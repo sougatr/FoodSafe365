@@ -1,0 +1,1 @@
+import {query} from '@/lib/db'; import {demo} from '@/lib/demo'; import {ok} from '@/lib/response'; export async function GET(){if(!process.env.DATABASE_URL)return ok(demo.equipmentTypes); return ok(await query('SELECT id,code,name,category FROM equipment_types WHERE active=true ORDER BY name'));}

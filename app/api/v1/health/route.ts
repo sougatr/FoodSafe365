@@ -1,0 +1,1 @@
+import {getPool} from '@/lib/db'; export async function GET(){if(!getPool())return Response.json({data:{status:'demo',database:false}}); try{await getPool()!.query('select 1'); return Response.json({data:{status:'ok',database:true}})}catch(e){return Response.json({data:{status:'degraded',database:false}})}}

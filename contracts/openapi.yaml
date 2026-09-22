@@ -1,0 +1,2662 @@
+openapi: 3.1.0
+info:
+  title: FoodSafe365 API
+  version: 1.0.0
+  description: OpenAPI 3.1 contract for FoodSafe365 — Safer food. Every day. Backend
+    is the enforcement boundary for tenant isolation, rules, checks, corrective actions,
+    records and future services/AI.
+servers:
+- url: https://api.foodsafe365.com/api/v1
+  description: Production
+- url: https://staging-api.foodsafe365.com/api/v1
+  description: Staging
+- url: http://localhost:3000/api/v1
+  description: Local development
+security:
+- bearerAuth: []
+tags:
+- name: Auth
+- name: Organisations
+- name: Outlets
+- name: Configuration
+- name: Rules
+- name: Checks
+- name: Observations
+- name: Actions
+- name: Evidence
+- name: Documents
+- name: Dashboard
+- name: Notifications
+- name: HACCP
+- name: Services
+- name: Vendors
+- name: Reports
+- name: AI
+paths:
+  /auth/register:
+    post:
+      tags:
+      - Auth
+      summary: Register user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /auth/login:
+    post:
+      tags:
+      - Auth
+      summary: Login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /auth/refresh:
+    post:
+      tags:
+      - Auth
+      summary: Refresh session
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /auth/logout:
+    post:
+      tags:
+      - Auth
+      summary: Logout
+      responses:
+        '204':
+          description: Success
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /organisations:
+    post:
+      tags:
+      - Organisations
+      summary: Create organisation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganisationCreate'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organisation'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /organisations/{organisation_id}:
+    get:
+      tags:
+      - Organisations
+      summary: Get organisation
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organisation'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OrganisationId'
+    patch:
+      tags:
+      - Organisations
+      summary: Update organisation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganisationUpdate'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organisation'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OrganisationId'
+  /organisations/{organisation_id}/outlets:
+    get:
+      tags:
+      - Outlets
+      summary: List outlets
+      responses:
+        '200':
+          description: Outlet list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Outlet'
+                  meta:
+                    $ref: '#/components/schemas/Pagination'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OrganisationId'
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PageSize'
+    post:
+      tags:
+      - Outlets
+      summary: Create outlet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OutletCreate'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Outlet'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OrganisationId'
+  /outlets/{outlet_id}:
+    get:
+      tags:
+      - Outlets
+      summary: Get outlet
+      responses:
+        '200':
+          description: Outlet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Outlet'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+  /outlets/{outlet_id}/profile:
+    get:
+      tags:
+      - Outlets
+      summary: Get outlet profile
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+  /outlets/{outlet_id}/processes:
+    get:
+      tags:
+      - Configuration
+      summary: Get outlet processes
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+    post:
+      tags:
+      - Configuration
+      summary: Set outlet processes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdsRequest'
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+  /outlets/{outlet_id}/equipment:
+    get:
+      tags:
+      - Configuration
+      summary: Add equipment
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+    post:
+      tags:
+      - Configuration
+      summary: Add equipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EquipmentCreate'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+  /outlets/{outlet_id}/applicable-rules:
+    get:
+      tags:
+      - Rules
+      summary: Get applicable rules
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+  /outlets/{outlet_id}/check-plan:
+    get:
+      tags:
+      - Checks
+      summary: Get generated check plan
+      responses:
+        '200':
+          description: Plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckPlan'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+  /outlets/{outlet_id}/checks/today:
+    get:
+      tags:
+      - Checks
+      summary: Get today's checks
+      responses:
+        '200':
+          description: Checks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckList'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+  /outlets/{outlet_id}/observations:
+    get:
+      tags:
+      - Observations
+      summary: List observations
+      responses:
+        '200':
+          description: Observations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservationList'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+  /outlets/{outlet_id}/actions:
+    get:
+      tags:
+      - Actions
+      summary: List corrective actions
+      responses:
+        '200':
+          description: Actions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionList'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+  /outlets/{outlet_id}/documents:
+    get:
+      tags:
+      - Documents
+      summary: List documents
+      responses:
+        '200':
+          description: Documents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentList'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+    post:
+      tags:
+      - Documents
+      summary: Create document record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentCreate'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+  /outlets/{outlet_id}/dashboard/today:
+    get:
+      tags:
+      - Dashboard
+      summary: Get role-aware dashboard
+      responses:
+        '200':
+          description: Dashboard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+  /outlets/{outlet_id}/haccp/plans:
+    get:
+      tags:
+      - HACCP
+      summary: List HACCP plans
+      responses:
+        '200':
+          description: Plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HaccpPlan'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+    post:
+      tags:
+      - HACCP
+      summary: Create HACCP plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HaccpPlanCreate'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HaccpPlan'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+  /outlets/{outlet_id}/service-requests:
+    get:
+      tags:
+      - Services
+      summary: List service requests
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+    post:
+      tags:
+      - Services
+      summary: Create service request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceRequestCreate'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceRequest'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+  /outlets/{outlet_id}/reports/monthly:
+    get:
+      tags:
+      - Reports
+      summary: Get monthly report
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+      - name: month
+        in: query
+        required: true
+        schema:
+          type: string
+          pattern: ^\d{4}-\d{2}$
+  /outlets/{outlet_id}/analytics/trends:
+    get:
+      tags:
+      - Reports
+      summary: Get trend analytics
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrendReport'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+      - name: from
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+  /restaurant-types:
+    get:
+      tags:
+      - Configuration
+      summary: List restaurant types
+      security: []
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /food-processes:
+    get:
+      tags:
+      - Configuration
+      summary: List food processes
+      security: []
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /equipment-types:
+    get:
+      tags:
+      - Configuration
+      summary: List equipment types
+      security: []
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /rules:
+    get:
+      tags:
+      - Rules
+      summary: List active rules
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleList'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - name: outlet_id
+        in: query
+        schema: &id001
+          type: string
+          format: uuid
+        required: false
+      - name: domain
+        in: query
+        schema:
+          type: string
+        required: false
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PageSize'
+  /rules/{rule_id}:
+    get:
+      tags:
+      - Rules
+      summary: Get rule
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Rule'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/RuleId'
+  /checks/{check_id}:
+    get:
+      tags:
+      - Checks
+      summary: Get check
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Check'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/CheckId'
+  /checks/{check_id}/start:
+    post:
+      tags:
+      - Checks
+      summary: Start check
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Check'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/CheckId'
+  /checks/{check_id}/responses:
+    post:
+      tags:
+      - Checks
+      summary: Submit and evaluate check response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckResponseRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluationResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/CheckId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+  /checks/{check_id}/complete:
+    post:
+      tags:
+      - Checks
+      summary: Complete check
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Check'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/CheckId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+  /outlets/{outlet_id}/issues:
+    post:
+      tags:
+      - Observations
+      summary: Report spontaneous issue
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueReportRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Observation'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/OutletId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+  /observations/{observation_id}:
+    get:
+      tags:
+      - Observations
+      summary: Get observation
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Observation'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/ObservationId'
+  /observations/{observation_id}/actions:
+    post:
+      tags:
+      - Actions
+      summary: Create corrective action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActionCreate'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrectiveAction'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/ObservationId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+  /actions/{action_id}:
+    get:
+      tags:
+      - Actions
+      summary: Get corrective action
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrectiveAction'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/ActionId'
+  /actions/{action_id}/assign:
+    post:
+      tags:
+      - Actions
+      summary: Assign corrective action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrectiveAction'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/ActionId'
+  /actions/{action_id}/start:
+    post:
+      tags:
+      - Actions
+      summary: Start corrective action
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrectiveAction'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/ActionId'
+  /actions/{action_id}/submit-verification:
+    post:
+      tags:
+      - Actions
+      summary: Submit for verification
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrectiveAction'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/ActionId'
+  /actions/{action_id}/verify:
+    post:
+      tags:
+      - Actions
+      summary: Verify corrective action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrectiveAction'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/ActionId'
+  /actions/{action_id}/reopen:
+    post:
+      tags:
+      - Actions
+      summary: Reopen corrective action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReopenRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrectiveAction'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/ActionId'
+  /files/presign:
+    post:
+      tags:
+      - Evidence
+      summary: Create controlled upload URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PresignRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresignResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /evidence:
+    post:
+      tags:
+      - Evidence
+      summary: Attach evidence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvidenceCreate'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evidence'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /documents/{document_id}:
+    get:
+      tags:
+      - Documents
+      summary: Get document
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/DocumentId'
+  /documents/{document_id}/verify:
+    post:
+      tags:
+      - Documents
+      summary: Verify or reject document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentVerifyRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/DocumentId'
+  /notifications:
+    get:
+      tags:
+      - Notifications
+      summary: List notifications
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PageSize'
+  /notifications/{notification_id}/read:
+    post:
+      tags:
+      - Notifications
+      summary: Mark notification read
+      responses:
+        '204':
+          description: Success
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/NotificationId'
+  /users/me/notification-preferences:
+    get:
+      tags:
+      - Notifications
+      summary: Get notification preferences
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+      - Notifications
+      summary: Update notification preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationPreferences'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /haccp/plans/{plan_id}:
+    get:
+      tags:
+      - HACCP
+      summary: Get HACCP plan
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HaccpPlan'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/PlanId'
+  /haccp/plans/{plan_id}/hazards:
+    post:
+      tags:
+      - HACCP
+      summary: Add hazard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HazardCreate'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hazard'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/PlanId'
+  /haccp/hazards/{hazard_id}/ccps:
+    post:
+      tags:
+      - HACCP
+      summary: Create CCP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CcpCreate'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ccp'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/HazardId'
+  /haccp/ccps/{ccp_id}/monitoring-records:
+    post:
+      tags:
+      - HACCP
+      summary: Record CCP monitoring
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonitoringRecordCreate'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringRecord'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/CcpId'
+  /service-categories:
+    get:
+      tags:
+      - Services
+      summary: List service categories
+      security: []
+      responses:
+        '200':
+          description: Success
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /vendors:
+    get:
+      tags:
+      - Vendors
+      summary: Discover vendors
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VendorList'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - name: category
+        in: query
+        schema:
+          type: string
+        required: false
+      - name: city
+        in: query
+        schema:
+          type: string
+        required: false
+      - $ref: '#/components/parameters/Page'
+      - $ref: '#/components/parameters/PageSize'
+  /service-requests/{request_id}/quotes:
+    get:
+      tags:
+      - Services
+      summary: List quotes
+      responses:
+        '200':
+          description: Quotes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+    post:
+      tags:
+      - Services
+      summary: Submit vendor quote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteCreate'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+  /service-requests/{request_id}/book:
+    post:
+      tags:
+      - Services
+      summary: Book selected quote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookRequest'
+      responses:
+        '201':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceBooking'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - $ref: '#/components/parameters/RequestId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+  /ai/summarise-record:
+    post:
+      tags:
+      - AI
+      summary: Summarise authorised record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiRecordRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /ai/analyse-trends:
+    post:
+      tags:
+      - AI
+      summary: Analyse authorised trends
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiTrendRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    OrganisationId:
+      name: organisation_id
+      in: path
+      required: true
+      schema: *id001
+    OutletId:
+      name: outlet_id
+      in: path
+      required: true
+      schema: *id001
+    RuleId:
+      name: rule_id
+      in: path
+      required: true
+      schema: *id001
+    CheckId:
+      name: check_id
+      in: path
+      required: true
+      schema: *id001
+    ObservationId:
+      name: observation_id
+      in: path
+      required: true
+      schema: *id001
+    ActionId:
+      name: action_id
+      in: path
+      required: true
+      schema: *id001
+    DocumentId:
+      name: document_id
+      in: path
+      required: true
+      schema: *id001
+    NotificationId:
+      name: notification_id
+      in: path
+      required: true
+      schema: *id001
+    PlanId:
+      name: plan_id
+      in: path
+      required: true
+      schema: *id001
+    HazardId:
+      name: hazard_id
+      in: path
+      required: true
+      schema: *id001
+    CcpId:
+      name: ccp_id
+      in: path
+      required: true
+      schema: *id001
+    RequestId:
+      name: request_id
+      in: path
+      required: true
+      schema: *id001
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: page_size
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 25
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+        maxLength: 255
+  responses:
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Not authorised
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+              additionalProperties: true
+            request_id:
+              type: string
+          required:
+          - code
+          - message
+          - request_id
+      required:
+      - error
+    User:
+      type: object
+      properties:
+        id: *id001
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        mobile:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+      required:
+      - id
+      - name
+      - email
+    RegisterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+        email:
+          type: string
+          format: email
+        mobile:
+          type: string
+        password:
+          type: string
+          minLength: 10
+          writeOnly: true
+      required:
+      - name
+      - email
+      - mobile
+      - password
+    LoginRequest:
+      type: object
+      properties:
+        identifier:
+          type: string
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - identifier
+      - password
+    RefreshRequest:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+          writeOnly: true
+      required:
+      - refresh_token
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+      - access_token
+      - refresh_token
+      - expires_in
+      - user
+    Lookup:
+      type: object
+      properties:
+        id: *id001
+        code:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+      required:
+      - id
+      - name
+    OrganisationCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        legal_name:
+          type: string
+        timezone:
+          type: string
+          default: Asia/Kolkata
+      required:
+      - name
+    Organisation:
+      type: object
+      properties:
+        id: *id001
+        name:
+          type: string
+        legal_name:
+          type: string
+        timezone:
+          type: string
+      required:
+      - id
+      - name
+    OrganisationUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        legal_name:
+          type: string
+        timezone:
+          type: string
+    OutletCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        restaurant_type_id: *id001
+        city:
+          type: string
+        address:
+          type: string
+        timezone:
+          type: string
+          default: Asia/Kolkata
+      required:
+      - name
+      - restaurant_type_id
+      - city
+    Outlet:
+      type: object
+      properties:
+        id: *id001
+        organisation_id: *id001
+        name:
+          type: string
+        restaurant_type_id: *id001
+        city:
+          type: string
+        address:
+          type: string
+        timezone:
+          type: string
+      required:
+      - id
+      - organisation_id
+      - name
+    OutletUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        city:
+          type: string
+        address:
+          type: string
+        timezone:
+          type: string
+    IdsRequest:
+      type: object
+      properties:
+        ids:
+          type: array
+          items: *id001
+          minItems: 1
+      required:
+      - ids
+    EquipmentCreate:
+      type: object
+      properties:
+        equipment_type_id: *id001
+        name:
+          type: string
+        location:
+          type: string
+      required:
+      - equipment_type_id
+      - name
+    Equipment:
+      type: object
+      properties:
+        id: *id001
+        outlet_id: *id001
+        equipment_type_id: *id001
+        name:
+          type: string
+        location:
+          type: string
+      required:
+      - id
+      - outlet_id
+      - name
+    Rule:
+      type: object
+      properties:
+        id: *id001
+        code:
+          type: string
+        title:
+          type: string
+        domain:
+          type: string
+        risk_level:
+          type: string
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+          - CRITICAL
+        frequency:
+          type: string
+        active:
+          type: boolean
+        version:
+          type: integer
+        source_id: *id001
+        applicability:
+          type: object
+          additionalProperties: true
+        failure_condition:
+          type: string
+        immediate_action:
+          type: string
+        corrective_action:
+          type: string
+        verification:
+          type: string
+      required:
+      - id
+      - code
+      - title
+      - domain
+      - risk_level
+      - active
+      - version
+    RuleList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Rule'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+    CheckPlan:
+      type: object
+      properties:
+        outlet_id: *id001
+        generated_at:
+          type: string
+          format: date-time
+        daily_count:
+          type: integer
+        weekly_count:
+          type: integer
+        temperature_count:
+          type: integer
+        documents_count:
+          type: integer
+    Check:
+      type: object
+      properties:
+        id: *id001
+        outlet_id: *id001
+        template_id: *id001
+        status:
+          type: string
+          enum:
+          - PENDING
+          - IN_PROGRESS
+          - COMPLETED
+          - OVERDUE
+        scheduled_for:
+          type: string
+          format: date-time
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+      required:
+      - id
+      - outlet_id
+      - status
+    CheckList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Check'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+    CheckResponseRequest:
+      type: object
+      properties:
+        item_id: *id001
+        rule_id: *id001
+        response_type:
+          type: string
+          enum:
+          - boolean
+          - pass_fail
+          - number
+          - temperature
+          - text
+          - photo
+          - date
+          - select
+          - multiselect
+          - na
+        value: {}
+        unit:
+          type: string
+        notes:
+          type: string
+        captured_at:
+          type: string
+          format: date-time
+      required:
+      - item_id
+      - response_type
+      - value
+    EvaluationResult:
+      type: object
+      properties:
+        outcome:
+          type: string
+          enum:
+          - GOOD
+          - ATTENTION
+          - ACTION_REQUIRED
+          - NA
+        risk_level:
+          type: string
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+          - CRITICAL
+        observation_id: *id001
+        corrective_action_id: *id001
+        explanation:
+          type: string
+        next_step:
+          type: string
+      required:
+      - outcome
+    IssueReportRequest:
+      type: object
+      properties:
+        category:
+          type: string
+          enum:
+          - PEST
+          - CLEANING
+          - TEMPERATURE
+          - STORAGE
+          - WATER
+          - OTHER
+        description:
+          type: string
+        severity_hint:
+          type: string
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+          - CRITICAL
+        area:
+          type: string
+        captured_at:
+          type: string
+          format: date-time
+        evidence_ids:
+          type: array
+          items: *id001
+      required:
+      - category
+      - description
+    Observation:
+      type: object
+      properties:
+        id: *id001
+        outlet_id: *id001
+        rule_id: *id001
+        check_response_id: *id001
+        category:
+          type: string
+        description:
+          type: string
+        risk_level:
+          type: string
+        status:
+          type: string
+          enum:
+          - OPEN
+          - ACKNOWLEDGED
+          - RESOLVED
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - outlet_id
+      - status
+    ObservationList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Observation'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+    ActionCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        immediate_action:
+          type: string
+        assignee_user_id: *id001
+        due_date:
+          type: string
+          format: date
+        priority:
+          type: string
+          enum:
+          - LOW
+          - MEDIUM
+          - HIGH
+          - CRITICAL
+      required:
+      - title
+      - due_date
+      - priority
+    CorrectiveAction:
+      type: object
+      properties:
+        id: *id001
+        observation_id: *id001
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum:
+          - OPEN
+          - IN_PROGRESS
+          - AWAITING_VERIFICATION
+          - CLOSED
+          - OVERDUE
+          - ESCALATED
+        priority:
+          type: string
+        assignee_user_id: *id001
+        due_date:
+          type: string
+          format: date
+      required:
+      - id
+      - status
+      - priority
+    ActionList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CorrectiveAction'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+    AssignRequest:
+      type: object
+      properties:
+        assignee_user_id: *id001
+      required:
+      - assignee_user_id
+    VerifyRequest:
+      type: object
+      properties:
+        result:
+          type: string
+          enum:
+          - VERIFIED
+          - FAILED
+        notes:
+          type: string
+        evidence_ids:
+          type: array
+          items: *id001
+      required:
+      - result
+    ReopenRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+      required:
+      - reason
+    PresignRequest:
+      type: object
+      properties:
+        file_name:
+          type: string
+        content_type:
+          type: string
+        size_bytes:
+          type: integer
+          minimum: 1
+        purpose:
+          type: string
+          enum:
+          - EVIDENCE
+          - DOCUMENT
+      required:
+      - file_name
+      - content_type
+      - size_bytes
+    PresignResponse:
+      type: object
+      properties:
+        upload_url:
+          type: string
+          format: uri
+        file_id:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+      required:
+      - upload_url
+      - file_id
+    EvidenceCreate:
+      type: object
+      properties:
+        file_id:
+          type: string
+        entity_type:
+          type: string
+          enum:
+          - CHECK_RESPONSE
+          - OBSERVATION
+          - ACTION
+          - DOCUMENT
+          - SERVICE_BOOKING
+        entity_id: *id001
+        caption:
+          type: string
+      required:
+      - file_id
+      - entity_type
+      - entity_id
+    Evidence:
+      type: object
+      properties:
+        id: *id001
+        entity_type:
+          type: string
+        entity_id: *id001
+        file_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - entity_type
+      - entity_id
+    DocumentCreate:
+      type: object
+      properties:
+        document_type_id: *id001
+        file_id:
+          type: string
+        document_number:
+          type: string
+        issue_date:
+          type: string
+          format: date
+        expiry_date:
+          type: string
+          format: date
+        notes:
+          type: string
+      required:
+      - document_type_id
+      - file_id
+    Document:
+      type: object
+      properties:
+        id: *id001
+        document_type_id: *id001
+        file_id:
+          type: string
+        document_number:
+          type: string
+        issue_date:
+          type: string
+          format: date
+        expiry_date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+          - PENDING
+          - VALID
+          - EXPIRING
+          - EXPIRED
+          - REJECTED
+      required:
+      - id
+      - status
+    DocumentList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+    DocumentVerifyRequest:
+      type: object
+      properties:
+        result:
+          type: string
+          enum:
+          - VERIFIED
+          - REJECTED
+        notes:
+          type: string
+      required:
+      - result
+    Dashboard:
+      type: object
+      properties:
+        outlet:
+          $ref: '#/components/schemas/Outlet'
+        status:
+          type: object
+          properties:
+            label:
+              type: string
+              enum:
+              - GOOD
+              - ATTENTION
+              - ACTION_REQUIRED
+            value:
+              type: number
+        checks:
+          type: object
+          properties:
+            total:
+              type: integer
+            completed:
+              type: integer
+            pending:
+              type: integer
+        issues:
+          type: object
+          properties:
+            open:
+              type: integer
+            high_priority:
+              type: integer
+        actions:
+          type: object
+          properties:
+            open:
+              type: integer
+            overdue:
+              type: integer
+        documents:
+          type: object
+          properties:
+            expiring_soon:
+              type: integer
+            expired:
+              type: integer
+      required:
+      - outlet
+      - status
+      - checks
+      - issues
+      - actions
+      - documents
+    Notification:
+      type: object
+      properties:
+        id: *id001
+        title:
+          type: string
+        message:
+          type: string
+        type:
+          type: string
+        read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - title
+      - type
+      - read
+    NotificationList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+    NotificationPreferences:
+      type: object
+      properties:
+        email:
+          type: boolean
+        whatsapp:
+          type: boolean
+        push:
+          type: boolean
+        operational_alerts:
+          type: boolean
+        marketing:
+          type: boolean
+    HaccpPlanCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        process_description:
+          type: string
+        version:
+          type: integer
+          default: 1
+      required:
+      - name
+    HaccpPlan:
+      type: object
+      properties:
+        id: *id001
+        outlet_id: *id001
+        name:
+          type: string
+        process_description:
+          type: string
+        version:
+          type: integer
+      required:
+      - id
+      - outlet_id
+      - name
+    HazardCreate:
+      type: object
+      properties:
+        process_step:
+          type: string
+        hazard_type:
+          type: string
+          enum:
+          - BIOLOGICAL
+          - CHEMICAL
+          - PHYSICAL
+          - ALLERGEN
+        hazard_description:
+          type: string
+        control_measure:
+          type: string
+      required:
+      - process_step
+      - hazard_type
+      - hazard_description
+    Hazard:
+      type: object
+      properties:
+        id: *id001
+        plan_id: *id001
+        process_step:
+          type: string
+        hazard_type:
+          type: string
+        hazard_description:
+          type: string
+        control_measure:
+          type: string
+      required:
+      - id
+      - plan_id
+    CcpCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        critical_limit:
+          type: string
+        monitoring_method:
+          type: string
+        corrective_action:
+          type: string
+        verification_method:
+          type: string
+      required:
+      - name
+      - critical_limit
+    Ccp:
+      type: object
+      properties:
+        id: *id001
+        hazard_id: *id001
+        name:
+          type: string
+        critical_limit:
+          type: string
+      required:
+      - id
+      - hazard_id
+      - name
+    MonitoringRecordCreate:
+      type: object
+      properties:
+        value: {}
+        unit:
+          type: string
+        observed_at:
+          type: string
+          format: date-time
+        notes:
+          type: string
+      required:
+      - value
+      - observed_at
+    MonitoringRecord:
+      type: object
+      properties:
+        id: *id001
+        ccp_id: *id001
+        value: {}
+        unit:
+          type: string
+        observed_at:
+          type: string
+          format: date-time
+        within_limit:
+          type: boolean
+      required:
+      - id
+      - ccp_id
+    Vendor:
+      type: object
+      properties:
+        id: *id001
+        name:
+          type: string
+        city:
+          type: string
+        verified:
+          type: boolean
+        categories:
+          type: array
+          items:
+            type: string
+      required:
+      - id
+      - name
+    VendorList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Vendor'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+    ServiceRequestCreate:
+      type: object
+      properties:
+        category:
+          type: string
+        description:
+          type: string
+        observation_id: *id001
+        preferred_date:
+          type: string
+          format: date
+        notes:
+          type: string
+      required:
+      - category
+      - description
+    ServiceRequest:
+      type: object
+      properties:
+        id: *id001
+        status:
+          type: string
+          enum:
+          - OPEN
+          - QUOTING
+          - BOOKED
+          - COMPLETED
+          - CANCELLED
+        category:
+          type: string
+        description:
+          type: string
+      required:
+      - id
+      - status
+    QuoteCreate:
+      type: object
+      properties:
+        amount:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          default: INR
+        valid_until:
+          type: string
+          format: date
+        scope:
+          type: string
+        notes:
+          type: string
+      required:
+      - amount
+      - valid_until
+    Quote:
+      type: object
+      properties:
+        id: *id001
+        vendor_id: *id001
+        amount:
+          type: number
+        currency:
+          type: string
+        valid_until:
+          type: string
+          format: date
+        scope:
+          type: string
+      required:
+      - id
+      - vendor_id
+    BookRequest:
+      type: object
+      properties:
+        quote_id: *id001
+        scheduled_for:
+          type: string
+          format: date-time
+      required:
+      - quote_id
+      - scheduled_for
+    ServiceBooking:
+      type: object
+      properties:
+        id: *id001
+        status:
+          type: string
+        scheduled_for:
+          type: string
+          format: date-time
+      required:
+      - id
+      - status
+    Report:
+      type: object
+      properties:
+        period:
+          type: string
+        status:
+          type: string
+        checks_completed:
+          type: integer
+        actions_closed:
+          type: integer
+        repeat_issues:
+          type: integer
+        documents_expiring:
+          type: integer
+    TrendReport:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+        series:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    AiRecordRequest:
+      type: object
+      properties:
+        entity_type:
+          type: string
+        entity_id: *id001
+        instruction:
+          type: string
+      required:
+      - entity_type
+      - entity_id
+    AiTrendRequest:
+      type: object
+      properties:
+        outlet_id: *id001
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+      required:
+      - outlet_id
+      - from
+      - to
+    AiResult:
+      type: object
+      properties:
+        output:
+          type: string
+        advisory:
+          type: boolean
+          const: true
+        model:
+          type: string
+        model_version:
+          type: string
+        uncertainty:
+          type: string
+        source_ids:
+          type: array
+          items:
+            type: string
+      required:
+      - output
+      - advisory
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total:
+          type: integer
+        next_cursor:
+          type:
+          - string
+          - 'null'
