@@ -28,7 +28,7 @@ export type KnowledgeTopic = {
 
 export const KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
   {
-    keywords: ['refrigerator', 'fridge', 'chiller', 'cold storage', 'temperature', 'cool room', 'high temp', 'warm', '5 degrees'],
+    keywords: ['refrigerator', 'fridge', 'chiller', 'cold storage', 'temperature', 'cool room', 'high temp', 'warm', '5 degrees', 'फ्रिज', 'फ्रीज', 'तापमान', 'ठंडा', 'थंड', 'कूलिंग', 'cooling'],
     title: 'Cold-Chain & Refrigeration Storage Deviations',
     standard: 'Refrigerated foods must be held strictly between 1°C and 5°C. Any temperature > 5°C accelerates dangerous pathogen growth (Listeria monocytogenes, Salmonella, E. coli).',
     fssaiRef: 'FSSAI Schedule 4 Section 2.1 & Temperature Control Mandate',
@@ -49,7 +49,7 @@ export const KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     actionLink: { label: 'Book Emergency HVAC Repair', href: '/providers?category=hvac' }
   },
   {
-    keywords: ['cooking', 'reheating', 'core temperature', 'chicken', 'meat', 'poultry', '75 degrees', 'cooked'],
+    keywords: ['cooking', 'reheating', 'core temperature', 'chicken', 'meat', 'poultry', '75 degrees', 'cooked', 'पकाना', 'कुकिंग', 'रीहीटिंग', 'गरम', 'तापमान', 'स्वयंपाक'],
     title: 'Safe Cooking, Internal Core Temperatures & Reheating',
     standard: 'All poultry and minced meats must reach an internal core temperature of ≥ 75°C for at least 15 seconds. Reheating of pre-cooked foods must reach ≥ 75°C throughout the core before service, and held at ≥ 65°C.',
     fssaiRef: 'FSSAI Schedule 4 Section 4.2 Thermal Processing Standard',
@@ -67,7 +67,7 @@ export const KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     ]
   },
   {
-    keywords: ['medical', 'form 1a', 'doctor', 'stool test', 'typhoid', 'vaccine', 'health check', 'communicable'],
+    keywords: ['medical', 'form 1a', 'doctor', 'stool test', 'typhoid', 'vaccine', 'health check', 'communicable', 'मेडिकल', 'फॉर्म 1a', 'डॉक्टर', 'स्टूल टेस्ट', 'मल परीक्षण', 'टाइफाइड', 'लसीकरण', 'लस'],
     title: 'Mandatory Food Handler Medical Examinations & Vaccinations',
     standard: 'All food handlers must undergo a registered medical examination every 6 months, receive Form 1A medical fitness certificates, clear laboratory stool testing for enteric pathogens, and maintain valid Typhoid (TCV) & Hepatitis A vaccinations.',
     fssaiRef: 'FSSAI Licensing & Registration Regulations Section 3.1 & Schedule 4 Mandate',
@@ -86,7 +86,7 @@ export const KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     actionLink: { label: 'Book Staff Medical Camp & Stool Tests', href: '/providers?category=medical' }
   },
   {
-    keywords: ['pest', 'cockroach', 'fly', 'rat', 'rodent', 'flies', 'insects', 'traps'],
+    keywords: ['pest', 'cockroach', 'fly', 'rat', 'rodent', 'flies', 'insects', 'traps', 'कीट', 'तिलचट्टा', 'झुरळ', 'उंदीर', 'माशी', 'मक्खी', 'पेस्ट कंट्रोल', 'उंदरे'],
     title: 'Pest Sighting & Integrated Pest Management (IPM)',
     standard: 'Zero tolerance for live pests in food preparation, storage, and service areas. Only CIB&RC approved odorless formulations applied by licensed pest control operators may be used.',
     fssaiRef: 'FSSAI Schedule 4 Section 1.3 Pest Management Regulations',
@@ -105,7 +105,7 @@ export const KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     actionLink: { label: 'Book Verified Pest Exterminator', href: '/providers?category=pest-control' }
   },
   {
-    keywords: ['handwash', 'hand wash', 'hands', 'soap', 'gloves', 'fingernails', 'hygiene'],
+    keywords: ['handwash', 'hand wash', 'hands', 'soap', 'gloves', 'fingernails', 'hygiene', 'हाथ धोना', 'हात धुणे', 'साबुन', 'साबण', 'स्वच्छता', 'हाइजीन'],
     title: 'Handwashing Standards & Personal Hygiene Protocols',
     standard: 'Handwashing must take at least 20 seconds with antibacterial soap and warm potable water before touching food, after touching raw meat/poultry, after handling waste, and after using washrooms.',
     fssaiRef: 'FSSAI Schedule 4 Section 3.2 Personal Hygiene Mandate',
@@ -122,7 +122,7 @@ export const KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
     ]
   },
   {
-    keywords: ['oil', 'frying', 'tpm', 'tpc', 'smoke', 'burnt oil', 'polar compounds'],
+    keywords: ['oil', 'frying', 'tpm', 'tpc', 'smoke', 'burnt oil', 'polar compounds', 'तेल', 'कुकिंग ऑयल', 'खाद्यतेल', 'तळणे'],
     title: 'Cooking Oil Quality & Total Polar Compounds (TPC)',
     standard: 'Cooking oil must not exceed 25% Total Polar Compounds (TPC). Oil that becomes dark, viscous, foams heavily, or smokes at low temperature must be discarded.',
     fssaiRef: 'FSSAI RUCO (Repurpose Used Cooking Oil) Regulation 2018',

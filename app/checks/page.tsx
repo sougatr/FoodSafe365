@@ -19,6 +19,9 @@ import {
   evaluateTemperature
 } from '@/lib/foodsafety28';
 import ThemeToggle from '@/components/ThemeToggle';
+import LanguageSelector from '@/components/LanguageSelector';
+import { useLanguage } from '@/lib/vernacular';
+import { Award } from 'lucide-react';
 
 function loadState(): AppPhase1State {
   try {
@@ -34,6 +37,7 @@ function saveState(v: AppPhase1State) {
 }
 
 export default function Checks() {
+  const { lang, t, getCheckText } = useLanguage();
   const [data, setData] = useState<AppPhase1State>({});
   const [selected, setSelected] = useState<FoodSafeCheck | null>(null);
   const [value, setValue] = useState('');
@@ -334,9 +338,13 @@ export default function Checks() {
             <span>FoodSafe365</span>
           </Link>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <LanguageSelector />
             <ThemeToggle />
+            <Link href="/showcase" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
+              <Award size={14} /> {t('nav.showcase')}
+            </Link>
             <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
-              <Home size={14} /> Home
+              <Home size={14} /> {t('nav.home')}
             </Link>
             <div className="muted">Supervisor · Guided check</div>
           </div>
@@ -349,14 +357,25 @@ export default function Checks() {
               history.replaceState(null, '', '/checks');
             }}
           >
-            <ChevronLeft size={17} /> Today’s checks
+            <ChevronLeft size={17} /> {t('nav.backChecks')}
           </button>
 
           <div className="checks-header">
             <div>
               <p className="eyebrow">CHECK {selected.id} OF {FOODSAFE28.length} · DAILY FOOD SAFETY CHECK</p>
-              <h1>{selected.title}</h1>
-              <p className="muted">Record the actual condition and submit the result for manager review.</p>
+              <h1>{getCheckText(selected.code)?.title || selected.title}</h1>
+              {lang !== 'en' && getCheckText(selected.code)?.title && (
+                <p style={{ fontSize: 14, color: 'var(--muted, #64748b)', margin: '4px 0 0', fontStyle: 'italic' }}>
+                  {selected.title}
+                </p>
+              )}
+              <p className="muted" style={{ marginTop: 6 }}>
+                {lang === 'hi'
+                  ? 'वास्तविक स्थिति दर्ज करें और प्रबंधक समीक्षा के लिए परिणाम जमा करें।'
+                  : lang === 'mr'
+                  ? 'प्रत्यक्ष स्थिती नोंदवा आणि व्यवस्थापक पुनरावलोकनासाठी सादर करा.'
+                  : 'Record the actual condition and submit the result for manager review.'}
+              </p>
             </div>
           </div>
 
@@ -749,7 +768,11 @@ export default function Checks() {
                 /* QUALITATIVE 1 TO 5 RATING SCALE + NOT APPLICABLE */
                 <div>
                   <p className="muted" style={{ marginBottom: 12 }}>
-                    Rate the observed operational condition on a <strong>1 to 5 scale (5 being best)</strong>, or select <strong>Not Applicable</strong>:
+                    {lang === 'hi'
+                      ? 'देखी गई परिचालन स्थिति को 1 से 5 के पैमाने पर रेट करें (5 सर्वश्रेष्ठ है), या लागू नहीं चुनें:'
+                      : lang === 'mr'
+                      ? 'प्रत्यक्ष कामाची स्थिती १ ते ५ च्या स्केलवर रेट करा (५ सर्वोत्तम), किंवा लागू नाही निवडा:'
+                      : 'Rate the observed operational condition on a 1 to 5 scale (5 being best), or select Not Applicable:'}
                   </p>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
                     {([5, 4, 3, 2, 1] as Rating1To5[]).map(r => {
@@ -758,7 +781,16 @@ export default function Checks() {
                       const activeBg = r >= 4 ? '#ecfdf5' : r === 3 ? '#fffbeb' : '#fef2f2';
                       const activeBorder = r >= 4 ? '#059669' : r === 3 ? '#f59e0b' : '#ef4444';
                       const starColor = r >= 4 ? '#059669' : r === 3 ? '#d97706' : '#dc2626';
-                      const badgeLabel = r >= 4 ? 'Acceptable' : r === 3 ? 'Needs attention' : 'Alert required';
+                      const badgeLabel = r >= 4
+                        ? (lang === 'hi' ? 'स्वीकार्य' : lang === 'mr' ? 'स्वीकार्य' : 'Acceptable')
+                        : r === 3
+                        ? (lang === 'hi' ? 'ध्यान दें' : lang === 'mr' ? 'लक्ष द्या' : 'Needs attention')
+                        : (lang === 'hi' ? 'अलर्ट आवश्यक' : lang === 'mr' ? 'धोका अलर्ट' : 'Alert required');
+                      const ratingLabel = lang === 'hi'
+                        ? (r === 5 ? 'उत्कृष्ट' : r === 4 ? 'अच्छा' : r === 3 ? 'ध्यान दें' : r === 2 ? 'असंतोषजनक' : 'गंभीर जोखिम')
+                        : lang === 'mr'
+                        ? (r === 5 ? 'उत्कृष्ट' : r === 4 ? 'समाधानकारक' : r === 3 ? 'लक्ष द्या' : r === 2 ? 'असमाधानकारक' : 'गंभीर धोका')
+                        : def.label;
                       return (
                         <button
                           key={r}
@@ -788,7 +820,7 @@ export default function Checks() {
                           }}>
                             {r}★
                           </div>
-                          <strong style={{ display: 'block', fontSize: 13, color: '#0f172a' }}>{def.label}</strong>
+                          <strong style={{ display: 'block', fontSize: 13, color: '#0f172a' }}>{ratingLabel}</strong>
                           <span style={{
                             display: 'inline-block',
                             marginTop: 5,
@@ -833,7 +865,9 @@ export default function Checks() {
                       }}>
                         ⊘ N/A
                       </div>
-                      <strong style={{ display: 'block', fontSize: 13, color: '#0f172a' }}>Not Applicable</strong>
+                      <strong style={{ display: 'block', fontSize: 13, color: '#0f172a' }}>
+                        {lang === 'hi' ? 'लागू नहीं' : lang === 'mr' ? 'लागू नाही' : 'Not Applicable'}
+                      </strong>
                       <span style={{
                         display: 'inline-block',
                         marginTop: 5,
@@ -844,7 +878,7 @@ export default function Checks() {
                         background: rating === 'na' ? '#ffffff' : '#f1f5f9',
                         color: '#475569'
                       }}>
-                        Exempt / N/A
+                        {lang === 'hi' ? 'छूट / N/A' : lang === 'mr' ? 'सूट / N/A' : 'Exempt / N/A'}
                       </span>
                     </button>
                   </div>
@@ -959,7 +993,11 @@ export default function Checks() {
                   disabled={!currentEvaluation.hasInput}
                   onClick={submit}
                 >
-                  Submit to manager for review <ArrowRight size={17} />
+                  {lang === 'hi'
+                    ? 'प्रबंधक समीक्षा के लिए जमा करें'
+                    : lang === 'mr'
+                    ? 'व्यवस्थापक पुनरावलोकनासाठी सादर करा'
+                    : 'Submit to manager for review'} <ArrowRight size={17} />
                 </button>
               </div>
             </section>
@@ -1038,34 +1076,48 @@ export default function Checks() {
           <span>FoodSafe365</span>
         </Link>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <LanguageSelector />
           <ThemeToggle />
-          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
-            <Home size={14} /> Home
+          <Link href="/showcase" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
+            <Award size={14} /> {t('nav.showcase')}
           </Link>
-          <div className="muted">ABC Restaurant · Supervisor</div>
+          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
+            <Home size={14} /> {t('nav.home')}
+          </Link>
+          <div className="muted">Supervisor · Checks</div>
         </div>
       </div>
       <div className="container checks-shell">
         <Link href="/home" className="nav-link muted back-row">
-          <ChevronLeft size={17} /> Home
+          <ChevronLeft size={17} /> {t('nav.home')}
         </Link>
 
         <div className="manager-header">
           <div>
-            <p className="eyebrow">TODAY’S CONTROLS</p>
-            <h1>Food safety checks</h1>
-            <p className="lead">Complete the controls that apply today. Every result goes to the manager for review.</p>
+            <p className="eyebrow">{lang === 'hi' ? 'आज के नियंत्रण' : lang === 'mr' ? 'आजची नियंत्रणे' : 'TODAY’S CONTROLS'}</p>
+            <h1>{lang === 'hi' ? 'दैनिक खाद्य सुरक्षा जांच' : lang === 'mr' ? 'दैनिक अन्न सुरक्षा तपासणी' : 'Food safety checks'}</h1>
+            <p className="lead">
+              {lang === 'hi'
+                ? 'आज लागू होने वाले नियंत्रण पूरे करें। प्रत्येक परिणाम प्रबंधक समीक्षा के लिए जाता है।'
+                : lang === 'mr'
+                ? 'आज लागू असलेली नियंत्रणे पूर्ण करा. प्रत्येक निकाल व्यवस्थापक पुनरावलोकनासाठी जातो.'
+                : 'Complete the controls that apply today. Every result goes to the manager for review.'}
+            </p>
           </div>
           <div className="check-progress-box">
             <strong>{today.length - remaining}/{today.length}</strong>
-            <span className="muted">submitted</span>
+            <span className="muted">{lang === 'hi' ? 'जमा' : lang === 'mr' ? 'सादर' : 'submitted'}</span>
           </div>
         </div>
 
         <div className="notice info">
           <Info size={18} />
           <span>
-            <strong>Supervisor role:</strong> observe, record and report. Qualitative checks are rated on a <strong>1 to 5 scale (5 being best)</strong>; temperature checks record actual measurements against verified limits.
+            <strong>{lang === 'hi' ? 'सुपरवाइजर भूमिका:' : lang === 'mr' ? 'सुपरवायझर भूमिका:' : 'Supervisor role:'}</strong> {lang === 'hi'
+              ? 'निरीक्षण करें, रिकॉर्ड करें और रिपोर्ट करें। गुणात्मक जांच 1 से 5 के पैमाने (5 सर्वोत्तम) पर आंकी जाती हैं; तापमान जांच वास्तविक माप दर्ज करती हैं।'
+              : lang === 'mr'
+              ? 'निरीक्षण करा, नोंदवा आणि अहवाल द्या. गुणात्मक तपासण्या १ ते ५ च्या स्केलवर (५ सर्वोत्तम) रेट केल्या जातात; तापमान तपासण्या प्रत्यक्ष मोजमाप नोंदवतात.'
+              : 'observe, record and report. Qualitative checks are rated on a 1 to 5 scale (5 being best); temperature checks record actual measurements against verified limits.'}
           </span>
         </div>
 
@@ -1074,7 +1126,7 @@ export default function Checks() {
             {badge.tone === 'good' ? <CheckCircle2 /> : <ClipboardCheck />}
           </div>
           <div>
-            <p className="eyebrow">TODAY’S BADGE PREVIEW</p>
+            <p className="eyebrow">{lang === 'hi' ? 'आज के बैज का पूर्वावलोकन' : lang === 'mr' ? 'आजच्या बॅजचे पूर्वावलोकन' : 'TODAY’S BADGE PREVIEW'}</p>
             <h2>{badge.status}</h2>
             <p className="muted">{badge.explanation}</p>
           </div>
@@ -1082,8 +1134,8 @@ export default function Checks() {
 
         <div className="section-title" style={{ marginTop: 24, marginBottom: 12 }}>
           <div>
-            <p className="eyebrow">DAILY OPERATIONAL CHECKS</p>
-            <h2 style={{ fontSize: 20 }}>Scheduled checks for today</h2>
+            <p className="eyebrow">{lang === 'hi' ? 'दैनिक परिचालन जांच' : lang === 'mr' ? 'दैनिक कार्य तपासण्या' : 'DAILY OPERATIONAL CHECKS'}</p>
+            <h2 style={{ fontSize: 20 }}>{lang === 'hi' ? 'आज के लिए निर्धारित जांच' : lang === 'mr' ? 'आजसाठी नियोजित तपासण्या' : 'Scheduled checks for today'}</h2>
           </div>
         </div>
 
@@ -1096,11 +1148,11 @@ export default function Checks() {
           paddingBottom: 4
         }}>
           {[
-            { id: 'all', label: 'All Checks', count: today.length },
-            { id: 'kitchen', label: '🍳 Kitchen & Premises', count: today.filter(x => !x.outletType || x.outletType === 'all').length },
-            { id: 'bar_brewery', label: '🍻 Bars & Brewery', count: today.filter(x => x.outletType === 'bar_brewery').length },
-            { id: 'cloud_kitchen', label: '🛵 Cloud Kitchen', count: today.filter(x => x.outletType === 'cloud_kitchen').length },
-            { id: 'catering', label: '🍱 Catering & Events', count: today.filter(x => x.outletType === 'catering').length },
+            { id: 'all', label: t('action.filterAll'), count: today.length },
+            { id: 'kitchen', label: t('action.filterKitchen'), count: today.filter(x => !x.outletType || x.outletType === 'all').length },
+            { id: 'bar_brewery', label: t('action.filterBar'), count: today.filter(x => x.outletType === 'bar_brewery').length },
+            { id: 'cloud_kitchen', label: t('action.filterCloud'), count: today.filter(x => x.outletType === 'cloud_kitchen').length },
+            { id: 'catering', label: t('action.filterCatering'), count: today.filter(x => x.outletType === 'catering').length },
           ].map(f => (
             <button
               key={f.id}
@@ -1142,6 +1194,8 @@ export default function Checks() {
             const isApproved = s?.reviewStatus === 'approved';
             const isAlert = s?.reviewStatus === 'alerted';
             const isPending = s?.reviewStatus === 'pending_manager';
+            const itemTr = getCheckText(x.code);
+            const itemTitle = itemTr?.title || x.title;
             return (
               <button
                 key={x.id}
@@ -1188,9 +1242,14 @@ export default function Checks() {
                       </span>
                     )}
                   </div>
-                  <h3 style={{ fontSize: 15.5, fontWeight: 800, color: '#0f172a', margin: '2px 0 4px' }}>{x.title}</h3>
+                  <h3 style={{ fontSize: 15.5, fontWeight: 800, color: 'var(--text, #0f172a)', margin: '2px 0 4px' }}>{itemTitle}</h3>
+                  {lang !== 'en' && itemTitle !== x.title && (
+                    <p style={{ fontSize: 12, color: 'var(--muted, #64748b)', margin: '0 0 4px', fontStyle: 'italic' }}>
+                      {x.title}
+                    </p>
+                  )}
                   <p className="muted" style={{ fontSize: 12.5, margin: 0 }}>
-                    Daily · {x.input === 'temperature' ? 'Temperature measurement' : '1–5 Qualitative Rating'}
+                    Daily · {x.input === 'temperature' ? (lang === 'hi' ? 'तापमान माप' : lang === 'mr' ? 'तापमान मोजमाप' : 'Temperature measurement') : (lang === 'hi' ? '1–5 गुणात्मक रेटिंग' : lang === 'mr' ? '१–५ गुणात्मक रेटिंग' : '1–5 Qualitative Rating')}
                     {s?.value && <> · <strong style={{ color: '#0f172a' }}>{s.value}</strong></>}
                   </p>
                 </div>

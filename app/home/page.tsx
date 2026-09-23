@@ -19,7 +19,8 @@ import {
   Wrench,
   Bluetooth,
   Cpu,
-  ChevronRight
+  ChevronRight,
+  Award
 } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 import {
@@ -31,6 +32,8 @@ import {
   BadgeResult
 } from '@/lib/foodsafety28';
 import ThemeToggle from '@/components/ThemeToggle';
+import LanguageSelector from '@/components/LanguageSelector';
+import { useLanguage } from '@/lib/vernacular';
 
 const learning = [
   {
@@ -99,6 +102,7 @@ const learning = [
 ];
 
 export default function Home() {
+  const { lang, t } = useLanguage();
   const [data, setData] = useState<AppPhase1State>({});
 
   useEffect(() => {
@@ -143,22 +147,26 @@ export default function Home() {
             FoodSafe365
           </Link>
           <span className="pill good" style={{ fontSize: 10.5, padding: '3px 9px', letterSpacing: '0.04em' }}>
-            ● FSSAI Live
+            {t('nav.fssaiLive')}
           </span>
         </div>
 
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '7px 14px', borderRadius: 10 }}>
-            <HomeIcon size={14} /> Home
-          </Link>
-          <Link href="/checks" className="nav-link">Checks</Link>
-          <Link href="/manager" className="nav-link">Manager</Link>
-          <Link href="/manager/trends" className="nav-link" style={{ color: 'var(--green)' }}>AI Trends</Link>
-          <Link href="/ai-copilot" className="nav-link" style={{ color: 'var(--green)' }}>AI Copilot</Link>
-          <Link href="/actions" className="nav-link">Actions</Link>
-          <Link href="/records" className="nav-link">Records</Link>
-          <Link href="/providers" className="nav-link">Providers</Link>
+          <LanguageSelector />
           <ThemeToggle />
+          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '7px 14px', borderRadius: 10 }}>
+            <HomeIcon size={14} /> {t('nav.home')}
+          </Link>
+          <Link href="/checks" className="nav-link">{t('nav.checks')}</Link>
+          <Link href="/showcase" className="nav-link" style={{ color: 'var(--green-dark)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <Award size={14} /> {t('nav.showcase')}
+          </Link>
+          <Link href="/manager" className="nav-link">{t('nav.manager')}</Link>
+          <Link href="/manager/trends" className="nav-link" style={{ color: 'var(--green)' }}>{t('nav.aiTrends')}</Link>
+          <Link href="/ai-copilot" className="nav-link" style={{ color: 'var(--green)' }}>{t('nav.aiCopilot')}</Link>
+          <Link href="/actions" className="nav-link">{t('nav.actions')}</Link>
+          <Link href="/records" className="nav-link">{t('nav.records')}</Link>
+          <Link href="/providers" className="nav-link">{t('nav.providers')}</Link>
         </div>
       </div>
 
@@ -181,31 +189,35 @@ export default function Home() {
               margin: '0 0 14px',
               color: 'var(--text)'
             }}>
-              Clean Kitchens <br />
+              {t('hero.title1')} <br />
               <span style={{
                 background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent'
-              }}>Don’t Get Shut Down.</span>
+              }}>{t('hero.title2')}</span>
             </h1>
 
             <p className="lead" style={{ fontSize: 18, color: 'var(--text-body)', fontWeight: 600, lineHeight: 1.5, margin: '0 0 10px' }}>
-              Keep your kitchen spotless, your cold chain unbroken, and FDA inspectors off your back.
+              {t('hero.subtitle')}
             </p>
 
             <p className="muted" style={{ fontSize: 14.5, lineHeight: 1.6, maxWidth: 620, margin: '0 0 24px' }}>
-              FoodSafe365 transforms statutory food safety mandates into effortless daily habits—protecting your diners, preserving your brand reputation, and keeping your dining room doors open every single day.
+              {lang === 'hi'
+                ? 'FoodSafe365 सरकारी खाद्य सुरक्षा नियमों को आसान दैनिक आदतों में बदल देता है—ताकि आपका रेस्तरां हमेशा खुला रहे और ग्राहक सुरक्षित रहें।'
+                : lang === 'mr'
+                ? 'FoodSafe365 शासकीय अन्न सुरक्षा नियमांचे सोप्या दैनंदिन सवयींमध्ये रूपांतर करते—जेणेकरून तुमचे स्वयंपाकघर नेहमी सुरू राहील आणि ग्राहक सुरक्षित राहतील.'
+                : 'FoodSafe365 transforms statutory food safety mandates into effortless daily habits—protecting your diners, preserving your brand reputation, and keeping your dining room doors open every single day.'}
             </p>
 
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               <Link className="btn primary" href="/checks">
-                Start Today’s Checks <ArrowRight size={16} />
+                {t('action.startToday')} <ArrowRight size={16} />
               </Link>
               <Link className="btn secondary" href="/manager">
-                Manager Review
+                {t('action.managerReview')}
               </Link>
               <Link className="btn secondary" href="/records">
-                Records &amp; Audit Dossier
+                {t('nav.records')}
               </Link>
             </div>
           </div>
@@ -225,14 +237,14 @@ export default function Home() {
               </span>
             </div>
 
-            <p className="eyebrow" style={{ color: 'var(--green-dark)', fontWeight: 800 }}>DAILY VERIFIED STATUS</p>
+            <p className="eyebrow" style={{ color: 'var(--green-dark)', fontWeight: 800 }}>{t('hero.dailyStatus')}</p>
             <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: '4px 0 8px' }}>{badge.status}</h2>
             <p className="muted" style={{ fontSize: 13.5, lineHeight: 1.5, margin: '0 0 16px' }}>{badge.explanation}</p>
 
             {/* Submission Mini Progress */}
             <div style={{ marginBottom: 12 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                <span>Shift Completion</span>
+                <span>{lang === 'hi' ? 'शिफ्ट प्रगति' : lang === 'mr' ? 'शिफ्ट प्रगती' : 'Shift Completion'}</span>
                 <span>{progressPercent}%</span>
               </div>
               <div className="progress" style={{ height: 7, margin: 0 }}>
@@ -249,8 +261,30 @@ export default function Home() {
               fontSize: 12.5,
               color: '#475569'
             }}>
-              <span>Submitted: <strong style={{ color: '#0f172a' }}>{badge.counts.submitted}/{badge.counts.scheduled}</strong></span>
-              <span>Open alerts: <strong style={{ color: badge.counts.openAlerts > 0 ? '#dc2626' : '#059669' }}>{badge.counts.openAlerts}</strong></span>
+              <span>{lang === 'hi' ? 'जमा जांच:' : lang === 'mr' ? 'सादर तपासणी:' : 'Submitted:'} <strong style={{ color: '#0f172a' }}>{badge.counts.submitted}/{badge.counts.scheduled}</strong></span>
+              <span>{lang === 'hi' ? 'खुले अलर्ट:' : lang === 'mr' ? 'सक्रिय अलर्ट:' : 'Open alerts:'} <strong style={{ color: badge.counts.openAlerts > 0 ? '#dc2626' : '#059669' }}>{badge.counts.openAlerts}</strong></span>
+            </div>
+
+            {/* Link to FoodSafetyGreen Showcase Badge */}
+            <div style={{ marginTop: 16 }}>
+              <Link
+                href="/showcase"
+                className="btn primary"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  fontSize: 13,
+                  padding: '9px 14px',
+                  borderRadius: 12,
+                  textDecoration: 'none'
+                }}
+              >
+                <Award size={15} />
+                {t('action.viewBadge')}
+              </Link>
             </div>
           </div>
         </section>

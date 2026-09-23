@@ -21,8 +21,10 @@ import {
   ChatMessage,
   queryFoodSafetyAI
 } from '@/lib/ai-food-safety-knowledge';
+import { useLanguage } from '@/lib/vernacular';
 
 export default function FoodSafetyChatbot() {
+  const { lang } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [persona, setPersona] = useState<PersonaRole>('supervisor');
   const [input, setInput] = useState('');
@@ -30,19 +32,32 @@ export default function FoodSafetyChatbot() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Initial greeting based on role
+    // Initial greeting based on role and language
+    let greetingText = '';
+    if (lang === 'hi') {
+      greetingText = `### 👋 नमस्ते! मैं आपका FoodSafe365 AI खाद्य सुरक्षा सहायक हूँ।\n\n` +
+        `मुझसे **FSSAI नियमों**, **तापमान सीमा (<5°C / ≥75°C)**, **पेस्ट नियंत्रण**, **स्टाफ मेडिकल/फॉर्म 1A**, या **दैनिक जांच** के बारे में कुछ भी पूछें।\n\n` +
+        `वर्तमान भूमिका: **${persona === 'supervisor' ? 'किचन सुपरवाइजर (तत्काल एक्शन)' : 'रेस्तरां प्रबंधक (ऑडिट एवं अनुपालन)'}**।`;
+    } else if (lang === 'mr') {
+      greetingText = `### 👋 नमस्कार! मी आपला FoodSafe365 AI अन्न सुरक्षा सहाय्यक आहे.\n\n` +
+        `मला **FSSAI नियम**, **तापमान मर्यादा (<५°C / ≥७५°C)**, **कीटक नियंत्रण**, **कर्मचारी वैद्यकीय/फॉर्म 1A**, किंवा **दैनिक तपासणी** बद्दल काहीही विचारा.\n\n` +
+        `सध्याची भूमिका: **${persona === 'supervisor' ? 'किचन सुपरवायझर (त्वरित कृती)' : 'रेस्टॉरंट व्यवस्थापक (ऑडिट व अनुपालन)'}**।`;
+    } else {
+      greetingText = `### 👋 Hello! I am your FoodSafe365 AI Assistant.\n\n` +
+        `Ask me anything about **FSSAI regulations**, **temperature limits**, **pest emergencies**, **staff medicals**, or **HACCP critical limits**.\n\n` +
+        `Currently answering as: **${persona === 'supervisor' ? 'Kitchen Supervisor (Immediate Floor Action)' : 'Restaurant Manager (Audit & Compliance)'}**.`;
+    }
+
     setMessages([
       {
         id: 'initial-1',
         sender: 'ai',
-        text: `### 👋 Hello! I am your FoodSafe365 AI Assistant.\n\n` +
-          `Ask me anything about **FSSAI regulations**, **temperature limits**, **pest emergencies**, **staff medicals**, or **HACCP critical limits**.\n\n` +
-          `Currently answering as: **${persona === 'supervisor' ? 'Kitchen Supervisor (Immediate Floor Action)' : 'Restaurant Manager (Audit & Compliance)'}**.`,
+        text: greetingText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         roleContext: persona
       }
     ]);
-  }, [persona]);
+  }, [persona, lang]);
 
   useEffect(() => {
     if (isOpen) {
@@ -68,14 +83,32 @@ export default function FoodSafetyChatbot() {
     setInput('');
   }
 
-  const QUICK_PROMPTS = [
-    '🌡️ Refrigerator at 8°C — What to do?',
-    '🍗 Core cooking & reheating temps',
-    '🩺 Mandatory Form 1A & stool test rules',
-    '🪲 Live pest spotted in kitchen',
-    '🚨 Table diner grievance protocol',
-    '🧪 Cooking oil TPC limits'
-  ];
+  const QUICK_PROMPTS = lang === 'hi'
+    ? [
+        '🌡️ फ्रिज 8°C पर है — क्या करें?',
+        '🍗 कुकिंग और रीहीटिंग सुरक्षित तापमान',
+        '🩺 अनिवार्य फॉर्म 1A और स्टूल टेस्ट नियम',
+        '🪲 किचन में जिंदा कीट/तिलचट्टा दिखा',
+        '🚨 टेबल डाइनर शिकायत प्रोटोकॉल',
+        '🧪 कुकिंग ऑयल TPC लिमिट'
+      ]
+    : lang === 'mr'
+    ? [
+        '🌡️ फ्रीज ८°C वर आहे — काय करावे?',
+        '🍗 स्वयंपाक आणि गरम करण्याचे सुरक्षित तापमान',
+        '🩺 फॉर्म 1A आणि स्टूल टेस्टचे नियम',
+        '🪲 स्वयंपाकघरात झुरळ किंवा कीटक दिसले',
+        '🚨 टेबल ग्राहक तक्रार प्रोटोकॉल',
+        '🧪 खाद्यतेल TPC मर्यादा'
+      ]
+    : [
+        '🌡️ Refrigerator at 8°C — What to do?',
+        '🍗 Core cooking & reheating temps',
+        '🩺 Mandatory Form 1A & stool test rules',
+        '🪲 Live pest spotted in kitchen',
+        '🚨 Table diner grievance protocol',
+        '🧪 Cooking oil TPC limits'
+      ];
 
   return (
     <>
