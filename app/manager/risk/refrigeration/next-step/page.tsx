@@ -1,7 +1,7 @@
 'use client';
 import {useMemo,useState} from 'react';
 import Link from 'next/link';
-import {ArrowLeft,ArrowRight,CheckCircle2,Info,ShieldCheck,AlertTriangle,ClipboardCheck} from 'lucide-react';
+import {ArrowLeft,ArrowRight,CheckCircle2,Home,Info,ShieldCheck,AlertTriangle,ClipboardCheck} from 'lucide-react';
 import {apiFetch} from '@/lib/api';
 
 const steps=[
@@ -42,9 +42,9 @@ export default function RefrigerationNextStep(){
 
   const next=()=>{ if(!answer)return; if(index<steps.length-1) setIndex(i=>i+1); else finish(); };
 
-  return <main><div className="topbar"><div className="brand">FoodSafe365</div><div className="muted">ABC Restaurant · Manager</div></div>
+  return <main><div className="topbar"><Link href="/home" className="brand">FoodSafe365</Link><div style={{display:'flex',gap:10,alignItems:'center'}}><Link href="/home" className="btn secondary" style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:13,padding:'6px 12px'}}><Home size={14}/> Home</Link><div className="muted">ABC Restaurant · Manager</div></div></div>
     <div className="container detail-shell">
-      <div className="back-row"><Link href="/manager/risk/refrigeration" className="nav-link"><ArrowLeft size={16}/> Back to Refrigerator 2</Link></div>
+      <div className="back-row"><Link href="/home" className="nav-link" style={{marginRight:12}}><ArrowLeft size={16}/> Home</Link><Link href="/manager/risk/refrigeration" className="nav-link"><ArrowLeft size={16}/> Back to Refrigerator 2</Link></div>
       {!done ? <>
         <div className="detail-hero"><div className="icon-tile"><ShieldCheck/></div><div><p className="eyebrow">RECOMMENDED CHECK · {index+1} OF {steps.length}</p><h1>Check Refrigerator 2</h1><p className="lead">A short operational check based on the repeated temperature pattern.</p></div></div>
         <div className="progress" style={{marginTop:24}}><div style={{height:8,borderRadius:99,background:'#e8eeeb'}}><div style={{height:8,borderRadius:99,background:'var(--green)',width:`${((index+1)/steps.length)*100}%`}}/></div></div>

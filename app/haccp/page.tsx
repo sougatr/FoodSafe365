@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import {ShieldCheck, ClipboardCheck, BookOpen, FileText} from 'lucide-react';
+import {ShieldCheck, ClipboardCheck, BookOpen, FileText, Home} from 'lucide-react';
 
 const principles = [
  ['1','Identify hazards','Identify biological, chemical, physical and allergen hazards in the food process.'],
@@ -13,26 +13,37 @@ const principles = [
 ];
 
 export default function HaccpControls(){
- return <main><div className="container">
-   <div className="breadcrumb"><Link href="/home">Home</Link> › HACCP Controls</div>
-   <p className="eyebrow">FOOD SAFETY FRAMEWORK</p>
-   <h1>HACCP Controls</h1>
-   <p className="lead">The HACCP framework used underneath FoodSafe365 to structure food-safety controls.</p>
-
-   <div className="notice" style={{marginTop:20}}><ShieldCheck size={20}/><div><strong>Keep HACCP simple</strong><p style={{margin:'4px 0 0'}}>The supervisor does not need to complete a HACCP worksheet here. FoodSafe365 uses these principles behind the scenes to structure checks, corrective actions, verification and records.</p></div></div>
-
-   <section className="section-title"><div><p className="eyebrow">THE 7 PRINCIPLES</p><h2>HACCP in simple language</h2></div></section>
-   <div className="grid grid2">
-    {principles.map(([n,title,text])=><div className="card" key={n} style={{display:'flex',gap:16,alignItems:'flex-start'}}><div className="step-number">{n}</div><div><h3 style={{marginTop:0}}>{title}</h3><p className="muted" style={{marginBottom:0}}>{text}</p></div></div>)}
+ return <main>
+   <div className="topbar">
+     <Link href="/home" className="brand">FoodSafe365</Link>
+     <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+       <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
+         <Home size={14} /> Home
+       </Link>
+       <div className="muted">HACCP Controls</div>
+     </div>
    </div>
 
-   <section className="section-title"><div><p className="eyebrow">WHAT HAPPENS IN FOODS AFE365</p><h2>One operational flow</h2></div></section>
-   <div className="card"><div className="flow-row"><span>Understand</span><span>→</span><span>Check</span><span>→</span><span>Correct</span><span>→</span><span>Verify</span><span>→</span><span>Record</span></div><p className="muted" style={{marginBottom:0}}>The rules engine keeps the technical HACCP structure underneath this simple workflow.</p></div>
+   <div className="container" style={{ paddingTop: 20 }}>
+    <div className="breadcrumb"><Link href="/home">Home</Link> › HACCP Controls</div>
+    <p className="eyebrow">FOOD SAFETY FRAMEWORK</p>
+    <h1>HACCP Controls</h1>
+    <p className="lead">The HACCP framework used underneath FoodSafe365 to structure food-safety controls.</p>
 
-   <div className="grid grid3" style={{marginTop:24}}>
-    <Link href="/checklist" className="card link-card"><ClipboardCheck/><h3>Food Safety Checklist</h3><p className="muted">FSSAI-aligned operational controls.</p></Link>
-    <Link href="/temperature-controls" className="card link-card"><BookOpen/><h3>Temperature Controls</h3><p className="muted">Five priority temperature controls.</p></Link>
-    <Link href="/records" className="card link-card"><FileText/><h3>Records</h3><p className="muted">Traceable checks, actions and verification.</p></Link>
-   </div>
- </div></main>
+    <div className="notice" style={{marginTop:20}}><ShieldCheck size={20}/><div><strong>Keep HACCP simple</strong><p style={{margin:'4px 0 0'}}>The supervisor does not need to complete a HACCP worksheet here. FoodSafe365 uses these principles behind the scenes to structure checks, corrective actions, verification and records.</p></div></div>
+
+    <section className="section-title"><div><p className="eyebrow">THE 7 PRINCIPLES</p><h2>HACCP in simple language</h2></div></section>
+    <div className="grid grid2">
+     {principles.map(([n,title,text])=><div className="card" key={n} style={{display:'flex',gap:16,alignItems:'flex-start'}}><div className="step-number">{n}</div><div><h3 style={{marginTop:0}}>{title}</h3><p className="muted" style={{marginBottom:0}}>{text}</p></div></div>)}
+    </div>
+
+    <section className="section-title"><div><p className="eyebrow">WHAT HAPPENS IN FOODSAFE365</p><h2>One operational flow</h2></div></section>
+    <div className="card"><div className="flow-row"><span>Understand</span><span>→</span><span>Check</span><span>→</span><span>Correct</span><span>→</span><span>Verify</span><span>→</span><span>Record</span></div><p className="muted" style={{marginBottom:0}}>The rules engine keeps the technical HACCP structure underneath this simple workflow.</p></div>
+
+    <div className="grid grid3" style={{marginTop:24}}>
+     <Link href="/checklist" className="card link-card"><ClipboardCheck/><h3>28 Essential Safeguards</h3><p className="muted">28 daily operational kitchen safeguards.</p></Link>
+     <Link href="/temperature-controls" className="card link-card"><BookOpen/><h3>Temperature Controls</h3><p className="muted">Six priority temperature controls.</p></Link>
+     <Link href="/records" className="card link-card"><FileText/><h3>Records</h3><p className="muted">Traceable checks, actions and verification.</p></Link>
+    </div>
+  </div></main>
 }

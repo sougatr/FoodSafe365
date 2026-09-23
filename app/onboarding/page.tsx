@@ -1,47 +1,349 @@
 'use client';
-import {useEffect,useMemo,useState} from 'react';
-import {useRouter} from 'next/navigation';
-import {apiFetch} from '@/lib/api';
-import {generateControlPlan} from '@/lib/control-plan';
-import {Check, ChevronRight, ShieldCheck} from 'lucide-react';
 
-type Option={id?:string;code:string;name:string};
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import {
+  Home,
+  ArrowRight,
+  ShieldCheck,
+  CheckCircle2,
+  Building2,
+  Coffee,
+  Croissant,
+  Flame,
+  Wine,
+  Users,
+  Hotel,
+  UtensilsCrossed
+} from 'lucide-react';
+import { apiFetch } from '@/lib/api';
 
-const fallbackTypes:Option[]=[
- {code:'restaurant',name:'Restaurant'},{code:'cafe',name:'Café'},{code:'bakery',name:'Bakery'},
- {code:'cloud_kitchen',name:'Cloud kitchen'},{code:'hotel',name:'Hotel kitchen'},{code:'canteen',name:'Canteen'},{code:'other',name:'Other'}
-];
-const fallbackProcesses:Option[]=[
- {code:'washing_preparation',name:'Washing / preparation'},{code:'cutting',name:'Cutting / chopping'},{code:'cooking',name:'Cooking'},
- {code:'frying',name:'Frying'},{code:'baking',name:'Baking'},{code:'refrigerated_storage',name:'Refrigerated storage'},
- {code:'freezing',name:'Freezing'},{code:'hot_holding',name:'Hot holding'},{code:'cooling',name:'Cooling cooked food'},
- {code:'reheating',name:'Reheating'},{code:'packaging',name:'Packaging'},{code:'delivery',name:'Delivery'},{code:'ready_to_eat',name:'Ready-to-eat preparation'}
-];
-const fallbackEquipment:Option[]=[
- {code:'refrigerator',name:'Refrigerator'},{code:'freezer',name:'Freezer'},{code:'deep_freezer',name:'Deep freezer'},
- {code:'hot_holding',name:'Hot holding equipment'},{code:'temperature_monitor',name:'Temperature monitor'},
- {code:'cooking_equipment',name:'Cooking equipment'},{code:'water_treatment',name:'Water treatment'},{code:'dishwasher',name:'Dishwasher'}
+interface OutletTypeOption {
+  code: string;
+  name: string;
+  description: string;
+  icon: any;
+}
+
+const OUTLET_TYPES: OutletTypeOption[] = [
+  {
+    code: 'restaurant',
+    name: 'Restaurant / Dine-In',
+    description: 'Fine dine, casual dining, bistro or family restaurant',
+    icon: UtensilsCrossed
+  },
+  {
+    code: 'cafe',
+    name: 'Café & Coffee Shop',
+    description: 'Beverages, bakery items, sandwiches & light fare',
+    icon: Coffee
+  },
+  {
+    code: 'cloud_kitchen',
+    name: 'Cloud / Dark Kitchen',
+    description: 'Delivery-only virtual brands & high-velocity dispatch',
+    icon: Flame
+  },
+  {
+    code: 'brewery',
+    name: 'Bar, Pub & Brewery',
+    description: 'Draft beer lines, cocktail stations & cold keg rooms',
+    icon: Wine
+  },
+  {
+    code: 'bakery',
+    name: 'Bakery & Confectionery',
+    description: 'Baked goods, prep tables, ovens & refrigerated display',
+    icon: Croissant
+  },
+  {
+    code: 'catering',
+    name: 'Catering & Banquets',
+    description: 'Outdoor food transit, buffet holding & temporary setups',
+    icon: Users
+  },
+  {
+    code: 'hotel',
+    name: 'Hotel Kitchen',
+    description: 'Multi-outlet hotel kitchens, room service & banqueting',
+    icon: Hotel
+  },
+  {
+    code: 'canteen',
+    name: 'Canteen / Cafeteria',
+    description: 'Corporate, university, hospital or institutional kitchen',
+    icon: Building2
+  }
 ];
 
-export default function Onboarding(){
- const [step,setStep]=useState(0),[types,setTypes]=useState<Option[]>(fallbackTypes),[processes,setProcesses]=useState<Option[]>(fallbackProcesses),[equipment,setEquipment]=useState<Option[]>(fallbackEquipment);
- const [type,setType]=useState('restaurant'),[selectedProcess,setSelectedProcess]=useState<string[]>(['refrigerated_storage','cooking']),[selectedEquip,setSelectedEquip]=useState<string[]>(['refrigerator','cooking_equipment','temperature_monitor']);
- const [name,setName]=useState('ABC Restaurant'),[city,setCity]=useState('Mumbai'),[saving,setSaving]=useState(false),[error,setError]=useState('');
- const r=useRouter();
- useEffect(()=>{Promise.all([apiFetch<any[]>('/restaurant-types'),apiFetch<any[]>('/food-processes'),apiFetch<any[]>('/equipment-types')]).then(([a,b,c])=>{if(a?.length)setTypes(a);if(b?.length)setProcesses(b);if(c?.length)setEquipment(c)}).catch(()=>{});},[]);
- const profile=useMemo(()=>({restaurantType:type,processCodes:selectedProcess,equipmentCodes:selectedEquip}),[type,selectedProcess,selectedEquip]);
- const plan=useMemo(()=>generateControlPlan(profile),[profile]);
- const toggle=(code:string,setter:React.Dispatch<React.SetStateAction<string[]>>)=>setter(v=>v.includes(code)?v.filter(a=>a!==code):[...v,code]);
- const save=async()=>{setSaving(true);setError('');const setup={name,city,restaurantType:type,processCodes:selectedProcess,equipmentCodes:selectedEquip,plan};try{const out=await apiFetch<any>('/onboarding',{method:'POST',body:JSON.stringify({user:{name:'Restaurant Admin',mobile:'9999999999'},organisation:{name},outlet:{name,city,restaurantTypeId:type},processCodes:selectedProcess,equipmentCodes:selectedEquip})});if(typeof window!=='undefined'){localStorage.setItem('foodsafe365_outlet_id',out.outletId||'demo-outlet');localStorage.setItem('foodsafe365_setup',JSON.stringify(setup));}r.push('/home')}catch(e:any){setError(e.message||'Could not create the restaurant plan.')}finally{setSaving(false)}};
- const canContinue=step===0?Boolean(name&&city&&type):step===1?selectedProcess.length>0:step===2?selectedEquip.length>0:true;
- return <main><div className="topbar"><div className="brand">FoodSafe365</div><span className="muted">Step {step+1} of 4</span></div>
- <div className="container" style={{maxWidth:1000,paddingTop:44}}><div className="card">
-  <div className="progress"><span style={{width:`${((step+1)/4)*100}%`}}/></div>
-  {step===0&&<section><p className="eyebrow" style={{marginTop:28}}>RESTAURANT ONBOARDING</p><h1>Tell us about your restaurant</h1><p className="lead">We’ll use this information to build a food-safety control plan for your outlet.</p><div className="grid grid2" style={{marginTop:24}}><div className="field"><label>Restaurant name</label><input className="input" value={name} onChange={e=>setName(e.target.value)}/></div><div className="field"><label>City</label><input className="input" value={city} onChange={e=>setCity(e.target.value)}/></div></div><h2 style={{marginTop:28}}>What type of outlet is this?</h2><div className="grid grid3" style={{marginTop:16}}>{types.map(x=><button key={x.code} className={'option '+(type===x.code?'selected':'')} onClick={()=>setType(x.code)}>{x.name}</button>)}</div></section>}
-  {step===1&&<section><p className="eyebrow" style={{marginTop:28}}>FOOD PROCESSES</p><h1>What happens in your kitchen?</h1><p className="lead">Select the processes that actually happen in this outlet. FoodSafe365 will use them to decide which controls apply.</p><div className="grid grid3" style={{marginTop:24}}>{processes.map(x=><button key={x.code} className={'option '+(selectedProcess.includes(x.code)?'selected':'')} onClick={()=>toggle(x.code,setSelectedProcess)}><div style={{display:'flex',justifyContent:'space-between',gap:10}}><strong>{x.name}</strong>{selectedProcess.includes(x.code)&&<Check size={20} color="var(--green)"/>}</div></button>)}</div></section>}
-  {step===2&&<section><p className="eyebrow" style={{marginTop:28}}>EQUIPMENT</p><h1>What equipment do you use?</h1><p className="lead">This helps FoodSafe365 add the right monitoring and maintenance controls.</p><div className="grid grid3" style={{marginTop:24}}>{equipment.map(x=><button key={x.code} className={'option '+(selectedEquip.includes(x.code)?'selected':'')} onClick={()=>toggle(x.code,setSelectedEquip)}><div style={{display:'flex',justifyContent:'space-between',gap:10}}><strong>{x.name}</strong>{selectedEquip.includes(x.code)&&<Check size={20} color="var(--green)"/>}</div></button>)}</div></section>}
-  {step===3&&<section><div style={{display:'flex',gap:14,alignItems:'flex-start',marginTop:28}}><div className="icon-tile"><ShieldCheck/></div><div><p className="eyebrow">YOUR FOODSAFE365 CONTROL PLAN</p><h1 style={{marginBottom:6}}>Your plan is ready</h1><p className="lead" style={{fontSize:16}}>Based on your restaurant type, food processes and equipment, FoodSafe365 has generated the controls that apply to this outlet.</p></div></div><div className="notice info" style={{marginTop:22}}><ShieldCheck size={20}/><div><strong>You do not need to build a HACCP worksheet here.</strong><p style={{margin:'5px 0 0'}}>FoodSafe365 uses its rules engine underneath. Your team simply sees the checks and actions that apply to this restaurant.</p></div></div><div className="summary-stats"><div><strong>{plan.length}</strong><span>controls generated</span></div><div><strong>{selectedProcess.length}</strong><span>food processes</span></div><div><strong>{selectedEquip.length}</strong><span>equipment types</span></div><div><strong>{name}</strong><span>outlet</span></div></div><div className="section-title"><div><h2>Controls FoodSafe365 will manage</h2><p className="muted">You can change your setup later.</p></div></div><div className="grid grid2">{plan.map(item=><div key={item.code} className="card" style={{padding:18}}><div style={{display:'flex',gap:12,alignItems:'flex-start'}}><div className="step-number"><Check size={18}/></div><div><strong>{item.title}</strong><p className="muted" style={{margin:'6px 0',lineHeight:1.45}}>{item.description}</p><small className="muted">Why included: {item.reason}</small></div></div></div>)}</div></section>}
-  {error&&<div className="notice error" style={{marginTop:20}}>{error}</div>}
-  <div style={{display:'flex',justifyContent:'space-between',gap:12,marginTop:32}}><button className="btn secondary" disabled={step===0||saving} onClick={()=>setStep(step-1)}>Back</button>{step<3?<button className="btn primary" disabled={!canContinue||saving} onClick={()=>setStep(step+1)}>Continue <ChevronRight size={18} style={{verticalAlign:'middle'}}/></button>:<button className="btn primary" disabled={saving} onClick={save}>{saving?'Creating your plan…':'Create my FoodSafe365 plan'}</button>}</div>
- </div></div></main>
+export default function Onboarding() {
+  const [name, setName] = useState('ABC Restaurant');
+  const [city, setCity] = useState('Mumbai');
+  const [outletType, setOutletType] = useState('restaurant');
+  const [fssaiLicense, setFssaiLicense] = useState('');
+  const [managerName, setManagerName] = useState('Restaurant Admin');
+  const [mobile, setMobile] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const router = useRouter();
+
+  const handleSave = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!name.trim() || !city.trim()) {
+      setError('Please provide your restaurant name and city.');
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+
+    const setup = {
+      name: name.trim(),
+      city: city.trim(),
+      restaurantType: outletType,
+      fssaiLicense: fssaiLicense.trim(),
+      managerName: managerName.trim(),
+      mobile: mobile.trim(),
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      // Attempt backend API sync if running
+      await apiFetch<any>('/onboarding', {
+        method: 'POST',
+        body: JSON.stringify({
+          user: { name: managerName || 'Restaurant Admin', mobile: mobile || '9999999999' },
+          organisation: { name: name.trim() },
+          outlet: { name: name.trim(), city: city.trim(), restaurantTypeId: outletType }
+        })
+      }).catch(() => {
+        // Graceful fallback to client storage
+      });
+
+      if (typeof window !== 'undefined') {
+        const slug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'demo-outlet';
+        localStorage.setItem('foodsafe365_outlet_id', slug);
+        localStorage.setItem('foodsafe365_setup', JSON.stringify(setup));
+      }
+
+      router.push('/home');
+    } catch (err: any) {
+      setError(err?.message || 'Could not complete setup. Proceeding to dashboard.');
+      setTimeout(() => router.push('/home'), 500);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <main style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: 64 }}>
+      {/* Top Bar */}
+      <div className="topbar">
+        <Link href="/home" className="brand">FoodSafe365</Link>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <Link
+            href="/home"
+            className="btn secondary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '7px 14px' }}
+          >
+            <Home size={15} /> Home
+          </Link>
+          <Link href="/login" className="btn secondary" style={{ fontSize: 13, padding: '7px 14px' }}>
+            Log in
+          </Link>
+        </div>
+      </div>
+
+      <div className="container" style={{ maxWidth: 860, paddingTop: 36 }}>
+        <div className="card" style={{ padding: '36px 32px', borderRadius: 20 }}>
+          
+          <div style={{ marginBottom: 28 }}>
+            <span className="pill good" style={{ fontSize: 11, padding: '4px 10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              RESTAURANT ONBOARDING
+            </span>
+            <h1 style={{ fontSize: 'clamp(28px, 4vw, 38px)', lineHeight: 1.2, margin: '12px 0 8px' }}>
+              Tell us about your restaurant
+            </h1>
+            <p className="lead muted" style={{ fontSize: 16, margin: 0 }}>
+              Set up your outlet in 30 seconds. Your kitchen team can immediately start today’s daily food safety protocol without cumbersome questionnaires.
+            </p>
+          </div>
+
+          <form onSubmit={handleSave}>
+            {/* Basic Information */}
+            <div className="grid grid2" style={{ gap: 18, marginBottom: 26 }}>
+              <div className="field">
+                <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Restaurant / Outlet Name *</label>
+                <input
+                  className="input"
+                  placeholder="e.g. The Bombay Canteen"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="field">
+                <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>City / Location *</label>
+                <input
+                  className="input"
+                  placeholder="e.g. Mumbai"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Outlet Type Selection */}
+            <div style={{ marginBottom: 28 }}>
+              <label style={{ fontSize: 14, fontWeight: 800, color: '#0f172a', display: 'block', marginBottom: 12 }}>
+                What type of outlet is this?
+              </label>
+              <div className="grid grid2" style={{ gap: 12 }}>
+                {OUTLET_TYPES.map((type) => {
+                  const Icon = type.icon;
+                  const isSelected = outletType === type.code;
+                  return (
+                    <button
+                      type="button"
+                      key={type.code}
+                      onClick={() => setOutletType(type.code)}
+                      style={{
+                        padding: '16px 18px',
+                        borderRadius: 14,
+                        border: isSelected ? '2px solid var(--green)' : '1px solid #cbd5e1',
+                        background: isSelected ? '#f0faf5' : '#ffffff',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        gap: 14,
+                        alignItems: 'center',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      <div style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 10,
+                        background: isSelected ? '#e9f7ef' : '#f1f5f9',
+                        color: isSelected ? 'var(--green-dark)' : '#64748b',
+                        display: 'grid',
+                        placeItems: 'center',
+                        flexShrink: 0
+                      }}>
+                        <Icon size={20} />
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <strong style={{ fontSize: 15, color: '#0f172a', display: 'block' }}>{type.name}</strong>
+                        <small style={{ color: '#64748b', fontSize: 12, display: 'block', marginTop: 2 }}>{type.description}</small>
+                      </div>
+                      {isSelected && (
+                        <CheckCircle2 size={20} style={{ color: 'var(--green)', flexShrink: 0 }} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Optional Compliance Details */}
+            <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 14, padding: '20px 22px', marginBottom: 28 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                <ShieldCheck size={18} style={{ color: 'var(--green)' }} />
+                <strong style={{ fontSize: 14, color: '#1e293b' }}>Operational &amp; FSSAI Details (Optional)</strong>
+              </div>
+
+              <div className="grid grid3" style={{ gap: 14 }}>
+                <div className="field">
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>FSSAI 14-Digit License No.</label>
+                  <input
+                    className="input"
+                    placeholder="e.g. 11521012000345"
+                    value={fssaiLicense}
+                    onChange={(e) => setFssaiLicense(e.target.value)}
+                    maxLength={14}
+                  />
+                  <small style={{ fontSize: 11, color: '#64748b', marginTop: 3 }}>Appears on digital inspection dossier</small>
+                </div>
+
+                <div className="field">
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>Manager In-Charge</label>
+                  <input
+                    className="input"
+                    placeholder="e.g. Vikram Sharma"
+                    value={managerName}
+                    onChange={(e) => setManagerName(e.target.value)}
+                  />
+                  <small style={{ fontSize: 11, color: '#64748b', marginTop: 3 }}>Receives critical temperature alerts</small>
+                </div>
+
+                <div className="field">
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>Alert Phone / WhatsApp</label>
+                  <input
+                    className="input"
+                    placeholder="e.g. 9820012345"
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value)}
+                  />
+                  <small style={{ fontSize: 11, color: '#64748b', marginTop: 3 }}>For instant deviation notifications</small>
+                </div>
+              </div>
+            </div>
+
+            {/* Instant Benefits Preview */}
+            <div style={{
+              background: '#f0faf5',
+              border: '1px solid #cce8da',
+              borderRadius: 14,
+              padding: '16px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 16,
+              marginBottom: 28,
+              flexWrap: 'wrap'
+            }}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                <CheckCircle2 size={20} style={{ color: 'var(--green)', flexShrink: 0 }} />
+                <span style={{ fontSize: 13, color: '#166534', fontWeight: 600 }}>
+                  Includes immediate access to all <strong>29 Operational Safeguards</strong>, cold-chain logs (&lt; 5°C), tabletop Diner QR audits, and on-demand service partners.
+                </span>
+              </div>
+            </div>
+
+            {error && (
+              <div className="notice error" style={{ marginBottom: 20 }}>
+                {error}
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+              <Link href="/home" className="btn secondary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                Cancel
+              </Link>
+              <button
+                type="submit"
+                className="btn primary"
+                disabled={saving || !name.trim() || !city.trim()}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '13px 28px',
+                  fontSize: 15,
+                  fontWeight: 800
+                }}
+              >
+                {saving ? 'Activating Outlet…' : 'Activate Outlet & Open Dashboard'} <ArrowRight size={17} />
+              </button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </main>
+  );
 }
