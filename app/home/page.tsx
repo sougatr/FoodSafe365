@@ -377,11 +377,40 @@ export default function Home() {
                 </div>
                 <span className="pill good" style={{ fontSize: 11, padding: '4px 8px' }}>MOAT 01</span>
               </div>
-              <p className="eyebrow" style={{ color: 'var(--green-dark)', fontWeight: 800 }}>PUBLIC TRUST FLYWHEEL</p>
-              <h3 style={{ fontSize: 19, margin: '0 0 10px', color: '#0f172a' }}>Turning Clean Kitchens into Packed Tables</h3>
-              <p className="muted" style={{ fontSize: 13.5, lineHeight: 1.6, flex: 1 }}>
-                Most restaurants hide what happens behind the kitchen swing doors. FoodSafe365 turns it into your sharpest marketing edge. Diners scan a sleek tabletop QR code to verify today’s safety badge and rate table hygiene in real time. If a guest ever spots an issue, they alert your General Manager directly from their phone, resolving it at the table in two minutes before it ever touches Google Reviews or Instagram.
+              <p className="eyebrow" style={{ color: 'var(--green-dark)', fontWeight: 800 }}>
+                {lang === 'hi' ? 'सार्वजनिक विश्वास चक्र' : lang === 'mr' ? 'सार्वजनिक विश्वास चक्र' : 'PUBLIC TRUST FLYWHEEL'}
               </p>
+              <h3 style={{ fontSize: 19, margin: '0 0 12px', color: '#0f172a' }}>
+                {lang === 'hi' ? 'स्वच्छ किचन से भरें टेबल' : lang === 'mr' ? 'स्वच्छ किचन, खचाखच भरलेले टेबल्स' : 'Turning Clean Kitchens into Packed Tables'}
+              </h3>
+              
+              <ul style={{ margin: '0 0 14px', paddingLeft: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
+                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'किचन-डोर पारदर्शिता:' : lang === 'mr' ? 'किचन-डोर पारदर्शकता:' : 'Kitchen-Door Transparency:'}</strong>{' '}
+                  {lang === 'hi'
+                    ? 'अंदरूनी स्वच्छता अनुशासन को सीधे ग्राहकों के भरोसे में बदलें।'
+                    : lang === 'mr'
+                    ? 'अंतर्गत स्वच्छता शिस्तीचे रूपांतर थेट ग्राहकांच्या विश्वासात करा.'
+                    : 'Turn back-of-house discipline into frontline diner trust.'}
+                </li>
+                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
+                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'लाइव टेबलटॉप QR प्रमाण:' : lang === 'mr' ? 'थेट टेबलटॉप QR पुरावा:' : 'Live Tabletop QR Proof:'}</strong>{' '}
+                  {lang === 'hi'
+                    ? 'ग्राहक स्कैन करके आज का प्रमाणित सुरक्षा बैज तुरंत देख सकते हैं।'
+                    : lang === 'mr'
+                    ? 'ग्राहक स्कॅन करून आजचा प्रमाणित सुरक्षा बॅज त्वरित तपासू शकतात.'
+                    : 'Diners scan to inspect today’s certified safety badge.'}
+                </li>
+                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
+                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'तत्काल प्रतिष्ठा सुरक्षा कवच:' : lang === 'mr' ? 'प्रतिष्ठा सुरक्षा कवच:' : 'Instant Reputation Firewall:'}</strong>{' '}
+                  {lang === 'hi'
+                    ? 'ग्राहकों की समस्या सीधे GM के फोन पर पहुंचेगी—2 मिनट में टेबल पर समाधान, सोशल मीडिया पर नहीं।'
+                    : lang === 'mr'
+                    ? 'ग्राहकांच्या तक्रारी थेट GM च्या फोनवर पोहोचतात—२ मिनिटांत जागेवरच निवारण, गुगल रिव्ह्यूवर नाही.'
+                    : 'Route guest concerns straight to your GM’s phone—resolved at the table in 2 minutes, never on Google Reviews.'}
+                </li>
+              </ul>
+
               <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
                 <Link href="/diner" className="nav-link" style={{ color: 'var(--green-dark)', fontWeight: 700, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 5, padding: 0 }}>
                   Explore Diner Trust Hub <ArrowRight size={14} />
@@ -397,11 +426,40 @@ export default function Home() {
                 </div>
                 <span className="pill good" style={{ fontSize: 11, padding: '4px 8px' }}>MOAT 02</span>
               </div>
-              <p className="eyebrow" style={{ color: 'var(--green-dark)', fontWeight: 800 }}>ON-DEMAND ECOSYSTEM</p>
-              <h3 style={{ fontSize: 19, margin: '0 0 10px', color: '#0f172a' }}>The Service Marketplace (&quot;Compliance-as-a-Service&quot;)</h3>
-              <p className="muted" style={{ fontSize: 13.5, lineHeight: 1.6, flex: 1 }}>
-                A typical checklist app tells you what’s broken and leaves you stranded. FoodSafe365 closes the loop. The moment a refrigerator temperature drifts above 5°C, or a bi-annual medical deadline looms, our integrated marketplace connects you in one tap to accredited pros: NABL diagnostic labs for staff health, licensed pest exterminators, 24/7 refrigeration engineers, and official FoSTaC training institutes.
+              <p className="eyebrow" style={{ color: 'var(--green-dark)', fontWeight: 800 }}>
+                {lang === 'hi' ? 'ऑन-डिमांड इकोसिस्टम' : lang === 'mr' ? 'ऑन-डिमांड इकोसिस्टम' : 'ON-DEMAND ECOSYSTEM'}
               </p>
+              <h3 style={{ fontSize: 19, margin: '0 0 12px', color: '#0f172a' }}>
+                {lang === 'hi' ? 'सेवा मार्केटप्लेस ("कम्प्लायंस-एज-ए-सर्विस")' : lang === 'mr' ? 'सेवा मार्केटप्लेस ("कम्प्लायन्स-ॲज-अ-सर्व्हिस")' : 'The Service Marketplace ("Compliance-as-a-Service")'}
+              </h3>
+              
+              <ul style={{ margin: '0 0 14px', paddingLeft: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
+                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'क्लोज्ड-लूप समाधान:' : lang === 'mr' ? 'क्लोज्ड-लूप तोडगा:' : 'Closed-Loop Resolution:'}</strong>{' '}
+                  {lang === 'hi'
+                    ? 'सिर्फ खामियां न बताएं—एक टैप में उन्हें तुरंत ठीक करें।'
+                    : lang === 'mr'
+                    ? 'केवळ त्रुटी दाखवू नका—एका टॅपमध्ये त्यांची त्वरित दुरुस्ती करा.'
+                    : 'Don’t just detect violations—fix them immediately in one tap.'}
+                </li>
+                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
+                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'प्रमाणित पार्टनर नेटवर्क:' : lang === 'mr' ? 'प्रमाणित भागीदार नेटवर्क:' : 'Accredited Partner Network:'}</strong>{' '}
+                  {lang === 'hi'
+                    ? 'NABL मान्यता प्राप्त लैब, लाइसेंस प्राप्त पेस्ट कंट्रोल और 24/7 HVAC इंजीनियरों तक सीधी पहुंच।'
+                    : lang === 'mr'
+                    ? 'NABL मान्यताप्राप्त लॅब, परवानाधारक पेस्ट कंट्रोल आणि २४/७ HVAC इंजिनिअर्सशी थेट जोडणी.'
+                    : 'On-demand access to NABL medical labs, licensed pest exterminators, and 24/7 HVAC technicians.'}
+                </li>
+                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
+                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'ऑडिट की कोई चिंता नहीं:' : lang === 'mr' ? 'ऑडिटची कोणतीही चिंता नाही:' : 'Zero Audit Panic:'}</strong>{' '}
+                  {lang === 'hi'
+                    ? 'स्टाफ के 6-मासिक स्टूल टेस्ट, फॉर्म 1A और FoSTaC ट्रेनिंग नवीनीकरण की ऑटोमेटेड बुकिंग।'
+                    : lang === 'mr'
+                    ? 'कर्मचाऱ्यांच्या ६-महिन्यांच्या स्टूल टेस्ट, फॉर्म 1A आणि FoSTaC प्रशिक्षण नूतनीकरणाची स्वयंचलित बुकिंग.'
+                    : 'Automated dispatch for 6-month staff stool tests, Form 1A certificates, and FoSTaC training renewals.'}
+                </li>
+              </ul>
+
               <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
                 <Link href="/providers" className="nav-link" style={{ color: 'var(--green-dark)', fontWeight: 700, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 5, padding: 0 }}>
                   Browse Services Marketplace <ArrowRight size={14} />
@@ -417,11 +475,40 @@ export default function Home() {
                 </div>
                 <span className="pill good" style={{ fontSize: 11, padding: '4px 8px' }}>MOAT 03</span>
               </div>
-              <p className="eyebrow" style={{ color: 'var(--green-dark)', fontWeight: 800 }}>REGULATORY SHIELD</p>
-              <h3 style={{ fontSize: 19, margin: '0 0 10px', color: '#0f172a' }}>Bulletproof Defense: Always Inspection-Ready</h3>
-              <p className="muted" style={{ fontSize: 13.5, lineHeight: 1.6, flex: 1 }}>
-                Built squarely on the legal bedrock of FSSAI Schedule 4 and international HACCP standards. Every temperature probe (&lt; 5°C cold storage, &lt; −18°C deep freeze, &ge; 75°C cooking), employee medical clearance, and sanitization cycle is cryptographically logged with tamper-evident timestamps. When an FDA inspector walks in unannounced, you hand them an airtight digital dossier with total confidence.
+              <p className="eyebrow" style={{ color: 'var(--green-dark)', fontWeight: 800 }}>
+                {lang === 'hi' ? 'नियामक सुरक्षा कवच' : lang === 'mr' ? 'नियामक सुरक्षा कवच' : 'REGULATORY SHIELD'}
               </p>
+              <h3 style={{ fontSize: 19, margin: '0 0 12px', color: '#0f172a' }}>
+                {lang === 'hi' ? 'अचूक सुरक्षा: हमेशा निरीक्षण के लिए तैयार' : lang === 'mr' ? 'अभेद्य संरक्षण: नेहमी तपासणीसाठी सज्ज' : 'Bulletproof Defense: Always Inspection-Ready'}
+              </h3>
+              
+              <ul style={{ margin: '0 0 14px', paddingLeft: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
+                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'FSSAI और HACCP अनुरूप:' : lang === 'mr' ? 'FSSAI व HACCP मानकांनुसार:' : 'FSSAI & HACCP Native:'}</strong>{' '}
+                  {lang === 'hi'
+                    ? 'FSSAI शेड्यूल 4 और अंतरराष्ट्रीय तापमान मानकों पर पूरी तरह आधारित।'
+                    : lang === 'mr'
+                    ? 'FSSAI शेड्युल ४ आणि आंतरराष्ट्रीय तापमान मानकांवर पूर्णपणे आधारित.'
+                    : 'Built strictly around statutory Schedule 4 mandates and thermal critical control limits.'}
+                </li>
+                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
+                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'छेड़छाड़-मुक्त डिजिटल ऑडिट ट्रेल:' : lang === 'mr' ? 'छेडछाड-मुक्त डिजिटल ऑडिट ट्रेल:' : 'Tamper-Evident Audit Trail:'}</strong>{' '}
+                  {lang === 'hi'
+                    ? 'कोल्ड चेन (<5°C), कुकिंग कोर (≥75°C) और स्वच्छता लॉग पर रियल-टाइम डिजिटल टाइमस्टैम्प।'
+                    : lang === 'mr'
+                    ? 'कोल्ड चेन (<५°C), कुकिंग कोअर (≥७५°C) आणि स्वच्छता नोंदींवर रिअल-टाइम डिजिटल टाइमस्टॅम्प.'
+                    : 'Real-time digital time-stamps on cold chain (< 5°C), cook core (≥ 75°C), and sanitary logs.'}
+                </li>
+                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
+                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'तत्काल निरीक्षण तैयारी:' : lang === 'mr' ? 'त्वरित तपासणी सज्जता:' : 'Zero-Notice Readiness:'}</strong>{' '}
+                  {lang === 'hi'
+                    ? 'अचानक आने वाले FDA निरीक्षकों को 30 सेकंड में पूर्ण डिजिटल अनुपालन फ़ाइल सौंपें।'
+                    : lang === 'mr'
+                    ? 'अचानक येणाऱ्या FDA अधिकाऱ्यांना ३० सेकंदांत संपूर्ण डिजिटल अनुपालन फाईल सादर करा.'
+                    : 'Hand unannounced FDA inspectors an airtight, verifiable compliance dossier in 30 seconds.'}
+                </li>
+              </ul>
+
               <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
                 <Link href="/food-safety-framework" className="nav-link" style={{ color: 'var(--green-dark)', fontWeight: 700, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 5, padding: 0 }}>
                   View Compliance Framework <ArrowRight size={14} />
