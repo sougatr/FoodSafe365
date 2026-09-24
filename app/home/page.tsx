@@ -343,7 +343,12 @@ export default function Home() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <span style={{ fontSize: 24 }}>💡</span>
                 <span style={{ fontSize: 13, color: '#1e293b', fontWeight: 600, lineHeight: 1.5 }}>
-                  <strong>The Industry Reality:</strong> In today’s viral digital era, an FDA suspension notice doesn’t just pause table covers; it obliterates decades of guest trust in a single two-minute headline. <em>FoodSafe365 turns daily kitchen discipline into an ironclad shield.</em>
+                  <strong>{lang === 'hi' ? 'वास्तविक सच्चाई:' : lang === 'mr' ? 'उद्योगातील वास्तव:' : 'The Industry Reality:'}</strong>{' '}
+                  {lang === 'hi'
+                    ? 'खाद्य सुरक्षा निरीक्षक यह नहीं देखते कि आपका खाना कितना स्वादिष्ट है; वे आपके वॉक-इन कूलर का तापमान और कड़छी संभालने वाले स्टाफ के मेडिकल सर्टिफिकेट चेक करते हैं। एक अनियंत्रित फ्रिज या गंदी नाली 15 मिनट में 50 साल की साख को बर्बाद कर सकती है।'
+                    : lang === 'mr'
+                    ? 'अन्न सुरक्षा निरीक्षक तुमचे जेवण किती चवदार आहे हे तपासत नाहीत; ते तुमच्या वॉक-इन कुलरचे तापमान आणि कर्मचाऱ्यांचे वैद्यकीय प्रमाणपत्र तपासतात. एका अनियंत्रित फ्रीजमुळे किंवा अस्वच्छ ड्रेनेजमुळे ५० वर्षांची प्रतिष्ठा १५ मिनिटांत नष्ट होऊ शकते.'
+                    : 'Inspectors don’t audit how delicious your food is; they audit the temperature inside your walk-in and the health certs of the team holding the ladles. A single unmonitored fridge or an unwashed drain can undo 50 years of brand legacy in 15 minutes.'}
                 </span>
               </div>
               <Link href="/checklist" className="btn secondary" style={{ fontSize: 13, padding: '8px 18px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 6 }}>

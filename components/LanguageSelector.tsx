@@ -69,3 +69,4 @@ export default function LanguageSelector({ compact = false }: { compact?: boolea
     </div>
   );
 }
+
