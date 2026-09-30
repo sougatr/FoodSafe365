@@ -212,9 +212,11 @@ export default function Landing() {
                 </span>
               </div>
 
-              <h2 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 6px' }}>Accredited Partner Hub</h2>
+              <h2 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 6px', lineHeight: 1.3 }}>
+                Found a problem? FoodSafe365 helps you fix it.
+              </h2>
               <p className="muted" style={{ fontSize: 13.5, margin: '0 0 16px', lineHeight: 1.5 }}>
-                List your certified services and receive direct booking requests from restaurant owners.
+                Connect with certified service providers to resolve kitchen issues, maintain compliance, and book services.
               </p>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>

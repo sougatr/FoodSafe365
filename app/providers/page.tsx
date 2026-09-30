@@ -27,7 +27,8 @@ import {
   Check,
   TrendingUp,
   FileCheck,
-  Home
+  Home,
+  Mail
 } from 'lucide-react';
 import {
   PHASE1_STORAGE_KEY,
@@ -567,7 +568,18 @@ export default function ProvidersPage() {
 
   // Provider Partner Application State
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
-  const [partnerSuccess, setPartnerSuccess] = useState<{ id: string; orgName: string; category: string } | null>(null);
+  const [partnerSuccess, setPartnerSuccess] = useState<{
+    id: string;
+    orgName: string;
+    category: string;
+    city: string;
+    contactPerson: string;
+    phone: string;
+    email: string;
+    accreditation: string;
+    capacity: string;
+    notes: string;
+  } | null>(null);
   const [providerForm, setProviderForm] = useState({
     orgName: '',
     category: 'Pest Control',
@@ -685,7 +697,14 @@ export default function ProvidersPage() {
     setPartnerSuccess({
       id: appId,
       orgName: providerForm.orgName,
-      category: providerForm.category
+      category: providerForm.category,
+      city: providerForm.city,
+      contactPerson: providerForm.contactPerson,
+      phone: providerForm.phone,
+      email: providerForm.email,
+      accreditation: providerForm.accreditation,
+      capacity: providerForm.capacity,
+      notes: providerForm.notes
     });
     setIsPartnerModalOpen(false);
   }
@@ -1566,9 +1585,39 @@ export default function ProvidersPage() {
               </div>
             </div>
 
-            <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 20px', lineHeight: 1.5 }}>
+            <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 14px', lineHeight: 1.5 }}>
               Join our network of verified diagnostic laboratories, FoSTaC training institutes, pest control operators, and HVAC service contractors. Receive high-value, recurring restaurant bookings.
             </p>
+
+            {/* Direct Onboarding Desk Contact Banner */}
+            <div style={{
+              background: '#f0fdf4',
+              border: '1.5px solid #86efac',
+              borderRadius: 14,
+              padding: '12px 16px',
+              marginBottom: 16,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12,
+              flexWrap: 'wrap'
+            }}>
+              <div>
+                <div style={{ fontSize: 11.5, fontWeight: 800, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  FoodSafe365 Partner Onboarding Desk
+                </div>
+                <div style={{ fontSize: 13, color: '#1e293b', marginTop: 2 }}>
+                  ✉️ Email: <a href="mailto:ray.health.ai@gmail.com?subject=FoodSafe365%20Provider%20Partnership" style={{ color: '#059669', fontWeight: 700, textDecoration: 'underline' }}>ray.health.ai@gmail.com</a>
+                </div>
+              </div>
+              <a
+                href="mailto:ray.health.ai@gmail.com?subject=FoodSafe365%20Provider%20Partnership%20Query"
+                className="btn secondary"
+                style={{ fontSize: 12, padding: '6px 12px', background: '#ffffff', color: '#166534', borderColor: '#86efac', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+              >
+                <Mail size={13} /> Email Partner Desk
+              </a>
+            </div>
 
             <form onSubmit={handleProviderApplication} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
@@ -1734,6 +1783,10 @@ export default function ProvidersPage() {
                   Submit Partner Application →
                 </button>
               </div>
+
+              <p style={{ fontSize: 11.5, color: '#64748b', margin: '6px 0 0', textAlign: 'center', lineHeight: 1.4 }}>
+                🔒 Your application is submitted directly to our Partner Desk at <strong>ray.health.ai@gmail.com</strong>. Our team verifies NABL/FSSAI credentials and contacts you directly via phone &amp; email within 24 business hours.
+              </p>
             </form>
           </div>
         </div>
@@ -1758,7 +1811,7 @@ export default function ProvidersPage() {
           <div style={{
             background: '#ffffff',
             borderRadius: 20,
-            maxWidth: 480,
+            maxWidth: 520,
             width: '100%',
             textAlign: 'center',
             padding: '32px 28px',
@@ -1786,18 +1839,18 @@ export default function ProvidersPage() {
               Welcome to FoodSafe Network!
             </h2>
 
-            <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 20px', lineHeight: 1.5 }}>
-              Thank you for applying, <strong>{partnerSuccess.orgName}</strong>. Your application has been logged for <strong>{partnerSuccess.category}</strong>. Our partner empanelment team will verify your credentials and reach out within 24 hours.
+            <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 16px', lineHeight: 1.5 }}>
+              Thank you for applying, <strong>{partnerSuccess.orgName}</strong>. Your application has been logged for <strong>{partnerSuccess.category}</strong>.
             </p>
 
             <div style={{
               background: '#f8fafc',
               border: '1px solid #e2e8f0',
               borderRadius: 14,
-              padding: '16px',
+              padding: '14px 16px',
               textAlign: 'left',
               fontSize: 13,
-              marginBottom: 24,
+              marginBottom: 16,
               display: 'flex',
               flexDirection: 'column',
               gap: 8
@@ -1811,17 +1864,76 @@ export default function ProvidersPage() {
                 <strong style={{ color: '#0f172a' }}>{partnerSuccess.category}</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#64748b' }}>Assigned Desk:</span>
+                <strong style={{ color: '#059669' }}>ray.health.ai@gmail.com</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: '#64748b' }}>Verification SLA:</span>
-                <span style={{ color: '#059669', fontWeight: 700 }}>● Under Review (24 Hours)</span>
+                <span style={{ color: '#059669', fontWeight: 700 }}>● Under Review (Within 24 Hours)</span>
+              </div>
+            </div>
+
+            {/* Direct Contact & Action Box */}
+            <div style={{
+              background: '#f0fdf4',
+              border: '1px solid #bbf7d0',
+              borderRadius: 14,
+              padding: '14px 16px',
+              textAlign: 'left',
+              marginBottom: 20
+            }}>
+              <div style={{ fontSize: 12.5, fontWeight: 700, color: '#166534', marginBottom: 4 }}>
+                📬 How We Connect With You:
+              </div>
+              <p style={{ fontSize: 12, color: '#14532d', margin: '0 0 12px', lineHeight: 1.5 }}>
+                Our team will reach out directly to <strong>{partnerSuccess.contactPerson}</strong> ({partnerSuccess.phone}). You can also send a pre-filled confirmation email to our desk or connect via WhatsApp immediately:
+              </p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <a
+                  href={`mailto:ray.health.ai@gmail.com?subject=${encodeURIComponent(`FoodSafe365 Provider Onboarding: ${partnerSuccess.orgName} (${partnerSuccess.category}) - Ref ${partnerSuccess.id}`)}&body=${encodeURIComponent(
+`Hi FoodSafe365 Partnerships Team,
+
+Here are the details of our service provider application:
+- Application Ref: ${partnerSuccess.id}
+- Organization: ${partnerSuccess.orgName}
+- Category: ${partnerSuccess.category}
+- License / Accreditation: ${partnerSuccess.accreditation}
+- Operating City: ${partnerSuccess.city}
+- Daily Field Capacity: ${partnerSuccess.capacity}
+- Contact Person: ${partnerSuccess.contactPerson}
+- Phone: ${partnerSuccess.phone}
+- Email: ${partnerSuccess.email}
+- Notes: ${partnerSuccess.notes || 'None'}
+
+Please confirm our onboarding and empanelment.
+
+Regards,
+${partnerSuccess.contactPerson}
+${partnerSuccess.orgName}`
+                  )}`}
+                  className="btn primary"
+                  style={{ fontSize: 12, padding: '7px 12px', background: '#059669', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                >
+                  <Mail size={13} /> Email Application to Desk
+                </a>
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(`Hi FoodSafe365 Team, I have submitted a provider application for ${partnerSuccess.orgName} (${partnerSuccess.category}) with Ref: ${partnerSuccess.id}. Please connect with us.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn secondary"
+                  style={{ fontSize: 12, padding: '7px 12px', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                >
+                  💬 Connect via WhatsApp
+                </a>
               </div>
             </div>
 
             <button
               onClick={() => setPartnerSuccess(null)}
               className="btn primary"
-              style={{ width: '100%', padding: '12px', background: '#059669' }}
+              style={{ width: '100%', padding: '12px', background: '#0f172a' }}
             >
-              Done
+              Done / Close
             </button>
           </div>
         </div>
