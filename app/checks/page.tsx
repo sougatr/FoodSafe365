@@ -364,6 +364,19 @@ export default function Checks() {
             <div>
               <p className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span>CHECK {selected.id} OF {FOODSAFE28.length} · DAILY FOOD SAFETY CHECK</span>
+                {selected.severity && (
+                  <span style={{
+                    fontSize: 10,
+                    background: selected.severity === 'Critical' ? '#fef2f2' : selected.severity === 'Major' ? '#fffbeb' : '#f0fdf4',
+                    color: selected.severity === 'Critical' ? '#dc2626' : selected.severity === 'Major' ? '#b45309' : '#16a34a',
+                    border: `1px solid ${selected.severity === 'Critical' ? '#fecaca' : selected.severity === 'Major' ? '#fde68a' : '#bbf7d0'}`,
+                    padding: '1px 8px',
+                    borderRadius: 999,
+                    fontWeight: 700
+                  }}>
+                    [{selected.severity}]
+                  </span>
+                )}
                 {selected.complianceRequirement === 'desirable' && (
                   <span style={{ fontSize: 10, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 8px', borderRadius: 999, fontWeight: 700, textTransform: 'uppercase' }}>
                     Desirable (Optional)
@@ -371,6 +384,21 @@ export default function Checks() {
                 )}
               </p>
               <h1>{getCheckText(selected.code)?.title || selected.title}</h1>
+              {selected.target && (
+                <div style={{
+                  marginTop: 10,
+                  marginBottom: 10,
+                  padding: '10px 14px',
+                  background: 'rgba(2, 132, 199, 0.08)',
+                  borderLeft: '4px solid #0284c7',
+                  borderRadius: '0 8px 8px 0',
+                  fontSize: 13.5,
+                  color: 'var(--foreground, #0f172a)',
+                  lineHeight: 1.5
+                }}>
+                  <strong style={{ color: '#0369a1' }}>Target:</strong> {selected.target}
+                </div>
+              )}
               {lang !== 'en' && getCheckText(selected.code)?.title && (
                 <p style={{ fontSize: 14, color: 'var(--muted, #64748b)', margin: '4px 0 0', fontStyle: 'italic' }}>
                   {selected.title}
@@ -1233,6 +1261,19 @@ export default function Checks() {
                 <div className="daily-check-main">
                   <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 2 }}>
                     <span className="eyebrow" style={{ margin: 0, fontSize: 10.5 }}>{x.category}</span>
+                    {x.severity && (
+                      <span style={{
+                        fontSize: 9.5,
+                        background: x.severity === 'Critical' ? '#fef2f2' : x.severity === 'Major' ? '#fffbeb' : '#f0fdf4',
+                        color: x.severity === 'Critical' ? '#dc2626' : x.severity === 'Major' ? '#b45309' : '#16a34a',
+                        border: `1px solid ${x.severity === 'Critical' ? '#fecaca' : x.severity === 'Major' ? '#fde68a' : '#bbf7d0'}`,
+                        padding: '1px 6px',
+                        borderRadius: 4,
+                        fontWeight: 700
+                      }}>
+                        [{x.severity}]
+                      </span>
+                    )}
                     {x.complianceRequirement === 'desirable' && (
                       <span style={{ fontSize: 9.5, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: 4, fontWeight: 700 }}>
                         DESIRABLE (OPTIONAL)

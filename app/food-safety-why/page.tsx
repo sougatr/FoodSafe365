@@ -1,8 +1,9 @@
 'use client';
 import Link from 'next/link';
-import { ArrowRight, CheckCircle2, ShieldCheck, AlertTriangle, ChevronLeft, HelpCircle, BookOpen, Home, Wrench, Eye } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ShieldCheck, AlertTriangle, ChevronLeft, HelpCircle, BookOpen, Wrench, Eye } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { FOODSAFE28, FoodSafeCheck } from '@/lib/foodsafety28';
+import GlobalHeader from '@/components/GlobalHeader';
 
 const categories = Array.from(new Set(FOODSAFE28.map(x => x.category)));
 
@@ -23,16 +24,7 @@ export default function FoodSafetyWhy() {
 
   return (
     <main>
-      <div className="topbar">
-        <Link href="/home" className="brand">FoodSafe365</Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
-            <Home size={14} /> Home
-          </Link>
-          <Link href="/checks" className="nav-link">Supervisor Checks</Link>
-          <Link href="/checklist" className="nav-link">28 Essential Safeguards</Link>
-        </div>
-      </div>
+      <GlobalHeader />
 
       <div className="container page-shell">
         <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 12 }}>

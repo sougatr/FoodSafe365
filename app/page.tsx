@@ -1,261 +1,314 @@
+'use client';
 import Link from 'next/link';
 import {
-  Home,
   QrCode,
   Store,
   ShieldCheck,
-  Bluetooth,
   ArrowRight,
   CheckCircle2,
   Users,
   Sparkles,
-  BookOpen
+  Wrench,
+  Bot,
+  Activity,
+  FileCheck
 } from 'lucide-react';
-
-import ThemeToggle from '@/components/ThemeToggle';
+import GlobalHeader from '@/components/GlobalHeader';
 
 export default function Landing() {
   return (
-    <main>
-      <div className="topbar">
-        <Link href="/home" className="brand">
-          <div style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <GlobalHeader />
+
+      {/* Hero Section - Zero Fluff, High Utility */}
+      <div className="container" style={{ paddingTop: 36, paddingBottom: 24, textAlign: 'center', maxWidth: 880 }}>
+        <span className="pill good" style={{ fontSize: 11, padding: '4px 10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          Food Safety Intelligence &amp; Kitchen Compliance OS
+        </span>
+        <h1 style={{ fontSize: 'clamp(32px, 5vw, 54px)', lineHeight: 1.15, margin: '14px 0 10px', fontWeight: 800 }}>
+          Clean Kitchens Don’t Get Shut Down.
+        </h1>
+        <p style={{ fontSize: 'clamp(16px, 2.5vw, 19px)', color: 'var(--text, #334155)', margin: '0 auto 24px', maxWidth: 680, lineHeight: 1.5, fontWeight: 500 }}>
+          The single operational hub connecting <strong>Diners</strong>, <strong>Restaurants</strong>, and <strong>Accredited Service Providers</strong> to prevent food safety lapses and build public trust.
+        </p>
+      </div>
+
+      {/* 3-Door Persona Onboarding Hub */}
+      <div className="container" style={{ maxWidth: 1180, flex: 1, paddingBottom: 40 }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gap: 20
+        }}>
+          {/* DOOR 1: GENERAL PUBLIC / DINERS */}
+          <div className="card" style={{
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 14
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            padding: 24,
+            borderRadius: 16,
+            border: '1.5px solid #cbd5e1',
+            background: 'var(--surface, #ffffff)',
+            boxShadow: 'var(--shadow-sm)'
           }}>
-            FS
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <div style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  background: '#eff6ff',
+                  color: '#2563eb',
+                  display: 'grid',
+                  placeItems: 'center',
+                  fontSize: 22
+                }}>
+                  🍽️
+                </div>
+                <span style={{ fontSize: 11, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '2px 8px', borderRadius: 999, fontWeight: 700 }}>
+                  GENERAL PUBLIC / DINERS
+                </span>
+              </div>
+
+              <h2 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 6px' }}>Rate a Restaurant</h2>
+              <p className="muted" style={{ fontSize: 13.5, margin: '0 0 16px', lineHeight: 1.5 }}>
+                Verify kitchen hygiene status and rate dining safety directly from your smartphone.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text, #334155)' }}>
+                  <CheckCircle2 size={16} style={{ color: '#2563eb', flexShrink: 0, marginTop: 2 }} />
+                  <span><strong>5 Food Safety Questions:</strong> Table cleanliness, staff hygiene, food freshness, safe water &amp; washrooms.</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text, #334155)' }}>
+                  <CheckCircle2 size={16} style={{ color: '#2563eb', flexShrink: 0, marginTop: 2 }} />
+                  <span><strong>100-Word Remarks:</strong> Submit real observations directly to restaurant management.</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text, #334155)' }}>
+                  <CheckCircle2 size={16} style={{ color: '#2563eb', flexShrink: 0, marginTop: 2 }} />
+                  <span><strong>Verified Badge:</strong> Check today’s live FoodSafetyGreen audit badge before you order.</span>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 14, borderTop: '1px solid var(--border, #e2e8f0)' }}>
+              <Link href="/diner" className="btn primary" style={{ width: '100%', justifyContent: 'center', background: '#2563eb', borderColor: '#1d4ed8' }}>
+                <QrCode size={16} /> Enter Diner Hub
+              </Link>
+              <Link href="/qr/abc-restaurant" className="btn secondary" style={{ width: '100%', justifyContent: 'center', fontSize: 12.5 }}>
+                Scan Demo Tabletop QR →
+              </Link>
+            </div>
           </div>
-          <span>FoodSafe365</span>
-        </Link>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <ThemeToggle />
-          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <Home size={14} /> Dashboard / Home
-          </Link>
-          <Link href="/manager/trends" className="btn secondary" style={{ color: 'var(--green)' }}>
-            AI Trends
-          </Link>
-          <Link href="/ai-copilot" className="btn secondary" style={{ color: 'var(--green)' }}>
-            AI Copilot
-          </Link>
-          <Link href="/providers" className="btn secondary">
-            Providers
-          </Link>
-          <Link href="/contact" className="btn secondary">
-            Contact
-          </Link>
-          <Link href="/login" className="btn secondary">
-            Log in
-          </Link>
+
+          {/* DOOR 2: RESTAURANTS & COMMERCIAL KITCHENS */}
+          <div className="card" style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            padding: 24,
+            borderRadius: 16,
+            border: '2px solid #059669',
+            background: 'var(--surface, #ffffff)',
+            boxShadow: '0 4px 14px rgba(5, 150, 105, 0.1)',
+            position: 'relative'
+          }}>
+            <div style={{
+              position: 'absolute',
+              top: -11,
+              left: 20,
+              background: '#059669',
+              color: '#ffffff',
+              fontSize: 10.5,
+              fontWeight: 800,
+              padding: '2px 10px',
+              borderRadius: 999,
+              letterSpacing: '0.04em'
+            }}>
+              RECOMMENDED FOR RESTAURANTS
+            </div>
+
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, marginTop: 4 }}>
+                <div style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  background: '#ecfdf5',
+                  color: '#059669',
+                  display: 'grid',
+                  placeItems: 'center',
+                  fontSize: 22
+                }}>
+                  🏪
+                </div>
+                <span style={{ fontSize: 11, background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '2px 8px', borderRadius: 999, fontWeight: 700 }}>
+                  RESTAURANT OS
+                </span>
+              </div>
+
+              <h2 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 6px' }}>Kitchen Operations &amp; AI</h2>
+              <p className="muted" style={{ fontSize: 13.5, margin: '0 0 16px', lineHeight: 1.5 }}>
+                Conduct daily checks, detect hazards early, take fast action, and showcase your verified badge.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text, #334155)' }}>
+                  <CheckCircle2 size={16} style={{ color: '#059669', flexShrink: 0, marginTop: 2 }} />
+                  <span><strong>1. Conduct 29 Daily Checks:</strong> Fast 15-min shift audits across 7 core zones.</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text, #334155)' }}>
+                  <CheckCircle2 size={16} style={{ color: '#059669', flexShrink: 0, marginTop: 2 }} />
+                  <span><strong>2. Analyse AI Trends:</strong> Spot temperature drifts and recurring misses before audits.</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text, #334155)' }}>
+                  <CheckCircle2 size={16} style={{ color: '#059669', flexShrink: 0, marginTop: 2 }} />
+                  <span><strong>3. Take Quick Action:</strong> Auto-generate corrective tasks with photo &amp; root-cause logs.</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text, #334155)' }}>
+                  <CheckCircle2 size={16} style={{ color: '#059669', flexShrink: 0, marginTop: 2 }} />
+                  <span><strong>4. FoodSafetyGreen Badge:</strong> Live QR decal to showcase cleanliness to customers.</span>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 14, borderTop: '1px solid var(--border, #e2e8f0)' }}>
+              <Link href="/home" className="btn primary" style={{ width: '100%', justifyContent: 'center' }}>
+                Open Kitchen Dashboard <ArrowRight size={16} />
+              </Link>
+              <Link href="/checks" className="btn secondary" style={{ width: '100%', justifyContent: 'center', fontSize: 12.5 }}>
+                Start Today’s Checks (29 Items) →
+              </Link>
+            </div>
+          </div>
+
+          {/* DOOR 3: SERVICE PROVIDERS */}
+          <div className="card" style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            padding: 24,
+            borderRadius: 16,
+            border: '1.5px solid #cbd5e1',
+            background: 'var(--surface, #ffffff)',
+            boxShadow: 'var(--shadow-sm)'
+          }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                <div style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  background: '#fef3c7',
+                  color: '#b45309',
+                  display: 'grid',
+                  placeItems: 'center',
+                  fontSize: 22
+                }}>
+                  🛠️
+                </div>
+                <span style={{ fontSize: 11, background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a', padding: '2px 8px', borderRadius: 999, fontWeight: 700 }}>
+                  SERVICE PROVIDERS
+                </span>
+              </div>
+
+              <h2 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 6px' }}>Accredited Partner Hub</h2>
+              <p className="muted" style={{ fontSize: 13.5, margin: '0 0 16px', lineHeight: 1.5 }}>
+                List your certified services and receive direct booking requests from restaurant owners.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text, #334155)' }}>
+                  <CheckCircle2 size={16} style={{ color: '#b45309', flexShrink: 0, marginTop: 2 }} />
+                  <span><strong>Staff Medical &amp; Form 1A:</strong> On-site stool test camps &amp; fitness certs.</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text, #334155)' }}>
+                  <CheckCircle2 size={16} style={{ color: '#b45309', flexShrink: 0, marginTop: 2 }} />
+                  <span><strong>NABL Lab Testing:</strong> Drinking water potability (IS 10500) &amp; surface swabs.</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text, #334155)' }}>
+                  <CheckCircle2 size={16} style={{ color: '#b45309', flexShrink: 0, marginTop: 2 }} />
+                  <span><strong>FoSTaC Certification:</strong> Food hygiene training for staff &amp; supervisors.</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text, #334155)' }}>
+                  <CheckCircle2 size={16} style={{ color: '#b45309', flexShrink: 0, marginTop: 2 }} />
+                  <span><strong>HVAC &amp; Pest Extermination:</strong> 24/7 chiller breakdown &amp; pest baiting.</span>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 14, borderTop: '1px solid var(--border, #e2e8f0)' }}>
+              <Link href="/providers" className="btn primary" style={{ width: '100%', justifyContent: 'center', background: '#b45309', borderColor: '#92400e' }}>
+                <Wrench size={16} /> Browse Services Directory
+              </Link>
+              <Link href="/providers?tab=register" className="btn secondary" style={{ width: '100%', justifyContent: 'center', fontSize: 12.5 }}>
+                Register as Accredited Partner →
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Crisp Utility Summary Band */}
+        <div style={{
+          marginTop: 28,
+          background: 'var(--surface, #ffffff)',
+          border: '1px solid var(--border, #e2e8f0)',
+          borderRadius: 14,
+          padding: '16px 20px',
+          display: 'flex',
+          justifyContent: 'space-around',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 16
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--green, #059669)' }}>29 Checks</div>
+            <div style={{ fontSize: 12, color: 'var(--muted, #64748b)' }}>FSSAI Schedule 4 Aligned</div>
+          </div>
+          <div style={{ width: 1, height: 32, background: 'var(--border, #e2e8f0)' }} />
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 20, fontWeight: 900, color: '#2563eb' }}>5 Touchpoints</div>
+            <div style={{ fontSize: 12, color: 'var(--muted, #64748b)' }}>Pure Food Safety Diner Rating</div>
+          </div>
+          <div style={{ width: 1, height: 32, background: 'var(--border, #e2e8f0)' }} />
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 20, fontWeight: 900, color: '#b45309' }}>6 Categories</div>
+            <div style={{ fontSize: 12, color: 'var(--muted, #64748b)' }}>Accredited Service Providers</div>
+          </div>
+          <div style={{ width: 1, height: 32, background: 'var(--border, #e2e8f0)' }} />
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 20, fontWeight: 900, color: '#0f172a' }}>100% Audit-Ready</div>
+            <div style={{ fontSize: 12, color: 'var(--muted, #64748b)' }}>Zero Paperwork &amp; Tamper-Proof</div>
+          </div>
         </div>
       </div>
 
-      <div className="container" style={{ paddingTop: 60 }}>
-        {/* Hero Section */}
-        <div style={{ maxWidth: 840 }}>
-          <span className="pill good">Food Safety Intelligence &amp; Regulatory Shield</span>
-          <h1 style={{ fontSize: 'clamp(38px, 6vw, 68px)', lineHeight: 1.1, margin: '20px 0 16px' }}>
-            Clean Kitchens<br />Don’t Get Shut Down.
-          </h1>
-          <p style={{ fontSize: 21, lineHeight: 1.5, color: '#1e293b', fontWeight: 600, margin: '0 0 10px' }}>
-            Keep your kitchen spotless, your cold chain unbroken, and FDA inspectors off your back.
-          </p>
-          <p style={{ fontSize: 16, lineHeight: 1.6 }} className="muted">
-            The all-in-one compliance platform uniting daily kitchen operational discipline, on-demand accredited service providers, and verified tabletop diner trust.
-          </p>
-          <div style={{ display: 'flex', gap: 12, marginTop: 28, flexWrap: 'wrap' }}>
-            <Link href="/onboarding">
-              <button className="btn primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                Start Free <ArrowRight size={16} />
-              </button>
-            </Link>
-            <Link href="/home">
-              <button className="btn secondary">Open Live App</button>
-            </Link>
-            <Link href="/diner">
-              <button className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                <QrCode size={15} /> Diner Trust Experience
-              </button>
-            </Link>
+      {/* Persistent Global Footer */}
+      <footer style={{
+        borderTop: '1px solid var(--border, #e2e8f0)',
+        background: 'var(--surface, #ffffff)',
+        padding: '20px 0',
+        marginTop: 'auto'
+      }}>
+        <div className="container" style={{
+          maxWidth: 1180,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 16
+        }}>
+          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', fontSize: 13 }}>
+            <Link href="/about" style={{ color: 'var(--muted, #64748b)', textDecoration: 'none' }}>About Us</Link>
+            <Link href="/food-safety-why" style={{ color: 'var(--muted, #64748b)', textDecoration: 'none' }}>Food Safety — Why?</Link>
+            <Link href="/haccp" style={{ color: 'var(--muted, #64748b)', textDecoration: 'none' }}>HACCP Principles</Link>
+            <Link href="/contact" style={{ color: 'var(--muted, #64748b)', textDecoration: 'none' }}>Contact Us</Link>
+            <Link href="/privacy" style={{ color: 'var(--muted, #64748b)', textDecoration: 'none' }}>Privacy Policy</Link>
+          </div>
+          <div style={{ fontSize: 12.5, color: 'var(--muted, #64748b)' }}>
+            © {new Date().getFullYear()} FoodSafe365 · Digital Food-Safety Operating System
           </div>
         </div>
-
-        {/* 3 Steps Banner */}
-        <div className="grid grid3" style={{ marginTop: 56 }}>
-          {['CHECK', 'CORRECT', 'IMPROVE'].map((x, i) => (
-            <div className="card" key={x}>
-              <div className="stat">0{i + 1}</div>
-              <h3>{x}</h3>
-              <p className="muted">A simple daily workflow that turns food-safety observations into verified audit records.</p>
-            </div>
-          ))}
-        </div>
-
-        {/* FoodSafe365's Three Key Competitive Moats */}
-        <section className="section-block" style={{ marginTop: 64 }}>
-          <div className="section-title" style={{ display: 'block', marginBottom: 20 }}>
-            <span className="pill good" style={{ marginBottom: 8 }}>STRATEGIC ADVANTAGE</span>
-            <h2 style={{ fontSize: 30, margin: '8px 0 6px' }}>FoodSafe365’s Three Competitive Moats: The Architecture of Trust</h2>
-            <p className="muted" style={{ fontSize: 16, margin: 0, maxWidth: 860 }}>
-              Forget clunky binder checklists and forgotten paper logs. Here is how FoodSafe365 turns invisible back-of-house hygiene into your restaurant’s most powerful business engine:
-            </p>
-          </div>
-
-          <div className="grid grid3">
-            {/* Moat 1 */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: '#e9f7ef', color: 'var(--green)', display: 'grid', placeItems: 'center' }}>
-                  <QrCode size={24} />
-                </div>
-                <span className="pill good" style={{ fontSize: 11, padding: '4px 8px' }}>MOAT 01</span>
-              </div>
-              <p className="eyebrow" style={{ color: 'var(--green-dark)', fontWeight: 800 }}>PUBLIC TRUST FLYWHEEL</p>
-              <h3 style={{ fontSize: 20, margin: '0 0 10px' }}>Turning Clean Kitchens into Packed Tables</h3>
-              <p className="muted" style={{ fontSize: 14, lineHeight: 1.6, flex: 1 }}>
-                Most restaurants hide what happens behind the kitchen swing doors. FoodSafe365 turns it into your sharpest marketing edge. Diners scan a sleek tabletop QR code (<Link href="/qr/abc-restaurant" style={{ color: 'var(--green-dark)', fontWeight: 600 }}>/qr/[outlet_id]</Link>) to verify today’s safety badge and rate table hygiene in real time. If a guest ever spots an issue—like a chipped glass or undercooked meat—they alert your General Manager directly from their phone, resolving it at the table in two minutes before it ever touches Google Reviews or Instagram.
-              </p>
-              <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
-                <Link href="/diner" className="nav-link" style={{ color: 'var(--green-dark)', fontWeight: 700, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                  Explore Diner Trust Hub <ArrowRight size={14} />
-                </Link>
-              </div>
-            </div>
-
-            {/* Moat 2 */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%', border: '2px solid rgba(22,131,91,0.25)', background: '#fbfefc' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: '#edf8f2', color: 'var(--green)', display: 'grid', placeItems: 'center' }}>
-                  <Store size={24} />
-                </div>
-                <span className="pill good" style={{ fontSize: 11, padding: '4px 8px' }}>MOAT 02</span>
-              </div>
-              <p className="eyebrow" style={{ color: 'var(--green-dark)', fontWeight: 800 }}>ON-DEMAND ECOSYSTEM</p>
-              <h3 style={{ fontSize: 20, margin: '0 0 10px' }}>The Service Marketplace (&quot;Compliance-as-a-Service&quot;)</h3>
-              <p className="muted" style={{ fontSize: 14, lineHeight: 1.6, flex: 1 }}>
-                A typical checklist app tells you what’s broken and leaves you stranded. FoodSafe365 closes the loop. The moment a refrigerator temperature drifts above 5°C, or a bi-annual medical deadline looms, our integrated marketplace connects you in one tap to accredited pros: NABL diagnostic labs for mandatory staff health & stool testing, licensed pest exterminators, 24/7 refrigeration engineers, and official FoSTaC training institutes.
-              </p>
-              <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
-                <Link href="/providers" className="nav-link" style={{ color: 'var(--green-dark)', fontWeight: 700, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                  Browse Services Marketplace <ArrowRight size={14} />
-                </Link>
-              </div>
-            </div>
-
-            {/* Moat 3 */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: '#e9f7ef', color: 'var(--green)', display: 'grid', placeItems: 'center' }}>
-                  <ShieldCheck size={24} />
-                </div>
-                <span className="pill good" style={{ fontSize: 11, padding: '4px 8px' }}>MOAT 03</span>
-              </div>
-              <p className="eyebrow" style={{ color: 'var(--green-dark)', fontWeight: 800 }}>REGULATORY SHIELD</p>
-              <h3 style={{ fontSize: 20, margin: '0 0 10px' }}>Bulletproof Defense: Always Inspection-Ready</h3>
-              <p className="muted" style={{ fontSize: 14, lineHeight: 1.6, flex: 1 }}>
-                Built squarely on the legal bedrock of FSSAI Schedule 4 and international HACCP standards, this isn’t guesswork or compliance theater. Every temperature probe (&lt; 5°C cold storage, &lt; −18°C deep freeze, &ge; 75°C cooking), employee medical clearance, and sanitization cycle is cryptographically logged with tamper-evident timestamps. When an FDA inspector walks in unannounced, you don&apos;t scramble—you hand them an airtight digital compliance dossier with total confidence.
-              </p>
-              <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
-                <Link href="/food-safety-framework" className="nav-link" style={{ color: 'var(--green-dark)', fontWeight: 700, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                  View Compliance Framework <ArrowRight size={14} />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Optional Modules */}
-        <section className="section-block" style={{ marginTop: 44, background: '#f8faf9', padding: '32px 28px', borderRadius: 16, border: '1px solid var(--border)' }}>
-          <div className="section-title" style={{ display: 'block', marginBottom: 20 }}>
-            <span className="pill neutral" style={{ marginBottom: 6, background: '#eef2f0', color: '#3f4f47' }}>ADVANCED WORKFLOWS</span>
-            <h2 style={{ fontSize: 26, margin: '6px 0 6px' }}>Optional Modules</h2>
-          </div>
-
-          <div className="grid grid2">
-            {/* Xenia Adoption 1: Unit QR Stickers */}
-            <div className="card" style={{ background: '#fff', display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: '#eef4ff', color: '#2f6fed', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                <QrCode size={22} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6, flexWrap: 'wrap' }}>
-                  <h3 style={{ margin: 0, fontSize: 18 }}>Tag Cold Units with QR Stickers</h3>
-                  <span className="pill neutral" style={{ fontSize: 11, padding: '3px 7px', background: '#eef4ff', color: '#2f6fed' }}>Optional Workflow</span>
-                </div>
-                <p className="muted" style={{ fontSize: 14, lineHeight: 1.5, margin: 0 }}>
-                  Kitchen staff place unique QR stickers directly on walk-in chillers, reach-in freezers, and prep counters. By scanning the unit's QR tag with a smartphone camera, staff can log temperatures directly at the unit with <strong>one tap</strong>—eliminating manual menu searching or navigation delays.
-                </p>
-                <div style={{ marginTop: 10, fontSize: 12, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <CheckCircle2 size={13} style={{ color: 'var(--green)' }} /> <span>Zero hardware cost; works on any staff phone</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Xenia Adoption 2: Bluetooth Probes */}
-            <div className="card" style={{ background: '#fff', display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: '#fff5df', color: 'var(--amber)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                <Bluetooth size={22} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6, flexWrap: 'wrap' }}>
-                  <h3 style={{ margin: 0, fontSize: 18 }}>Bluetooth IoT Temperature Probes</h3>
-                  <span className="pill attention" style={{ fontSize: 11, padding: '3px 7px' }}>Optional Hardware</span>
-                </div>
-                <p className="muted" style={{ fontSize: 14, lineHeight: 1.5, margin: 0 }}>
-                  Optional integration with wireless handheld Bluetooth food thermometers and ambient refrigeration probes. Core food temperatures (cooking, cooling, and hot holding) sync wirelessly into the FoodSafe365 digital log in real time—eliminating pen-and-paper transcription and manual typing.
-                </p>
-                <div style={{ marginTop: 10, fontSize: 12, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <CheckCircle2 size={13} style={{ color: 'var(--green)' }} /> <span>Automatic reading capture; completely optional for operations</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Optional Modules: Guide Drawer */}
-          <details style={{ marginTop: 20, background: '#fff', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 20px', cursor: 'pointer' }}>
-            <summary style={{ fontWeight: 700, fontSize: 14, color: 'var(--green-dark)', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <BookOpen size={16} /> Optional Modules: Architecture, Zero Hardware Mandate &amp; Deployment Guide
-            </summary>
-            <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)', fontSize: 14, lineHeight: 1.6, color: '#4a5568' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-                <div style={{ background: '#f8faf9', padding: 14, borderRadius: 10, border: '1px solid #e2ece6' }}>
-                  <strong style={{ display: 'block', color: 'var(--green-dark)', marginBottom: 6 }}>1. Zero Mandatory Hardware</strong>
-                  <p style={{ margin: 0, fontSize: 13 }}>
-                    Every core FoodSafe365 feature—including daily FSSAI Schedule 4 checks, manager reviews, and diner QR audits—functions 100% in any smartphone or tablet browser. No proprietary hardware purchase is ever required.
-                  </p>
-                </div>
-                <div style={{ background: '#f8faf9', padding: 14, borderRadius: 10, border: '1px solid #e2ece6' }}>
-                  <strong style={{ display: 'block', color: 'var(--green-dark)', marginBottom: 6 }}>2. Cold Unit QR Stickers (Optional)</strong>
-                  <p style={{ margin: 0, fontSize: 13 }}>
-                    Outlets can print standard QR tags from the manager portal. Placing them on chillers, freezers, and bain-maries allows staff to scan and log that exact unit’s temperature with a single tap, eliminating menu searching.
-                  </p>
-                </div>
-                <div style={{ background: '#f8faf9', padding: 14, borderRadius: 10, border: '1px solid #e2ece6' }}>
-                  <strong style={{ display: 'block', color: 'var(--green-dark)', marginBottom: 6 }}>3. Bluetooth IoT Probes (Optional)</strong>
-                  <p style={{ margin: 0, fontSize: 13 }}>
-                    For high-volume cloud kitchens or hotel banquets, wireless Bluetooth core probes sync food temperatures directly into digital logs via Web Bluetooth API, avoiding manual entry errors.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </details>
-        </section>
-      </div>
-
-      <footer className="container" style={{ borderTop: '1px solid var(--border)', marginTop: 60, paddingTop: 24, display: 'flex', gap: 18, flexWrap: 'wrap' }}>
-        <Link href="/home" className="muted">Dashboard / Home</Link>
-        <Link href="/providers" className="muted">Providers & Vendors</Link>
-        <Link href="/contact" className="muted">Contact Us</Link>
-        <Link href="/diner" className="muted">Diner Hub</Link>
-        <span className="muted" style={{ marginLeft: 'auto' }}>© FoodSafe365</span>
       </footer>
     </main>
   );

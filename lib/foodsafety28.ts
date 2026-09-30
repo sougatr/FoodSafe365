@@ -3,6 +3,8 @@ export type FoodSafeCheck = {
   code: string;
   category: string;
   title: string;
+  target?: string;
+  severity?: 'Critical' | 'Major' | 'Minor';
   frequency: 'Opening' | 'Daily' | 'Per shift' | 'Process' | 'As applicable';
   input: 'scale_1_5' | 'temperature' | 'yes_no';
   why: string;
@@ -39,12 +41,14 @@ export const RATING_DEFINITIONS: Record<Rating1To5, {
 };
 
 export const FOODSAFE28: FoodSafeCheck[] = [
-  // Category: Premises & environment
+  // 1. Premises & Environment
   {
     id: 1,
     code: 'FS28-01',
-    category: 'Premises & environment',
-    title: 'Food preparation areas, kitchen counters, and floors are clean and orderly',
+    category: 'Premises & Environment',
+    title: 'Are all counters, floors, and prep areas clean and clutter-free right now?',
+    target: 'Maintain continuous upkeep. Minor lapses must be managed immediately.',
+    severity: 'Major',
     frequency: 'Opening',
     input: 'scale_1_5',
     why: 'Clean food preparation zones, counters, and floors prevent physical and microbial cross-contamination into ingredients and ready-to-eat dishes.',
@@ -57,8 +61,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 2,
     code: 'FS28-03',
-    category: 'Premises & environment',
-    title: 'Kitchen drains are clean, functioning, and free of grease accumulation or blockage',
+    category: 'Premises & Environment',
+    title: 'Are the kitchen drains flowing freely with no foul smell?',
+    target: 'Drains must be free of grease buildup to prevent odors and pest attraction.',
+    severity: 'Major',
     frequency: 'Daily',
     input: 'scale_1_5',
     why: 'Blocked, slow, or dirty drains cause standing water, foul odors, sewer gas back-draft, and provide prime breeding zones for cockroaches and fruit flies.',
@@ -71,8 +77,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 3,
     code: 'FS28-04',
-    category: 'Premises & environment',
-    title: 'Doors, windows, insect screens, and physical barriers prevent pest entry',
+    category: 'Premises & Environment',
+    title: 'Are windows, doors, and fly-screens closed to keep pests out?',
+    target: 'Physical barriers must be intact. This is a fundamental FSSAI structural requirement.',
+    severity: 'Critical',
     frequency: 'Opening',
     input: 'scale_1_5',
     why: 'Intact physical barriers (door sweeps, air curtains, wire-mesh screens) keep pests, rodents, and birds from infiltrating food zones.',
@@ -83,12 +91,14 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     outletType: 'all'
   },
 
-  // Category: Personal hygiene & training
+  // 2. Staff Hygiene & Health
   {
     id: 4,
     code: 'FS28-05',
-    category: 'Personal hygiene',
-    title: 'Hands are washed before handling food, after breaks, and between tasks',
+    category: 'Staff Hygiene & Health',
+    title: 'Did all staff wash their hands with soap before starting work?',
+    target: 'Hands must be washed after breaks and between tasks to prevent cross-contamination.',
+    severity: 'Critical',
     frequency: 'Per shift',
     input: 'scale_1_5',
     why: 'Unwashed hands are the single largest transmission vector of enteric pathogens (Norovirus, Staphylococcus aureus, Salmonella) to food.',
@@ -101,8 +111,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 5,
     code: 'FS28-06',
-    category: 'Personal hygiene',
-    title: 'Dedicated hand-washing stations are fully equipped with water, soap, and tissue',
+    category: 'Staff Hygiene & Health',
+    title: 'Are all hand-wash sinks fully stocked with soap and drying towels/tissue?',
+    target: 'Sinks must be accessible and usable at all times.',
+    severity: 'Critical',
     frequency: 'Opening',
     input: 'scale_1_5',
     why: 'Staff cannot follow handwashing protocols if designated sinks are blocked, dry, or missing soap and tissue.',
@@ -116,8 +128,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 6,
     code: 'FS28-07',
-    category: 'Personal hygiene',
-    title: 'Clean protective clothing, aprons, and head coverings are worn by all kitchen staff',
+    category: 'Staff Hygiene & Health',
+    title: 'Is everyone on shift wearing a clean uniform, apron, and hairnet?',
+    target: 'Clean protective clothing prevents physical and biological contamination.',
+    severity: 'Critical',
     frequency: 'Per shift',
     input: 'scale_1_5',
     why: 'Street clothes and exposed hair shed foreign matter, dandruff, and bacteria directly into exposed food.',
@@ -130,8 +144,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 7,
     code: 'FS28-08',
-    category: 'Personal hygiene & training',
-    title: 'Food safety training: FoSTaC certified (optional) supervisor and staff food-hygiene training',
+    category: 'Staff Hygiene & Health',
+    title: 'Are supervisor FoSTaC and staff training certificates (optional) up to date and available?',
+    target: 'Requirement for food-hygiene training.',
+    severity: 'Minor',
     frequency: 'Daily',
     input: 'scale_1_5',
     why: 'Staff food safety training is desirable and recommended to build kitchen hygiene awareness and prevent errors.',
@@ -145,8 +161,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 8,
     code: 'FS28-09',
-    category: 'Personal hygiene & medical',
-    title: 'Staff medical check-up: 6-monthly stool tests, Form 1A certificates, and vaccinations (Typhoid, Hep A)',
+    category: 'Staff Hygiene & Health',
+    title: 'Are staff medical fitness certificates and 6-monthly stool test records current?',
+    target: 'Administrative check frequently targeted during surprise FDA/FSSAI inspections.',
+    severity: 'Critical',
     frequency: 'Daily',
     input: 'scale_1_5',
     why: 'Food handlers carrying enteric pathogens (Salmonella Typhi, Hepatitis A, parasites) can silently transmit devastating waterborne and foodborne illnesses.',
@@ -157,12 +175,14 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     outletType: 'all'
   },
 
-  // Category: Receiving & storage
+  // 3. Receiving & Storage
   {
     id: 9,
     code: 'FS28-10',
-    category: 'Receiving & storage',
-    title: 'Incoming raw materials and food deliveries are inspected before acceptance',
+    category: 'Receiving & Storage',
+    title: 'Were today’s raw materials checked for freshness and pests before accepting?',
+    target: 'Reject spoiled goods before they enter the inventory.',
+    severity: 'Major',
     frequency: 'Daily',
     input: 'scale_1_5',
     why: 'Preventing compromised, expired, or temperature-abused raw materials at receiving protects the entire kitchen chain.',
@@ -175,8 +195,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 10,
     code: 'FS28-11',
-    category: 'Receiving & storage',
-    title: 'Raw meat, poultry, seafood, and ready-to-eat foods are strictly segregated in storage',
+    category: 'Receiving & Storage',
+    title: 'Is raw meat stored on the bottom shelves, completely away from vegetables and cooked food?',
+    target: 'Strict segregation is absolutely essential to prevent fatal biological cross-contamination.',
+    severity: 'Critical',
     frequency: 'Daily',
     input: 'scale_1_5',
     why: 'Raw animal proteins carry high pathogenic bacterial loads (Salmonella, Campylobacter) that drip or transfer onto cooked or ready-to-eat foods.',
@@ -189,8 +211,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 11,
     code: 'FS28-12',
-    category: 'Receiving & storage',
-    title: 'Food is stored off the floor (pallets/shelves) and protected in food-grade containers',
+    category: 'Receiving & Storage',
+    title: 'Is all food stored in closed containers at least 6 inches off the floor?',
+    target: 'Pallets or shelves must be used. Basic FSSAI storage mandate.',
+    severity: 'Critical',
     frequency: 'Daily',
     input: 'scale_1_5',
     why: 'Placing food bags or boxes directly on floors exposes them to mop water, floor sweepings, dirt, and ground pests.',
@@ -203,8 +227,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 12,
     code: 'FS28-13',
-    category: 'Receiving & storage',
-    title: 'FIFO (First In, First Out) and FEFO (First Expiry, First Out) rotation is followed with date tags',
+    category: 'Receiving & Storage',
+    title: 'Is all food labeled with a date, and is older stock pulled to the front to be used first?',
+    target: 'Ensure proper inventory health and prevent the usage of expired food.',
+    severity: 'Major',
     frequency: 'Daily',
     input: 'scale_1_5',
     why: 'Stock rotation ensures older stock is consumed before expiry, preventing spoilage, mold, and stale ingredient hazards.',
@@ -215,12 +241,14 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     outletType: 'all'
   },
 
-  // Category: Food preparation & cross-contamination
+  // 4. Prep & Cross-Contamination
   {
     id: 13,
     code: 'FS28-15',
-    category: 'Food preparation & cross-contamination',
-    title: 'Raw vegetables, salad greens, and fruits are thoroughly washed and sanitized before prep',
+    category: 'Prep & Cross-Contamination',
+    title: 'Are fruits and vegetables thoroughly washed before chopping?',
+    target: 'Crucial step, especially for foods served raw.',
+    severity: 'Major',
     frequency: 'Process',
     input: 'scale_1_5',
     why: 'Raw agricultural produce carries field soil, bird droppings, parasitic cysts (Giardia, Amoeba), and pesticide residues.',
@@ -233,8 +261,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 14,
     code: 'FS28-16',
-    category: 'Food preparation & cross-contamination',
-    title: 'Color-coded cutting boards, knives, and prep stations prevent cross-contamination',
+    category: 'Prep & Cross-Contamination',
+    title: 'Are staff strictly using different colored cutting boards for raw meat vs. veg?',
+    target: 'Highly recommended FSSAI best practice to prevent cross-contamination.',
+    severity: 'Major',
     frequency: 'Process',
     input: 'scale_1_5',
     why: 'Using the same knife or board for raw poultry and salad vegetables transfers live pathogens into food that receives no further cooking.',
@@ -247,8 +277,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 15,
     code: 'FS28-17',
-    category: 'Food preparation & cross-contamination',
-    title: 'Food-contact equipment, blenders, meat slicers, and utensils are cleaned and sanitized',
+    category: 'Prep & Cross-Contamination',
+    title: 'Are shared tools like blenders and meat slicers washed immediately after use?',
+    target: 'Food-contact equipment is a direct vector for bacteria if left dirty.',
+    severity: 'Critical',
     frequency: 'Daily',
     input: 'scale_1_5',
     why: 'Dismantled equipment parts (slicer blades, blender gaskets, peelers) trap food residues that turn into bacterial biofilms.',
@@ -261,8 +293,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 16,
     code: 'FS28-18',
-    category: 'Food preparation & cross-contamination',
-    title: 'Prepared and partially prepped foods are covered and protected during kitchen service',
+    category: 'Prep & Cross-Contamination',
+    title: 'Is all prepped food covered with lids or wrap while waiting for service?',
+    target: 'Prevents physical and airborne contamination during kitchen service.',
+    severity: 'Critical',
     frequency: 'Process',
     input: 'scale_1_5',
     why: 'Exposed food bowls, garnishes, and intermediate prep items are vulnerable to airborne droplets, dust, overhead condensation, and accidental splashes.',
@@ -273,12 +307,14 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     outletType: 'all'
   },
 
-  // Category: Temperature control
+  // 5. Temperature Control
   {
     id: 17,
     code: 'FS28-19',
-    category: 'Temperature control',
-    title: 'Refrigerator and cool-storage temperature is checked and verified (< 5°C)',
+    category: 'Temperature Control',
+    title: 'Are all fridges reading below 5°C?',
+    target: 'Verify cool-storage temperature to prevent bacterial growth.',
+    severity: 'Critical',
     frequency: 'Daily',
     input: 'temperature',
     why: 'Keeping perishable foods continuously at < 5°C (0°C to < 5°C) suppresses bacterial proliferation and prevents spoilage.',
@@ -291,8 +327,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 18,
     code: 'FS28-20',
-    category: 'Temperature control',
-    title: 'Freezer and cold-storage temperature is checked and verified (< −18°C)',
+    category: 'Temperature Control',
+    title: 'Are all freezers reading below -18°C?',
+    target: 'Core FSSAI requirement for deep cold storage.',
+    severity: 'Critical',
     frequency: 'Daily',
     input: 'temperature',
     why: 'Deep freezing at < −18°C stops all microbial growth and halts enzymatic decomposition of frozen meats and raw stocks.',
@@ -305,8 +343,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 19,
     code: 'FS28-21',
-    category: 'Temperature control',
-    title: 'Cooking core temperature (≥ 75°C) or reheating temperature is verified with calibrated probe',
+    category: 'Temperature Control',
+    title: 'Is hot food reaching at least 75°C in the center?',
+    target: 'Verify cooking or reheating temperatures with a calibrated probe to guarantee pathogens are killed.',
+    severity: 'Critical',
     frequency: 'Process',
     input: 'temperature',
     why: 'Cooking to adequate core temperature destroys vegetative foodborne pathogens (Salmonella, E. coli, Listeria) in meats, poultry, and gravies.',
@@ -319,8 +359,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 20,
     code: 'FS28-22',
-    category: 'Temperature control',
-    title: 'Cooked high-risk food is rapidly cooled (60°C to 21°C within 2 hrs, then to 5°C within 2 hrs)',
+    category: 'Temperature Control',
+    title: 'Are hot foods split into shallow pans or chilled in an ice bath before refrigeration?',
+    target: 'Cool to ≤ 21°C before placing in the fridge. Never place large hot pots directly into cold storage or leave food at room temperature.',
+    severity: 'Major',
     frequency: 'Process',
     input: 'temperature',
     why: 'Slow cooling allows spore-forming bacteria (Clostridium perfringens, Bacillus cereus) to germinate and release heat-stable toxins.',
@@ -331,12 +373,14 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     outletType: 'all'
   },
 
-  // Category: Cleaning, pests & waste
+  // 6. Cleaning, Pests & Waste
   {
     id: 21,
     code: 'FS28-26',
-    category: 'Cleaning, pests & waste',
-    title: 'Pest inspection: Zero active signs of pests (droppings, sightings, or gnaw marks)',
+    category: 'Cleaning, Pests & Waste',
+    title: 'Are there zero signs of rats, cockroaches, or droppings in the kitchen today?',
+    target: 'Any active signs are an immediate red flag and reason for license suspension.',
+    severity: 'Critical',
     frequency: 'Opening',
     input: 'scale_1_5',
     why: 'Physical pest signs indicate active infestation and direct contamination of kitchen food contact zones.',
@@ -349,8 +393,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 22,
     code: 'FS28-27',
-    category: 'Cleaning, pests & waste',
-    title: 'Pest-control devices (fly-killers, bait stations) operational and vendor service log current',
+    category: 'Cleaning, Pests & Waste',
+    title: 'Are the fly-catchers turned on and pest-bait stations undisturbed?',
+    target: 'Devices must be operational and vendor service logs current.',
+    severity: 'Critical',
     frequency: 'Daily',
     input: 'scale_1_5',
     why: 'Operational pest traps provide early detection and defensive perimeter control before infestations spread.',
@@ -363,8 +409,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 23,
     code: 'FS28-28',
-    category: 'Cleaning, pests & waste',
-    title: 'Kitchen food waste is contained in covered pedal bins and external garbage area is clean',
+    category: 'Cleaning, Pests & Waste',
+    title: 'Are all kitchen dustbins covered with a lid, and is the outside garbage area clean?',
+    target: 'Standard hygiene requirement to contain waste and avoid attracting pests.',
+    severity: 'Major',
     frequency: 'Daily',
     input: 'scale_1_5',
     why: 'Overflowing, uncovered waste bins attract pests, generate foul odors, and cross-contaminate food handlers.',
@@ -375,12 +423,14 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     outletType: 'all'
   },
 
-  // Category: Bars & Brewery
+  // 7. Specialized Operations
   {
     id: 24,
     code: 'FS28-29',
-    category: 'Bars & Brewery',
-    title: 'Bar & Brewery: Ice machine interior sanitation and dedicated ice scoop hygiene',
+    category: 'Specialized Operations',
+    title: 'Bar: Is the inside of the ice machine clean, and is the ice scoop stored outside the ice?',
+    target: 'Ice is treated as food; dirty machines are a massive hidden source of mold.',
+    severity: 'Major',
     frequency: 'Opening',
     input: 'scale_1_5',
     why: 'Ice is classified as ready-to-eat food under FSSAI. Contaminated ice machines harbor black mold and slime; scooping ice with drinking glasses causes dangerous glass breakage in the bin.',
@@ -393,8 +443,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 25,
     code: 'FS28-30',
-    category: 'Bars & Brewery',
-    title: 'Bar & Brewery: Draft beer lines, beverage dispensing nozzles, and drip trays sanitation',
+    category: 'Specialized Operations',
+    title: 'Bar: Are beer lines, drink nozzles, and drip trays wiped down and sanitized?',
+    target: 'Impacts beverage quality and localized hygiene.',
+    severity: 'Minor',
     frequency: 'Daily',
     input: 'scale_1_5',
     why: 'Beer lines, post-mix soda gun diffusers, and beer faucets accumulate wild yeast, beer stone, bacterial biofilm, and attract fruit flies.',
@@ -404,13 +456,13 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     action: 'Remove and soak all dispenser nozzles in sanitizer immediately; flush drip wells with hot water; schedule certified draft line flush.',
     outletType: 'bar_brewery'
   },
-
-  // Category: Cloud Kitchen & Delivery
   {
     id: 26,
     code: 'FS28-31',
-    category: 'Cloud Kitchen & Delivery',
-    title: 'Cloud Kitchen: Delivery packaging integrity, tamper-evident seals, and dispatch labeling',
+    category: 'Specialized Operations',
+    title: 'Cloud Kitchen: Are all outgoing delivery bags sealed shut so food cannot be tampered with?',
+    target: 'Tamper-evident seals are strictly mandated by FSSAI for all e-commerce deliveries.',
+    severity: 'Critical',
     frequency: 'Per shift',
     input: 'scale_1_5',
     why: 'For delivery-only orders, packaging is the sole barrier against tampering, vehicular pollution, spills, and microbial contamination during motorcycle transit.',
@@ -423,8 +475,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 27,
     code: 'FS28-32',
-    category: 'Cloud Kitchen & Delivery',
-    title: 'Cloud Kitchen: Staging & dispatch holding temperature control until courier pickup',
+    category: 'Specialized Operations',
+    title: 'Cloud Kitchen: Is food waiting for riders kept in hot/cold bags instead of sitting on the counter?',
+    target: 'Staging temperature control ensures food quality and safety until courier pickup.',
+    severity: 'Minor',
     frequency: 'Per shift',
     input: 'scale_1_5',
     why: 'Cooked delivery food staged on ambient dispatch tables enters the danger zone (5°C to 60°C) while waiting for delivery riders, causing rapid bacterial growth.',
@@ -434,13 +488,13 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     action: 'Move staged food into heated pass units or cold storage immediately; expedite courier handover; discard orders staged at room temperature for over 45 minutes.',
     outletType: 'cloud_kitchen'
   },
-
-  // Category: Catering & Outdoor Events
   {
     id: 28,
     code: 'FS28-33',
-    category: 'Catering & Outdoor Events',
-    title: 'Catering Services: Insulated food transport & core temperature maintenance during transit',
+    category: 'Specialized Operations',
+    title: 'Catering: Is food traveling to the venue packed securely in insulated hot/cold boxes?',
+    target: 'Core temperature maintenance during transit is essential to avoid the danger zone.',
+    severity: 'Critical',
     frequency: 'Process',
     input: 'scale_1_5',
     why: 'Catering logistics involve high-risk transport over road traffic; cooked banquet food must maintain safe temperatures inside insulated transport containers.',
@@ -453,8 +507,10 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 29,
     code: 'FS28-34',
-    category: 'Catering & Outdoor Events',
-    title: 'Catering Services: Potable water supply & dedicated mobile handwashing station at event venue',
+    category: 'Specialized Operations',
+    title: 'Catering: Is there a working hand-wash station and safe drinking water set up at the event?',
+    target: 'Cannot operate a safe temporary food service without potable water and handwashing facilities.',
+    severity: 'Critical',
     frequency: 'Opening',
     input: 'scale_1_5',
     why: 'Outdoor and banquet venues frequently lack potable plumbing; using raw untreated ground water or lacking handwash stations triggers catastrophic waterborne food poisoning.',

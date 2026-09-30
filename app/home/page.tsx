@@ -34,6 +34,7 @@ import {
 import ThemeToggle from '@/components/ThemeToggle';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useLanguage } from '@/lib/vernacular';
+import GlobalHeader from '@/components/GlobalHeader';
 
 const learning = [
   {
@@ -129,44 +130,42 @@ export default function Home() {
 
   return (
     <main>
-      {/* Translucent Glassmorphic Topbar (Zomato / Swiggy standard) */}
-      <div className="topbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <Link href="/home" className="brand">
-            <span style={{
-              width: 32,
-              height: 32,
-              borderRadius: 10,
-              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-              color: '#ffffff',
-              display: 'inline-grid',
-              placeItems: 'center',
-              fontSize: 16,
-              boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)'
-            }}>🛡️</span>
-            FoodSafe365
-          </Link>
-          <span className="pill good" style={{ fontSize: 10.5, padding: '3px 9px', letterSpacing: '0.04em' }}>
-            {t('nav.fssaiLive')}
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <LanguageSelector />
-          <ThemeToggle />
-          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '7px 14px', borderRadius: 10 }}>
-            <HomeIcon size={14} /> {t('nav.home')}
-          </Link>
-          <Link href="/checks" className="nav-link">{t('nav.checks')}</Link>
-          <Link href="/showcase" className="nav-link" style={{ color: 'var(--green-dark)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-            <Award size={14} /> {t('nav.showcase')}
-          </Link>
-          <Link href="/manager" className="nav-link">{t('nav.manager')}</Link>
-          <Link href="/manager/trends" className="nav-link" style={{ color: 'var(--green)' }}>{t('nav.aiTrends')}</Link>
-          <Link href="/ai-copilot" className="nav-link" style={{ color: 'var(--green)' }}>{t('nav.aiCopilot')}</Link>
-          <Link href="/actions" className="nav-link">{t('nav.actions')}</Link>
-          <Link href="/records" className="nav-link">{t('nav.records')}</Link>
-          <Link href="/providers" className="nav-link">{t('nav.providers')}</Link>
+      <GlobalHeader />
+      {/* Kitchen Operations Sub-bar */}
+      <div style={{ background: 'var(--surface, #ffffff)', borderBottom: '1px solid var(--border, #e2e8f0)', padding: '10px 24px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text, #0f172a)' }}>Kitchen Operations</span>
+            <span className="pill good" style={{ fontSize: 10.5, padding: '2px 8px' }}>
+              {t('nav.fssaiLive')}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+            <Link href="/checks" className="btn secondary" style={{ fontSize: 12.5, padding: '6px 12px' }}>
+              {t('nav.checks')}
+            </Link>
+            <Link href="/showcase" className="btn secondary" style={{ fontSize: 12.5, padding: '6px 12px', color: 'var(--green-dark)', fontWeight: 700 }}>
+              <Award size={13} style={{ marginRight: 4, display: 'inline' }} /> {t('nav.showcase')}
+            </Link>
+            <Link href="/manager" className="btn secondary" style={{ fontSize: 12.5, padding: '6px 12px' }}>
+              {t('nav.manager')}
+            </Link>
+            <Link href="/manager/trends" className="btn secondary" style={{ fontSize: 12.5, padding: '6px 12px', color: 'var(--green)' }}>
+              {t('nav.aiTrends')}
+            </Link>
+            <Link href="/ai-copilot" className="btn secondary" style={{ fontSize: 12.5, padding: '6px 12px', color: 'var(--green)' }}>
+              {t('nav.aiCopilot')}
+            </Link>
+            <Link href="/actions" className="btn secondary" style={{ fontSize: 12.5, padding: '6px 12px' }}>
+              {t('nav.actions')}
+            </Link>
+            <Link href="/records" className="btn secondary" style={{ fontSize: 12.5, padding: '6px 12px' }}>
+              {t('nav.records')}
+            </Link>
+            <Link href="/providers" className="btn secondary" style={{ fontSize: 12.5, padding: '6px 12px' }}>
+              {t('nav.providers')}
+            </Link>
+          </div>
         </div>
       </div>
 

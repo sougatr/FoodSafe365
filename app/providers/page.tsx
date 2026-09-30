@@ -35,6 +35,7 @@ import {
   AuditTrailEvent
 } from '@/lib/foodsafety28';
 import ThemeToggle from '@/components/ThemeToggle';
+import GlobalHeader from '@/components/GlobalHeader';
 
 export type ServiceCategory =
   | 'all'
@@ -512,69 +513,35 @@ export default function ProvidersPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: 60 }}>
-      {/* Top Navbar */}
-      <div className="topbar" style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0' }}>
-        <Link href="/home" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: 'inherit' }}>
-          <div style={{
-            width: 38,
-            height: 38,
-            borderRadius: 10,
-            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontWeight: 900,
-            fontSize: 17
-          }}>
-            FS
+      <GlobalHeader />
+      <div style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '12px 20px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span className="pill good" style={{ fontSize: 11, padding: '2px 8px' }}>
+              <Sparkles size={11} style={{ marginRight: 4, display: 'inline' }} />
+              On-Demand Compliance Network
+            </span>
+            <span className="muted" style={{ fontSize: 13 }}>Verified Diagnostic Labs, Trainers, Technicians &amp; Exterminators</span>
           </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <strong style={{ fontSize: 16, color: '#0f172a' }}>FoodSafe Marketplace</strong>
-              <span className="pill good" style={{ fontSize: 11, padding: '2px 8px' }}>
-                <Sparkles size={11} style={{ marginRight: 4, display: 'inline' }} />
-                On-Demand Compliance Network
-              </span>
-            </div>
-            <div className="muted" style={{ fontSize: 12 }}>Verified Diagnostic Labs, Trainers, Technicians &amp; Exterminators</div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button
+              onClick={() => setIsPartnerModalOpen(true)}
+              className="btn primary"
+              style={{
+                fontSize: 13,
+                padding: '6px 14px',
+                background: '#0f172a',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6
+              }}
+            >
+              <Building2 size={14} /> Partner With Us
+            </button>
+            <Link href="/checks" className="btn secondary" style={{ fontSize: 13, padding: '6px 12px' }}>
+              Today’s Checks
+            </Link>
           </div>
-        </Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <ThemeToggle />
-          <Link
-            href="/home"
-            className="btn secondary"
-            style={{
-              fontSize: 13,
-              padding: '7px 14px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6
-            }}
-          >
-            <Home size={14} /> Home
-          </Link>
-          <button
-            onClick={() => setIsPartnerModalOpen(true)}
-            className="btn primary"
-            style={{
-              fontSize: 13,
-              padding: '7px 14px',
-              background: '#0f172a',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6
-            }}
-          >
-            <Building2 size={14} /> Partner With Us
-          </button>
-          <Link href="/checks" className="btn secondary" style={{ fontSize: 13, padding: '7px 14px' }}>
-            Today’s Checks
-          </Link>
-          <Link href="/actions" className="btn secondary" style={{ fontSize: 13, padding: '7px 14px' }}>
-            Actions Centre
-          </Link>
         </div>
       </div>
 

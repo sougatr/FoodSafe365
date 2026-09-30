@@ -28,6 +28,7 @@ import {
   CorrectiveAction,
   AuditTrailEvent
 } from '@/lib/foodsafety28';
+import GlobalHeader from '@/components/GlobalHeader';
 
 export default function TableQrPage() {
   const params = useParams();
@@ -173,38 +174,7 @@ export default function TableQrPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#f1f5f9', paddingBottom: 60 }}>
-      {/* Top Navbar */}
-      <div className="topbar" style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0' }}>
-        <Link href="/home" className="brand" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 14
-          }}>
-            FS
-          </div>
-          <span>FoodSafe365</span>
-        </Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <Link
-            href="/home"
-            className="btn secondary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}
-          >
-            <Home size={14} /> Home
-          </Link>
-          <Link href="/diner" className="btn secondary" style={{ fontSize: 13, padding: '6px 12px' }}>
-            Diner Portal
-          </Link>
-        </div>
-      </div>
+      <GlobalHeader />
 
       <div className="container" style={{ maxWidth: 640, paddingTop: 20 }}>
         {/* Tabletop Context Card */}
@@ -512,16 +482,44 @@ export default function TableQrPage() {
                   </div>
                 </div>
 
-                {/* Optional Feedback */}
+                {/* 100-Word Additional Remarks Column */}
                 <label className="field">
-                  <span>Comments or Observations (Optional)</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <span style={{ fontWeight: 600, fontSize: 13.5 }}>Additional Remarks (Max 100 words)</span>
+                    <span style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: (feedback.trim() ? feedback.trim().split(/\s+/).length : 0) > 100 ? '#dc2626' : '#64748b',
+                      background: (feedback.trim() ? feedback.trim().split(/\s+/).length : 0) > 100 ? '#fef2f2' : '#f1f5f9',
+                      padding: '2px 8px',
+                      borderRadius: 999
+                    }}>
+                      {feedback.trim() ? feedback.trim().split(/\s+/).length : 0} / 100 words
+                    </span>
+                  </div>
                   <textarea
                     className="input textarea"
-                    style={{ minHeight: 70 }}
-                    placeholder="e.g. Prompt service, glasses were sparkling clean, food was piping hot..."
+                    style={{
+                      minHeight: 80,
+                      borderColor: (feedback.trim() ? feedback.trim().split(/\s+/).length : 0) > 100 ? '#dc2626' : undefined
+                    }}
+                    placeholder="Share specific observations regarding table hygiene, cutlery cleanliness, food temperature, or staff habits (up to 100 words)..."
                     value={feedback}
-                    onChange={e => setFeedback(e.target.value)}
+                    onChange={e => {
+                      const val = e.target.value;
+                      const words = val.trim() ? val.trim().split(/\s+/) : [];
+                      if (words.length > 100 && val.length > feedback.length) {
+                        setFeedback(words.slice(0, 100).join(' '));
+                      } else {
+                        setFeedback(val);
+                      }
+                    }}
                   />
+                  {(feedback.trim() ? feedback.trim().split(/\s+/).length : 0) >= 100 && (
+                    <p style={{ color: '#dc2626', fontSize: 12, margin: '4px 0 0', fontWeight: 600 }}>
+                      Maximum limit of 100 words reached.
+                    </p>
+                  )}
                 </label>
 
                 <button

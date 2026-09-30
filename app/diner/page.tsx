@@ -24,6 +24,7 @@ import {
   DinerSafetyRating,
   DinerIncidentReport
 } from '@/lib/foodsafety28';
+import GlobalHeader from '@/components/GlobalHeader';
 
 export default function DinerDashboard() {
   const [dinerUser, setDinerUser] = useState<any>({ name: 'Rahul Sharma', city: 'Mumbai', diet: 'Vegetarian' });
@@ -89,38 +90,7 @@ export default function DinerDashboard() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: 60 }}>
-      {/* Top Navbar */}
-      <div className="topbar" style={{ background: '#ffffff', borderBottom: '1px solid #e2e8f0' }}>
-        <Link href="/home" className="brand" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 14
-          }}>
-            FS
-          </div>
-          <span>FoodSafe Diner</span>
-        </Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <Link
-            href="/home"
-            className="btn secondary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}
-          >
-            <Home size={14} /> Home
-          </Link>
-          <Link href="/login" className="btn secondary" style={{ fontSize: 13, padding: '6px 12px' }}>
-            Switch Persona
-          </Link>
-        </div>
-      </div>
+      <GlobalHeader />
 
       <div className="container" style={{ maxWidth: 960, paddingTop: 28 }}>
         {/* User Hero Banner */}

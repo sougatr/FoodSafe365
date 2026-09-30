@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
-import {ShieldCheck, ClipboardCheck, BookOpen, FileText, Home} from 'lucide-react';
+import {ShieldCheck, ClipboardCheck, BookOpen, FileText} from 'lucide-react';
+import GlobalHeader from '@/components/GlobalHeader';
 
 const principles = [
  ['1','Identify hazards','Identify biological, chemical, physical and allergen hazards in the food process.'],
@@ -14,15 +15,7 @@ const principles = [
 
 export default function HaccpControls(){
  return <main>
-   <div className="topbar">
-     <Link href="/home" className="brand">FoodSafe365</Link>
-     <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-       <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
-         <Home size={14} /> Home
-       </Link>
-       <div className="muted">HACCP Controls</div>
-     </div>
-   </div>
+   <GlobalHeader />
 
    <div className="container" style={{ paddingTop: 20 }}>
     <div className="breadcrumb"><Link href="/home">Home</Link> › HACCP Controls</div>

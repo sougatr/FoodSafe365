@@ -113,11 +113,11 @@ export default function FoodSafetyChatbot() {
   return (
     <>
       {/* Floating Launcher Button */}
-      {!isOpen && (
         <button
+          id="foodsafe-chatbot-trigger"
           onClick={() => setIsOpen(true)}
           className="foodsafe-chatbot-btn"
-          aria-label="Open FoodSafe AI Assistant"
+          aria-label="Ask Me (FoodSafe AI Assistant)"
           style={{
             position: 'fixed',
             bottom: 24,
@@ -146,9 +146,9 @@ export default function FoodSafetyChatbot() {
             display: 'grid',
             placeItems: 'center'
           }}>
-            <Sparkles size={16} />
+            <Bot size={17} />
           </div>
-          <span>FoodSafe AI</span>
+          <span>Ask Me (Chat Bot)</span>
           <span style={{
             width: 8,
             height: 8,
@@ -157,7 +157,6 @@ export default function FoodSafetyChatbot() {
             display: 'inline-block'
           }} />
         </button>
-      )}
 
       {/* Chat Window Drawer / Modal */}
       {isOpen && (
