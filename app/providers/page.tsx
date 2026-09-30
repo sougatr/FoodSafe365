@@ -39,12 +39,20 @@ import GlobalHeader from '@/components/GlobalHeader';
 
 export type ServiceCategory =
   | 'all'
-  | 'medical'
-  | 'lab-tests'
-  | 'certification'
   | 'pest-control'
+  | 'deep-cleaning'
+  | 'waste-management'
+  | 'cooking-oil'
+  | 'water-testing'
+  | 'food-testing'
+  | 'calibration'
   | 'hvac'
-  | 'deep-cleaning';
+  | 'equipment'
+  | 'garbage-bags'
+  | 'fire-safety'
+  | 'ppe-hygiene'
+  | 'occupational-health'
+  | 'hygiene-engineering';
 
 export type ServiceItem = {
   id: string;
@@ -64,194 +72,28 @@ export type ServiceItem = {
 
 const CATEGORIES: { id: ServiceCategory; label: string; icon: string }[] = [
   { id: 'all', label: 'All Services', icon: '✨' },
-  { id: 'medical', label: 'Medical Check Up', icon: '🩺' },
-  { id: 'lab-tests', label: 'Lab Tests', icon: '🧪' },
-  { id: 'certification', label: 'Food Safety Certification', icon: '🎓' },
-  { id: 'pest-control', label: 'Pest Control Services', icon: '🪲' },
-  { id: 'hvac', label: 'HVAC Services', icon: '❄️' },
-  { id: 'deep-cleaning', label: 'Kitchen Deep Cleaning', icon: '🧼' }
+  { id: 'pest-control', label: 'Pest Control', icon: '🪲' },
+  { id: 'deep-cleaning', label: 'Deep Cleaning Services', icon: '🧼' },
+  { id: 'waste-management', label: 'Waste-management companies', icon: '♻️' },
+  { id: 'cooking-oil', label: 'Used cooking-oil collectors', icon: '🛢️' },
+  { id: 'water-testing', label: 'Water-testing laboratories', icon: '💧' },
+  { id: 'food-testing', label: 'Food-testing laboratories', icon: '🧪' },
+  { id: 'calibration', label: 'Calibration agencies', icon: '⚖️' },
+  { id: 'hvac', label: 'Refrigeration/HVAC technicians', icon: '❄️' },
+  { id: 'equipment', label: 'Kitchen equipment service', icon: '🔧' },
+  { id: 'garbage-bags', label: 'Garbage/Sullage Bag Supplier', icon: '🗑️' },
+  { id: 'fire-safety', label: 'Fire-safety providers', icon: '🧯' },
+  { id: 'ppe-hygiene', label: 'PPE & hygiene suppliers', icon: '🧤' },
+  { id: 'occupational-health', label: 'Occupational health providers', icon: '🩺' },
+  { id: 'hygiene-engineering', label: 'Kitchen hygiene/engineering services', icon: '🏗️' }
 ];
 
 const SERVICES: ServiceItem[] = [
-  // 1. MEDICAL CHECK UP
-  {
-    id: 'srv-medical-camp',
-    category: 'medical',
-    categoryLabel: 'Medical Check Up',
-    icon: '🩺',
-    title: 'Food Handler 6-Monthly Medical Checkup & Form 1A Certification',
-    rating: '4.9',
-    reviewCount: '1,840',
-    tat: 'On-site medical camp · Reports in 24 hrs',
-    badge: 'Mandatory FSSAI Compliance',
-    description: 'Comprehensive physical fitness examination by registered MBBS medical practitioners. Screens for skin, respiratory, eye infections, and general fitness with Form 1A certificates issued.',
-    inclusions: [
-      'Physical medical examination by MBBS registered doctor',
-      'FSSAI Form 1A Medical Fitness Certificate issued per employee',
-      'Skin, eye, nails, and communicable respiratory illness screening',
-      'De-worming administration and fitness endorsement',
-      'Digital compliance records uploaded directly to restaurant profile'
-    ],
-    resolvesChecks: ['Check #8: Staff Medical Check-up, Form 1A & Vaccinations'],
-    complianceStandard: 'FSSAI Schedule 4 Section 3.1 & 6-Monthly Health Examination Mandate'
-  },
-  {
-    id: 'srv-vaccination-typhoid-hepa',
-    category: 'medical',
-    categoryLabel: 'Medical Check Up',
-    icon: '💉',
-    title: 'Food Handler Immunization: Typhoid Conjugate & Hepatitis A',
-    rating: '4.9',
-    reviewCount: '920',
-    tat: 'Administered on-site by certified nurses',
-    badge: 'FSSAI Mandatory Vaccines',
-    description: 'Essential immunization drive for kitchen, bar, and service staff against waterborne and foodborne enteric pathogens.',
-    inclusions: [
-      'Typhoid Conjugate Vaccine (TCV) — 3-year immunization',
-      'Hepatitis A Vaccine (Single dose / primary course)',
-      'Cold-chain verified batch-tracked vaccine vials',
-      'Official Vaccination Certificate with doctor registration number',
-      'Automated renewal reminder tracking in restaurant compliance dashboard'
-    ],
-    resolvesChecks: ['Check #8: Staff Medical Check-up, Form 1A & Vaccinations'],
-    complianceStandard: 'FSSAI Food Safety & Standards (Licensing & Registration) Regulations'
-  },
-
-  // 2. LAB TESTS
-  {
-    id: 'srv-lab-stool-test',
-    category: 'lab-tests',
-    categoryLabel: 'Lab Tests',
-    icon: '🔬',
-    title: 'Food Handler Stool Examination for Enteric Pathogens (NABL Lab)',
-    rating: '4.95',
-    reviewCount: '2,420',
-    tat: 'Sterile kit pickup · NABL Lab report in 24–48 hrs',
-    badge: 'Mandatory FSSAI Check #8',
-    description: 'Government-mandated laboratory stool culture and microscopy for kitchen food handlers to eliminate carriers of Salmonella, Vibrio, and intestinal parasites.',
-    inclusions: [
-      'Sterile stool collection kit dispatched directly to your kitchen',
-      'Microscopic examination for Ova, Cysts, and Trophozoites',
-      'Culture screening for Salmonella enterica, Vibrio cholerae, and Shigella',
-      'NABL Accredited Laboratory Test Report with QR verification',
-      'Physician clearance certificate integration into Check #8 compliance log'
-    ],
-    resolvesChecks: ['Check #8: Staff Medical Check-up (Stool Test & Pathogen Screen)'],
-    complianceStandard: 'FSSAI Schedule 4 Section 3.1 Stool Examination Mandate'
-  },
-  {
-    id: 'srv-water-testing',
-    category: 'lab-tests',
-    categoryLabel: 'Lab Tests',
-    icon: '🧪',
-    title: 'Drinking & Cooking Water Potability Testing (BIS IS 10500)',
-    rating: '4.9',
-    reviewCount: '1,420',
-    tat: 'Sterile sample pickup · NABL Lab report in 48 hrs',
-    badge: 'NABL Accredited Lab Report',
-    description: 'Mandatory water testing for restaurant cooking, ice-making, and drinking water per Bureau of Indian Standards IS 10500:2012.',
-    inclusions: [
-      'Sterile on-site water sample collection by certified lab phlebotomist',
-      'Microbiological parameters: E. coli, Total Coliforms, Faecal streptococci',
-      'Chemical parameters: TDS, pH, Hardness, Free Residual Chlorine, Heavy metals',
-      'NABL Accredited Laboratory Test Report with QR verification code',
-      'FSSAI audit-compliant potability certificate'
-    ],
-    resolvesChecks: ['Check #6: Handwashing Station Water', 'Premises Potable Water Compliance'],
-    complianceStandard: 'FSSAI Section 2.1.3 & BIS IS 10500:2012 Drinking Water Standards'
-  },
-  {
-    id: 'srv-surface-swab-test',
-    category: 'lab-tests',
-    categoryLabel: 'Lab Tests',
-    icon: '🧫',
-    title: 'Kitchen Surface Swab & Microbial Safety Analysis',
-    rating: '4.85',
-    reviewCount: '680',
-    tat: 'Sample collection · Report in 48 hrs',
-    badge: 'HACCP Hygiene Validation',
-    description: 'Microbiological surface swab testing for chopping boards, prep counters, slicers, and ice-makers to verify sanitation efficacy and eliminate Listeria and E. coli risks.',
-    inclusions: [
-      'Sterile swab collection from 5 high-risk food contact surfaces',
-      'Aerobic Plate Count (APC) and Coliform count analysis',
-      'Listeria monocytogenes and Staphylococcus aureus screening',
-      'Sanitation effectiveness certification for HACCP audit compliance',
-      'Detailed hygiene corrective recommendation report'
-    ],
-    resolvesChecks: ['Check #1: Food Prep Areas Cleanliness', 'Check #24: Cleaning Schedule Completed'],
-    complianceStandard: 'FSSAI Good Hygiene Practices (GHP) & ISO 22000'
-  },
-
-  // 3. FOOD SAFETY CERTIFICATION
-  {
-    id: 'srv-fostac-training',
-    category: 'certification',
-    categoryLabel: 'Food Safety Certification',
-    icon: '🎓',
-    title: 'FoSTaC Food Safety Supervisor & Food Handler Certification',
-    rating: '4.8',
-    reviewCount: '2,150',
-    tat: 'Half-day interactive workshop (In-person / Live Digital)',
-    badge: 'Official FSSAI FoSTaC Certificate',
-    description: 'Government-mandated Food Safety Training & Certification (FoSTaC) delivered by empaneled FSSAI trainers for catering, bakery, and restaurant staff.',
-    inclusions: [
-      'Certified FoSTaC Food Safety Supervisor Certificate (valid across India)',
-      'Basic & Advanced Catering hygiene, cross-contamination, and CCP training',
-      'Allergen management, temperature danger zones & rapid cooling rules',
-      'Employee Training Logbook signed and stamped for food safety audits',
-      'Laminated kitchen hygiene SOP posters provided'
-    ],
-    resolvesChecks: ['Check #7: FoSTaC Food Safety Supervisor & Staff Training', 'Check #5 to #7: Personal Hygiene'],
-    complianceStandard: 'FSSAI FoSTaC Mandate (1 certified supervisor per 25 food handlers)'
-  },
-  {
-    id: 'srv-hygiene-rating-audit',
-    category: 'certification',
-    categoryLabel: 'Food Safety Certification',
-    icon: '⭐',
-    title: 'FSSAI Hygiene Rating Audit & Pre-Inspection Readiness Score',
-    rating: '4.9',
-    reviewCount: '1,120',
-    tat: 'Full-day kitchen audit · Report in 24 hrs',
-    badge: '5-Star Hygiene Rating Prep',
-    description: 'Comprehensive mock audit conducted by FSSAI-recognized hygiene audit agencies to prepare your restaurant for the official 5-star "Eat Right" hygiene rating certificate.',
-    inclusions: [
-      'Comprehensive 48-point physical kitchen, store, and service audit',
-      'Verification of statutory records, licenses, pest logs, and calibration records',
-      'Gap identification matrix with immediate corrective action roadmap',
-      'Pre-audit readiness certificate and official audit application filing assistance',
-      'Direct synchronization with FoodSafe365 Daily Badge scoring'
-    ],
-    resolvesChecks: ['All 29 FSSAI Operational Controls', 'Annual Audit Compliance'],
-    complianceStandard: 'FSSAI Hygiene Rating Scheme & Schedule 4 Audit Standards'
-  },
-  {
-    id: 'srv-haccp-certification',
-    category: 'certification',
-    categoryLabel: 'Food Safety Certification',
-    icon: '📜',
-    title: 'HACCP & ISO 22000 Food Safety Management System Certification',
-    rating: '4.88',
-    reviewCount: '430',
-    tat: 'Consultation & documentation in 5 days',
-    badge: 'Global Food Safety Standard',
-    description: 'End-to-end consulting, Hazard Analysis Critical Control Point (HACCP) plan drafting, and ISO 22000 readiness for premium dining establishments and franchise chains.',
-    inclusions: [
-      'Custom Hazard Analysis & Critical Control Point (HACCP) manual drafting',
-      'Cook-chill, storage, and cross-contamination CCP boundary validation',
-      'Staff standard operating procedure (SOP) documentation',
-      'Accredited certification body audit facilitation',
-      'Lifetime digital repository in FoodSafe365 document vault'
-    ],
-    resolvesChecks: ['HACCP Principles #1 to #7', 'Food Safety Management Systems'],
-    complianceStandard: 'Codex Alimentarius HACCP & ISO 22000:2018'
-  },
-
-  // 4. PEST CONTROL SERVICES
+  // 1. PEST CONTROL
   {
     id: 'srv-pest-emergency',
     category: 'pest-control',
-    categoryLabel: 'Pest Control Services',
+    categoryLabel: 'Pest Control',
     icon: '🪲',
     title: 'Emergency Kitchen Pest Extermination & German Cockroach Gel Baiting',
     rating: '4.9',
@@ -260,19 +102,19 @@ const SERVICES: ServiceItem[] = [
     badge: '100% Food-Safe Chemicals',
     description: 'Rapid-response extermination and barrier application using odorless, non-toxic Bayer gel and micro-encapsulated spray safe for food preparation zones.',
     inclusions: [
-      'Complete inspection of dark corners, motor housings, drains, and dry storage (#26)',
+      'Complete inspection of dark corners, motor housings, drains, and dry storage (#21)',
       'Odorless German cockroach gel baiting in all electrical points and joints',
       'Drain flushing with bio-enzymatic pest-repelling wash',
       'Digital Pest Elimination Certificate for manager verification & audit records',
       '30-day warranty with free re-treatment if pests reappear'
     ],
-    resolvesChecks: ['Check #26: Pest Inspection (Signs of Pests)', 'Check #27: Pest-Control Devices & Vendor Service'],
+    resolvesChecks: ['Check #21: Signs of Pests', 'Check #22: Fly-Catchers & Pest Bait Stations'],
     complianceStandard: 'FSSAI Schedule 4 Integrated Pest Management (IPM)'
   },
   {
     id: 'srv-pest-amc',
     category: 'pest-control',
-    categoryLabel: 'Pest Control Services',
+    categoryLabel: 'Pest Control',
     icon: '🛡️',
     title: 'Annual Pest Management AMC with Rodent Stations & ILT Servicing',
     rating: '4.8',
@@ -283,84 +125,19 @@ const SERVICES: ServiceItem[] = [
     inclusions: [
       'Monthly audit and chemical rotation service per CIB&RC regulations',
       'Tamper-resistant rodent bait stations placed at kitchen perimeter',
-      'Insect Light Trap (ILT) maintenance & UV bulb/glue pad replacements (#27)',
+      'Insect Light Trap (ILT) maintenance & UV bulb/glue pad replacements (#22)',
       'Service Logbook kept on-site with MSDS chemical safety data sheets',
       'FSSAI inspection audit defense representation'
     ],
-    resolvesChecks: ['Check #26: Pest Inspection', 'Check #27: Pest-Control Devices & Vendor Service'],
+    resolvesChecks: ['Check #21: Signs of Pests', 'Check #22: Fly-Catchers & Pest Bait Stations'],
     complianceStandard: 'FSSAI Schedule 4 Annual Pest Maintenance Requirement'
   },
 
-  // 5. HVAC SERVICES
+  // 2. DEEP CLEANING SERVICES
   {
-    id: 'srv-refrigeration-repair',
-    category: 'hvac',
-    categoryLabel: 'HVAC Services',
-    icon: '❄️',
-    title: 'Cool Room (<5°C) & Cold Room (<-18°C) Emergency Breakdown Repair',
-    rating: '4.88',
-    reviewCount: '870',
-    tat: 'Arrives within 2 hours (Emergency temperature restoration)',
-    badge: 'Cold Chain Rescue',
-    description: 'Certified commercial HVAC & refrigeration technician for Cool Rooms (<5°C) and Cold Rooms (<-18°C), walk-ins, reach-in chillers, and compressor repairs.',
-    inclusions: [
-      'Compressor gas pressure, condenser coil cleaning, and thermostat repair',
-      'Magnetic door gasket seal inspection and on-site replacement',
-      'Defrost cycle testing and fan motor servicing',
-      'Emergency temperature restoration before perishable stock abuse occurs',
-      'Service report with pre/post temperature telemetry log'
-    ],
-    resolvesChecks: ['Check #17: Refrigerator & Cool Storage (< 5°C)', 'Check #18: Freezer & Cold Storage (< −18°C)'],
-    complianceStandard: 'FSSAI Schedule 4 Cold Chain Storage Regulations'
-  },
-  {
-    id: 'srv-calibration-service',
-    category: 'hvac',
-    categoryLabel: 'HVAC Services',
-    icon: '🌡️',
-    title: 'NABL-Traceable Thermometer & Temperature Probe Calibration',
-    rating: '4.9',
-    reviewCount: '620',
-    tat: 'On-site calibration · Certificates same day',
-    badge: 'NABL Traceable Certificate',
-    description: 'Precision calibration of kitchen thermometers, needle probes, walk-in digital controllers, and infrared guns against NABL-traceable reference standards.',
-    inclusions: [
-      '3-point calibration test at cold (-18°C), chilled (4°C), and cooking (75°C) points',
-      'Official Calibration Certificate with serial number and validity sticker',
-      'Error margin tolerance calculation and instrument adjustment',
-      'Required documentation for FSSAI and HACCP compliance files',
-      '12-month recalibration reminder scheduled in FoodSafe365'
-    ],
-    resolvesChecks: ['Check #17: Cool Storage', 'Check #18: Cold Storage', 'Check #19: Cooking Core Temperature', 'Check #20: Rapid Cooling Protocol'],
-    complianceStandard: 'FSSAI Schedule 4 Equipment Calibration Mandate'
-  },
-  {
-    id: 'srv-hvac-amc',
-    category: 'hvac',
-    categoryLabel: 'HVAC Services',
-    icon: '⚙️',
-    title: 'Commercial Refrigeration & Walk-In Quarterly AMC',
-    rating: '4.8',
-    reviewCount: '510',
-    tat: 'Quarterly comprehensive servicing visits',
-    badge: 'Zero Spoilage Guarantee',
-    description: 'Preventive maintenance contract for commercial chillers, freezers, ice machines, and cold storage to avert unexpected compressor burnout and costly food spoilage.',
-    inclusions: [
-      'Chemical cleaning of condenser coils and evaporator fin combs',
-      'Refrigerant leak detection and pressure check',
-      'Electrical connection tightening and thermostat accuracy test',
-      'Priority 2-hour emergency breakdown response included',
-      'Quarterly health certificate issued for food safety audits'
-    ],
-    resolvesChecks: ['Check #17: Refrigerator & Cool Storage (< 5°C)', 'Check #18: Freezer & Cold Storage (< −18°C)'],
-    complianceStandard: 'Preventive Food Safety Equipment Maintenance'
-  },
-
-  // 6. KITCHEN DEEP CLEANING
-  {
-    id: 'srv-deep-cleaning',
+    id: 'srv-deep-exhaust',
     category: 'deep-cleaning',
-    categoryLabel: 'Kitchen Deep Cleaning',
+    categoryLabel: 'Deep Cleaning Services',
     icon: '🧼',
     title: 'Commercial Kitchen Exhaust Hood & Grease Duct Steam Cleaning',
     rating: '4.9',
@@ -375,8 +152,410 @@ const SERVICES: ServiceItem[] = [
       'Floor drain descaling and bio-enzymatic odor neutralization',
       'Before/After photo audit report uploaded for compliance verification'
     ],
-    resolvesChecks: ['Check #1: Food Prep Area Cleanliness', 'Check #2: Drains & Grease Traps', 'Premises Deep Sanitation'],
+    resolvesChecks: ['Check #1: Clean & Clutter-Free Counters & Floors', 'Check #2: Drains Flowing Freely'],
     complianceStandard: 'FSSAI Schedule 4 Premises Sanitation & Fire Safety Standards'
+  },
+  {
+    id: 'srv-deep-kitchen',
+    category: 'deep-cleaning',
+    categoryLabel: 'Deep Cleaning Services',
+    icon: '✨',
+    title: 'Kitchen Floor, Wall & Equipment Deep Degreasing Sanitation',
+    rating: '4.85',
+    reviewCount: '1,420',
+    tat: 'Scheduled weekend or off-peak shift',
+    badge: 'FSSAI Deep Sanitation Protocol',
+    description: 'Deep mechanical scrubbing of tiled walls, grouting, slip-resistant floors, and prep tables using NSF-certified food-grade detergents.',
+    inclusions: [
+      'Tile grout descaling and steam sanitization across all cooking lines',
+      'Heavy degreasing of prep tables, under-shelves, and storage racks',
+      'Stainless steel surface polish with food-grade sanitizing wash',
+      'Sanitary swab test validation post-cleaning',
+      'Digital sanitation checklist signed by master cleaning supervisor'
+    ],
+    resolvesChecks: ['Check #1: Counters, Floors & Prep Areas Clean', 'Check #15: Food-Contact Equipment Cleaned'],
+    complianceStandard: 'FSSAI Good Hygiene Practices (GHP)'
+  },
+
+  // 3. WASTE-MANAGEMENT COMPANIES
+  {
+    id: 'srv-waste-mgmt',
+    category: 'waste-management',
+    categoryLabel: 'Waste-management companies',
+    icon: '♻️',
+    title: 'Commercial Kitchen Solid & Wet Waste Segregation & Bio-Compost Collection',
+    rating: '4.85',
+    reviewCount: '780',
+    tat: 'Daily scheduled morning & evening pickups',
+    badge: 'Pollution Control Board Authorized',
+    description: 'Authorized wet and dry waste management service ensuring kitchen segregation, odor-free collection, and verifiable disposal certificates.',
+    inclusions: [
+      'Daily bio-degradable wet waste pickup from kitchen premises',
+      'Segregated dry waste sorting and authorized recycling dispatch',
+      'Sanitization of waste staging bins and collection point',
+      'Monthly Waste Disposal Certificate for municipality and FDA inspections',
+      'Composting and green audit compliance report'
+    ],
+    resolvesChecks: ['Check #23: Kitchen Dustbins Covered & Outside Garbage Area Clean'],
+    complianceStandard: 'Solid Waste Management Rules 2016 & FSSAI Schedule 4'
+  },
+
+  // 4. USED COOKING-OIL COLLECTORS
+  {
+    id: 'srv-ruco-oil',
+    category: 'cooking-oil',
+    categoryLabel: 'Used cooking-oil collectors',
+    icon: '🛢️',
+    title: 'FSSAI RUCO Certified Used Cooking Oil (UCO) Collection & Biodiesel Conversion',
+    rating: '4.9',
+    reviewCount: '1,340',
+    tat: 'Scheduled weekly pickup · Immediate RUCO certificate',
+    badge: 'FSSAI RUCO Empaneled Aggregator',
+    description: 'Empaneled Used Cooking Oil (UCO) collector under FSSAI RUCO initiative. Collects degraded frying oil (TPC > 25%) and provides official sale vouchers for biodiesel production.',
+    inclusions: [
+      'Free food-grade leakproof collection drums provided on-site',
+      'On-site Total Polar Compounds (TPC) tester verification before collection',
+      'Official RUCO Purchase Voucher issued for every batch collected',
+      'Direct traceability documentation to protect restaurant against illegal resale',
+      'Free monthly frying oil management guidelines and disposal log'
+    ],
+    resolvesChecks: ['Check #12: Safe Oil Quality (FSSAI RUCO Limit TPC ≤ 25%)'],
+    complianceStandard: 'FSSAI RUCO (Repurpose Used Cooking Oil) Regulation'
+  },
+
+  // 5. WATER-TESTING LABORATORIES
+  {
+    id: 'srv-water-testing',
+    category: 'water-testing',
+    categoryLabel: 'Water-testing laboratories',
+    icon: '💧',
+    title: 'Drinking & Cooking Water Potability Testing (BIS IS 10500 NABL Lab)',
+    rating: '4.9',
+    reviewCount: '1,420',
+    tat: 'Sterile sample pickup · NABL Lab report in 48 hrs',
+    badge: 'NABL Accredited Lab Report',
+    description: 'Mandatory testing for restaurant cooking, ice-making, and drinking water per Bureau of Indian Standards IS 10500:2012.',
+    inclusions: [
+      'Sterile on-site water sample collection by certified lab phlebotomist',
+      'Microbiological parameters: E. coli, Total Coliforms, Faecal streptococci',
+      'Chemical parameters: TDS, pH, Hardness, Free Residual Chlorine, Heavy metals',
+      'NABL Accredited Laboratory Test Report with QR verification code',
+      'FSSAI audit-compliant potability certificate'
+    ],
+    resolvesChecks: ['Check #4: Hand-wash Station Water', 'Safe Drinking Water at Catering / Prep'],
+    complianceStandard: 'FSSAI Section 2.1.3 & BIS IS 10500:2012 Drinking Water Standards'
+  },
+
+  // 6. FOOD-TESTING LABORATORIES
+  {
+    id: 'srv-food-pathogen-test',
+    category: 'food-testing',
+    categoryLabel: 'Food-testing laboratories',
+    icon: '🧪',
+    title: 'Cooked Food & Ingredient Pathogen Laboratory Analysis (NABL Lab)',
+    rating: '4.95',
+    reviewCount: '1,150',
+    tat: 'Sample pickup · Complete micro report in 72 hrs',
+    badge: 'NABL Accredited (ISO/IEC 17025)',
+    description: 'Comprehensive microbiological and chemical screening of prepared foods, raw meats, dairy, and gravies for foodborne pathogens.',
+    inclusions: [
+      'Sterile insulated cold-chain sample transit to NABL laboratory',
+      'Quantitative pathogen testing: Salmonella, E. coli, Listeria monocytogenes, Bacillus cereus',
+      'Total Plate Count (TPC) and Yeast/Mold enumeration',
+      'Official NABL Certificate of Analysis with digital verification QR',
+      'Direct compliance upload to restaurant audit locker'
+    ],
+    resolvesChecks: ['Check #9: Raw Material Quality Check', 'Check #19: Cooking Temperature & Pathogen Kill'],
+    complianceStandard: 'FSSAI Food Safety and Standards (Contaminants, Toxins & Residues) Regulations'
+  },
+  {
+    id: 'srv-surface-swab-test',
+    category: 'food-testing',
+    categoryLabel: 'Food-testing laboratories',
+    icon: '🧫',
+    title: 'Kitchen Surface Swab & Cutting Board Microbial Safety Analysis',
+    rating: '4.85',
+    reviewCount: '680',
+    tat: 'Sample collection · Report in 48 hrs',
+    badge: 'HACCP Hygiene Validation',
+    description: 'Microbiological surface swab testing for chopping boards, prep counters, slicers, and ice-makers to verify sanitation efficacy.',
+    inclusions: [
+      'Sterile swab collection from 5 high-risk food contact surfaces',
+      'Aerobic Plate Count (APC) and Coliform count analysis',
+      'Listeria monocytogenes and Staphylococcus aureus screening',
+      'Sanitation effectiveness certification for HACCP audit compliance',
+      'Detailed hygiene corrective recommendation report'
+    ],
+    resolvesChecks: ['Check #1: Food Prep Area Cleanliness', 'Check #14: Color-Coded Cutting Boards'],
+    complianceStandard: 'FSSAI Good Hygiene Practices (GHP) & ISO 22000'
+  },
+
+  // 7. CALIBRATION AGENCIES
+  {
+    id: 'srv-calibration-service',
+    category: 'calibration',
+    categoryLabel: 'Calibration agencies',
+    icon: '⚖️',
+    title: 'NABL-Traceable Thermometer & Temperature Probe Calibration',
+    rating: '4.9',
+    reviewCount: '620',
+    tat: 'On-site calibration · Certificates same day',
+    badge: 'NABL Traceable Certificate',
+    description: 'Precision calibration of kitchen thermometers, needle probes, walk-in digital controllers, and infrared guns against NABL-traceable reference standards.',
+    inclusions: [
+      '3-point calibration test at cold (-18°C), chilled (4°C), and cooking (75°C) points',
+      'Official Calibration Certificate with serial number and validity sticker',
+      'Error margin tolerance calculation and instrument adjustment',
+      'Required documentation for FSSAI and HACCP compliance files',
+      '12-month recalibration reminder scheduled in FoodSafe365'
+    ],
+    resolvesChecks: ['Check #17: Fridge (<5°C)', 'Check #18: Freezer (<-18°C)', 'Check #19: Cooking Core Temp (≥75°C)'],
+    complianceStandard: 'FSSAI Schedule 4 Equipment Calibration Mandate'
+  },
+
+  // 8. REFRIGERATION/HVAC TECHNICIANS
+  {
+    id: 'srv-refrigeration-repair',
+    category: 'hvac',
+    categoryLabel: 'Refrigeration/HVAC technicians',
+    icon: '❄️',
+    title: 'Cool Room (<5°C) & Cold Room (<-18°C) Emergency Breakdown Repair',
+    rating: '4.88',
+    reviewCount: '870',
+    tat: 'Arrives within 2 hours (Emergency temperature restoration)',
+    badge: 'Cold Chain Rescue',
+    description: 'Certified commercial HVAC & refrigeration technician for Cool Rooms (<5°C) and Cold Rooms (<-18°C), walk-ins, reach-in chillers, and compressor repairs.',
+    inclusions: [
+      'Compressor gas pressure, condenser coil cleaning, and thermostat repair',
+      'Magnetic door gasket seal inspection and on-site replacement',
+      'Defrost cycle testing and fan motor servicing',
+      'Emergency temperature restoration before perishable stock abuse occurs',
+      'Service report with pre/post temperature telemetry log'
+    ],
+    resolvesChecks: ['Check #17: Refrigerator Storage (< 5°C)', 'Check #18: Deep Freezer Storage (< −18°C)'],
+    complianceStandard: 'FSSAI Schedule 4 Cold Chain Storage Regulations'
+  },
+  {
+    id: 'srv-hvac-amc',
+    category: 'hvac',
+    categoryLabel: 'Refrigeration/HVAC technicians',
+    icon: '⚙️',
+    title: 'Commercial Refrigeration & Walk-In Compressor Quarterly AMC',
+    rating: '4.8',
+    reviewCount: '510',
+    tat: 'Quarterly comprehensive servicing visits',
+    badge: 'Zero Spoilage Guarantee',
+    description: 'Preventive maintenance contract for commercial chillers, freezers, ice machines, and cold storage to avert unexpected compressor burnout.',
+    inclusions: [
+      'Chemical cleaning of condenser coils and evaporator fin combs',
+      'Refrigerant leak detection and pressure check',
+      'Electrical connection tightening and thermostat accuracy test',
+      'Priority 2-hour emergency breakdown response included',
+      'Quarterly health certificate issued for food safety audits'
+    ],
+    resolvesChecks: ['Check #17: Refrigerator Storage (< 5°C)', 'Check #18: Deep Freezer Storage (< −18°C)'],
+    complianceStandard: 'Preventive Food Safety Equipment Maintenance'
+  },
+
+  // 9. KITCHEN EQUIPMENT SERVICE
+  {
+    id: 'srv-equipment-maintenance',
+    category: 'equipment',
+    categoryLabel: 'Kitchen equipment service',
+    icon: '🔧',
+    title: 'Commercial Cooking Range, Combi-Oven & Dishwasher Servicing',
+    rating: '4.85',
+    reviewCount: '940',
+    tat: 'On-site technician within 3 hours',
+    badge: 'Certified Kitchen Engineers',
+    description: 'Maintenance and repair for heavy commercial kitchen appliances including gas burners, combi-ovens, fryers, slicers, and pass-through dishwashers.',
+    inclusions: [
+      'Burner flame nozzle cleaning, gas pressure regulation, and leak detection',
+      'High-temperature dishwasher chemical dispenser calibration (final rinse ≥ 82°C)',
+      'Slicer, mixer, and food processor blade inspection and sanitization check',
+      'Genuine OEM replacement parts with 90-day warranty',
+      'Equipment health report for kitchen insurance and safety audits'
+    ],
+    resolvesChecks: ['Check #15: Shared Tools & Food-Contact Equipment', 'Check #19: Cooking Equipment Performance'],
+    complianceStandard: 'Commercial Kitchen Equipment Safety Standards'
+  },
+
+  // 10. GARBAGE/SULLAGE BAG SUPPLIER
+  {
+    id: 'srv-garbage-bags-supply',
+    category: 'garbage-bags',
+    categoryLabel: 'Garbage/Sullage Bag Supplier',
+    icon: '🗑️',
+    title: 'Heavy-Duty Biodegradable Wet/Dry Garbage & Sullage Bags (Color-Coded)',
+    rating: '4.8',
+    reviewCount: '630',
+    tat: 'Same-day bulk kitchen delivery',
+    badge: '100% CPCB Certified Biodegradable',
+    description: 'Puncture-resistant, leak-proof garbage and sullage bags color-coded for kitchen waste segregation (Green for wet/food, Black for dry/packaging).',
+    inclusions: [
+      'Heavy-duty 50+ micron tear-proof bags resistant to hot liquids and kitchen bones',
+      'CPCB (Central Pollution Control Board) certified compostable & biodegradable',
+      'Green bags for organic prep waste and Black bags for inorganic packaging',
+      'Bulk pack options with dispenser boxes for kitchen waste stations',
+      'Prevents bin leakage, odor release, and pest attraction'
+    ],
+    resolvesChecks: ['Check #23: Covered Kitchen Dustbins & Outside Waste Storage'],
+    complianceStandard: 'CPCB Plastic Waste Management Regulations 2021'
+  },
+
+  // 11. FIRE-SAFETY PROVIDERS
+  {
+    id: 'srv-fire-safety-kitchen',
+    category: 'fire-safety',
+    categoryLabel: 'Fire-safety providers',
+    icon: '🧯',
+    title: 'Kitchen Wet Chemical (Class K/F) Fire Extinguisher & Hood Suppression Servicing',
+    rating: '4.9',
+    reviewCount: '1,280',
+    tat: 'Annual servicing & on-site inspection within 24 hrs',
+    badge: 'Certified Fire Safety Engineers',
+    description: 'Specialized commercial kitchen fire safety: Wet Chemical (Class F/K) extinguishers for hot cooking oil fires and automatic exhaust hood suppression system maintenance.',
+    inclusions: [
+      'Inspection and hydraulic pressure testing of Class K/F Wet Chemical extinguishers',
+      'Automatic fusible link and nozzle inspection over cooking ranges and fryers',
+      'Fire safety certificate and inspection tags affixed to all kitchen equipment',
+      'Kitchen staff training on operating fire blankets and suppression triggers',
+      'Form 15/Annual Fire Safety Audit compliance documentation'
+    ],
+    resolvesChecks: ['Kitchen Fire Safety & Exhaust Hood Compliance'],
+    complianceStandard: 'National Building Code (NBC) Part 4 & BIS 15683 Fire Standards'
+  },
+
+  // 12. PPE & HYGIENE SUPPLIERS
+  {
+    id: 'srv-ppe-hygiene-supplies',
+    category: 'ppe-hygiene',
+    categoryLabel: 'PPE & hygiene suppliers',
+    icon: '🧤',
+    title: 'Food-Grade Nitrile Gloves, Hairnets, Aprons & Touchless Sanitizer Supplies',
+    rating: '4.85',
+    reviewCount: '1,670',
+    tat: 'Next-day restaurant door delivery',
+    badge: 'Food-Grade Certified PPE',
+    description: 'Certified protective wear and kitchen hygiene consumables including powder-free nitrile gloves, non-woven hairnets, heavy-duty aprons, and tissue rolls.',
+    inclusions: [
+      'Powder-free food-contact certified blue nitrile gloves (all sizes)',
+      'Breathable bouffant hairnets and beard covers for food handlers',
+      'Waterproof heavy-duty kitchen aprons and slip-resistant footwear',
+      'Multi-fold absorbent paper tissue rolls and wall-mounted dispensers',
+      'WHO-formulation alcohol hand sanitizers and antibacterial hand soaps'
+    ],
+    resolvesChecks: ['Check #4: Hand-wash Stations Soap & Tissue', 'Check #6: Clean Uniform, Apron & Hairnet'],
+    complianceStandard: 'FSSAI Personal Hygiene Mandate Section 3.2'
+  },
+
+  // 13. OCCUPATIONAL HEALTH PROVIDERS
+  {
+    id: 'srv-medical-camp',
+    category: 'occupational-health',
+    categoryLabel: 'Occupational health providers',
+    icon: '🩺',
+    title: 'Food Handler 6-Monthly Medical Checkup & Form 1A Certification Camp',
+    rating: '4.9',
+    reviewCount: '1,840',
+    tat: 'On-site medical camp · Reports in 24 hrs',
+    badge: 'Mandatory FSSAI Compliance',
+    description: 'Comprehensive physical fitness examination by registered MBBS medical practitioners. Screens for skin, respiratory, eye infections, and general fitness with Form 1A certificates issued.',
+    inclusions: [
+      'Physical medical examination by MBBS registered doctor',
+      'FSSAI Form 1A Medical Fitness Certificate issued per employee',
+      'Skin, eye, nails, and communicable respiratory illness screening',
+      'De-worming administration and fitness endorsement',
+      'Digital compliance records uploaded directly to restaurant profile'
+    ],
+    resolvesChecks: ['Check #8: Staff Medical Fitness Certificates (Form 1A)'],
+    complianceStandard: 'FSSAI Schedule 4 Section 3.1 & 6-Monthly Health Examination Mandate'
+  },
+  {
+    id: 'srv-lab-stool-test',
+    category: 'occupational-health',
+    categoryLabel: 'Occupational health providers',
+    icon: '🔬',
+    title: 'Food Handler Stool Examination for Enteric Pathogens (NABL Lab)',
+    rating: '4.95',
+    reviewCount: '2,420',
+    tat: 'Sterile kit pickup · NABL Lab report in 24–48 hrs',
+    badge: 'Mandatory FSSAI Check #8',
+    description: 'Government-mandated laboratory stool culture and microscopy for kitchen food handlers to eliminate carriers of Salmonella, Vibrio, and intestinal parasites.',
+    inclusions: [
+      'Sterile stool collection kit dispatched directly to your kitchen',
+      'Microscopic examination for Ova, Cysts, and Trophozoites',
+      'Culture screening for Salmonella enterica, Vibrio cholerae, and Shigella',
+      'NABL Accredited Laboratory Test Report with QR verification',
+      'Physician clearance certificate integration into Check #8 compliance log'
+    ],
+    resolvesChecks: ['Check #8: 6-Monthly Stool Test Records'],
+    complianceStandard: 'FSSAI Schedule 4 Section 3.1 Stool Examination Mandate'
+  },
+  {
+    id: 'srv-vaccination-typhoid-hepa',
+    category: 'occupational-health',
+    categoryLabel: 'Occupational health providers',
+    icon: '💉',
+    title: 'Food Handler Immunization: Typhoid Conjugate & Hepatitis A',
+    rating: '4.9',
+    reviewCount: '920',
+    tat: 'Administered on-site by certified nurses',
+    badge: 'FSSAI Mandatory Vaccines',
+    description: 'Essential immunization drive for kitchen, bar, and service staff against waterborne and foodborne enteric pathogens.',
+    inclusions: [
+      'Typhoid Conjugate Vaccine (TCV) — 3-year immunization',
+      'Hepatitis A Vaccine (Single dose / primary course)',
+      'Cold-chain verified batch-tracked vaccine vials',
+      'Official Vaccination Certificate with doctor registration number',
+      'Automated renewal reminder tracking in restaurant compliance dashboard'
+    ],
+    resolvesChecks: ['Check #8: Staff Medical Fitness & Immunizations'],
+    complianceStandard: 'FSSAI Food Safety & Standards (Licensing & Registration) Regulations'
+  },
+  {
+    id: 'srv-fostac-training',
+    category: 'occupational-health',
+    categoryLabel: 'Occupational health providers',
+    icon: '🎓',
+    title: 'FoSTaC Food Safety Supervisor & Food Handler Certification',
+    rating: '4.8',
+    reviewCount: '2,150',
+    tat: 'Half-day interactive workshop (In-person / Live Digital)',
+    badge: 'Official FSSAI FoSTaC Certificate',
+    description: 'Government-recognized Food Safety Training & Certification (FoSTaC) delivered by empaneled FSSAI trainers for catering, bakery, and restaurant staff.',
+    inclusions: [
+      'Certified FoSTaC Food Safety Supervisor Certificate (valid across India)',
+      'Basic & Advanced Catering hygiene, cross-contamination, and CCP training',
+      'Allergen management, temperature danger zones & rapid cooling rules',
+      'Employee Training Logbook signed and stamped for food safety audits',
+      'Laminated kitchen hygiene SOP posters provided'
+    ],
+    resolvesChecks: ['Check #7: Supervisor FoSTaC & Staff Training Certificates'],
+    complianceStandard: 'FSSAI FoSTaC Mandate (1 certified supervisor per 25 food handlers)'
+  },
+
+  // 14. KITCHEN HYGIENE/ENGINEERING SERVICES
+  {
+    id: 'srv-hygiene-engineering',
+    category: 'hygiene-engineering',
+    categoryLabel: 'Kitchen hygiene/engineering services',
+    icon: '🏗️',
+    title: 'Commercial Kitchen Drain Unblocking, Stainless Steel Grease Traps & Odor Control',
+    rating: '4.9',
+    reviewCount: '810',
+    tat: 'On-site engineering team within 4 hours',
+    badge: 'Structural FSSAI Compliance',
+    description: 'Specialized plumbing and kitchen engineering: High-pressure drain hydro-jetting, commercial SS 304 grease trap installation, and non-return valve fitting to eliminate foul odors and insect backflow.',
+    inclusions: [
+      'High-pressure water jetting of kitchen grease lines and main header pipes',
+      'Fabrication and installation of customized SS 304 food-grade grease interceptors',
+      'Trap seal maintenance and anti-rodent floor drain grating installation',
+      'Biological enzymatic grease digesting bacterial treatment for continuous flow',
+      'Structural drainage compliance report signed by sanitary engineers'
+    ],
+    resolvesChecks: ['Check #2: Kitchen Drains Flowing Freely With No Foul Smell', 'Check #3: Physical Barriers & Fly-Screens'],
+    complianceStandard: 'FSSAI Schedule 4 Drainage & Sanitary Installation Norms'
   }
 ];
 
@@ -391,13 +570,13 @@ export default function ProvidersPage() {
   const [partnerSuccess, setPartnerSuccess] = useState<{ id: string; orgName: string; category: string } | null>(null);
   const [providerForm, setProviderForm] = useState({
     orgName: '',
-    category: 'Medical Check Up',
+    category: 'Pest Control',
     accreditation: 'NABL Accredited (ISO/IEC 17025)',
     city: 'Bangalore',
     contactPerson: '',
     phone: '',
     email: '',
-    capacity: '10–25 Technicians / Phlebotomists',
+    capacity: '10–25 Technicians / Staff',
     notes: ''
   });
 
@@ -419,17 +598,17 @@ export default function ProvidersPage() {
 
     if (cat) {
       setSelectedCategory(cat);
-    } else if (srv === 'training' || chk === 'FS28-08') {
-      setSelectedCategory('certification');
-      const found = SERVICES.find(s => s.id === 'srv-fostac');
+    } else if (srv === 'training' || chk === 'FS28-07') {
+      setSelectedCategory('occupational-health');
+      const found = SERVICES.find(s => s.id === 'srv-fostac-training');
       if (found) setActiveBookingService(found);
-    } else if (srv === 'medical' || chk === 'FS28-09') {
-      setSelectedCategory('medical');
+    } else if (srv === 'medical' || chk === 'FS28-08') {
+      setSelectedCategory('occupational-health');
       const found = SERVICES.find(s => s.id === 'srv-medical-camp');
       if (found) setActiveBookingService(found);
-    } else if (srv === 'pest' || chk === 'FS28-26' || chk === 'FS28-27') {
+    } else if (srv === 'pest' || chk === 'FS28-21' || chk === 'FS28-22') {
       setSelectedCategory('pest-control');
-    } else if (srv === 'refrigeration' || chk === 'FS28-19' || chk === 'FS28-20') {
+    } else if (srv === 'refrigeration' || chk === 'FS28-17' || chk === 'FS28-18') {
       setSelectedCategory('hvac');
     }
   }, []);
@@ -681,8 +860,8 @@ export default function ProvidersPage() {
           </div>
         </div>
 
-        {/* Informative Banner for Medical Check */}
-        {selectedCategory === 'medical' && (
+        {/* Informative Banner for Occupational Health */}
+        {selectedCategory === 'occupational-health' && (
           <div style={{
             background: '#ecfdf5',
             border: '1px solid #a7f3d0',
@@ -695,7 +874,7 @@ export default function ProvidersPage() {
           }}>
             <Stethoscope size={20} color="#059669" style={{ flexShrink: 0, marginTop: 2 }} />
             <div style={{ fontSize: 13, color: '#065f46' }}>
-              <strong>FSSAI Schedule 4 Mandate (Check #8):</strong> All restaurant kitchen and service personnel must undergo a certified medical examination including laboratory stool testing every 6 months and maintain active Typhoid &amp; Hepatitis A immunizations.
+              <strong>FSSAI Schedule 4 Mandate (Check #8):</strong> All restaurant kitchen and service personnel must undergo a certified medical examination (Form 1A) and 6-monthly stool test screening for enteric pathogens.
             </div>
           </div>
         )}
@@ -714,7 +893,7 @@ export default function ProvidersPage() {
           }}>
             <Bug size={20} color="#d97706" style={{ flexShrink: 0, marginTop: 2 }} />
             <div style={{ fontSize: 13, color: '#92400e' }}>
-              <strong>Checks #26 &amp; #27 Resolution:</strong> Only food-safe, odorless formulations approved by CIB&amp;RC are permitted in active food prep zones. All service visits generate a compliance log entry with chemical safety data sheets (MSDS).
+              <strong>Checks #21 &amp; #22 Resolution:</strong> Integrated pest management (IPM), odorless cockroach gel baiting, and pest-free audit log maintenance.
             </div>
           </div>
         )}
@@ -733,7 +912,26 @@ export default function ProvidersPage() {
           }}>
             <Wrench size={20} color="#0284c7" style={{ flexShrink: 0, marginTop: 2 }} />
             <div style={{ fontSize: 13, color: '#0369a1' }}>
-              <strong>Cold Storage (<span style={{ fontWeight: 700 }}>&lt; -18°C</span>) &amp; Cool Room (<span style={{ fontWeight: 700 }}>&lt; 5°C</span>):</strong> Emergency HVAC technicians carry calibrated digital test instruments and replacement gasket seals to restore temperature before food abuse occurs.
+              <strong>Checks #17 &amp; #18 Maintenance:</strong> Emergency HVAC repair for Cool Rooms (&lt;5°C) and Deep Freezers (&lt; -18°C) with gasket seal replacement and calibrated telemetry.
+            </div>
+          </div>
+        )}
+
+        {/* Informative Banner for Food Testing */}
+        {selectedCategory === 'food-testing' && (
+          <div style={{
+            background: '#f5f3ff',
+            border: '1px solid #ddd6fe',
+            borderRadius: 14,
+            padding: '14px 18px',
+            marginBottom: 20,
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 12
+          }}>
+            <ShieldCheck size={20} color="#7c3aed" style={{ flexShrink: 0, marginTop: 2 }} />
+            <div style={{ fontSize: 13, color: '#5b21b6' }}>
+              <strong>NABL Pathogen Analysis:</strong> Food testing laboratories provide certified microbial screening (Salmonella, Listeria, E. coli) and surface swabs to validate HACCP controls.
             </div>
           </div>
         )}
@@ -1397,12 +1595,20 @@ export default function ProvidersPage() {
                     onChange={e => setProviderForm({ ...providerForm, category: e.target.value })}
                     style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid #cbd5e1', fontSize: 13 }}
                   >
-                    <option value="Medical Check Up">Medical Check Up</option>
-                    <option value="Lab Tests">Lab Tests (Stool / Water / Micro)</option>
-                    <option value="Food Safety Certification">Food Safety Certification (FoSTaC)</option>
-                    <option value="Pest Control Services">Pest Control Services</option>
-                    <option value="HVAC Services">HVAC Services &amp; Calibration</option>
-                    <option value="Kitchen Deep Cleaning">Kitchen Deep Cleaning</option>
+                    <option value="Pest Control">Pest Control</option>
+                    <option value="Deep Cleaning Services">Deep Cleaning Services</option>
+                    <option value="Waste-management companies">Waste-management companies</option>
+                    <option value="Used cooking-oil collectors">Used cooking-oil collectors</option>
+                    <option value="Water-testing laboratories">Water-testing laboratories</option>
+                    <option value="Food-testing laboratories">Food-testing laboratories</option>
+                    <option value="Calibration agencies">Calibration agencies</option>
+                    <option value="Refrigeration/HVAC technicians">Refrigeration/HVAC technicians</option>
+                    <option value="Kitchen equipment service">Kitchen equipment service</option>
+                    <option value="Garbage/Sullage Bag Supplier">Garbage/Sullage Bag Supplier</option>
+                    <option value="Fire-safety providers">Fire-safety providers</option>
+                    <option value="PPE & hygiene suppliers">PPE &amp; hygiene suppliers</option>
+                    <option value="Occupational health providers">Occupational health providers</option>
+                    <option value="Kitchen hygiene/engineering services">Kitchen hygiene/engineering services</option>
                   </select>
                 </div>
 

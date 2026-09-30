@@ -220,19 +220,19 @@ export default function Landing() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text, #334155)' }}>
                   <CheckCircle2 size={16} style={{ color: '#b45309', flexShrink: 0, marginTop: 2 }} />
-                  <span><strong>Staff Medical &amp; Form 1A:</strong> On-site stool test camps &amp; fitness certs.</span>
+                  <span><strong>Pest Control Agencies:</strong> Integrated pest management, bait stations &amp; audit certs.</span>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text, #334155)' }}>
                   <CheckCircle2 size={16} style={{ color: '#b45309', flexShrink: 0, marginTop: 2 }} />
-                  <span><strong>NABL Lab Testing:</strong> Drinking water potability (IS 10500) &amp; surface swabs.</span>
+                  <span><strong>Food-testing laboratories:</strong> NABL accredited pathogen testing &amp; safety analysis.</span>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text, #334155)' }}>
                   <CheckCircle2 size={16} style={{ color: '#b45309', flexShrink: 0, marginTop: 2 }} />
-                  <span><strong>FoSTaC Certification:</strong> Food hygiene training for staff &amp; supervisors.</span>
+                  <span><strong>Refrigeration/HVAC technicians:</strong> 24/7 chiller repair, cold-chain calibration &amp; exhaust.</span>
                 </div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: 'var(--text, #334155)' }}>
                   <CheckCircle2 size={16} style={{ color: '#b45309', flexShrink: 0, marginTop: 2 }} />
-                  <span><strong>HVAC &amp; Pest Extermination:</strong> 24/7 chiller breakdown &amp; pest baiting.</span>
+                  <span><strong>Occupational health providers:</strong> 6-monthly medical check-ups, Form 1A &amp; stool tests.</span>
                 </div>
               </div>
             </div>
