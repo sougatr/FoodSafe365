@@ -193,19 +193,19 @@ export const SAFEGUARD_TRANSLATIONS: Record<string, Record<Language, SafeguardTr
   },
   'FS28-06': {
     en: {
-      title: 'Dedicated hand-washing stations are fully equipped with water, soap, and clean towels',
+      title: 'Dedicated hand-washing stations are fully equipped with water, soap, and tissue',
       why: 'Staff skip handwashing if sinks lack running water or soap.',
-      action: 'Restock liquid soap and paper towels immediately; unblock sink access.'
+      action: 'Restock liquid soap and paper tissue immediately; unblock sink access.'
     },
     hi: {
-      title: 'हाथ धोने के बेसिन पानी, साबुन और साफ तौलिये से पूरी तरह सुसज्जित हैं',
+      title: 'हाथ धोने के बेसिन पानी, साबुन और साफ टिशू से पूरी तरह सुसज्जित हैं',
       why: 'यदि बेसिन में साबुन या पानी नहीं होगा तो कर्मचारी हाथ धोने में लापरवाही करेंगे।',
-      action: 'लिक्विड सोप और पेपर टॉवल तुरंत भरें; बेसिन का रास्ता साफ रखें।'
+      action: 'लिक्विड सोप और साफ टिशू तुरंत भरें; बेसिन का रास्ता साफ रखें।'
     },
     mr: {
-      title: 'हात धुण्यासाठीचे वॉशबेसिन पाणी, साबण आणि स्वच्छ टॉवेलने सुसज्ज आहेत',
+      title: 'हात धुण्यासाठीचे वॉशबेसिन पाणी, साबण आणि स्वच्छ टिशूने सुसज्ज आहेत',
       why: 'बेसिनमध्ये पाणी किंवा साबण नसल्यास कर्मचारी हात धुणे टाळतात.',
-      action: 'लिक्विड सोप आणि टॉवेल त्वरित ठेवा; वॉशबेसिन मोकळे करा.'
+      action: 'लिक्विड सोप आणि टिशू त्वरित ठेवा; वॉशबेसिन मोकळे करा.'
     }
   },
   'FS28-07': {
@@ -227,18 +227,18 @@ export const SAFEGUARD_TRANSLATIONS: Record<string, Record<Language, SafeguardTr
   },
   'FS28-08': {
     en: {
-      title: 'Food safety training: FoSTaC certified supervisor and staff food-hygiene training',
-      why: 'Untrained staff commit critical cross-contamination and cooking errors.',
-      action: 'Enrol untrained supervisors and staff in accredited FoSTaC training programs.'
+      title: 'Food safety training: FoSTaC certified (optional) supervisor and staff food-hygiene training',
+      why: 'Staff food safety training is desirable and recommended to maintain hygiene.',
+      action: 'Enrol supervisors and staff in desirable FoSTaC food safety training programs.'
     },
     hi: {
-      title: 'खाद्य सुरक्षा प्रशिक्षण: FoSTaC प्रमाणित सुपरवाइजर और स्टाफ हाइजीन प्रशिक्षण',
-      why: 'बिना ट्रेनिंग वाला स्टाफ अनजाने में खाने को दूषित करने की गंभीर गलतियां करता है।',
-      action: 'सुपरवाइजर को FSSAI FoSTaC प्रशिक्षण में नामांकित करें और सुरक्षा नियम समझाएं।'
+      title: 'खाद्य सुरक्षा प्रशिक्षण: FoSTaC प्रमाणित (वैकल्पिक/इच्छनीय) सुपरवाइजर और स्टाफ हाइजीन प्रशिक्षण',
+      why: 'स्टाफ ट्रेनिंग इच्छनीय और अनुशंसित है ताकि सुरक्षित भोजन नियम बने रहें।',
+      action: 'इच्छानुसार सुपरवाइजर को FoSTaC प्रशिक्षण में नामांकित करें।'
     },
     mr: {
-      title: 'अन्न सुरक्षा प्रशिक्षण: FoSTaC प्रमाणित सुपरवायझर आणि कर्मचाऱ्यांचे स्वच्छता प्रशिक्षण',
-      why: 'प्रशिक्षण नसलेले कर्मचारी अजाणतेपणी सुरक्षिततेच्या गंभीर चुका करतात.',
+      title: 'अन्न सुरक्षा प्रशिक्षण: FoSTaC प्रमाणित (पर्यायी/इच्छित) सुपरवायझर आणि कर्मचाऱ्यांचे स्वच्छता प्रशिक्षण',
+      why: 'कर्मचाऱ्यांचे प्रशिक्षण इच्छित आणि शिफारस केलेले आहे.',
       action: 'कर्मचाऱ्यांना FoSTaC प्रशिक्षण वर्गासाठी नोंदवा आणि नियम समजावून सांगा.'
     }
   },

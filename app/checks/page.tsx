@@ -362,7 +362,14 @@ export default function Checks() {
 
           <div className="checks-header">
             <div>
-              <p className="eyebrow">CHECK {selected.id} OF {FOODSAFE28.length} · DAILY FOOD SAFETY CHECK</p>
+              <p className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span>CHECK {selected.id} OF {FOODSAFE28.length} · DAILY FOOD SAFETY CHECK</span>
+                {selected.complianceRequirement === 'desirable' && (
+                  <span style={{ fontSize: 10, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 8px', borderRadius: 999, fontWeight: 700, textTransform: 'uppercase' }}>
+                    Desirable (Optional)
+                  </span>
+                )}
+              </p>
               <h1>{getCheckText(selected.code)?.title || selected.title}</h1>
               {lang !== 'en' && getCheckText(selected.code)?.title && (
                 <p style={{ fontSize: 14, color: 'var(--muted, #64748b)', margin: '4px 0 0', fontStyle: 'italic' }}>
@@ -1226,6 +1233,11 @@ export default function Checks() {
                 <div className="daily-check-main">
                   <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 2 }}>
                     <span className="eyebrow" style={{ margin: 0, fontSize: 10.5 }}>{x.category}</span>
+                    {x.complianceRequirement === 'desirable' && (
+                      <span style={{ fontSize: 9.5, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: 4, fontWeight: 700 }}>
+                        DESIRABLE (OPTIONAL)
+                      </span>
+                    )}
                     {x.outletType === 'bar_brewery' && (
                       <span style={{ fontSize: 10, background: '#fef3c7', color: '#92400e', padding: '1px 7px', borderRadius: 6, fontWeight: 700 }}>
                         🍻 BAR / BREWERY

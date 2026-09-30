@@ -11,6 +11,7 @@ export type FoodSafeCheck = {
   risk: string;
   action: string;
   outletType?: 'all' | 'bar_brewery' | 'cloud_kitchen' | 'catering';
+  complianceRequirement?: 'mandatory' | 'desirable';
 };
 
 export type Rating1To5 = 1 | 2 | 3 | 4 | 5;
@@ -101,15 +102,16 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     id: 5,
     code: 'FS28-06',
     category: 'Personal hygiene',
-    title: 'Dedicated hand-washing stations are fully equipped with water, soap, and clean towels',
+    title: 'Dedicated hand-washing stations are fully equipped with water, soap, and tissue',
     frequency: 'Opening',
     input: 'scale_1_5',
-    why: 'Staff cannot follow handwashing protocols if designated sinks are blocked, dry, or missing soap and drying materials.',
-    what: ['Check each dedicated handwash basin in kitchen, bar, and dishwashing areas.', 'Verify uninterrupted running potable water, antibacterial liquid soap in dispensers, and single-use paper towels or air dryers.', 'Ensure handwash sink is not used for dishwashing or food prep.'],
-    standard: 'Dedicated handwash basins must be accessible, unobstructed, and continuously stocked with running water, liquid soap, and hygienic hand-drying supplies.',
-    risk: 'Missing soap or towels forces staff to skip handwashing or use contaminated aprons/cloths to dry hands.',
-    action: 'Restock liquid soap and paper towels immediately; unblock sink access; report plumbing issues for rapid repair.',
-    outletType: 'all'
+    why: 'Staff cannot follow handwashing protocols if designated sinks are blocked, dry, or missing soap and tissue.',
+    what: ['Check each dedicated handwash basin in kitchen, bar, and dishwashing areas.', 'Verify uninterrupted running potable water, antibacterial liquid soap in dispensers, and single-use tissue or air dryers.', 'Ensure handwash sink is not used for dishwashing or food prep.'],
+    standard: 'Dedicated handwash basins must be accessible, unobstructed, and continuously stocked with running water, liquid soap, and hygienic tissue supplies.',
+    risk: 'Missing soap or tissue forces staff to skip handwashing or use contaminated aprons/cloths to dry hands.',
+    action: 'Restock liquid soap and paper tissue immediately; unblock sink access; report plumbing issues for rapid repair.',
+    outletType: 'all',
+    complianceRequirement: 'mandatory'
   },
   {
     id: 6,
@@ -129,15 +131,16 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     id: 7,
     code: 'FS28-08',
     category: 'Personal hygiene & training',
-    title: 'Food safety training: FoSTaC certified supervisor and staff food-hygiene training',
+    title: 'Food safety training: FoSTaC certified (optional) supervisor and staff food-hygiene training',
     frequency: 'Daily',
     input: 'scale_1_5',
-    why: 'Staff lacking accredited food safety training fail to recognize cross-contamination hazards, temperature danger zones, and safe allergen handling.',
-    what: ['Verify presence of at least one certified Food Safety Supervisor (FoSTaC) on premises during shifts.', 'Check that training certificates and induction records for kitchen handlers are documented and within valid renewal cycle.'],
-    standard: 'Under FSSAI regulations, every licensed food business must have at least one trained FoSTaC Food Safety Supervisor for every 25 food handlers.',
-    risk: 'Untrained handlers commit critical food safety errors (inadequate cooking, cross-contamination, poor allergen segregation).',
-    action: 'Enrol untrained supervisors and staff in accredited FoSTaC training programs; conduct immediate internal supervisor briefing.',
-    outletType: 'all'
+    why: 'Staff food safety training is desirable and recommended to build kitchen hygiene awareness and prevent errors.',
+    what: ['Verify presence of trained or FoSTaC certified supervisor (desirable/recommended).', 'Review internal induction and hygiene awareness records for kitchen handlers.'],
+    standard: 'Food safety training is desirable and recommended for supervisors and handlers to reinforce hygienic practices.',
+    risk: 'Lack of basic hygiene awareness can lead to poor temperature control or allergen segregation.',
+    action: 'Encourage enrollment in desirable FoSTaC training programs; conduct routine internal hygiene briefing.',
+    outletType: 'all',
+    complianceRequirement: 'desirable'
   },
   {
     id: 8,
