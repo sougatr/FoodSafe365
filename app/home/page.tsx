@@ -11,15 +11,10 @@ import {
   Thermometer,
   Users,
   AlertTriangle,
-  History,
   Home as HomeIcon,
-  Sparkles,
   QrCode,
   Store,
   Wrench,
-  Bluetooth,
-  Cpu,
-  ChevronRight,
   Award
 } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
@@ -35,72 +30,6 @@ import ThemeToggle from '@/components/ThemeToggle';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useLanguage } from '@/lib/vernacular';
 import GlobalHeader from '@/components/GlobalHeader';
-
-const learning = [
-  {
-    href: '/providers',
-    icon: Sparkles,
-    eyebrow: 'ON-DEMAND PARTNERS',
-    title: 'FoodSafe Services Hub',
-    text: 'On-demand compliance partners: Book 6-monthly medical & stool test camps, FoSTaC training, pest control, and HVAC repair.',
-    bg: '#ecfdf5',
-    color: '#059669'
-  },
-  {
-    href: '/checklist',
-    icon: ClipboardCheck,
-    eyebrow: 'DAILY PROTOCOL',
-    title: '29 Essential Safeguards',
-    text: '29 operational safeguards engineered for daily kitchen discipline, zero contamination, and continuous audit readiness.',
-    bg: '#f0fdf4',
-    color: '#16a34a'
-  },
-  {
-    href: '/food-safety-why',
-    icon: ShieldCheck,
-    eyebrow: 'LEARN WHY',
-    title: 'Food Safety — Why?',
-    text: 'Understand why each control matters and how missing a control can affect food safety.',
-    bg: '#eff6ff',
-    color: '#2563eb'
-  },
-  {
-    href: '/food-safety-framework',
-    icon: BookOpen,
-    eyebrow: 'UNDERSTAND THE SYSTEM',
-    title: 'Food Safety Framework',
-    text: 'See how operational checks, temperature controls and HACCP fit together.',
-    bg: '#faf5ff',
-    color: '#7c3aed'
-  },
-  {
-    href: '/temperature-controls',
-    icon: Thermometer,
-    eyebrow: 'TEMPERATURE',
-    title: 'Temperature Controls',
-    text: 'Understand safe storage, cooking, cooling, reheating and holding controls.',
-    bg: '#fffbeb',
-    color: '#d97706'
-  },
-  {
-    href: '/haccp',
-    icon: ShieldCheck,
-    eyebrow: 'HAZARD CONTROL',
-    title: 'HACCP Principles',
-    text: 'Learn the international framework used to identify and control food-safety hazards.',
-    bg: '#fef2f2',
-    color: '#dc2626'
-  },
-  {
-    href: '/records',
-    icon: History,
-    eyebrow: 'AUDIT EVIDENCE',
-    title: 'Records & History',
-    text: 'Review daily checks, manager reviews, corrective actions, and verifiable audit trail.',
-    bg: '#f8fafc',
-    color: '#475569'
-  },
-];
 
 export default function Home() {
   const { lang, t } = useLanguage();
@@ -309,51 +238,39 @@ export default function Home() {
               borderRadius: 20,
               textTransform: 'uppercase'
             }}>
-              Investigative Dispatch · Food Safety Reality Check
+              Core Purpose · Food Safety In Action
             </span>
-            <span style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Special Feature for Restaurateurs &amp; Operators</span>
           </div>
 
-          <h2 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', margin: '0 0 12px', lineHeight: 1.3 }}>
-            The Mumbai Wake-Up Call: Why Even Iconic Kitchens Face Sudden FDA Padlocks
-          </h2>
+          <p style={{ fontSize: 16.5, lineHeight: 1.65, color: '#1e293b', fontWeight: 600, margin: '0 0 16px' }}>
+            Behind every safe meal is a kitchen that gets the small things right, every day. FoodSafe365 turns food-safety practices into simple daily actions—helping businesses deliver safer, more wholesome food to the community.
+          </p>
 
-          <div style={{ fontSize: 15, lineHeight: 1.7, color: '#334155' }}>
-            <p style={{ margin: '0 0 12px' }}>
-              When the Maharashtra FDA swept through Mumbai’s dining hubs—serving suspension notices and temporary closures to century-old heritage landmarks in Colaba, high-profile fine dines in Mahalaxmi, exclusive sports clubs, and buzzing cloud kitchens—the shockwaves reverberated across the industry.
-            </p>
-            <p style={{ margin: '0 0 12px' }}>
-              Yet, read through the inspectors&apos; official charge sheets and an unsettling truth becomes clear: <strong>not a single establishment was shut down because their chef lacked culinary flair or their recipes disappointed patrons.</strong>
-            </p>
-            <p style={{ margin: '0 0 14px' }}>
-              They were padlocked over mundane, preventable back-of-house breakdowns: reach-in chillers running at a lukewarm 8°C to 10°C (straight into the danger zone); live cockroach trails nesting behind motor housings; waterlogged, grease-choked floor drains; open waste bins; and kitchen handlers working without mandatory 6-month medical check-ups (Form 1A), stool pathogen clearances, or certified FoSTaC supervisors.
-            </p>
-            <div style={{
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: 14,
-              padding: '16px 20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 16,
-              flexWrap: 'wrap'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: 24 }}>💡</span>
-                <span style={{ fontSize: 13, color: '#1e293b', fontWeight: 600, lineHeight: 1.5 }}>
-                  <strong>{lang === 'hi' ? 'वास्तविक सच्चाई:' : lang === 'mr' ? 'उद्योगातील वास्तव:' : 'The Industry Reality:'}</strong>{' '}
-                  {lang === 'hi'
-                    ? 'खाद्य सुरक्षा निरीक्षक यह नहीं देखते कि आपका खाना कितना स्वादिष्ट है; वे आपके वॉक-इन कूलर का तापमान और कड़छी संभालने वाले स्टाफ के मेडिकल सर्टिफिकेट चेक करते हैं। एक अनियंत्रित फ्रिज या गंदी नाली 15 मिनट में 50 साल की साख को बर्बाद कर सकती है।'
-                    : lang === 'mr'
-                    ? 'अन्न सुरक्षा निरीक्षक तुमचे जेवण किती चवदार आहे हे तपासत नाहीत; ते तुमच्या वॉक-इन कुलरचे तापमान आणि कर्मचाऱ्यांचे वैद्यकीय प्रमाणपत्र तपासतात. एका अनियंत्रित फ्रीजमुळे किंवा अस्वच्छ ड्रेनेजमुळे ५० वर्षांची प्रतिष्ठा १५ मिनिटांत नष्ट होऊ शकते.'
-                    : 'Inspectors don’t audit how delicious your food is; they audit the temperature inside your walk-in and the health certs of the team holding the ladles. A single unmonitored fridge or an unwashed drain can undo 50 years of brand legacy in 15 minutes.'}
-                </span>
-              </div>
-              <Link href="/checklist" className="btn secondary" style={{ fontSize: 13, padding: '8px 18px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                View 29 Operational Safeguards <ArrowRight size={14} />
-              </Link>
+          <div style={{
+            background: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: 14,
+            padding: '14px 18px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 16,
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 22 }}>💡</span>
+              <span style={{ fontSize: 13, color: '#1e293b', fontWeight: 600, lineHeight: 1.5 }}>
+                <strong>{lang === 'hi' ? 'दैनिक अनुशासन:' : lang === 'mr' ? 'दैनिक शिस्त:' : 'Daily Discipline:'}</strong>{' '}
+                {lang === 'hi'
+                  ? '29 आवश्यक परिचालन सुरक्षा उपाय हर दिन आपकी रसोई को स्वच्छ और ऑडिट के लिए तैयार रखते हैं।'
+                  : lang === 'mr'
+                  ? '२९ आवश्यक परिचालन सुरक्षा उपाय दररोज तुमचे किचन स्वच्छ आणि ऑडिटसाठी सज्ज ठेवतात.'
+                  : '29 operational safeguards engineered for daily kitchen discipline, zero contamination, and continuous audit readiness.'}
+              </span>
             </div>
+            <Link href="/checklist" className="btn secondary" style={{ fontSize: 13, padding: '8px 18px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              View 29 Operational Safeguards <ArrowRight size={14} />
+            </Link>
           </div>
         </section>
 
@@ -514,123 +431,6 @@ export default function Home() {
                 </Link>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* Optional Modules */}
-        <section className="section-block" style={{ marginTop: 36, background: '#ffffff', padding: '28px 24px', borderRadius: 18, border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}>
-          <div className="section-title" style={{ display: 'block', marginBottom: 18 }}>
-            <span className="pill neutral" style={{ marginBottom: 6 }}>ADVANCED WORKFLOWS</span>
-            <h2 style={{ fontSize: 24, margin: '6px 0 6px' }}>Optional Modules</h2>
-          </div>
-
-          <div className="grid grid2">
-            {/* Unit QR Stickers */}
-            <div className="card" style={{ background: '#f8fafc', display: 'flex', gap: 16, alignItems: 'flex-start', border: '1px solid #e2e8f0' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: '#eef4ff', color: '#2563eb', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                <QrCode size={22} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6, flexWrap: 'wrap' }}>
-                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Tag Cold Units with QR Stickers</h3>
-                  <span className="pill neutral" style={{ fontSize: 10, padding: '3px 7px', background: '#eef4ff', color: '#2563eb' }}>Optional Workflow</span>
-                </div>
-                <p className="muted" style={{ fontSize: 13, lineHeight: 1.5, margin: 0 }}>
-                  Kitchen staff place unique QR stickers directly on walk-in chillers, reach-in freezers, and prep counters. By scanning the unit&apos;s QR tag with a smartphone camera, staff log temperatures directly at the unit with <strong>one tap</strong>—eliminating manual menu searching.
-                </p>
-                <div style={{ marginTop: 10, fontSize: 12, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <CheckCircle2 size={13} style={{ color: 'var(--green)' }} /> <span>Zero hardware cost; works on any staff phone</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Bluetooth Probes */}
-            <div className="card" style={{ background: '#f8fafc', display: 'flex', gap: 16, alignItems: 'flex-start', border: '1px solid #e2e8f0' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: '#fffbeb', color: '#d97706', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-                <Bluetooth size={22} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6, flexWrap: 'wrap' }}>
-                  <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Bluetooth IoT Temperature Probes</h3>
-                  <span className="pill attention" style={{ fontSize: 10, padding: '3px 7px' }}>Optional Hardware</span>
-                </div>
-                <p className="muted" style={{ fontSize: 13, lineHeight: 1.5, margin: 0 }}>
-                  Optional integration with wireless handheld Bluetooth food thermometers and ambient refrigeration probes. Core food temperatures (cooking, cooling, and hot holding) sync wirelessly into the FoodSafe365 digital log in real time—eliminating pen-and-paper transcription.
-                </p>
-                <div style={{ marginTop: 10, fontSize: 12, color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <CheckCircle2 size={13} style={{ color: 'var(--green)' }} /> <span>Automatic reading capture; completely optional for operations</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Guide Drawer */}
-          <details style={{ marginTop: 20, background: '#f8fafc', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 20px', cursor: 'pointer' }}>
-            <summary style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--green-dark)', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <BookOpen size={16} /> Optional Modules: Architecture, Zero Hardware Mandate &amp; Deployment Guide
-            </summary>
-            <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)', fontSize: 13.5, lineHeight: 1.6, color: '#4a5568' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-                <div style={{ background: '#ffffff', padding: 14, borderRadius: 10, border: '1px solid #e2ece6' }}>
-                  <strong style={{ display: 'block', color: 'var(--green-dark)', marginBottom: 6 }}>1. Zero Mandatory Hardware</strong>
-                  <p style={{ margin: 0, fontSize: 12.5 }}>
-                    Every core FoodSafe365 feature—including daily FSSAI Schedule 4 checks, manager reviews, and diner QR audits—functions 100% in any smartphone or tablet browser. No proprietary hardware purchase is ever required.
-                  </p>
-                </div>
-                <div style={{ background: '#ffffff', padding: 14, borderRadius: 10, border: '1px solid #e2ece6' }}>
-                  <strong style={{ display: 'block', color: 'var(--green-dark)', marginBottom: 6 }}>2. Cold Unit QR Stickers (Optional)</strong>
-                  <p style={{ margin: 0, fontSize: 12.5 }}>
-                    Outlets can print standard QR tags from the manager portal. Placing them on chillers, freezers, and bain-maries allows staff to scan and log that exact unit’s temperature with a single tap, eliminating menu searching.
-                  </p>
-                </div>
-                <div style={{ background: '#ffffff', padding: 14, borderRadius: 10, border: '1px solid #e2ece6' }}>
-                  <strong style={{ display: 'block', color: 'var(--green-dark)', marginBottom: 6 }}>3. Bluetooth IoT Probes (Optional)</strong>
-                  <p style={{ margin: 0, fontSize: 12.5 }}>
-                    For high-volume cloud kitchens or hotel banquets, wireless Bluetooth core probes sync food temperatures directly into digital logs via Web Bluetooth API, avoiding manual entry errors.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </details>
-        </section>
-
-        {/* Learning Cards (Swiggy / Urban Company Service Tiles) */}
-        <section className="section-block">
-          <div className="section-title">
-            <div>
-              <p className="eyebrow">START HERE</p>
-              <h2>Food safety learning &amp; controls</h2>
-              <p className="muted">Everything the supervisor and team need to understand what to check and why.</p>
-            </div>
-          </div>
-          <div className="grid grid2">
-            {learning.map(({ href, icon: Icon, eyebrow, title, text, bg, color }) => (
-              <Link href={href} className="card link-card interactive" key={href} style={{
-                display: 'flex',
-                gap: 16,
-                alignItems: 'center',
-                padding: '20px 22px'
-              }}>
-                <div style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 14,
-                  background: bg,
-                  color: color,
-                  display: 'grid',
-                  placeItems: 'center',
-                  flexShrink: 0
-                }}>
-                  <Icon size={22} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p className="eyebrow" style={{ fontSize: 11, marginBottom: 4 }}>{eyebrow}</p>
-                  <h3 style={{ margin: '0 0 4px', fontSize: 16.5, fontWeight: 800, color: '#0f172a' }}>{title}</h3>
-                  <p className="muted" style={{ margin: 0, fontSize: 13, lineHeight: 1.45 }}>{text}</p>
-                </div>
-                <ChevronRight size={18} style={{ color: '#94a3b8', flexShrink: 0 }} />
-              </Link>
-            ))}
           </div>
         </section>
 
