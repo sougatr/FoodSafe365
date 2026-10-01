@@ -42,8 +42,8 @@ export default function GlobalHeader() {
 
   return (
     <header className="topbar" style={{
-      borderBottom: '1px solid var(--border, #e2e8f0)',
-      background: 'var(--surface, #ffffff)',
+      borderBottom: '1px solid var(--border, rgba(251, 146, 60, 0.22))',
+      background: 'var(--surface, #341105)',
       position: 'sticky',
       top: 0,
       zIndex: 50
@@ -62,11 +62,11 @@ export default function GlobalHeader() {
             color: '#fff',
             fontWeight: 800,
             fontSize: 14,
-            boxShadow: '0 2px 4px rgba(5,150,105,0.2)'
+            boxShadow: '0 2px 4px rgba(5,150,105,0.4)'
           }}>
             FS
           </div>
-          <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--text, #0f172a)' }}>FoodSafe365</span>
+          <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--text, #ffffff)' }}>FoodSafe365</span>
         </Link>
 
         {/* Global Persistent Navigation (Required across all pages) */}
@@ -80,11 +80,11 @@ export default function GlobalHeader() {
                 style={{
                   fontSize: 13,
                   fontWeight: isActive ? 700 : 500,
-                  color: isActive ? 'var(--green, #059669)' : 'var(--muted, #64748b)',
+                  color: isActive ? '#34d399' : 'var(--muted, #fed7aa)',
                   textDecoration: 'none',
                   padding: '6px 10px',
                   borderRadius: 6,
-                  background: isActive ? 'rgba(5,150,105,0.08)' : 'transparent',
+                  background: isActive ? 'rgba(16,185,129,0.18)' : 'transparent',
                   transition: 'all 0.15s ease'
                 }}
               >
@@ -101,13 +101,13 @@ export default function GlobalHeader() {
               display: 'inline-flex',
               alignItems: 'center',
               gap: 6,
-              background: '#f0fdf4',
-              border: '1px solid #86efac',
+              background: 'rgba(16, 185, 129, 0.2)',
+              border: '1px solid rgba(52, 211, 153, 0.4)',
               padding: '4px 10px',
               borderRadius: 9999,
               fontSize: 12
             }}>
-              <span style={{ color: '#166534', fontWeight: 700 }}>
+              <span style={{ color: '#34d399', fontWeight: 700 }}>
                 📱 +91 {customerPhone.length > 5 ? customerPhone.slice(0, 5) + '...' : customerPhone}
               </span>
               <button
@@ -116,7 +116,7 @@ export default function GlobalHeader() {
                 style={{
                   background: 'none',
                   border: 'none',
-                  color: '#dc2626',
+                  color: '#f87171',
                   fontSize: 11,
                   fontWeight: 800,
                   cursor: 'pointer',
@@ -147,7 +147,7 @@ export default function GlobalHeader() {
                 color: '#ffffff',
                 fontWeight: 700,
                 cursor: 'pointer',
-                boxShadow: '0 2px 6px rgba(255, 82, 0, 0.25)'
+                boxShadow: '0 2px 6px rgba(255, 82, 0, 0.35)'
               }}
               title="Customer Login with Mobile OTP"
             >
@@ -173,15 +173,15 @@ export default function GlobalHeader() {
               fontSize: 13,
               padding: '6px 12px',
               borderRadius: 8,
-              border: '1px solid #a7f3d0',
-              background: '#ecfdf5',
-              color: '#065f46',
+              border: '1px solid rgba(52, 211, 153, 0.4)',
+              background: 'rgba(16, 185, 129, 0.18)',
+              color: '#34d399',
               fontWeight: 600,
               cursor: 'pointer'
             }}
             title="Ask food safety & compliance AI questions"
           >
-            <Bot size={15} style={{ color: '#059669' }} />
+            <Bot size={15} style={{ color: '#34d399' }} />
             <span>Ask Me</span>
           </button>
         </div>

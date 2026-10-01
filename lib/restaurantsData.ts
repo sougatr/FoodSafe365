@@ -1,7 +1,7 @@
 export interface RestaurantItem {
   id: string;
   name: string;
-  city: 'mumbai' | 'delhi' | 'bengaluru' | 'pan-india';
+  city: 'mumbai' | 'delhi' | 'bengaluru' | 'kolkata' | 'hyderabad' | 'agra' | 'chandigarh' | 'jaipur' | 'pan-india' | string;
   location: string;
   tableCode: string;
   cuisine: string;
@@ -761,6 +761,628 @@ export const POPULAR_RESTAURANTS: RestaurantItem[] = [
       cold: { title: 'Grill Core ≥ 75°C', subtitle: 'Hot Meat Inspection' },
       medical: { title: '100% Medical', subtitle: 'Kitchen Crew Tested' },
       pest: { title: 'Pest Safe', subtitle: 'Sanitized Nightly' }
+    }
+  },
+
+  // --- KOLKATA DINING & SWIGGY ICONS ---
+  {
+    id: 'peter-cat-kolkata',
+    name: 'Peter Cat',
+    city: 'kolkata',
+    location: 'Park Street, Kolkata',
+    tableCode: 'Table QR #07',
+    cuisine: 'Iconic Chelo Kebab, Sizzlers & Continental Classic',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.9',
+    reviews: 1850,
+    lastCheck: 'Today, 10:30 AM',
+    signals: {
+      cold: { title: 'Butter & Meat < 4°C', subtitle: 'Cold Chain Maintained' },
+      medical: { title: '100% Medical', subtitle: 'Form 1A Certified' },
+      pest: { title: 'Pest Safe', subtitle: 'Zero Pest Activity' }
+    }
+  },
+  {
+    id: 'mocambo-kolkata',
+    name: 'Mocambo',
+    city: 'kolkata',
+    location: 'Park Street, Kolkata',
+    tableCode: 'Table QR #11',
+    cuisine: 'Heritage Devilled Crab, Beckti Bell Vue & Steaks',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 1420,
+    lastCheck: 'Today, 09:45 AM',
+    signals: {
+      cold: { title: 'Seafood Chilled < 2°C', subtitle: 'Ice Slush Stored' },
+      medical: { title: '100% Medical', subtitle: 'Stool Test Cleared' },
+      pest: { title: 'Pest Safe', subtitle: 'Nightly Pest Trap Check' }
+    }
+  },
+  {
+    id: 'flurys-kolkata',
+    name: 'Flurys Tearoom & Confectionery',
+    city: 'kolkata',
+    location: 'Park Street, Kolkata',
+    tableCode: 'Table QR #03',
+    cuisine: 'English Breakfast, Rum Balls, Viennese Pastries & Coffee',
+    category: 'iconic_cafe',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 1640,
+    lastCheck: 'Today, 08:00 AM',
+    signals: {
+      cold: { title: 'Dairy & Cream < 4°C', subtitle: 'Bakery Chillers OK' },
+      medical: { title: '100% Medical', subtitle: 'All Bakers Certified' },
+      pest: { title: 'Pest Safe', subtitle: 'Bakery Fly-Traps Active' }
+    }
+  },
+  {
+    id: 'arsalan-kolkata',
+    name: 'Arsalan',
+    city: 'kolkata',
+    location: 'Park Circus & Ripon Street, Kolkata',
+    tableCode: 'Table QR #18',
+    cuisine: 'Kolkata Mutton Biryani, Chicken Chaap & Firni',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 3200,
+    lastCheck: 'Today, 11:00 AM',
+    signals: {
+      cold: { title: 'Dum Handi Core ≥ 80°C', subtitle: 'Piping Hot Safe Temp' },
+      medical: { title: '100% Medical', subtitle: 'Staff Health Screened' },
+      pest: { title: 'Pest Safe', subtitle: 'Clean Grease Traps' }
+    }
+  },
+  {
+    id: 'aminia-kolkata',
+    name: 'Aminia',
+    city: 'kolkata',
+    location: 'New Market & Golpark, Kolkata',
+    tableCode: 'Table QR #09',
+    cuisine: 'Classic Kolkata Awadhi Biryani, Rezala & Kebabs',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.7',
+    reviews: 2150,
+    lastCheck: 'Today, 10:15 AM',
+    signals: {
+      cold: { title: 'Cold Room < 4°C', subtitle: 'Meat Stored Separately' },
+      medical: { title: '100% Medical', subtitle: 'Form 1A Updated' },
+      pest: { title: 'Pest Safe', subtitle: 'Certified Monthly' }
+    }
+  },
+  {
+    id: 'shiraz-golden-kolkata',
+    name: 'Shiraz Golden Restaurant',
+    city: 'kolkata',
+    location: 'Mullick Bazar, Park Street Ext., Kolkata',
+    tableCode: 'Table QR #14',
+    cuisine: 'Legendary Mutton Chaap, Shahi Biryani & Parathas',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.7',
+    reviews: 1390,
+    lastCheck: 'Today, 10:45 AM',
+    signals: {
+      cold: { title: 'Raw Meat Bottom Shelf', subtitle: 'FSSAI Cross-Contam OK' },
+      medical: { title: '100% Medical', subtitle: 'Medical Checkups 6-mo' },
+      pest: { title: 'Pest Safe', subtitle: 'Insect Killers On' }
+    }
+  },
+  {
+    id: '6-ballygunge-place',
+    name: '6 Ballygunge Place',
+    city: 'kolkata',
+    location: 'Ballygunge & Sector V, Kolkata',
+    tableCode: 'Table QR #05',
+    cuisine: 'Traditional Bengali Daab Chingri, Kosha Mangsho & Bhetki Paturi',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.9',
+    reviews: 1670,
+    lastCheck: 'Today, 09:30 AM',
+    signals: {
+      cold: { title: 'Mustard Pastes Chilled', subtitle: 'Fresh Prep < 5°C' },
+      medical: { title: '100% Medical', subtitle: 'Staff Stool Tests Done' },
+      pest: { title: 'Pest Safe', subtitle: 'Kitchen Walls Sanitized' }
+    }
+  },
+  {
+    id: 'kusum-rolls-kolkata',
+    name: 'Kusum Rolls',
+    city: 'kolkata',
+    location: 'Park Street, Kolkata',
+    tableCode: 'Counter QR #01',
+    cuisine: 'Iconic Kolkata Kathi Rolls, Egg-Chicken & Paneer Rolls',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 2450,
+    lastCheck: 'Today, 11:30 AM',
+    signals: {
+      cold: { title: 'Tawa Heat > 120°C', subtitle: 'Fresh Cooked On-Order' },
+      medical: { title: '100% Medical', subtitle: 'Handlers Wear Gloves' },
+      pest: { title: 'Pest Safe', subtitle: 'Clean Prep Counters' }
+    }
+  },
+  {
+    id: 'oudh-1590-kolkata',
+    name: 'Oudh 1590',
+    city: 'kolkata',
+    location: 'Deshapriya Park & Salt Lake, Kolkata',
+    tableCode: 'Table QR #06',
+    cuisine: 'Period Dining Awadhi Biryani, Galawati Kebab & Raan',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 1290,
+    lastCheck: 'Today, 10:00 AM',
+    signals: {
+      cold: { title: 'Slow-Cooked > 85°C', subtitle: 'Copper Handi Sealed' },
+      medical: { title: '100% Medical', subtitle: 'FoSTaC Certified Super' },
+      pest: { title: 'Pest Safe', subtitle: 'Bait Stations Clean' }
+    }
+  },
+  {
+    id: 'balaram-mullick-kolkata',
+    name: 'Balaram Mullick & Radharaman Mullick',
+    city: 'kolkata',
+    location: 'Bhowanipore & Ballygunge, Kolkata',
+    tableCode: 'Counter QR #02',
+    cuisine: 'Century-Old Mishti Doi, Baked Rosogolla, Sandesh & Sweets',
+    category: 'iconic_cafe',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.9',
+    reviews: 3100,
+    lastCheck: 'Today, 08:30 AM',
+    signals: {
+      cold: { title: 'Chilled Displays < 4°C', subtitle: 'Milk Products Safe' },
+      medical: { title: '100% Medical', subtitle: 'Sweetmakers Form 1A' },
+      pest: { title: 'Pest Safe', subtitle: 'Fly-Screens Intact' }
+    }
+  },
+
+  // --- HYDERABAD DINING & SWIGGY ICONS ---
+  {
+    id: 'paradise-biryani-hyderabad',
+    name: 'Paradise Biryani',
+    city: 'hyderabad',
+    location: 'Secunderabad & Hitec City, Hyderabad',
+    tableCode: 'Table QR #10',
+    cuisine: 'World Famous Hyderabadi Dum Biryani, Mirchi Ka Salan & Double Ka Meetha',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 4500,
+    lastCheck: 'Today, 11:15 AM',
+    signals: {
+      cold: { title: 'Dum Handi Core ≥ 82°C', subtitle: 'Thermal Probe Passed' },
+      medical: { title: '100% Medical', subtitle: 'Form 1A & Stool Cleared' },
+      pest: { title: 'Pest Safe', subtitle: 'Certified Commercial' }
+    }
+  },
+  {
+    id: 'bawarchi-hyderabad',
+    name: 'Bawarchi Restaurant',
+    city: 'hyderabad',
+    location: 'RTC X Roads, Hyderabad',
+    tableCode: 'Table QR #15',
+    cuisine: 'Authentic Hyderabadi Mutton Biryani, Boti Kebab & Tandoori',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 3890,
+    lastCheck: 'Today, 10:45 AM',
+    signals: {
+      cold: { title: 'Cold Storage < 3°C', subtitle: 'Fresh Marinated Meat' },
+      medical: { title: '100% Medical', subtitle: 'Staff Tested 6-mo' },
+      pest: { title: 'Pest Safe', subtitle: 'Kitchen Drain De-greased' }
+    }
+  },
+  {
+    id: 'shah-ghouse-hyderabad',
+    name: 'Shah Ghouse Cafe & Restaurant',
+    city: 'hyderabad',
+    location: 'Tolichowki & Charminar, Hyderabad',
+    tableCode: 'Table QR #12',
+    cuisine: 'Special Mutton Biryani, Irani Chai, Haleem & Paya',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.7',
+    reviews: 2980,
+    lastCheck: 'Today, 09:15 AM',
+    signals: {
+      cold: { title: 'Haleem Pot ≥ 85°C', subtitle: 'Continuous Core Heat' },
+      medical: { title: '100% Medical', subtitle: 'Form 1A Certified' },
+      pest: { title: 'Pest Safe', subtitle: 'Sanitized Daily' }
+    }
+  },
+  {
+    id: 'pista-house-hyderabad',
+    name: 'Pista House',
+    city: 'hyderabad',
+    location: 'Charminar & Gachibowli, Hyderabad',
+    tableCode: 'Table QR #08',
+    cuisine: 'GI-Tagged Hyderabadi Haleem, Zafrani Biryani & Bakery Delights',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 3410,
+    lastCheck: 'Today, 10:30 AM',
+    signals: {
+      cold: { title: 'Cold Room < 4°C', subtitle: 'Raw Ingredients Safe' },
+      medical: { title: '100% Medical', subtitle: 'All Handlers Certified' },
+      pest: { title: 'Pest Safe', subtitle: 'Pest Traps Monitored' }
+    }
+  },
+  {
+    id: 'cafe-niloufer-hyderabad',
+    name: 'Cafe Niloufer',
+    city: 'hyderabad',
+    location: 'Red Hills & Banjara Hills, Hyderabad',
+    tableCode: 'Table QR #04',
+    cuisine: 'Iconic Malai Chai, Osmania Biscuits, Bun Maska & Puffs',
+    category: 'iconic_cafe',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.9',
+    reviews: 4200,
+    lastCheck: 'Today, 07:45 AM',
+    signals: {
+      cold: { title: 'Dairy Chilled < 4°C', subtitle: 'Fresh Milk Storage' },
+      medical: { title: '100% Medical', subtitle: 'Bakers Form 1A' },
+      pest: { title: 'Pest Safe', subtitle: 'Spotless Counters' }
+    }
+  },
+  {
+    id: 'chutneys-hyderabad',
+    name: 'Chutneys',
+    city: 'hyderabad',
+    location: 'Banjara Hills & Jubilee Hills, Hyderabad',
+    tableCode: 'Table QR #09',
+    cuisine: 'Steam Dosa, Guntur Idli, 6 Assorted Fresh Chutneys & Thalis',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 2150,
+    lastCheck: 'Today, 08:30 AM',
+    signals: {
+      cold: { title: 'Chutneys Freshly Made', subtitle: 'Chilled < 5°C Batch' },
+      medical: { title: '100% Medical', subtitle: 'Supervisor FoSTaC' },
+      pest: { title: 'Pest Safe', subtitle: 'Zero Insect Activity' }
+    }
+  },
+  {
+    id: 'karachi-bakery-hyderabad',
+    name: 'Karachi Bakery',
+    city: 'hyderabad',
+    location: 'Mozamjahi Market & Banjara Hills, Hyderabad',
+    tableCode: 'Counter QR #03',
+    cuisine: 'Legendary Fruit Biscuits, Cashew Cookies, Plum Cake & Pastries',
+    category: 'iconic_cafe',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 3600,
+    lastCheck: 'Today, 09:00 AM',
+    signals: {
+      cold: { title: 'Bakery Chillers < 4°C', subtitle: 'Butter & Creams OK' },
+      medical: { title: '100% Medical', subtitle: 'Form 1A Current' },
+      pest: { title: 'Pest Safe', subtitle: 'Clean Packaging Hub' }
+    }
+  },
+  {
+    id: 'minerva-coffee-shop-hyderabad',
+    name: 'Minerva Coffee Shop',
+    city: 'hyderabad',
+    location: 'Himayatnagar & Somajiguda, Hyderabad',
+    tableCode: 'Table QR #06',
+    cuisine: 'Filter Coffee, Button Vada, Mysore Bonda & South Indian Meals',
+    category: 'iconic_cafe',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.7',
+    reviews: 1890,
+    lastCheck: 'Today, 08:15 AM',
+    signals: {
+      cold: { title: 'Fresh Batter Refrig < 5°C', subtitle: 'Controlled Ferm' },
+      medical: { title: '100% Medical', subtitle: 'Staff Hygiene Clean' },
+      pest: { title: 'Pest Safe', subtitle: 'Kitchen Drain Clean' }
+    }
+  },
+
+  // --- AGRA DINING & SWIGGY ICONS ---
+  {
+    id: 'peshawri-itc-mughal-agra',
+    name: 'Peshawri - ITC Mughal',
+    city: 'agra',
+    location: 'Fatehabad Road, Agra',
+    tableCode: 'Table QR #02',
+    cuisine: 'Royal Dal Bukhara, Sikandari Raan, Murgh Malai Kebab & Tandoori',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.9',
+    reviews: 980,
+    lastCheck: 'Today, 10:15 AM',
+    signals: {
+      cold: { title: 'Chiller Temp 2.8°C', subtitle: 'Cold Storage Verified' },
+      medical: { title: '100% Medical', subtitle: 'Hospital Grade Testing' },
+      pest: { title: 'Pest Safe', subtitle: 'Zero Pest Activity' }
+    }
+  },
+  {
+    id: 'pinch-of-spice-agra',
+    name: 'Pinch of Spice',
+    city: 'agra',
+    location: 'Wazirpura & Fatehabad Road, Agra',
+    tableCode: 'Table QR #08',
+    cuisine: 'Murg Boti Masala, Paneer Lababdar & North Indian Gourmet',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 1650,
+    lastCheck: 'Today, 10:45 AM',
+    signals: {
+      cold: { title: 'Cooked Food ≥ 76°C', subtitle: 'Core Probe Passed' },
+      medical: { title: '100% Medical', subtitle: 'Form 1A Certified' },
+      pest: { title: 'Pest Safe', subtitle: 'Kitchen UV Traps On' }
+    }
+  },
+  {
+    id: 'dasaprakash-agra',
+    name: 'Dasaprakash',
+    city: 'agra',
+    location: 'Meher Cinema Complex, Gwalior Road, Agra',
+    tableCode: 'Table QR #05',
+    cuisine: 'Pure Vegetarian South Indian Dosa, Thali & Ice Cream Desserts',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.7',
+    reviews: 1200,
+    lastCheck: 'Today, 08:45 AM',
+    signals: {
+      cold: { title: 'Sambhar Hot > 75°C', subtitle: 'Fresh Steam Station' },
+      medical: { title: '100% Medical', subtitle: 'Staff Screened' },
+      pest: { title: 'Pest Safe', subtitle: 'Screens All Closed' }
+    }
+  },
+  {
+    id: 'panchhi-petha-agra',
+    name: 'Panchhi Petha Store',
+    city: 'agra',
+    location: 'Hari Parbat & Sadar Bazar, Agra',
+    tableCode: 'Counter QR #01',
+    cuisine: 'Original Agra Petha, Kesar Petha, Paan Petha & Dalmoth',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 2890,
+    lastCheck: 'Today, 09:30 AM',
+    signals: {
+      cold: { title: 'Hygienic Sealed Pack', subtitle: 'Food-Grade Materials' },
+      medical: { title: '100% Medical', subtitle: 'Sweetmakers Cleared' },
+      pest: { title: 'Pest Safe', subtitle: 'Sealed Glass Counters' }
+    }
+  },
+  {
+    id: 'mama-chicken-agra',
+    name: 'Mama Chicken Mama Franky',
+    city: 'agra',
+    location: 'Sadar Bazar, Agra Cantt, Agra',
+    tableCode: 'Table QR #03',
+    cuisine: 'Famous Franky Rolls, Tandoori Chicken, Butter Chicken & Naans',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.7',
+    reviews: 1450,
+    lastCheck: 'Today, 11:30 AM',
+    signals: {
+      cold: { title: 'Tandoori Core ≥ 78°C', subtitle: 'Thoroughly Cooked' },
+      medical: { title: '100% Medical', subtitle: 'Clean Handwash Station' },
+      pest: { title: 'Pest Safe', subtitle: 'Pedal Bins Covered' }
+    }
+  },
+
+  // --- CHANDIGARH DINING & SWIGGY ICONS ---
+  {
+    id: 'pal-dhaba-chandigarh',
+    name: 'Pal Dhaba',
+    city: 'chandigarh',
+    location: 'Sector 28 D, Chandigarh',
+    tableCode: 'Table QR #09',
+    cuisine: 'Legendary Butter Chicken, Rogan Josh, Dal Makhani & Keema Naan',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 2750,
+    lastCheck: 'Today, 10:15 AM',
+    signals: {
+      cold: { title: 'Gravy Stored Hot > 75°C', subtitle: 'Danger Zone Prevented' },
+      medical: { title: '100% Medical', subtitle: 'Form 1A Certified' },
+      pest: { title: 'Pest Safe', subtitle: 'Floor Drains Clean' }
+    }
+  },
+  {
+    id: 'gopal-sweets-chandigarh',
+    name: 'Gopal Sweets',
+    city: 'chandigarh',
+    location: 'Sector 35 & Sector 8, Chandigarh',
+    tableCode: 'Table QR #12',
+    cuisine: 'Chole Bhature, Dhokla, Rasmalai, Kaju Katli & Punjabi Chaat',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 3100,
+    lastCheck: 'Today, 08:30 AM',
+    signals: {
+      cold: { title: 'Dairy & Sweets < 4°C', subtitle: 'Refrigerated Cases' },
+      medical: { title: '100% Medical', subtitle: 'Stool Test Cleared' },
+      pest: { title: 'Pest Safe', subtitle: 'Daily Pest Check' }
+    }
+  },
+  {
+    id: 'virgin-courtyard-chandigarh',
+    name: 'Virgin Courtyard',
+    city: 'chandigarh',
+    location: 'Sector 7 C, Chandigarh',
+    tableCode: 'Table QR #04',
+    cuisine: 'Mediterranean Italian Fine Dining, Wood-Fired Pizza & Pasta',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.9',
+    reviews: 1120,
+    lastCheck: 'Today, 10:45 AM',
+    signals: {
+      cold: { title: 'Cheese & Cold Cuts < 3°C', subtitle: 'Imported Chillers OK' },
+      medical: { title: '100% Medical', subtitle: 'Hospital Screened' },
+      pest: { title: 'Pest Safe', subtitle: 'Courtyard Pest Shield' }
+    }
+  },
+  {
+    id: 'nik-bakers-chandigarh',
+    name: 'Nik Baker\'s',
+    city: 'chandigarh',
+    location: 'Sector 9 & Sector 35, Chandigarh',
+    tableCode: 'Table QR #07',
+    cuisine: 'Gourmet Red Velvet, Bagels, Quiches, Shakes & Aussie Pastries',
+    category: 'iconic_cafe',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 2400,
+    lastCheck: 'Today, 09:00 AM',
+    signals: {
+      cold: { title: 'Bakery Chillers < 4°C', subtitle: 'Whipped Cream Safe' },
+      medical: { title: '100% Medical', subtitle: 'All Bakers Form 1A' },
+      pest: { title: 'Pest Safe', subtitle: 'Fly-Screens Intact' }
+    }
+  },
+  {
+    id: 'sindhi-sweets-chandigarh',
+    name: 'Sindhi Sweets',
+    city: 'chandigarh',
+    location: 'Sector 17, Chandigarh',
+    tableCode: 'Table QR #06',
+    cuisine: 'Pani Puri, Pav Bhaji, Pure Ghee Desi Sweets & Quick Bites',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.7',
+    reviews: 1850,
+    lastCheck: 'Today, 09:30 AM',
+    signals: {
+      cold: { title: 'Water Filtered RO Safe', subtitle: 'UV Purified Water' },
+      medical: { title: '100% Medical', subtitle: 'Handlers Form 1A' },
+      pest: { title: 'Pest Safe', subtitle: 'Kitchen Cleansed' }
+    }
+  },
+
+  // --- JAIPUR DINING & SWIGGY ICONS ---
+  {
+    id: 'lmb-jaipur',
+    name: 'LMB - Laxmi Mishtan Bhandar',
+    city: 'jaipur',
+    location: 'Johari Bazar, Jaipur',
+    tableCode: 'Table QR #08',
+    cuisine: 'Royal Rajasthani Thali, Paneer Ghewar, Pyaaz Kachori & Ker Sangri',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 2900,
+    lastCheck: 'Today, 08:45 AM',
+    signals: {
+      cold: { title: 'Pure Desi Ghee Tested', subtitle: 'FSSAI Oil Specs OK' },
+      medical: { title: '100% Medical', subtitle: 'Form 1A Certified' },
+      pest: { title: 'Pest Safe', subtitle: 'Zero Pest Activity' }
+    }
+  },
+  {
+    id: 'rawat-mishtan-jaipur',
+    name: 'Rawat Mishtan Bhandar',
+    city: 'jaipur',
+    location: 'Station Road, Jaipur',
+    tableCode: 'Table QR #11',
+    cuisine: 'World Famous Pyaaz Kachori, Mawa Kachori, Mirchi Vada & Sweets',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.9',
+    reviews: 4800,
+    lastCheck: 'Today, 07:30 AM',
+    signals: {
+      cold: { title: 'Frying Oil Polar Compounds Safe', subtitle: 'TPM < 25% Verified' },
+      medical: { title: '100% Medical', subtitle: 'Staff Medically Cleared' },
+      pest: { title: 'Pest Safe', subtitle: 'Nightly Fogging Active' }
+    }
+  },
+  {
+    id: 'chokhi-dhani-jaipur',
+    name: 'Chokhi Dhani',
+    city: 'jaipur',
+    location: '12 Miles, Tonk Road, Jaipur',
+    tableCode: 'Table QR #20',
+    cuisine: 'Authentic Rajasthani Village Thali, Dal Baati Churma & Bajre Ki Roti',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.9',
+    reviews: 3600,
+    lastCheck: 'Today, 11:00 AM',
+    signals: {
+      cold: { title: 'Chilled Storage < 4°C', subtitle: 'Milk & Curd Fresh' },
+      medical: { title: '100% Medical', subtitle: 'FoSTaC Supervisors' },
+      pest: { title: 'Pest Safe', subtitle: 'Resort Wide Traps' }
+    }
+  },
+  {
+    id: '1135-ad-jaipur',
+    name: '1135 AD - Amer Fort',
+    city: 'jaipur',
+    location: 'Amer Fort, Jaipur',
+    tableCode: 'Table QR #03',
+    cuisine: 'Royal Rajputana Laal Maas, Safed Maas, Murgh Tikka & Thalis',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.9',
+    reviews: 1350,
+    lastCheck: 'Today, 10:30 AM',
+    signals: {
+      cold: { title: 'Cold Room < 3°C', subtitle: 'Segregated Meat Storage' },
+      medical: { title: '100% Medical', subtitle: 'Hospital Certified' },
+      pest: { title: 'Pest Safe', subtitle: 'Heritage Enclosure Clean' }
+    }
+  },
+  {
+    id: 'handi-jaipur',
+    name: 'Handi Restaurant',
+    city: 'jaipur',
+    location: 'MI Road, Jaipur',
+    tableCode: 'Table QR #07',
+    cuisine: 'Famous Handi Meat, Rajasthani Laal Maas & Mughlai Tandoor',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.7',
+    reviews: 2100,
+    lastCheck: 'Today, 10:45 AM',
+    signals: {
+      cold: { title: 'Handi Core ≥ 80°C', subtitle: 'Safe Serving Temp' },
+      medical: { title: '100% Medical', subtitle: 'Form 1A Updated' },
+      pest: { title: 'Pest Safe', subtitle: 'Sanitized Daily' }
+    }
+  },
+  {
+    id: 'tapri-central-jaipur',
+    name: 'Tapri Central',
+    city: 'jaipur',
+    location: 'C-Scheme & Central Park, Jaipur',
+    tableCode: 'Table QR #05',
+    cuisine: 'Chai Ki Tapri, Bun Maska, Khakhra Pizza, Nachos & Rooftop Cafe',
+    category: 'iconic_cafe',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 3200,
+    lastCheck: 'Today, 08:00 AM',
+    signals: {
+      cold: { title: 'Milk Storage < 4°C', subtitle: 'Chilled Dairy' },
+      medical: { title: '100% Medical', subtitle: 'Staff Hairnets & Aprons' },
+      pest: { title: 'Pest Safe', subtitle: 'Spotless Open Kitchen' }
     }
   }
 ];
