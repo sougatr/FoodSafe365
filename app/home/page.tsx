@@ -579,162 +579,85 @@ export default function Home() {
           </div>
         </section>
 
-        {/* FoodSafe365's Three Key Competitive Moats */}
+        {/* FoodSafe365 Passport: The Architecture of Trust & 9 Customer Touchpoints */}
         <section className="section-block" style={{ marginTop: 44 }}>
-          <div className="section-title" style={{ display: 'block', marginBottom: 22 }}>
-            <span className="pill good" style={{ marginBottom: 8 }}>STRATEGIC ADVANTAGE</span>
-            <h2 style={{ fontSize: 28, margin: '8px 0 6px' }}>FoodSafe365’s Three Competitive Moats: The Architecture of Trust</h2>
-            <p className="muted" style={{ fontSize: 15.5, margin: 0, maxWidth: 840 }}>
-              Forget clunky binder checklists and forgotten paper logs. Here is how FoodSafe365 turns invisible back-of-house hygiene into your restaurant’s most powerful business engine:
-            </p>
+          <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 14, marginBottom: 20 }}>
+            <div>
+              <span className="pill good" style={{ marginBottom: 6 }}>FOODSAFE365 PASSPORT · THE FLYWHEEL OF TRUST</span>
+              <h2 style={{ fontSize: 26, margin: '6px 0 4px', color: '#0f172a' }}>
+                FoodSafe365 Passport: Show Customers How You Manage Food Safety
+              </h2>
+              <p className="muted" style={{ fontSize: 14.5, margin: 0, maxWidth: 840 }}>
+                Restaurant Daily Checks → FoodSafe365 Verification → Visible Food-Safety Record (Passport) → Consumer → Trust.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Link href="/showcase" className="btn primary" style={{ fontSize: 13, padding: '7px 16px' }}>
+                <Award size={15} /> Preview FoodSafe365 Passport
+              </Link>
+              <Link href="/qr/abc-restaurant" className="btn secondary" style={{ fontSize: 13, padding: '7px 14px' }}>
+                <QrCode size={15} /> Test Diner QR Flow
+              </Link>
+            </div>
           </div>
 
-          <div className="grid grid3">
-            {/* Moat 1 */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                <div className="icon-tile" style={{ width: 44, height: 44, borderRadius: 12, background: '#e9f7ef', color: 'var(--green)' }}>
-                  <QrCode size={22} />
-                </div>
-                <span className="pill good" style={{ fontSize: 11, padding: '4px 8px' }}>MOAT 01</span>
-              </div>
-              <p className="eyebrow" style={{ color: 'var(--green-dark)', fontWeight: 800 }}>
-                {lang === 'hi' ? 'सार्वजनिक विश्वास चक्र' : lang === 'mr' ? 'सार्वजनिक विश्वास चक्र' : 'PUBLIC TRUST FLYWHEEL'}
-              </p>
-              <h3 style={{ fontSize: 19, margin: '0 0 12px', color: '#0f172a' }}>
-                {lang === 'hi' ? 'स्वच्छ किचन से भरें टेबल' : lang === 'mr' ? 'स्वच्छ किचन, खचाखच भरलेले टेबल्स' : 'Turning Clean Kitchens into Packed Tables'}
-              </h3>
-              
-              <ul style={{ margin: '0 0 14px', paddingLeft: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
-                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
-                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'किचन-डोर पारदर्शिता:' : lang === 'mr' ? 'किचन-डोर पारदर्शकता:' : 'Kitchen-Door Transparency:'}</strong>{' '}
-                  {lang === 'hi'
-                    ? 'अंदरूनी स्वच्छता अनुशासन को सीधे ग्राहकों के भरोसे में बदलें।'
-                    : lang === 'mr'
-                    ? 'अंतर्गत स्वच्छता शिस्तीचे रूपांतर थेट ग्राहकांच्या विश्वासात करा.'
-                    : 'Turn back-of-house discipline into frontline diner trust.'}
-                </li>
-                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
-                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'लाइव टेबलटॉप QR प्रमाण:' : lang === 'mr' ? 'थेट टेबलटॉप QR पुरावा:' : 'Live Tabletop QR Proof:'}</strong>{' '}
-                  {lang === 'hi'
-                    ? 'ग्राहक स्कैन करके आज का प्रमाणित सुरक्षा बैज तुरंत देख सकते हैं।'
-                    : lang === 'mr'
-                    ? 'ग्राहक स्कॅन करून आजचा प्रमाणित सुरक्षा बॅज त्वरित तपासू शकतात.'
-                    : 'Diners scan to inspect today’s certified safety badge.'}
-                </li>
-                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
-                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'तत्काल प्रतिष्ठा सुरक्षा कवच:' : lang === 'mr' ? 'प्रतिष्ठा सुरक्षा कवच:' : 'Instant Reputation Firewall:'}</strong>{' '}
-                  {lang === 'hi'
-                    ? 'ग्राहकों की समस्या सीधे GM के फोन पर पहुंचेगी—2 मिनट में टेबल पर समाधान, सोशल मीडिया पर नहीं।'
-                    : lang === 'mr'
-                    ? 'ग्राहकांच्या तक्रारी थेट GM च्या फोनवर पोहोचतात—२ मिनिटांत जागेवरच निवारण, गुगल रिव्ह्यूवर नाही.'
-                    : 'Route guest concerns straight to your GM’s phone—resolved at the table in 2 minutes, never on Google Reviews.'}
-                </li>
-              </ul>
-
-              <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
-                <Link href="/diner" className="nav-link" style={{ color: 'var(--green-dark)', fontWeight: 700, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 5, padding: 0 }}>
-                  Explore Diner Trust Hub <ArrowRight size={14} />
-                </Link>
+          {/* 9 Customer Touchpoints Deployment Grid */}
+          <div className="card" style={{ background: '#ffffff', border: '1.5px solid #a7f3d0', borderRadius: 18, padding: '24px 28px', boxShadow: 'var(--shadow-sm)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <span style={{ fontSize: 24 }}>📍</span>
+              <div>
+                <h3 style={{ fontSize: 17, fontWeight: 800, margin: 0, color: '#0f172a' }}>
+                  Deploy Your FoodSafe365 Passport QR Across 9 Customer Touchpoints
+                </h3>
+                <p className="muted" style={{ margin: '2px 0 0', fontSize: 13 }}>
+                  Let customers scan and see your verified daily food-safety discipline at every stage of their dining journey:
+                </p>
               </div>
             </div>
 
-            {/* Moat 2 */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', border: '2px solid rgba(22,131,91,0.25)', background: '#fbfefc' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                <div className="icon-tile" style={{ width: 44, height: 44, borderRadius: 12, background: '#edf8f2', color: 'var(--green)' }}>
-                  <Store size={22} />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
+              {[
+                { icon: '🚪', title: '1. Restaurant Entrance', desc: 'Door decal or window plaque reassuring guests before they step in.' },
+                { icon: '📋', title: '2. Dine-In Menu', desc: 'Front page or footer QR corner so guests verify hygiene while choosing dishes.' },
+                { icon: '🪑', title: '3. Table Tent', desc: 'Acrylic standee on every table for instant diner safety rating & reviews.' },
+                { icon: '🥡', title: '4. Takeaway Packaging', desc: 'Stamp or sticker on carryout bags signaling kitchen cleanliness to go.' },
+                { icon: '🛵', title: '5. Delivery Bags', desc: 'Tamper-evident seal for Zomato & Swiggy orders guaranteeing safe transit.' },
+                { icon: '📦', title: '6. Food Containers', desc: 'Individual meal container lid seal certifying sealed, uncontaminated prep.' },
+                { icon: '🧾', title: '7. Bills & Receipts', desc: 'Printed at the bottom of the POS receipt with link to rate food safety.' },
+                { icon: '🌐', title: '8. Restaurant Website', desc: 'Live digital trust widget embedded directly on your ordering page.' },
+                { icon: '📱', title: '9. Social Media', desc: 'Instagram bio stamp and WhatsApp broadcast proof of daily audit passes.' },
+              ].map((t, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    background: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 12,
+                    padding: '14px 16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <span style={{ fontSize: 20 }}>{t.icon}</span>
+                    <strong style={{ fontSize: 13.5, color: '#0f172a' }}>{t.title}</strong>
+                  </div>
+                  <p className="muted" style={{ fontSize: 12, lineHeight: 1.45, margin: 0 }}>
+                    {t.desc}
+                  </p>
                 </div>
-                <span className="pill good" style={{ fontSize: 11, padding: '4px 8px' }}>MOAT 02</span>
-              </div>
-              <p className="eyebrow" style={{ color: 'var(--green-dark)', fontWeight: 800 }}>
-                {lang === 'hi' ? 'ऑन-डिमांड इकोसिस्टम' : lang === 'mr' ? 'ऑन-डिमांड इकोसिस्टम' : 'ON-DEMAND ECOSYSTEM'}
-              </p>
-              <h3 style={{ fontSize: 19, margin: '0 0 12px', color: '#0f172a' }}>
-                {lang === 'hi' ? 'सेवा मार्केटप्लेस ("कम्प्लायंस-एज-ए-सर्विस")' : lang === 'mr' ? 'सेवा मार्केटप्लेस ("कम्प्लायन्स-ॲज-अ-सर्व्हिस")' : 'The Service Marketplace ("Compliance-as-a-Service")'}
-              </h3>
-              
-              <ul style={{ margin: '0 0 14px', paddingLeft: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
-                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
-                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'क्लोज्ड-लूप समाधान:' : lang === 'mr' ? 'क्लोज्ड-लूप तोडगा:' : 'Closed-Loop Resolution:'}</strong>{' '}
-                  {lang === 'hi'
-                    ? 'सिर्फ खामियां न बताएं—एक टैप में उन्हें तुरंत ठीक करें।'
-                    : lang === 'mr'
-                    ? 'केवळ त्रुटी दाखवू नका—एका टॅपमध्ये त्यांची त्वरित दुरुस्ती करा.'
-                    : 'Don’t just detect violations—fix them immediately in one tap.'}
-                </li>
-                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
-                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'प्रमाणित पार्टनर नेटवर्क:' : lang === 'mr' ? 'प्रमाणित भागीदार नेटवर्क:' : 'Accredited Partner Network:'}</strong>{' '}
-                  {lang === 'hi'
-                    ? 'NABL मान्यता प्राप्त लैब, लाइसेंस प्राप्त पेस्ट कंट्रोल और 24/7 HVAC इंजीनियरों तक सीधी पहुंच।'
-                    : lang === 'mr'
-                    ? 'NABL मान्यताप्राप्त लॅब, परवानाधारक पेस्ट कंट्रोल आणि २४/७ HVAC इंजिनिअर्सशी थेट जोडणी.'
-                    : 'On-demand access to NABL medical labs, licensed pest exterminators, and 24/7 HVAC technicians.'}
-                </li>
-                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
-                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'ऑडिट की कोई चिंता नहीं:' : lang === 'mr' ? 'ऑडिटची कोणतीही चिंता नाही:' : 'Zero Audit Panic:'}</strong>{' '}
-                  {lang === 'hi'
-                    ? 'स्टाफ के 6-मासिक स्टूल टेस्ट, फॉर्म 1A और FoSTaC ट्रेनिंग नवीनीकरण की ऑटोमेटेड बुकिंग।'
-                    : lang === 'mr'
-                    ? 'कर्मचाऱ्यांच्या ६-महिन्यांच्या स्टूल टेस्ट, फॉर्म 1A आणि FoSTaC प्रशिक्षण नूतनीकरणाची स्वयंचलित बुकिंग.'
-                    : 'Automated dispatch for 6-month staff stool tests, Form 1A certificates, and FoSTaC training renewals.'}
-                </li>
-              </ul>
-
-              <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
-                <Link href="/providers" className="nav-link" style={{ color: 'var(--green-dark)', fontWeight: 700, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 5, padding: 0 }}>
-                  Browse Services Marketplace <ArrowRight size={14} />
-                </Link>
-              </div>
+              ))}
             </div>
 
-            {/* Moat 3 */}
-            <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                <div className="icon-tile" style={{ width: 44, height: 44, borderRadius: 12, background: '#e9f7ef', color: 'var(--green)' }}>
-                  <ShieldCheck size={22} />
-                </div>
-                <span className="pill good" style={{ fontSize: 11, padding: '4px 8px' }}>MOAT 03</span>
+            <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#047857', fontWeight: 600 }}>
+                <CheckCircle2 size={16} />
+                <span>Over 140+ verified diners rate restaurants monthly through FoodSafe365 tabletop QR codes.</span>
               </div>
-              <p className="eyebrow" style={{ color: 'var(--green-dark)', fontWeight: 800 }}>
-                {lang === 'hi' ? 'नियामक सुरक्षा कवच' : lang === 'mr' ? 'नियामक सुरक्षा कवच' : 'REGULATORY SHIELD'}
-              </p>
-              <h3 style={{ fontSize: 19, margin: '0 0 12px', color: '#0f172a' }}>
-                {lang === 'hi' ? 'अचूक सुरक्षा: हमेशा निरीक्षण के लिए तैयार' : lang === 'mr' ? 'अभेद्य संरक्षण: नेहमी तपासणीसाठी सज्ज' : 'Bulletproof Defense: Always Inspection-Ready'}
-              </h3>
-              
-              <ul style={{ margin: '0 0 14px', paddingLeft: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
-                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
-                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'FSSAI और HACCP अनुरूप:' : lang === 'mr' ? 'FSSAI व HACCP मानकांनुसार:' : 'FSSAI & HACCP Native:'}</strong>{' '}
-                  {lang === 'hi'
-                    ? 'FSSAI शेड्यूल 4 और अंतरराष्ट्रीय तापमान मानकों पर पूरी तरह आधारित।'
-                    : lang === 'mr'
-                    ? 'FSSAI शेड्युल ४ आणि आंतरराष्ट्रीय तापमान मानकांवर पूर्णपणे आधारित.'
-                    : 'Built strictly around statutory Schedule 4 mandates and thermal critical control limits.'}
-                </li>
-                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
-                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'छेड़छाड़-मुक्त डिजिटल ऑडिट ट्रेल:' : lang === 'mr' ? 'छेडछाड-मुक्त डिजिटल ऑडिट ट्रेल:' : 'Tamper-Evident Audit Trail:'}</strong>{' '}
-                  {lang === 'hi'
-                    ? 'कोल्ड चेन (<5°C), कुकिंग कोर (≥75°C) और स्वच्छता लॉग पर रियल-टाइम डिजिटल टाइमस्टैम्प।'
-                    : lang === 'mr'
-                    ? 'कोल्ड चेन (<५°C), कुकिंग कोअर (≥७५°C) आणि स्वच्छता नोंदींवर रिअल-टाइम डिजिटल टाइमस्टॅम्प.'
-                    : 'Real-time digital time-stamps on cold chain (< 5°C), cook core (≥ 75°C), and sanitary logs.'}
-                </li>
-                <li style={{ fontSize: 13, lineHeight: 1.5, color: '#334155' }}>
-                  <strong style={{ color: '#0f172a' }}>• {lang === 'hi' ? 'तत्काल निरीक्षण तैयारी:' : lang === 'mr' ? 'त्वरित तपासणी सज्जता:' : 'Zero-Notice Readiness:'}</strong>{' '}
-                  {lang === 'hi'
-                    ? 'अचानक आने वाले FDA निरीक्षकों को 30 सेकंड में पूर्ण डिजिटल अनुपालन फ़ाइल सौंपें।'
-                    : lang === 'mr'
-                    ? 'अचानक येणाऱ्या FDA अधिकाऱ्यांना ३० सेकंदांत संपूर्ण डिजिटल अनुपालन फाईल सादर करा.'
-                    : 'Hand unannounced FDA inspectors an airtight, verifiable compliance dossier in 30 seconds.'}
-                </li>
-              </ul>
-
-              <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
-                <Link href="/food-safety-framework" className="nav-link" style={{ color: 'var(--green-dark)', fontWeight: 700, fontSize: 13, display: 'inline-flex', alignItems: 'center', gap: 5, padding: 0 }}>
-                  View Compliance Framework <ArrowRight size={14} />
-                </Link>
-              </div>
+              <Link href="/showcase" className="btn secondary" style={{ fontSize: 12.5, padding: '6px 14px' }}>
+                Print Official FoodSafe365 QR Passport Kit →
+              </Link>
             </div>
           </div>
         </section>

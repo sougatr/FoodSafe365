@@ -172,25 +172,17 @@ export default function ShowcasePage() {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <span className="pill good" style={{ fontSize: 11, padding: '3px 9px' }}>
-                  ★ {lang === 'hi' ? 'दैनिक ग्राहक बैज' : lang === 'mr' ? 'दैनिक ग्राहक बॅज' : 'DAILY DINER BADGE'}
+                  ★ FOODSAFE365 PASSPORT
                 </span>
                 <span style={{ fontSize: 13, color: 'var(--muted, #64748b)' }}>
                   {todayFormatted}
                 </span>
               </div>
               <h1 style={{ fontSize: 22, fontWeight: 900, margin: '2px 0 4px', color: 'var(--text, #0f172a)' }}>
-                {lang === 'hi'
-                  ? 'FoodSafetyGreen™ दैनिक सत्यापन बैज'
-                  : lang === 'mr'
-                  ? 'FoodSafetyGreen™ दैनिक प्रमाणन बॅज'
-                  : 'FoodSafetyGreen™ Daily Verified Showcase'}
+                FoodSafe365 Passport &amp; Daily Food Safety Badge
               </h1>
               <p style={{ margin: 0, fontSize: 13.5, color: 'var(--muted, #64748b)' }}>
-                {lang === 'hi'
-                  ? 'डाइनर्स और FDA निरीक्षकों के लिए टेबल स्टैंडी, विंडो स्टिकर और सोशल प्रूफ'
-                  : lang === 'mr'
-                  ? 'ग्राहक आणि FDA निरीक्षकांसाठी टेबल स्टॅन्डी, विंडो स्टिकर व सोशल प्रूफ'
-                  : 'High-visibility digital certificate, printable acrylic table standee, and social proof'}
+                Restaurant → FoodSafe365 → Visible Food-Safety Record (Passport) → Consumer → Trust
               </p>
             </div>
 
@@ -673,42 +665,34 @@ export default function ShowcasePage() {
           borderRadius: 18,
           border: '1px solid var(--border, #e2e8f0)'
         }}>
-          <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 12px', color: 'var(--text, #0f172a)' }}>
-            💡 {lang === 'hi' ? 'इस बैज का उपयोग कैसे करें?' : lang === 'mr' ? 'या बॅजचा कसा वापर करावा?' : 'How to Showcase Your FoodSafetyGreen Badge?'}
+          <h3 style={{ fontSize: 17, fontWeight: 900, margin: '0 0 4px', color: 'var(--text, #0f172a)' }}>
+            📍 Deploy Your FoodSafe365 Passport QR Across 9 Customer Touchpoints
           </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-            <div style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-body, #475569)' }}>
-              <strong style={{ color: 'var(--text, #0f172a)', display: 'block', marginBottom: 4 }}>
-                1. 🪟 {lang === 'hi' ? 'प्रवेश द्वार स्टिकर / विंडो डिकल' : lang === 'mr' ? 'प्रवेशद्वार स्टिकर / विंडो डिकल' : 'Front Door / Window Decal'}
-              </strong>
-              {lang === 'hi'
-                ? 'A4 आकार में प्रिंट करें और रेस्तरां के मुख्य दरवाजे या रिसेप्शन पर लगाएं ताकि आने वाले ग्राहक और FDA अधिकारी तुरंत देख सकें।'
-                : lang === 'mr'
-                ? 'A4 आकारावर प्रिंट करा आणि मुख्य दरवाजावर किंवा रिसेप्शनवर लावा, जेणेकरून येणारे ग्राहक आणि FDA अधिकारी लगेच पाहू शकतील.'
-                : 'Print on A4 photo paper or transparent vinyl and mount on your entrance door or host podium.'}
-            </div>
-
-            <div style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-body, #475569)' }}>
-              <strong style={{ color: 'var(--text, #0f172a)', display: 'block', marginBottom: 4 }}>
-                2. 🍽️ {lang === 'hi' ? 'एक्रिलिक टेबल स्टैंडी (A5)' : lang === 'mr' ? 'ॲक्रेलिक टेबल स्टॅन्डी (A5)' : 'Acrylic Table Standee (A5)'}
-              </strong>
-              {lang === 'hi'
-                ? 'A5 आकार में प्रिंट कर टेबल टेंट में लगाएं। ग्राहक QR स्कैन करके निश्चिंत होकर खाना ऑर्डर करते हैं।'
-                : lang === 'mr'
-                ? 'A5 आकारावर प्रिंट करून टेबल टेंटमध्ये ठेवा. ग्राहक QR स्कॅन करून निर्धास्तपणे जेवणाचा आस्वाद घेतात.'
-                : 'Slide an A5 print into clear acrylic table tents on each dining table. Diners can scan the QR while waiting.'}
-            </div>
-
-            <div style={{ fontSize: 13, lineHeight: 1.6, color: 'var(--text-body, #475569)' }}>
-              <strong style={{ color: 'var(--text, #0f172a)', display: 'block', marginBottom: 4 }}>
-                3. 📱 {lang === 'hi' ? 'व्हाट्सएप व इंस्टाग्राम स्टोरी' : lang === 'mr' ? 'व्हॉट्सॲप व इन्स्टाग्राम स्टोरी' : 'WhatsApp & Instagram Stories'}
-              </strong>
-              {lang === 'hi'
-                ? 'दैनिक जांच पूरी होते ही "Share on WhatsApp" दबाएं और अपने ब्रॉडकास्ट ग्रुप और सोशल मीडिया पर शेयर करें।'
-                : lang === 'mr'
-                ? 'दैनिक तपासणी पूर्ण झाल्यावर "Share on WhatsApp" वर क्लिक करा आणि स्टेटसवर शेअर करा.'
-                : 'Share daily audit achievements with your food connoisseurs and regulars on WhatsApp and Instagram.'}
-            </div>
+          <p className="muted" style={{ margin: '0 0 16px', fontSize: 13 }}>
+            Restaurant → FoodSafe365 → Visible Food-Safety Record (Passport) → Consumer → Trust. Let customers scan and verify hygiene at every touchpoint:
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
+            {[
+              { icon: '🚪', title: '1. Restaurant Entrance', desc: 'Mount an A4 vinyl decal or window plaque near your main entrance or host desk so arriving diners know before entering.' },
+              { icon: '📋', title: '2. Dine-In Menu', desc: 'Print the QR passport code on the front cover or footer corner of printed menus so guests verify cleanliness while ordering.' },
+              { icon: '🪑', title: '3. Table Tent Standee', desc: 'Slide an A5 print into clear acrylic table tents on every dining table. Diners scan to view temperatures and rate safety.' },
+              { icon: '🥡', title: '4. Takeaway Packaging', desc: 'Stamp or sticker the FoodSafe365 Passport QR onto paper takeout bags, guaranteeing sanitary handling to go.' },
+              { icon: '🛵', title: '5. Delivery Bags', desc: 'Apply a tamper-evident seal for Zomato & Swiggy riders so online order customers know packaging was not opened in transit.' },
+              { icon: '📦', title: '6. Food Containers', desc: 'Affix tamper closure tape across curry bowls and meal boxes confirming sealed, uncontaminated kitchen prep.' },
+              { icon: '🧾', title: '7. Bills & Receipts', desc: 'Configure your POS billing thermal printer to print the FoodSafe365 Passport QR at the bottom of the bill receipt.' },
+              { icon: '🌐', title: '8. Restaurant Website', desc: 'Embed the FoodSafe365 digital live trust badge on your online ordering and catering booking website.' },
+              { icon: '📱', title: '9. Social Media', desc: 'Post daily audit passes on Instagram & WhatsApp status to build loyal community following and brand trust.' },
+            ].map((tp, idx) => (
+              <div key={idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px 14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <span style={{ fontSize: 20 }}>{tp.icon}</span>
+                  <strong style={{ fontSize: 13, color: '#0f172a' }}>{tp.title}</strong>
+                </div>
+                <p className="muted" style={{ fontSize: 12, lineHeight: 1.45, margin: 0 }}>
+                  {tp.desc}
+                </p>
+              </div>
+            ))}
           </div>
         </section>
       </div>
