@@ -15,7 +15,8 @@ import {
   Wine,
   Users,
   Hotel,
-  UtensilsCrossed
+  UtensilsCrossed,
+  Wrench
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
@@ -342,6 +343,92 @@ export default function Onboarding() {
             </div>
           </form>
 
+        </div>
+
+        {/* ACCREDITED PARTNERS: Found a problem? FoodSafe365 helps you fix it */}
+        <div className="card" style={{
+          marginTop: 24,
+          background: '#ffffff',
+          border: '1.5px solid #cbd5e1',
+          borderRadius: 20,
+          padding: '28px 32px',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 18 }}>
+            <div>
+              <span style={{
+                background: '#fef3c7',
+                color: '#92400e',
+                border: '1px solid #fde68a',
+                fontSize: 11,
+                fontWeight: 800,
+                padding: '3px 10px',
+                borderRadius: 9999,
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase'
+              }}>
+                ACCREDITED PARTNERS
+              </span>
+              <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: '6px 0 4px' }}>
+                Found a problem? FoodSafe365 helps you fix it.
+              </h2>
+              <p className="muted" style={{ margin: 0, fontSize: 13.5 }}>
+                Connect with verified service partners to resolve kitchen deviations, maintain equipment, and renew statutory health clearances:
+              </p>
+            </div>
+            <Link
+              href="/providers"
+              className="btn primary"
+              style={{
+                fontSize: 13,
+                padding: '8px 18px',
+                background: '#b45309',
+                borderColor: '#92400e'
+              }}
+            >
+              <Wrench size={15} /> Browse All 14 Provider Categories →
+            </Link>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
+            {[
+              { icon: '🪲', title: 'Pest Control Agencies', desc: 'Integrated pest management, numbered bait boxes & monthly service certificates.' },
+              { icon: '🧪', title: 'Food-testing laboratories', desc: 'NABL accredited food & water pathogen screening, swab tests, and chemical assays.' },
+              { icon: '❄️', title: 'Refrigeration/HVAC technicians', desc: '24/7 cold-chain repair, chiller thermostat calibration & kitchen exhaust maintenance.' },
+              { icon: '🩺', title: 'Occupational health providers', desc: 'Mandatory 6-monthly medical fitness checkups, Form 1A certificates & stool pathogen tests.' },
+            ].map((p, idx) => (
+              <div
+                key={idx}
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 12,
+                  padding: '14px 16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 24, marginBottom: 8 }}>{p.icon}</div>
+                  <strong style={{ fontSize: 14, color: '#0f172a', display: 'block', marginBottom: 4 }}>
+                    {p.title}
+                  </strong>
+                  <p className="muted" style={{ fontSize: 12.5, lineHeight: 1.45, margin: 0 }}>
+                    {p.desc}
+                  </p>
+                </div>
+                <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #f1f5f9' }}>
+                  <Link
+                    href={`/providers?category=${encodeURIComponent(p.title)}`}
+                    style={{ fontSize: 12, fontWeight: 700, color: '#b45309', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                  >
+                    Find Verified Partners <ArrowRight size={12} />
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </main>
