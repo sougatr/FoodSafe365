@@ -242,36 +242,9 @@ export default function Home() {
             </span>
           </div>
 
-          <p style={{ fontSize: 16.5, lineHeight: 1.65, color: '#1e293b', fontWeight: 600, margin: '0 0 16px' }}>
+          <p style={{ fontSize: 16.5, lineHeight: 1.65, color: '#1e293b', fontWeight: 600, margin: 0 }}>
             Behind every safe meal is a kitchen that gets the small things right, every day. FoodSafe365 turns food-safety practices into simple daily actions—helping businesses deliver safer, more wholesome food to the community.
           </p>
-
-          <div style={{
-            background: '#ffffff',
-            border: '1px solid #e2e8f0',
-            borderRadius: 14,
-            padding: '14px 18px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 16,
-            flexWrap: 'wrap'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 22 }}>💡</span>
-              <span style={{ fontSize: 13, color: '#1e293b', fontWeight: 600, lineHeight: 1.5 }}>
-                <strong>{lang === 'hi' ? 'दैनिक अनुशासन:' : lang === 'mr' ? 'दैनिक शिस्त:' : 'Daily Discipline:'}</strong>{' '}
-                {lang === 'hi'
-                  ? '29 आवश्यक परिचालन सुरक्षा उपाय हर दिन आपकी रसोई को स्वच्छ और ऑडिट के लिए तैयार रखते हैं।'
-                  : lang === 'mr'
-                  ? '२९ आवश्यक परिचालन सुरक्षा उपाय दररोज तुमचे किचन स्वच्छ आणि ऑडिटसाठी सज्ज ठेवतात.'
-                  : '29 operational safeguards engineered for daily kitchen discipline, zero contamination, and continuous audit readiness.'}
-              </span>
-            </div>
-            <Link href="/checklist" className="btn secondary" style={{ fontSize: 13, padding: '8px 18px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              View 29 Operational Safeguards <ArrowRight size={14} />
-            </Link>
-          </div>
         </section>
 
         {/* Operational Shift Fast-Track Checklists (2-3 Minutes Each — Designed to Match Kitchen Rhythm) */}
@@ -574,89 +547,6 @@ export default function Home() {
                 style={{ fontSize: 12.5, padding: '6px 12px', whiteSpace: 'nowrap' }}
               >
                 Open Admin Audit <ArrowRight size={13} />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* FoodSafe365 Passport: The Architecture of Trust & 9 Customer Touchpoints */}
-        <section className="section-block" style={{ marginTop: 44 }}>
-          <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 14, marginBottom: 20 }}>
-            <div>
-              <span className="pill good" style={{ marginBottom: 6 }}>FOODSAFE365 PASSPORT · THE FLYWHEEL OF TRUST</span>
-              <h2 style={{ fontSize: 26, margin: '6px 0 4px', color: '#0f172a' }}>
-                FoodSafe365 Passport: Show Customers How You Manage Food Safety
-              </h2>
-              <p className="muted" style={{ fontSize: 14.5, margin: 0, maxWidth: 840 }}>
-                Restaurant Daily Checks → FoodSafe365 Verification → Visible Food-Safety Record (Passport) → Consumer → Trust.
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <Link href="/showcase" className="btn primary" style={{ fontSize: 13, padding: '7px 16px' }}>
-                <Award size={15} /> Preview FoodSafe365 Passport
-              </Link>
-              <Link href="/qr/abc-restaurant" className="btn secondary" style={{ fontSize: 13, padding: '7px 14px' }}>
-                <QrCode size={15} /> Test Diner QR Flow
-              </Link>
-            </div>
-          </div>
-
-          {/* 9 Customer Touchpoints Deployment Grid */}
-          <div className="card" style={{ background: '#ffffff', border: '1.5px solid #a7f3d0', borderRadius: 18, padding: '24px 28px', boxShadow: 'var(--shadow-sm)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <span style={{ fontSize: 24 }}>📍</span>
-              <div>
-                <h3 style={{ fontSize: 17, fontWeight: 800, margin: 0, color: '#0f172a' }}>
-                  Deploy Your FoodSafe365 Passport QR Across 9 Customer Touchpoints
-                </h3>
-                <p className="muted" style={{ margin: '2px 0 0', fontSize: 13 }}>
-                  Let customers scan and see your verified daily food-safety discipline at every stage of their dining journey:
-                </p>
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
-              {[
-                { icon: '🚪', title: '1. Restaurant Entrance', desc: 'Door decal or window plaque reassuring guests before they step in.' },
-                { icon: '📋', title: '2. Dine-In Menu', desc: 'Front page or footer QR corner so guests verify hygiene while choosing dishes.' },
-                { icon: '🪑', title: '3. Table Tent', desc: 'Acrylic standee on every table for instant diner safety rating & reviews.' },
-                { icon: '🥡', title: '4. Takeaway Packaging', desc: 'Stamp or sticker on carryout bags signaling kitchen cleanliness to go.' },
-                { icon: '🛵', title: '5. Delivery Bags', desc: 'Tamper-evident seal for Zomato & Swiggy orders guaranteeing safe transit.' },
-                { icon: '📦', title: '6. Food Containers', desc: 'Individual meal container lid seal certifying sealed, uncontaminated prep.' },
-                { icon: '🧾', title: '7. Bills & Receipts', desc: 'Printed at the bottom of the POS receipt with link to rate food safety.' },
-                { icon: '🌐', title: '8. Restaurant Website', desc: 'Live digital trust widget embedded directly on your ordering page.' },
-                { icon: '📱', title: '9. Social Media', desc: 'Instagram bio stamp and WhatsApp broadcast proof of daily audit passes.' },
-              ].map((t, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    background: '#f8fafc',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: 12,
-                    padding: '14px 16px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                    <span style={{ fontSize: 20 }}>{t.icon}</span>
-                    <strong style={{ fontSize: 13.5, color: '#0f172a' }}>{t.title}</strong>
-                  </div>
-                  <p className="muted" style={{ fontSize: 12, lineHeight: 1.45, margin: 0 }}>
-                    {t.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#047857', fontWeight: 600 }}>
-                <CheckCircle2 size={16} />
-                <span>Over 140+ verified diners rate restaurants monthly through FoodSafe365 tabletop QR codes.</span>
-              </div>
-              <Link href="/showcase" className="btn secondary" style={{ fontSize: 12.5, padding: '6px 14px' }}>
-                Print Official FoodSafe365 QR Passport Kit →
               </Link>
             </div>
           </div>

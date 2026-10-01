@@ -1,73 +1,79 @@
 'use client';
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   QrCode,
-  Store,
   ShieldCheck,
   ArrowRight,
   CheckCircle2,
-  Users,
-  Sparkles,
   Wrench,
   Search,
   Star,
   MapPin,
   Award,
-  ChevronRight,
-  ExternalLink,
-  SlidersHorizontal,
-  Flame,
+  Thermometer,
+  UserCheck,
   Check
 } from 'lucide-react';
 import GlobalHeader from '@/components/GlobalHeader';
 
 export default function Landing() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState<'all' | 'mumbai' | 'delhi' | 'bengaluru'>('all');
 
   const SAMPLE_RESTAURANTS = [
     {
       id: 'abc-restaurant',
-      name: 'ABC Restaurant & Bar',
+      name: 'ABC Restaurant',
       city: 'mumbai',
       location: 'Bandra West, Mumbai',
+      tableCode: 'Table QR #04',
       cuisine: 'Multi-Cuisine · Dine-In & Bar',
-      badge: 'FOODSAFE TODAY',
-      badgeTone: 'good',
+      badge: 'FOODSAFE TODAY VERIFIED',
       score: '4.8',
       reviews: 142,
       lastCheck: 'Today, 09:15 AM',
-      safeguardsMet: ['Fridges < 5°C Verified', 'Zero Pest Signs', 'Staff Stool Tested', 'Safe RO Water'],
-      touchpoints: ['Table Tent', 'Menu QR', 'Delivery Bag Seal']
+      signals: {
+        cold: { title: 'Cold < 5°C', subtitle: 'Refrigeration OK' },
+        medical: { title: '100% Medical', subtitle: 'Stool Test Cleared' },
+        pest: { title: 'Pest Safe', subtitle: 'Inspected Weekly' }
+      }
     },
     {
       id: 'delhi-spice-hub',
       name: 'The Spice Pavilion',
       city: 'delhi',
       location: 'Connaught Place, New Delhi',
-      cuisine: 'North Indian & Mughlai Dine-in',
-      badge: 'FOODSAFE TODAY',
-      badgeTone: 'good',
+      tableCode: 'Table QR #12',
+      cuisine: 'North Indian & Mughlai Dine-In',
+      badge: 'FOODSAFE TODAY VERIFIED',
       score: '4.9',
       reviews: 98,
       lastCheck: 'Today, 10:00 AM',
-      safeguardsMet: ['Cooking Core ≥ 75°C', 'Safe RO Water & Clean Glasses', 'FoSTaC Certified', 'Color Cutting Boards'],
-      touchpoints: ['Entrance Plaque', 'Bills & Receipts', 'Table Tent']
+      signals: {
+        cold: { title: 'Cooked ≥ 75°C', subtitle: 'Core Temp Passed' },
+        medical: { title: '100% Medical', subtitle: 'Stool Test Cleared' },
+        pest: { title: 'Pest Safe', subtitle: 'Bait Stations Intact' }
+      }
     },
     {
       id: 'bengaluru-cafe-safe',
       name: 'GreenLeaf Artisan Bistro',
       city: 'bengaluru',
       location: 'Indiranagar, Bengaluru',
-      cuisine: 'Continental, Organic Salads & Bakery',
-      badge: 'FOODSAFE TODAY',
-      badgeTone: 'good',
+      tableCode: 'Table QR #08',
+      cuisine: 'Continental & Organic Salads',
+      badge: 'FOODSAFE TODAY VERIFIED',
       score: '4.7',
       reviews: 210,
       lastCheck: 'Today, 08:45 AM',
-      safeguardsMet: ['Salad Prep < 5°C', 'Daily Sanitized Shared Tools', 'Washrooms Stocked', 'Covered Preps'],
-      touchpoints: ['Takeaway Bags', 'Food Containers', 'Instagram Story']
+      signals: {
+        cold: { title: 'Salad < 5°C', subtitle: 'Fresh Prep Chilled' },
+        medical: { title: '100% Medical', subtitle: 'Stool Test Cleared' },
+        pest: { title: 'Pest Safe', subtitle: 'Certified Weekly' }
+      }
     }
   ];
 
@@ -82,6 +88,25 @@ export default function Landing() {
     });
   }, [searchQuery, selectedCity]);
 
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    // If exact or partial match with sample restaurant
+    const matched = SAMPLE_RESTAURANTS.find(r => 
+      r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      r.id.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    if (matched) {
+      router.push(`/qr/${matched.id}`);
+    } else {
+      // Direct client to rate this restaurant name
+      const slug = searchQuery.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      router.push(`/qr/${slug}?name=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  }
+
   return (
     <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#ffffff' }}>
       <GlobalHeader />
@@ -90,27 +115,12 @@ export default function Landing() {
       <section style={{
         background: 'linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%)',
         borderBottom: '1px solid #e2e8f0',
-        paddingTop: 36,
-        paddingBottom: 40
+        paddingTop: 38,
+        paddingBottom: 42
       }}>
-        <div className="container" style={{ maxWidth: 980, textAlign: 'center' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
-            <span style={{
-              background: '#059669',
-              color: '#ffffff',
-              fontSize: 11,
-              fontWeight: 800,
-              padding: '4px 12px',
-              borderRadius: 9999,
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase'
-            }}>
-              THE DISRUPTIVE FOOD SAFETY MOAT
-            </span>
-          </div>
-
+        <div className="container" style={{ maxWidth: 880, textAlign: 'center' }}>
           <h1 style={{
-            fontSize: 'clamp(32px, 5vw, 52px)',
+            fontSize: 'clamp(32px, 4.8vw, 50px)',
             lineHeight: 1.15,
             fontWeight: 900,
             color: '#0f172a',
@@ -121,19 +131,19 @@ export default function Landing() {
           </h1>
 
           <p style={{
-            fontSize: 'clamp(16px, 2.2vw, 19px)',
+            fontSize: 'clamp(16px, 2vw, 18.5px)',
             color: '#334155',
-            margin: '0 auto 26px',
-            maxWidth: 720,
+            margin: '0 auto 24px',
+            maxWidth: 680,
             lineHeight: 1.5,
             fontWeight: 500
           }}>
-            Right from your phone: rate kitchen hygiene in 60 seconds, scan the restaurant’s <strong>FoodSafe365 Passport QR</strong>, or discover certified safe kitchens near you.
+            Search a restaurant or scan its QR code to rate food safety in 60 seconds (5 questions + 100-word feedback).
           </p>
 
-          {/* Quick Search & Rating Gateway */}
-          <div style={{
-            maxWidth: 680,
+          {/* Quick Search & Rating Gateway Form */}
+          <form onSubmit={handleSearchSubmit} style={{
+            maxWidth: 640,
             margin: '0 auto',
             background: '#ffffff',
             borderRadius: 16,
@@ -148,7 +158,7 @@ export default function Landing() {
               <Search size={20} style={{ color: '#059669', flexShrink: 0 }} />
               <input
                 type="text"
-                placeholder="Search restaurant (e.g. ABC Restaurant, Spice Pavilion) or locality..."
+                placeholder="Search restaurant (e.g. ABC Restaurant, Spice Pavilion)..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 style={{
@@ -178,8 +188,8 @@ export default function Landing() {
               paddingTop: 8,
               flexWrap: 'wrap'
             }}>
-              <Link
-                href="/qr/abc-restaurant"
+              <button
+                type="submit"
                 className="btn primary"
                 style={{
                   flex: '1 1 200px',
@@ -190,10 +200,10 @@ export default function Landing() {
                   borderColor: '#059669'
                 }}
               >
-                <QrCode size={16} /> Scan FoodSafe365 Passport QR
-              </Link>
-              <a
-                href="#discovery-layer"
+                <Star size={16} /> Rate This Restaurant
+              </button>
+              <Link
+                href="/qr/abc-restaurant"
                 className="btn secondary"
                 style={{
                   flex: '1 1 200px',
@@ -203,30 +213,30 @@ export default function Landing() {
                   color: '#0f172a'
                 }}
               >
-                <MapPin size={16} style={{ color: '#059669' }} /> Find Safe Restaurants Near Me
-              </a>
+                <QrCode size={16} style={{ color: '#059669' }} /> Scan Table QR Code
+              </Link>
             </div>
-          </div>
+          </form>
 
-          {/* Quick Metrics Bar */}
+          {/* 3 Quick Benefit Metrics */}
           <div style={{
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            gap: 24,
-            marginTop: 22,
+            gap: 22,
+            marginTop: 20,
             flexWrap: 'wrap',
             fontSize: 13,
             color: '#475569'
           }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <CheckCircle2 size={15} style={{ color: '#059669' }} /> 5 Pure Food Safety Questions
+              <CheckCircle2 size={15} style={{ color: '#059669' }} /> 5 Food Safety Questions
             </span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <CheckCircle2 size={15} style={{ color: '#059669' }} /> 100-Word Direct Remarks
+              <CheckCircle2 size={15} style={{ color: '#059669' }} /> 100-Word Feedback
             </span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <CheckCircle2 size={15} style={{ color: '#059669' }} /> Instant GM &amp; Health Dashboard
+              <CheckCircle2 size={15} style={{ color: '#059669' }} /> Direct to General Manager
             </span>
           </div>
         </div>
@@ -243,11 +253,11 @@ export default function Landing() {
               </h2>
             </div>
             <p className="muted" style={{ margin: 0, fontSize: 14 }}>
-              Discovered by diners. Certified daily through transparent kitchen checklists and live temperature logs.
+              Discovered by diners. Verified daily through digital kitchen checklists and transparent hygiene audits.
             </p>
           </div>
 
-          {/* City / Filter Pills */}
+          {/* City Filter Pills */}
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
             {[
               { id: 'all', label: 'All Cities' },
@@ -278,7 +288,7 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Restaurant Discovery Cards Grid */}
+        {/* Restaurant Cards Grid (Matching Tabletop Verified Audit style) */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 20 }}>
           {filteredRestaurants.map(r => (
             <div
@@ -287,6 +297,7 @@ export default function Landing() {
               style={{
                 background: '#ffffff',
                 border: '1.5px solid #e2e8f0',
+                borderLeft: '4px solid #059669',
                 borderRadius: 16,
                 padding: '22px 24px',
                 display: 'flex',
@@ -297,108 +308,94 @@ export default function Landing() {
               }}
             >
               <div>
+                {/* Header row with Tabletop Badge & Verification Status */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                   <div>
-                    <h3 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 3px', color: '#0f172a' }}>
+                    <span className="pill good" style={{ fontSize: 10.5, padding: '2px 8px', marginBottom: 6, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <QrCode size={11} /> TABLETOP VERIFIED AUDIT
+                    </span>
+                    <h3 style={{ fontSize: 20, fontWeight: 800, margin: '4px 0 2px', color: '#0f172a' }}>
                       {r.name}
                     </h3>
                     <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>
-                      {r.location} · {r.cuisine}
+                      {r.location} · {r.tableCode}
                     </p>
                   </div>
-                  <span style={{
-                    fontSize: 10.5,
-                    fontWeight: 800,
+                  <div style={{
                     background: '#ecfdf5',
-                    color: '#047857',
                     border: '1px solid #a7f3d0',
-                    padding: '3px 8px',
-                    borderRadius: 9999,
-                    whiteSpace: 'nowrap'
+                    borderRadius: 10,
+                    padding: '6px 10px',
+                    textAlign: 'center',
+                    flexShrink: 0
                   }}>
-                    {r.badge}
-                  </span>
+                    <span style={{ fontSize: 13, fontWeight: 900, color: '#047857', display: 'block', lineHeight: 1.1 }}>FOODSAFE</span>
+                    <span style={{ fontSize: 9, fontWeight: 700, color: '#065f46', textTransform: 'uppercase' }}>TODAY VERIFIED</span>
+                  </div>
                 </div>
 
-                {/* Score & Rating Bar */}
+                {/* 3 Physical Signals Bar */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: 8,
+                  marginTop: 14,
+                  marginBottom: 14,
+                  padding: '10px 8px',
+                  background: '#f8fafc',
+                  border: '1px solid #f1f5f9',
+                  borderRadius: 10
+                }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <Thermometer size={16} color="#059669" style={{ margin: '0 auto 3px' }} />
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#0f172a' }}>{r.signals.cold.title}</div>
+                    <div style={{ fontSize: 9.5, color: '#64748b' }}>{r.signals.cold.subtitle}</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <UserCheck size={16} color="#2563eb" style={{ margin: '0 auto 3px' }} />
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#0f172a' }}>{r.signals.medical.title}</div>
+                    <div style={{ fontSize: 9.5, color: '#64748b' }}>{r.signals.medical.subtitle}</div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <ShieldCheck size={16} color="#7c3aed" style={{ margin: '0 auto 3px' }} />
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#0f172a' }}>{r.signals.pest.title}</div>
+                    <div style={{ fontSize: 9.5, color: '#64748b' }}>{r.signals.pest.subtitle}</div>
+                  </div>
+                </div>
+
+                {/* Score Summary */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 12,
-                  background: '#f8fafc',
-                  border: '1px solid #f1f5f9',
-                  borderRadius: 10,
-                  padding: '8px 12px',
-                  marginBottom: 14
+                  gap: 10,
+                  marginBottom: 16,
+                  fontSize: 12.5,
+                  color: '#64748b'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#059669', fontWeight: 900, fontSize: 16 }}>
-                    <Star size={18} fill="#059669" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#059669', fontWeight: 800, fontSize: 15 }}>
+                    <Star size={16} fill="#059669" />
                     <span>{r.score}</span>
                   </div>
-                  <div style={{ fontSize: 12, color: '#64748b' }}>
-                    Based on <strong>{r.reviews}</strong> verified diner food-safety reviews
-                  </div>
-                </div>
-
-                {/* Live Kitchen Safeguards Met Today */}
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 6 }}>
-                    Live Kitchen Safeguards Verified Today:
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {r.safeguardsMet.map((sg, idx) => (
-                      <span
-                        key={idx}
-                        style={{
-                          fontSize: 11.5,
-                          background: '#ffffff',
-                          color: '#1e293b',
-                          border: '1px solid #cbd5e1',
-                          padding: '3px 8px',
-                          borderRadius: 6,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 4
-                        }}
-                      >
-                        <Check size={12} style={{ color: '#059669' }} /> {sg}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* QR Touchpoints Displayed */}
-                <div style={{ fontSize: 11.5, color: '#64748b', marginBottom: 16 }}>
-                  <strong>Passport QR Deployed At:</strong> {r.touchpoints.join(' · ')}
+                  <span>({r.reviews} verified diner ratings)</span>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, paddingTop: 14, borderTop: '1px solid #f1f5f9' }}>
+              {/* Action Buttons: Directly Enter QR Code Questions */}
+              <div style={{ paddingTop: 14, borderTop: '1px solid #f1f5f9' }}>
                 <Link
                   href={`/qr/${r.id}`}
                   className="btn primary"
                   style={{
-                    fontSize: 12.5,
-                    padding: '8px 12px',
+                    width: '100%',
                     justifyContent: 'center',
+                    fontSize: 13.5,
+                    padding: '10px 14px',
                     background: '#059669',
-                    borderColor: '#059669'
+                    borderColor: '#059669',
+                    fontWeight: 700
                   }}
                 >
-                  ⭐ Rate Restaurant
-                </Link>
-                <Link
-                  href="/showcase"
-                  className="btn secondary"
-                  style={{
-                    fontSize: 12.5,
-                    padding: '8px 12px',
-                    justifyContent: 'center',
-                    color: '#0f172a'
-                  }}
-                >
-                  <Award size={14} style={{ color: '#059669' }} /> View Passport
+                  ⭐ Rate Restaurant (5 Safety Questions) →
                 </Link>
               </div>
             </div>
@@ -406,124 +403,50 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* RESTAURANT ONBOARDING & PASSPORT FLYWHEEL */}
+      {/* RESTAURANT ONBOARDING (For Kitchens & Operators) */}
       <section style={{
         background: '#f8fafc',
         borderTop: '1px solid #e2e8f0',
         borderBottom: '1px solid #e2e8f0',
-        paddingTop: 44,
-        paddingBottom: 48
+        padding: '36px 0'
       }}>
         <div className="container" style={{ maxWidth: 1180 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 20, marginBottom: 28 }}>
-            <div style={{ maxWidth: 760 }}>
-              <span style={{
-                background: '#ecfdf5',
-                color: '#047857',
-                border: '1px solid #a7f3d0',
-                fontSize: 11,
-                fontWeight: 800,
-                padding: '3px 10px',
-                borderRadius: 9999,
-                letterSpacing: '0.04em',
-                textTransform: 'uppercase'
-              }}>
-                FOR RESTAURANTS &amp; COMMERCIAL KITCHENS
-              </span>
-              <h2 style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', margin: '8px 0 6px' }}>
-                The Trust Flywheel: Turn Clean Kitchens into Packed Tables
-              </h2>
-              <p className="muted" style={{ fontSize: 15, margin: 0, lineHeight: 1.5 }}>
-                <strong>Restaurant Daily Checks</strong> → <strong>FoodSafe365 Verification</strong> → <strong>Visible Food-Safety Record (Passport)</strong> → <strong>Consumer</strong> → <strong>Trust</strong>.
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <Link href="/home" className="btn primary" style={{ fontSize: 13.5, padding: '10px 18px' }}>
-                Open Kitchen Operations <ArrowRight size={16} />
-              </Link>
-              <Link href="/onboarding" className="btn secondary" style={{ fontSize: 13.5, padding: '10px 18px' }}>
-                Onboard Restaurant →
-              </Link>
-            </div>
-          </div>
-
-          {/* 9 Touchpoints Card */}
           <div className="card" style={{
             background: '#ffffff',
             border: '1.5px solid #a7f3d0',
-            borderRadius: 18,
+            borderRadius: 16,
             padding: '24px 28px',
-            boxShadow: 'var(--shadow-sm)'
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 20
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <span style={{ fontSize: 24 }}>📱</span>
-              <div>
-                <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                  Where Restaurants Keep the FoodSafe365 Passport QR Code:
-                </h3>
-                <p className="muted" style={{ margin: '2px 0 0', fontSize: 13 }}>
-                  Showcase your real-time hygiene compliance to customers at every touchpoint:
-                </p>
-              </div>
+            <div>
+              <span className="pill good" style={{ fontSize: 11, padding: '3px 10px', textTransform: 'uppercase', marginBottom: 6 }}>
+                FOR RESTAURANTS &amp; COMMERCIAL KITCHENS
+              </span>
+              <h2 style={{ fontSize: 22, fontWeight: 900, color: '#0f172a', margin: '6px 0 4px' }}>
+                Run Daily Checks · Earn Your FoodSafe365 Passport
+              </h2>
+              <p className="muted" style={{ margin: 0, fontSize: 14 }}>
+                Conduct shift checks in 2–3 minutes, resolve alerts, and generate a verified safety badge to showcase to customers.
+              </p>
             </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
-              {[
-                { icon: '🚪', title: '1. Restaurant Entrance', desc: 'Door decal / window plaque' },
-                { icon: '📋', title: '2. Dine-In Menu', desc: 'Front page / footer QR' },
-                { icon: '🪑', title: '3. Table Tent', desc: 'Tabletop acrylic stand' },
-                { icon: '🥡', title: '4. Takeaway Packaging', desc: 'Carryout bag sticker' },
-                { icon: '🛵', title: '5. Delivery Bags', desc: 'Tamper-evident seal for riders' },
-                { icon: '📦', title: '6. Food Containers', desc: 'Container lid closure tape' },
-                { icon: '🧾', title: '7. Bills & Receipts', desc: 'Printed on POS receipt' },
-                { icon: '🌐', title: '8. Restaurant Website', desc: 'Live embed trust badge' },
-                { icon: '📱', title: '9. Social Media', desc: 'Instagram / WhatsApp proof' },
-              ].map((tp, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    background: '#f8fafc',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: 10,
-                    padding: '12px 14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10
-                  }}
-                >
-                  <span style={{ fontSize: 22, flexShrink: 0 }}>{tp.icon}</span>
-                  <div>
-                    <strong style={{ fontSize: 13, color: '#0f172a', display: 'block' }}>{tp.title}</strong>
-                    <span className="muted" style={{ fontSize: 11.5 }}>{tp.desc}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div style={{
-              marginTop: 20,
-              paddingTop: 16,
-              borderTop: '1px solid #f1f5f9',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: 12
-            }}>
-              <div style={{ fontSize: 13, color: '#047857', fontWeight: 600 }}>
-                ✓ Includes ready-to-print PDF stickers, table tents, and digital vector badges.
-              </div>
-              <Link href="/showcase" className="btn secondary" style={{ fontSize: 12.5, padding: '7px 16px' }}>
-                <Award size={14} style={{ color: '#059669' }} /> Generate &amp; Print QR Passport Kit →
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <Link href="/onboarding" className="btn primary" style={{ fontSize: 13.5, padding: '10px 18px', background: '#059669', borderColor: '#059669' }}>
+                Onboard Restaurant <ArrowRight size={15} />
+              </Link>
+              <Link href="/home" className="btn secondary" style={{ fontSize: 13.5, padding: '10px 18px' }}>
+                Kitchen Operations →
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* SERVICE PROVIDERS DOOR: Found a problem? FoodSafe365 helps you fix it */}
-      <section className="container" style={{ maxWidth: 1180, paddingTop: 40, paddingBottom: 40 }}>
+      {/* SERVICE PROVIDERS HUB: Found a problem? FoodSafe365 helps you fix it */}
+      <section className="container" style={{ maxWidth: 1180, paddingTop: 38, paddingBottom: 40 }}>
         <div className="card" style={{
           background: '#ffffff',
           border: '1.5px solid #cbd5e1',

@@ -34,6 +34,17 @@ export default function TableQrPage() {
   const params = useParams();
   const outletId = (params.outlet_id as string) || 'abc-restaurant';
 
+  const KNOWN_RESTAURANTS: Record<string, { name: string; location: string; table: string }> = {
+    'abc-restaurant': { name: 'ABC Restaurant', location: 'Bandra West, Mumbai', table: 'Table QR #04' },
+    'delhi-spice-hub': { name: 'The Spice Pavilion', location: 'Connaught Place, New Delhi', table: 'Table QR #12' },
+    'bengaluru-cafe-safe': { name: 'GreenLeaf Artisan Bistro', location: 'Indiranagar, Bengaluru', table: 'Table QR #08' }
+  };
+
+  const known = KNOWN_RESTAURANTS[outletId];
+  const [displayName, setDisplayName] = useState(known?.name || outletId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+  const [displayLocation, setDisplayLocation] = useState(known?.location || 'Verified Dine-In Partner');
+  const [displayTable, setDisplayTable] = useState(known?.table || 'Table QR #04');
+
   const [activeTab, setActiveTab] = useState<'rate' | 'complain'>('rate');
   const [tableNumber, setTableNumber] = useState('Table 4');
   const [dinerName, setDinerName] = useState('');
@@ -56,6 +67,10 @@ export default function TableQrPage() {
   useEffect(() => {
     // Read cached diner user if signed in
     if (typeof window !== 'undefined') {
+      const q = new URLSearchParams(window.location.search);
+      const customName = q.get('name');
+      if (customName) setDisplayName(customName);
+
       const cached = localStorage.getItem('foodsafe365_diner_user');
       if (cached) {
         try {
@@ -74,7 +89,7 @@ export default function TableQrPage() {
     const newRating: DinerSafetyRating = {
       id: `rating-${Date.now()}`,
       outletId,
-      outletName: 'ABC Restaurant — Bandra West',
+      outletName: `${displayName} — ${displayLocation}`,
       createdAt: new Date().toISOString(),
       dinerName: dinerName.trim() || 'Verified Diner',
       dinerMobile: dinerPhone.trim() || undefined,
@@ -185,8 +200,8 @@ export default function TableQrPage() {
                 <QrCode size={11} style={{ display: 'inline', marginRight: 4 }} />
                 TABLETOP VERIFIED AUDIT
               </span>
-              <h1 style={{ fontSize: 22, margin: '8px 0 2px', color: '#0f172a' }}>ABC Restaurant</h1>
-              <p className="muted" style={{ fontSize: 13, margin: 0 }}>Bandra West, Mumbai · Table QR #04</p>
+              <h1 style={{ fontSize: 22, margin: '8px 0 2px', color: '#0f172a' }}>{displayName}</h1>
+              <p className="muted" style={{ fontSize: 13, margin: 0 }}>{displayLocation} · {displayTable}</p>
             </div>
             <div style={{
               background: '#ecfdf5',
@@ -302,7 +317,7 @@ export default function TableQrPage() {
                 </div>
                 <h2 style={{ fontSize: 20, margin: '0 0 8px' }}>Thank You for Verifying Food Safety!</h2>
                 <p className="muted" style={{ fontSize: 14, maxWidth: 440, margin: '0 auto 20px' }}>
-                  Your {overallRating}★ audit score has been recorded into the live FoodSafe365 transparency index for ABC Restaurant.
+                  Your {overallRating}★ audit score has been recorded into the live FoodSafe365 transparency index for {displayName}.
                 </p>
                 <button
                   type="button"
