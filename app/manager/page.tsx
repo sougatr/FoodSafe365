@@ -378,6 +378,88 @@ export default function ManagerPage() {
           </div>
         )}
 
+        {/* 5. THE MANAGER'S MONTHLY ADMIN AUDIT (Items 7 & 8) */}
+        <section className="section-block" style={{ marginTop: 36 }}>
+          <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12 }}>
+            <div>
+              <span className="pill good" style={{ marginBottom: 6 }}>MONTHLY STATUTORY COMPLIANCE</span>
+              <h2 style={{ fontSize: 22, margin: '4px 0 2px', color: '#0f172a' }}>
+                5. The Manager&apos;s Monthly Admin Audit
+              </h2>
+              <p className="muted" style={{ margin: 0, fontSize: 13.5 }}>
+                Administrative points removed from daily floor supervisor routine. Audited monthly by the General Manager or Owner.
+              </p>
+            </div>
+            <Link
+              href="/providers?category=Occupational%20health%20providers"
+              className="btn secondary"
+              style={{ fontSize: 12.5, padding: '7px 14px', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+            >
+              Book Diagnostic Camp / Training <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          <div className="grid grid2" style={{ gap: 16, marginTop: 16 }}>
+            {/* Item 7: FoSTaC & Staff Training */}
+            <div className="card" style={{ background: '#ffffff', border: '1.5px solid #e2e8f0', borderRadius: 16, padding: '20px 22px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, background: '#eff6ff', color: '#1d4ed8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
+                    🎓
+                  </div>
+                  <div>
+                    <span className="eyebrow" style={{ margin: 0, fontSize: 10 }}>ITEM 7 · FS28-08</span>
+                    <span style={{ fontSize: 9.5, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: 4, fontWeight: 700, marginLeft: 6 }}>
+                      DESIRABLE (OPTIONAL)
+                    </span>
+                  </div>
+                </div>
+                <Link href="/checks?check=7" className="btn secondary" style={{ fontSize: 11.5, padding: '4px 10px' }}>
+                  Log Audit Check →
+                </Link>
+              </div>
+              <h3 style={{ fontSize: 15.5, fontWeight: 800, color: '#0f172a', margin: '4px 0 6px' }}>
+                Supervisor FoSTaC and Staff Food-Hygiene Training
+              </h3>
+              <p className="muted" style={{ fontSize: 13, lineHeight: 1.5, margin: '0 0 12px' }}>
+                Are supervisor FoSTaC and staff training certificates (optional) up to date and available? Training is desirable and recommended to reinforce hygienic practices.
+              </p>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: '10px 12px', fontSize: 12, color: '#475569' }}>
+                <strong>Standard:</strong> Verified certificate copies filed in the audit folder or digital repository.
+              </div>
+            </div>
+
+            {/* Item 8: Staff Medical Fitness & Stool Test Records */}
+            <div className="card" style={{ background: '#ffffff', border: '1.5px solid #e2e8f0', borderRadius: 16, padding: '20px 22px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, background: '#fef2f2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
+                    🩺
+                  </div>
+                  <div>
+                    <span className="eyebrow" style={{ margin: 0, fontSize: 10 }}>ITEM 8 · FS28-09</span>
+                    <span style={{ fontSize: 9.5, background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca', padding: '1px 6px', borderRadius: 4, fontWeight: 700, marginLeft: 6 }}>
+                      [CRITICAL]
+                    </span>
+                  </div>
+                </div>
+                <Link href="/checks?check=8" className="btn secondary" style={{ fontSize: 11.5, padding: '4px 10px' }}>
+                  Log Audit Check →
+                </Link>
+              </div>
+              <h3 style={{ fontSize: 15.5, fontWeight: 800, color: '#0f172a', margin: '4px 0 6px' }}>
+                Staff Medical Fitness (Form 1A) &amp; 6-Monthly Stool Tests
+              </h3>
+              <p className="muted" style={{ fontSize: 13, lineHeight: 1.5, margin: '0 0 12px' }}>
+                Are staff medical fitness certificates and 6-monthly stool test records current? Administrative check frequently targeted during surprise FDA/FSSAI inspections.
+              </p>
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: '10px 12px', fontSize: 12, color: '#475569' }}>
+                <strong>Standard:</strong> 100% of active food handlers must hold active Form 1A certificates with stool pathogen clearance.
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* AUDIT & RECORDS QUICK LINK */}
         <div className="section-block" style={{ marginTop: 36 }}>
           <div className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>

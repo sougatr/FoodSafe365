@@ -1,11 +1,12 @@
 'use client';
 import Link from 'next/link';
+import { useState, useMemo } from 'react';
 import { ArrowRight, Bluetooth, BookOpen, CheckCircle2, ChevronLeft, Home, QrCode, ShieldCheck } from 'lucide-react';
-import { FOODSAFE28 } from '@/lib/foodsafety28';
+import { FOODSAFE28, SHIFT_DEFINITIONS, OperationalShift } from '@/lib/foodsafety28';
 import GlobalHeader from '@/components/GlobalHeader';
 
 export default function Checklist() {
-  const groups = Array.from(new Set(FOODSAFE28.map(x => x.category)));
+  const [selectedShift, setSelectedShift] = useState<OperationalShift | 'all'>('all');
 
   return (
     <main>
@@ -58,30 +59,207 @@ export default function Checklist() {
           </Link>
         </div>
 
-        {groups.map(g => (
-          <section key={g} className="section-block">
-            <div className="section-title">
-              <div>
-                <h2>{g}</h2>
-                <p className="muted">{FOODSAFE28.filter(x => x.category === g).length} controls</p>
-              </div>
-            </div>
-            <div className="checklist-library">
-              {FOODSAFE28.filter(x => x.category === g).map(x => (
-                <Link href={`/checks?check=${x.id}`} key={x.id} className="card library-row">
-                  <div className="library-number">{x.id}</div>
-                  <div className="library-main">
-                    <h3>{x.title}</h3>
-                    <p className="muted">
-                      {x.frequency} · {x.input === 'temperature' ? 'Temperature measurement' : '1–5 Qualitative Rating'}
+        {/* Shift Filter Tabs (White background, green active tabs, black font) */}
+        <div className="shift-tabs-bar" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, margin: '24px 0 16px' }}>
+          {[
+            { id: 'all', icon: '📑', label: 'All 29 Controls', time: '', count: 29 },
+            { id: 'opening', icon: '🌅', label: 'Opening Shift', time: '2–3m', count: 7 },
+            { id: 'active', icon: '🍳', label: 'Active Service', time: '2–3m', count: 6 },
+            { id: 'closing', icon: '🌙', label: 'Closing Shift', time: '2–3m', count: 8 },
+            { id: 'specialized', icon: '🏢', label: 'Specialized', time: '1–2m', count: 6 },
+            { id: 'monthly_audit', icon: '📋', label: "Manager's Audit", time: '5m', count: 2 },
+          ].map(s => {
+            const isActive = selectedShift === s.id;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                className={`shift-tab-btn ${isActive ? 'active' : ''}`}
+                onClick={() => setSelectedShift(s.id as any)}
+              >
+                <span>{s.icon}</span>
+                <span>{s.label}</span>
+                {s.time && (
+                  <span style={{
+                    fontSize: 10.5,
+                    padding: '1px 6px',
+                    borderRadius: 6,
+                    background: isActive ? 'rgba(255,255,255,0.25)' : '#e0f2fe',
+                    color: isActive ? '#ffffff' : '#0369a1',
+                    fontWeight: 700
+                  }}>
+                    {s.time}
+                  </span>
+                )}
+                <span className="tab-badge">{s.count}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* If 'all' is selected: Render sections for each shift */}
+        {selectedShift === 'all' ? (
+          (['opening', 'active', 'closing', 'specialized', 'monthly_audit'] as OperationalShift[]).map(shiftKey => {
+            const def = SHIFT_DEFINITIONS[shiftKey];
+            const items = FOODSAFE28.filter(x => x.shift === shiftKey);
+            return (
+              <section key={shiftKey} className="section-block" style={{ marginBottom: 28 }}>
+                <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                      <span style={{ fontSize: 20 }}>{def.icon}</span>
+                      <h2 style={{ fontSize: 20, margin: 0, color: '#0f172a' }}>{def.name} — {def.subtitle}</h2>
+                      <span style={{ fontSize: 11, background: '#059669', color: '#fff', padding: '2px 8px', borderRadius: 9999, fontWeight: 700 }}>
+                        ⏱️ {def.duration}
+                      </span>
+                    </div>
+                    <p className="muted" style={{ margin: 0, fontSize: 13 }}>
+                      {def.description}
                     </p>
                   </div>
-                  <ArrowRight size={18} />
+                  <Link
+                    href={`/checks?shift=${shiftKey}`}
+                    className="btn secondary"
+                    style={{ fontSize: 12.5, padding: '6px 14px', whiteSpace: 'nowrap' }}
+                  >
+                    Launch Shift ({items.length} checks) <ArrowRight size={14} />
+                  </Link>
+                </div>
+                <div className="checklist-library" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {items.map(x => (
+                    <Link
+                      href={`/checks?check=${x.id}`}
+                      key={x.id}
+                      className="card library-row"
+                      style={{ background: '#ffffff', border: '1px solid #e2e8f0', boxShadow: 'var(--shadow-xs)' }}
+                    >
+                      <div className="library-number" style={{ background: '#f1f5f9', color: '#0f172a', fontWeight: 800 }}>
+                        {x.id}
+                      </div>
+                      <div className="library-main">
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 2 }}>
+                          <span className="eyebrow" style={{ margin: 0, fontSize: 10 }}>{x.category}</span>
+                          {x.severity && (
+                            <span style={{
+                              fontSize: 9.5,
+                              background: x.severity === 'Critical' ? '#fef2f2' : x.severity === 'Major' ? '#fffbeb' : '#f0fdf4',
+                              color: x.severity === 'Critical' ? '#dc2626' : x.severity === 'Major' ? '#b45309' : '#16a34a',
+                              border: `1px solid ${x.severity === 'Critical' ? '#fecaca' : x.severity === 'Major' ? '#fde68a' : '#bbf7d0'}`,
+                              padding: '1px 6px',
+                              borderRadius: 4,
+                              fontWeight: 700
+                            }}>
+                              [{x.severity}]
+                            </span>
+                          )}
+                          {x.complianceRequirement === 'desirable' && (
+                            <span style={{ fontSize: 9.5, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: 4, fontWeight: 700 }}>
+                              DESIRABLE (OPTIONAL)
+                            </span>
+                          )}
+                        </div>
+                        <h3 style={{ fontSize: 15, fontWeight: 800, margin: '2px 0 4px', color: '#0f172a' }}>{x.title}</h3>
+                        {x.target && (
+                          <p style={{ margin: '0 0 4px', fontSize: 12.5, color: '#475569' }}>
+                            <strong>Target:</strong> {x.target}
+                          </p>
+                        )}
+                        <p className="muted" style={{ margin: 0, fontSize: 12 }}>
+                          ⏱️ {x.timeEstimate} · {x.frequency} · {x.input === 'temperature' ? 'Temperature measurement' : '1–5 Qualitative Rating'}
+                        </p>
+                      </div>
+                      <ArrowRight size={18} style={{ color: '#94a3b8' }} />
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            );
+          })
+        ) : (
+          /* Single Selected Shift View */
+          <section className="section-block">
+            {SHIFT_DEFINITIONS[selectedShift] && (
+              <div style={{
+                background: '#ffffff',
+                border: '1.5px solid #a7f3d0',
+                borderRadius: 14,
+                padding: '16px 20px',
+                marginBottom: 20,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 16,
+                flexWrap: 'wrap'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 30 }}>{SHIFT_DEFINITIONS[selectedShift].icon}</span>
+                  <div>
+                    <h2 style={{ fontSize: 19, fontWeight: 800, margin: '0 0 2px', color: '#0f172a' }}>
+                      {SHIFT_DEFINITIONS[selectedShift].name} — {SHIFT_DEFINITIONS[selectedShift].subtitle}
+                    </h2>
+                    <p style={{ margin: 0, fontSize: 13, color: '#475569' }}>
+                      {SHIFT_DEFINITIONS[selectedShift].description}
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href={`/checks?shift=${selectedShift}`}
+                  className="btn primary"
+                  style={{ fontSize: 13, padding: '8px 18px', whiteSpace: 'nowrap' }}
+                >
+                  Start This Shift (2-3 min) <ArrowRight size={15} />
+                </Link>
+              </div>
+            )}
+            <div className="checklist-library" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {FOODSAFE28.filter(x => x.shift === selectedShift).map(x => (
+                <Link
+                  href={`/checks?check=${x.id}`}
+                  key={x.id}
+                  className="card library-row"
+                  style={{ background: '#ffffff', border: '1px solid #e2e8f0', boxShadow: 'var(--shadow-xs)' }}
+                >
+                  <div className="library-number" style={{ background: '#f1f5f9', color: '#0f172a', fontWeight: 800 }}>
+                    {x.id}
+                  </div>
+                  <div className="library-main">
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 2 }}>
+                      <span className="eyebrow" style={{ margin: 0, fontSize: 10 }}>{x.category}</span>
+                      {x.severity && (
+                        <span style={{
+                          fontSize: 9.5,
+                          background: x.severity === 'Critical' ? '#fef2f2' : x.severity === 'Major' ? '#fffbeb' : '#f0fdf4',
+                          color: x.severity === 'Critical' ? '#dc2626' : x.severity === 'Major' ? '#b45309' : '#16a34a',
+                          border: `1px solid ${x.severity === 'Critical' ? '#fecaca' : x.severity === 'Major' ? '#fde68a' : '#bbf7d0'}`,
+                          padding: '1px 6px',
+                          borderRadius: 4,
+                          fontWeight: 700
+                        }}>
+                          [{x.severity}]
+                        </span>
+                      )}
+                      {x.complianceRequirement === 'desirable' && (
+                        <span style={{ fontSize: 9.5, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: 4, fontWeight: 700 }}>
+                          DESIRABLE (OPTIONAL)
+                        </span>
+                      )}
+                    </div>
+                    <h3 style={{ fontSize: 15, fontWeight: 800, margin: '2px 0 4px', color: '#0f172a' }}>{x.title}</h3>
+                    {x.target && (
+                      <p style={{ margin: '0 0 4px', fontSize: 12.5, color: '#475569' }}>
+                        <strong>Target:</strong> {x.target}
+                      </p>
+                    )}
+                    <p className="muted" style={{ margin: 0, fontSize: 12 }}>
+                      ⏱️ {x.timeEstimate} · {x.frequency} · {x.input === 'temperature' ? 'Temperature measurement' : '1–5 Qualitative Rating'}
+                    </p>
+                  </div>
+                  <ArrowRight size={18} style={{ color: '#94a3b8' }} />
                 </Link>
               ))}
             </div>
           </section>
-        ))}
+        )}
 
         {/* Optional Modules (Moved from Home Page) */}
         <section className="section-block" style={{ marginTop: 36, background: '#ffffff', padding: '28px 24px', borderRadius: 18, border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)' }}>

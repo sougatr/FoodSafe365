@@ -274,6 +274,311 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Operational Shift Fast-Track Checklists (2-3 Minutes Each — Designed to Match Kitchen Rhythm) */}
+        <section className="section-block" style={{ marginTop: 36 }}>
+          <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginBottom: 18 }}>
+            <div>
+              <span className="pill good" style={{ marginBottom: 6 }}>TIME-PHASED WORKFLOW</span>
+              <h2 style={{ fontSize: 24, margin: '6px 0 4px', color: '#0f172a' }}>
+                Operational Shift Checklists · 2 to 3 Minutes Each
+              </h2>
+              <p className="muted" style={{ fontSize: 14.5, margin: 0 }}>
+                Split naturally across kitchen hours. Floor supervisors only spend 2–3 minutes at specific times of the day.
+              </p>
+            </div>
+            <Link href="/checks" className="btn secondary" style={{ fontSize: 13, padding: '7px 14px' }}>
+              Open Full Checklist Hub <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          <div className="grid grid3" style={{ gap: 16 }}>
+            {/* Shift 1: The Opening Shift */}
+            <div className="card" style={{
+              background: '#ffffff',
+              border: '1.5px solid #e2e8f0',
+              borderRadius: 16,
+              padding: '20px 22px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              boxShadow: 'var(--shadow-sm)',
+              position: 'relative'
+            }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <div style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 12,
+                    background: '#ecfdf5',
+                    fontSize: 22,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    🌅
+                  </div>
+                  <span style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    padding: '3px 9px',
+                    borderRadius: 9999,
+                    background: '#ecfdf5',
+                    color: '#047857',
+                    border: '1px solid #a7f3d0'
+                  }}>
+                    ⏱️ 2–3 mins · Morning
+                  </span>
+                </div>
+                <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
+                  1. The Opening Shift
+                </h3>
+                <p style={{ fontSize: 13, color: '#059669', fontWeight: 700, margin: '0 0 10px' }}>
+                  Pre-Service Readiness (7 Checks)
+                </p>
+                <p className="muted" style={{ fontSize: 13, lineHeight: 1.5, margin: '0 0 14px' }}>
+                  Completed in the morning before food preparation begins. Ensures clean counters, stocked sinks, cold refrigeration (&lt;5°C / &lt;−18°C), and zero pest signs.
+                </p>
+                <ul style={{ margin: '0 0 16px', paddingLeft: 18, fontSize: 12.5, color: '#334155', lineHeight: 1.6 }}>
+                  <li>Staff uniforms, aprons & hairnets (Item 6)</li>
+                  <li>Hand-wash sinks with soap & tissue (Item 5)</li>
+                  <li>Fridges (&lt;5°C) & freezers (&lt;−18°C) (Items 17, 18)</li>
+                  <li>Doors closed & zero pest signs (Items 3, 21)</li>
+                  <li>Clean counters & floors (Item 1)</li>
+                </ul>
+              </div>
+              <Link
+                href="/checks?shift=opening"
+                className="btn primary"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 6,
+                  fontSize: 13,
+                  padding: '9px 14px'
+                }}
+              >
+                Start Opening Shift (2-3 min) <ArrowRight size={15} />
+              </Link>
+            </div>
+
+            {/* Shift 2: Active Service */}
+            <div className="card" style={{
+              background: '#ffffff',
+              border: '1.5px solid #e2e8f0',
+              borderRadius: 16,
+              padding: '20px 22px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              boxShadow: 'var(--shadow-sm)',
+              position: 'relative'
+            }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <div style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 12,
+                    background: '#eff6ff',
+                    fontSize: 22,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    🍳
+                  </div>
+                  <span style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    padding: '3px 9px',
+                    borderRadius: 9999,
+                    background: '#eff6ff',
+                    color: '#1d4ed8',
+                    border: '1px solid #bfdbfe'
+                  }}>
+                    ⏱️ 2–3 mins · Mid-Day
+                  </span>
+                </div>
+                <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
+                  2. Active Service
+                </h3>
+                <p style={{ fontSize: 13, color: '#2563eb', fontWeight: 700, margin: '0 0 10px' }}>
+                  Prep &amp; Cooking Stations (6 Checks)
+                </p>
+                <p className="muted" style={{ fontSize: 13, lineHeight: 1.5, margin: '0 0 14px' }}>
+                  Completed during service or delegated to station chefs (Chef de Partie). Rapid visual sweep on receiving, cross-contamination, and cooking temperatures.
+                </p>
+                <ul style={{ margin: '0 0 16px', paddingLeft: 18, fontSize: 12.5, color: '#334155', lineHeight: 1.6 }}>
+                  <li>Receiving raw materials inspection (Item 9)</li>
+                  <li>Washing fruits & vegetables (Item 13)</li>
+                  <li>Colored cutting boards & hand washing (Items 4, 14)</li>
+                  <li>Cooking core temp ≥ 75°C (Item 19)</li>
+                  <li>Service protection: covered preps (Item 16)</li>
+                </ul>
+              </div>
+              <Link
+                href="/checks?shift=active"
+                className="btn primary"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 6,
+                  fontSize: 13,
+                  padding: '9px 14px'
+                }}
+              >
+                Start Active Service (2-3 min) <ArrowRight size={15} />
+              </Link>
+            </div>
+
+            {/* Shift 3: The Closing Shift */}
+            <div className="card" style={{
+              background: '#ffffff',
+              border: '1.5px solid #e2e8f0',
+              borderRadius: 16,
+              padding: '20px 22px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              boxShadow: 'var(--shadow-sm)',
+              position: 'relative'
+            }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <div style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 12,
+                    background: '#f5f3ff',
+                    fontSize: 22,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    🌙
+                  </div>
+                  <span style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    padding: '3px 9px',
+                    borderRadius: 9999,
+                    background: '#f5f3ff',
+                    color: '#6d28d9',
+                    border: '1px solid #ddd6fe'
+                  }}>
+                    ⏱️ 2–3 mins · Night
+                  </span>
+                </div>
+                <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
+                  3. The Closing Shift
+                </h3>
+                <p style={{ fontSize: 13, color: '#7c3aed', fontWeight: 700, margin: '0 0 10px' }}>
+                  Shutdown &amp; Reset (8 Checks)
+                </p>
+                <p className="muted" style={{ fontSize: 13, lineHeight: 1.5, margin: '0 0 14px' }}>
+                  Completed at the end of the night. Secures leftovers in shallow pans, safely segregates raw meat, rotates FIFO inventory, and guards against overnight pests.
+                </p>
+                <ul style={{ margin: '0 0 16px', paddingLeft: 18, fontSize: 12.5, color: '#334155', lineHeight: 1.6 }}>
+                  <li>Cooling leftovers in shallow pans (Item 20)</li>
+                  <li>Raw meat on bottom shelves (Item 10)</li>
+                  <li>FIFO inventory dated & 6" off floor (Items 11, 12)</li>
+                  <li>Sanitizing shared blenders & slicers (Item 15)</li>
+                  <li>Covered pedal bins & free drains (Items 2, 23)</li>
+                  <li>Fly-killers on & bait stations intact (Item 22)</li>
+                </ul>
+              </div>
+              <Link
+                href="/checks?shift=closing"
+                className="btn primary"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 6,
+                  fontSize: 13,
+                  padding: '9px 14px'
+                }}
+              >
+                Start Closing Shift (2-3 min) <ArrowRight size={15} />
+              </Link>
+            </div>
+          </div>
+
+          {/* Conditional Specialized & Manager Audit Strip */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: 14,
+            marginTop: 16
+          }}>
+            <div style={{
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: 14,
+              padding: '14px 18px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 24 }}>🏢</span>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#0f172a' }}>
+                    4. Specialized Stations (Conditional)
+                  </h4>
+                  <p className="muted" style={{ margin: '2px 0 0', fontSize: 12 }}>
+                    Bar &amp; Draught Beer (2) · Cloud Delivery Hub (2) · Outdoor Catering (2)
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/checks?shift=specialized"
+                className="btn secondary"
+                style={{ fontSize: 12.5, padding: '6px 12px', whiteSpace: 'nowrap' }}
+              >
+                View Stations <ArrowRight size={13} />
+              </Link>
+            </div>
+
+            <div style={{
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: 14,
+              padding: '14px 18px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 24 }}>📋</span>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#0f172a' }}>
+                    5. Manager's Monthly Admin Audit
+                  </h4>
+                  <p className="muted" style={{ margin: '2px 0 0', fontSize: 12 }}>
+                    FoSTaC Supervisor Training (Item 7) &amp; 6-Monthly Staff Medical Form 1A (Item 8)
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/manager"
+                className="btn secondary"
+                style={{ fontSize: 12.5, padding: '6px 12px', whiteSpace: 'nowrap' }}
+              >
+                Open Admin Audit <ArrowRight size={13} />
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* FoodSafe365's Three Key Competitive Moats */}
         <section className="section-block" style={{ marginTop: 44 }}>
           <div className="section-title" style={{ display: 'block', marginBottom: 22 }}>

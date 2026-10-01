@@ -16,7 +16,9 @@ import {
   Rating1To5OrNA,
   NA_DEFINITION,
   RATING_DEFINITIONS,
-  evaluateTemperature
+  evaluateTemperature,
+  OperationalShift,
+  SHIFT_DEFINITIONS
 } from '@/lib/foodsafety28';
 import ThemeToggle from '@/components/ThemeToggle';
 import LanguageSelector from '@/components/LanguageSelector';
@@ -56,6 +58,7 @@ export default function Checks() {
   const [holdingType, setHoldingType] = useState<'hot' | 'cold' | ''>('');
   const [reheatMethodOK, setReheatMethodOK] = useState<'yes' | 'no' | ''>('');
   const [selectedFormat, setSelectedFormat] = useState<'all' | 'kitchen' | 'bar_brewery' | 'cloud_kitchen' | 'catering'>('all');
+  const [selectedShift, setSelectedShift] = useState<OperationalShift | 'all'>('opening');
 
   useEffect(() => {
     const refresh = () => setData(loadState());
@@ -66,17 +69,34 @@ export default function Checks() {
     const code = q.get('code');
     const focus = q.get('focus');
     const fmt = q.get('format');
+    const shift = q.get('shift');
 
     if (fmt === 'bar_brewery' || fmt === 'cloud_kitchen' || fmt === 'catering' || fmt === 'kitchen') {
       setSelectedFormat(fmt);
     }
 
+    if (shift === 'opening' || shift === 'active' || shift === 'closing' || shift === 'specialized' || shift === 'monthly_audit' || shift === 'all') {
+      setSelectedShift(shift as any);
+    } else {
+      // Auto-detect shift based on time of day
+      const hr = new Date().getHours();
+      if (hr < 11) setSelectedShift('opening');
+      else if (hr < 16) setSelectedShift('active');
+      else setSelectedShift('closing');
+    }
+
     if (id) {
       const match = FOODSAFE28.find(x => x.id === id);
-      if (match) openCheck(match);
+      if (match) {
+        openCheck(match);
+        if (match.shift) setSelectedShift(match.shift);
+      }
     } else if (code) {
       const match = FOODSAFE28.find(x => x.code === code);
-      if (match) openCheck(match);
+      if (match) {
+        openCheck(match);
+        if (match.shift) setSelectedShift(match.shift);
+      }
     } else if (focus) {
       if (focus === 'storage') {
         const match = FOODSAFE28.find(x => x.code === 'FS28-19');
@@ -110,11 +130,20 @@ export default function Checks() {
   }, []);
 
   const today = useMemo(() => FOODSAFE28.filter(isScheduledCheck), []);
+  const shiftChecks = useMemo(() => {
+    if (selectedShift === 'all') return FOODSAFE28;
+    return FOODSAFE28.filter(x => x.shift === selectedShift);
+  }, [selectedShift]);
+
   const filteredChecks = useMemo(() => {
-    if (selectedFormat === 'all') return today;
-    if (selectedFormat === 'kitchen') return today.filter(x => !x.outletType || x.outletType === 'all');
-    return today.filter(x => x.outletType === selectedFormat);
-  }, [today, selectedFormat]);
+    if (selectedShift === 'specialized' && selectedFormat !== 'all') {
+      return shiftChecks.filter(x => x.outletType === selectedFormat);
+    }
+    if (selectedFormat === 'kitchen') return shiftChecks.filter(x => !x.outletType || x.outletType === 'all');
+    if (selectedFormat !== 'all') return shiftChecks.filter(x => x.outletType === selectedFormat);
+    return shiftChecks;
+  }, [shiftChecks, selectedShift, selectedFormat]);
+
   const saved: Record<string, CheckRecord> = data.checks || {};
   const issues: Issue[] = data.issues || [];
   const remaining = today.filter(x => !saved[x.code]).length;
@@ -1174,54 +1203,167 @@ export default function Checks() {
           </div>
         </div>
 
-        {/* Format Selection Filter Tabs */}
-        <div style={{
-          display: 'flex',
-          gap: 8,
-          marginBottom: 16,
-          overflowX: 'auto',
-          paddingBottom: 4
-        }}>
+        {/* Time-Phased Operational Shift Tabs (White background, green active tabs, black fonts) */}
+        <div className="shift-tabs-bar" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, marginBottom: 16 }}>
           {[
-            { id: 'all', label: t('action.filterAll'), count: today.length },
-            { id: 'kitchen', label: t('action.filterKitchen'), count: today.filter(x => !x.outletType || x.outletType === 'all').length },
-            { id: 'bar_brewery', label: t('action.filterBar'), count: today.filter(x => x.outletType === 'bar_brewery').length },
-            { id: 'cloud_kitchen', label: t('action.filterCloud'), count: today.filter(x => x.outletType === 'cloud_kitchen').length },
-            { id: 'catering', label: t('action.filterCatering'), count: today.filter(x => x.outletType === 'catering').length },
-          ].map(f => (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => setSelectedFormat(f.id as any)}
-              style={{
-                border: selectedFormat === f.id ? '2px solid #059669' : '1px solid #cbd5e1',
-                background: selectedFormat === f.id ? '#ecfdf5' : '#ffffff',
-                color: selectedFormat === f.id ? '#065f46' : '#475569',
-                fontWeight: selectedFormat === f.id ? 600 : 500,
-                fontSize: 13,
-                borderRadius: 20,
-                padding: '6px 14px',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                whiteSpace: 'nowrap',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <span>{f.label}</span>
-              <span style={{
-                fontSize: 11,
-                padding: '2px 6px',
-                borderRadius: 10,
-                background: selectedFormat === f.id ? '#059669' : '#e2e8f0',
-                color: selectedFormat === f.id ? '#ffffff' : '#475569'
-              }}>
-                {f.count}
-              </span>
-            </button>
-          ))}
+            { id: 'opening', icon: '🌅', label: 'Opening Shift', time: '2–3m', count: 7 },
+            { id: 'active', icon: '🍳', label: 'Active Service', time: '2–3m', count: 6 },
+            { id: 'closing', icon: '🌙', label: 'Closing Shift', time: '2–3m', count: 8 },
+            { id: 'specialized', icon: '🏢', label: 'Specialized Stations', time: '1–2m', count: 6 },
+            { id: 'monthly_audit', icon: '📋', label: "Manager's Audit", time: '5m', count: 2 },
+            { id: 'all', icon: '📑', label: 'All 29 Checks', time: '', count: 29 },
+          ].map(s => {
+            const isActive = selectedShift === s.id;
+            const shiftItems = s.id === 'all' ? FOODSAFE28 : FOODSAFE28.filter(x => x.shift === s.id);
+            const completedCount = shiftItems.filter(x => Boolean(saved[x.code])).length;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                className={`shift-tab-btn ${isActive ? 'active' : ''}`}
+                onClick={() => {
+                  setSelectedShift(s.id as any);
+                  const url = new URL(window.location.href);
+                  url.searchParams.set('shift', s.id);
+                  history.replaceState(null, '', url.toString());
+                }}
+              >
+                <span>{s.icon}</span>
+                <span>{s.label}</span>
+                {s.time && (
+                  <span style={{
+                    fontSize: 10.5,
+                    padding: '1px 6px',
+                    borderRadius: 6,
+                    background: isActive ? 'rgba(255,255,255,0.25)' : '#e0f2fe',
+                    color: isActive ? '#ffffff' : '#0369a1',
+                    fontWeight: 700
+                  }}>
+                    {s.time}
+                  </span>
+                )}
+                <span className="tab-badge">
+                  {completedCount}/{shiftItems.length}
+                </span>
+              </button>
+            );
+          })}
         </div>
+
+        {/* Current Operational Shift Header Banner */}
+        {selectedShift !== 'all' && SHIFT_DEFINITIONS[selectedShift] && (
+          <div style={{
+            background: '#ffffff',
+            border: '1.5px solid #a7f3d0',
+            borderRadius: 14,
+            padding: '14px 18px',
+            marginBottom: 16,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 14,
+            boxShadow: '0 2px 8px rgba(5, 150, 105, 0.06)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                background: '#ecfdf5',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 22,
+                flexShrink: 0
+              }}>
+                {SHIFT_DEFINITIONS[selectedShift].icon}
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: '#0f172a' }}>
+                    {SHIFT_DEFINITIONS[selectedShift].name} — {SHIFT_DEFINITIONS[selectedShift].subtitle}
+                  </h3>
+                  <span style={{
+                    fontSize: 11,
+                    background: '#059669',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    padding: '2px 8px',
+                    borderRadius: 9999
+                  }}>
+                    ⏱️ {SHIFT_DEFINITIONS[selectedShift].duration}
+                  </span>
+                  <span style={{
+                    fontSize: 11,
+                    background: '#f1f5f9',
+                    color: '#475569',
+                    fontWeight: 600,
+                    padding: '2px 8px',
+                    borderRadius: 9999
+                  }}>
+                    🕒 {SHIFT_DEFINITIONS[selectedShift].timing}
+                  </span>
+                </div>
+                <p style={{ margin: '3px 0 0', fontSize: 13, color: '#475569' }}>
+                  {SHIFT_DEFINITIONS[selectedShift].description}
+                </p>
+              </div>
+            </div>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div style={{
+                fontSize: 18,
+                fontWeight: 800,
+                color: shiftChecks.filter(x => Boolean(saved[x.code])).length === shiftChecks.length ? '#059669' : '#0f172a'
+              }}>
+                {shiftChecks.filter(x => Boolean(saved[x.code])).length} / {shiftChecks.length}
+              </div>
+              <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>
+                {shiftChecks.filter(x => Boolean(saved[x.code])).length === shiftChecks.length ? '✓ Completed' : 'In Progress'}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Specialized Stations Sub-Filter Tabs (visible when specialized shift is selected) */}
+        {selectedShift === 'specialized' && (
+          <div style={{
+            display: 'flex',
+            gap: 8,
+            marginBottom: 16,
+            overflowX: 'auto',
+            paddingBottom: 4
+          }}>
+            {[
+              { id: 'all', label: 'All Stations (6)', count: 6 },
+              { id: 'bar_brewery', label: '🍻 Bar / Draught Beer (2)', count: 2 },
+              { id: 'cloud_kitchen', label: '🛵 Cloud Kitchen Dispatch (2)', count: 2 },
+              { id: 'catering', label: '🍱 Catering & Outdoor Events (2)', count: 2 },
+            ].map(f => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setSelectedFormat(f.id as any)}
+                style={{
+                  border: selectedFormat === f.id ? '2px solid #059669' : '1.5px solid #e2e8f0',
+                  background: selectedFormat === f.id ? '#059669' : '#ffffff',
+                  color: selectedFormat === f.id ? '#ffffff' : '#0f172a',
+                  fontWeight: selectedFormat === f.id ? 700 : 600,
+                  fontSize: 12.5,
+                  borderRadius: 20,
+                  padding: '6px 14px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <span>{f.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="checklist-library" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {filteredChecks.map(x => {
@@ -1292,6 +1434,11 @@ export default function Checks() {
                     {x.outletType === 'catering' && (
                       <span style={{ fontSize: 10, background: '#e0f2fe', color: '#0369a1', padding: '1px 7px', borderRadius: 6, fontWeight: 700 }}>
                         🍱 CATERING &amp; EVENTS
+                      </span>
+                    )}
+                    {x.timeEstimate && (
+                      <span style={{ fontSize: 9.5, background: '#f8fafc', color: '#334155', border: '1px solid #e2e8f0', padding: '1px 6px', borderRadius: 4, fontWeight: 700 }}>
+                        ⏱️ {x.timeEstimate}
                       </span>
                     )}
                   </div>

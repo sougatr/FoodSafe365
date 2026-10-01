@@ -1,3 +1,5 @@
+export type OperationalShift = 'opening' | 'active' | 'closing' | 'specialized' | 'monthly_audit';
+
 export type FoodSafeCheck = {
   id: number;
   code: string;
@@ -6,6 +8,9 @@ export type FoodSafeCheck = {
   target?: string;
   severity?: 'Critical' | 'Major' | 'Minor';
   frequency: 'Opening' | 'Daily' | 'Per shift' | 'Process' | 'As applicable';
+  shift: OperationalShift;
+  shiftTitle: string;
+  timeEstimate: string;
   input: 'scale_1_5' | 'temperature' | 'yes_no';
   why: string;
   what: string[];
@@ -14,6 +19,68 @@ export type FoodSafeCheck = {
   action: string;
   outletType?: 'all' | 'bar_brewery' | 'cloud_kitchen' | 'catering';
   complianceRequirement?: 'mandatory' | 'desirable';
+};
+
+export const SHIFT_DEFINITIONS: Record<OperationalShift, {
+  id: OperationalShift;
+  name: string;
+  subtitle: string;
+  duration: string;
+  timing: string;
+  icon: string;
+  description: string;
+  itemCount: number;
+}> = {
+  opening: {
+    id: 'opening',
+    name: 'Opening Shift',
+    subtitle: 'Pre-Service Readiness',
+    duration: '2–3 mins',
+    timing: 'Morning (Pre-Prep)',
+    icon: '🌅',
+    description: 'Completed in the morning before food preparation begins. Ensures the kitchen is a clean and safe environment to start cooking.',
+    itemCount: 7
+  },
+  active: {
+    id: 'active',
+    name: 'Active Service',
+    subtitle: 'Prep & Cooking Stations',
+    duration: '2–3 mins',
+    timing: 'Mid-Day / Active Rush',
+    icon: '🍳',
+    description: 'Quick sweep completed during service or delegated to station chefs (Chef de Partie) covering prep, cross-contamination, and cooking temperatures.',
+    itemCount: 6
+  },
+  closing: {
+    id: 'closing',
+    name: 'Closing Shift',
+    subtitle: 'Shutdown & Reset',
+    duration: '2–3 mins',
+    timing: 'Night (Post-Service)',
+    icon: '🌙',
+    description: 'Completed at the end of the night. Secures leftovers, safely stores meat, rotates FIFO inventory, and safeguards against overnight pests.',
+    itemCount: 8
+  },
+  specialized: {
+    id: 'specialized',
+    name: 'Specialized Stations',
+    subtitle: 'Conditional Operations',
+    duration: '1–2 mins',
+    timing: 'Operational Need',
+    icon: '🏢',
+    description: 'Targeted checks for Bar / Draught Beer, Cloud Kitchen Dispatch, and Outdoor Catering & Events.',
+    itemCount: 6
+  },
+  monthly_audit: {
+    id: 'monthly_audit',
+    name: "Manager's Monthly",
+    subtitle: 'Admin Compliance Audit',
+    duration: '5 mins',
+    timing: 'Monthly / Manager Only',
+    icon: '📋',
+    description: "Removed from daily floor supervisor routine. Admin audit for FoSTaC supervisor training and 6-monthly staff medical fitness records.",
+    itemCount: 2
+  }
 };
 
 export type Rating1To5 = 1 | 2 | 3 | 4 | 5;
@@ -50,6 +117,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Maintain continuous upkeep. Minor lapses must be managed immediately.',
     severity: 'Major',
     frequency: 'Opening',
+    shift: 'opening',
+    shiftTitle: 'The Opening Shift (Pre-Service Readiness)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Clean food preparation zones, counters, and floors prevent physical and microbial cross-contamination into ingredients and ready-to-eat dishes.',
     what: ['Inspect food prep tables, cutting areas, floors, and surrounding walls before starting food prep.', 'Verify no dirt, chemical residues, or debris on working food surfaces.'],
@@ -66,6 +136,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Drains must be free of grease buildup to prevent odors and pest attraction.',
     severity: 'Major',
     frequency: 'Daily',
+    shift: 'closing',
+    shiftTitle: 'The Closing Shift (Shutdown & Reset)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Blocked, slow, or dirty drains cause standing water, foul odors, sewer gas back-draft, and provide prime breeding zones for cockroaches and fruit flies.',
     what: ['Inspect all kitchen floor drains, trench drains, and sink outlets.', 'Verify water flows freely with no pooling, foul odor, or grease trap overflow.'],
@@ -82,6 +155,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Physical barriers must be intact. This is a fundamental FSSAI structural requirement.',
     severity: 'Critical',
     frequency: 'Opening',
+    shift: 'opening',
+    shiftTitle: 'The Opening Shift (Pre-Service Readiness)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Intact physical barriers (door sweeps, air curtains, wire-mesh screens) keep pests, rodents, and birds from infiltrating food zones.',
     what: ['Check external doors for tight seal and intact bottom sweeps (no gap > 6mm).', 'Verify insect fly-wire screens on kitchen windows are tear-free and closed.', 'Ensure air curtains at service doors are powered on.'],
@@ -100,6 +176,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Hands must be washed after breaks and between tasks to prevent cross-contamination.',
     severity: 'Critical',
     frequency: 'Per shift',
+    shift: 'active',
+    shiftTitle: 'Active Service (Prep & Cooking Stations)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Unwashed hands are the single largest transmission vector of enteric pathogens (Norovirus, Staphylococcus aureus, Salmonella) to food.',
     what: ['Observe staff washing hands before starting food preparation or handling ready-to-eat foods.', 'Verify handwashing occurs immediately after handling raw meats, handling waste, cleaning, or visiting washrooms.'],
@@ -116,6 +195,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Sinks must be accessible and usable at all times.',
     severity: 'Critical',
     frequency: 'Opening',
+    shift: 'opening',
+    shiftTitle: 'The Opening Shift (Pre-Service Readiness)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Staff cannot follow handwashing protocols if designated sinks are blocked, dry, or missing soap and tissue.',
     what: ['Check each dedicated handwash basin in kitchen, bar, and dishwashing areas.', 'Verify uninterrupted running potable water, antibacterial liquid soap in dispensers, and single-use tissue or air dryers.', 'Ensure handwash sink is not used for dishwashing or food prep.'],
@@ -133,6 +215,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Clean protective clothing prevents physical and biological contamination.',
     severity: 'Critical',
     frequency: 'Per shift',
+    shift: 'opening',
+    shiftTitle: 'The Opening Shift (Pre-Service Readiness)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Street clothes and exposed hair shed foreign matter, dandruff, and bacteria directly into exposed food.',
     what: ['Check that all food handlers wear clean company uniforms or protective chef jackets/aprons.', 'Verify hair nets, chef caps, or beard nets completely enclose all hair.', 'Ensure no jewelry (rings, bracelets, watches) is worn during food handling, except plain wedding band.'],
@@ -149,6 +234,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Requirement for food-hygiene training.',
     severity: 'Minor',
     frequency: 'Daily',
+    shift: 'monthly_audit',
+    shiftTitle: "The Manager's Monthly (Admin Audit)",
+    timeEstimate: '5 mins',
     input: 'scale_1_5',
     why: 'Staff food safety training is desirable and recommended to build kitchen hygiene awareness and prevent errors.',
     what: ['Verify presence of trained or FoSTaC certified supervisor (desirable/recommended).', 'Review internal induction and hygiene awareness records for kitchen handlers.'],
@@ -166,6 +254,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Administrative check frequently targeted during surprise FDA/FSSAI inspections.',
     severity: 'Critical',
     frequency: 'Daily',
+    shift: 'monthly_audit',
+    shiftTitle: "The Manager's Monthly (Admin Audit)",
+    timeEstimate: '5 mins',
     input: 'scale_1_5',
     why: 'Food handlers carrying enteric pathogens (Salmonella Typhi, Hepatitis A, parasites) can silently transmit devastating waterborne and foodborne illnesses.',
     what: ['Verify valid 6-monthly medical fitness certificates (Form 1A) for all food handlers, including laboratory stool examination.', 'Check valid vaccinations (Typhoid vaccine every 3 years, Hepatitis A).', 'Ensure staff with active diarrhea, vomiting, fever, or open infected skin lesions are strictly excluded from food handling.'],
@@ -184,6 +275,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Reject spoiled goods before they enter the inventory.',
     severity: 'Major',
     frequency: 'Daily',
+    shift: 'active',
+    shiftTitle: 'Active Service (Prep & Cooking Stations)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Preventing compromised, expired, or temperature-abused raw materials at receiving protects the entire kitchen chain.',
     what: ['Inspect delivery packaging for punctures, swelling, or pest signs.', 'Check delivery vehicle cleanliness and verify refrigerated items arrive at < 5°C and frozen items at < −18°C.', 'Check manufacturing dates, FSSAI license on supplier labels, and expiry dates.'],
@@ -200,6 +294,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Strict segregation is absolutely essential to prevent fatal biological cross-contamination.',
     severity: 'Critical',
     frequency: 'Daily',
+    shift: 'closing',
+    shiftTitle: 'The Closing Shift (Shutdown & Reset)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Raw animal proteins carry high pathogenic bacterial loads (Salmonella, Campylobacter) that drip or transfer onto cooked or ready-to-eat foods.',
     what: ['Check refrigerator and walk-in chiller shelving layout.', 'Verify raw meats/poultry are stored on the bottom shelves below ready-to-eat foods, dairy, and cooked preps.', 'Ensure separate color-coded sealed containers are used.'],
@@ -216,6 +313,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Pallets or shelves must be used. Basic FSSAI storage mandate.',
     severity: 'Critical',
     frequency: 'Daily',
+    shift: 'closing',
+    shiftTitle: 'The Closing Shift (Shutdown & Reset)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Placing food bags or boxes directly on floors exposes them to mop water, floor sweepings, dirt, and ground pests.',
     what: ['Inspect dry store, cold room, and prep areas.', 'Verify all food containers, crates, and sacks are placed on raised shelves or pallets at least 15 cm (6 inches) off the floor.', 'Check that opened bags are transferred to food-grade containers with lids.'],
@@ -232,6 +332,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Ensure proper inventory health and prevent the usage of expired food.',
     severity: 'Major',
     frequency: 'Daily',
+    shift: 'closing',
+    shiftTitle: 'The Closing Shift (Shutdown & Reset)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Stock rotation ensures older stock is consumed before expiry, preventing spoilage, mold, and stale ingredient hazards.',
     what: ['Check expiration dates and preparation day-labels on stored sauces, marinades, preps, and dairy.', 'Verify new stock is placed behind existing stock on shelves.', 'Inspect for any expired, unlabelled, or decaying items.'],
@@ -250,6 +353,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Crucial step, especially for foods served raw.',
     severity: 'Major',
     frequency: 'Process',
+    shift: 'active',
+    shiftTitle: 'Active Service (Prep & Cooking Stations)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Raw agricultural produce carries field soil, bird droppings, parasitic cysts (Giardia, Amoeba), and pesticide residues.',
     what: ['Inspect produce washing area before chopping salads or garnishes.', 'Verify vegetables and fruits are washed in clean running potable water and sanitized with food-grade sanitizing solution (50 ppm chlorine rinse or approved fruit/veg wash).'],
@@ -266,6 +372,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Highly recommended FSSAI best practice to prevent cross-contamination.',
     severity: 'Major',
     frequency: 'Process',
+    shift: 'active',
+    shiftTitle: 'Active Service (Prep & Cooking Stations)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Using the same knife or board for raw poultry and salad vegetables transfers live pathogens into food that receives no further cooking.',
     what: ['Observe kitchen prep stations during live service.', 'Verify strict color-coding: Red (Raw Meat), Yellow (Raw Poultry), Blue (Raw Fish), Green (Vegetables/Fruits), White (Dairy/Bakery).', 'Ensure knives and boards are not interchanged without washing and sanitizing.'],
@@ -282,6 +391,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Food-contact equipment is a direct vector for bacteria if left dirty.',
     severity: 'Critical',
     frequency: 'Daily',
+    shift: 'closing',
+    shiftTitle: 'The Closing Shift (Shutdown & Reset)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Dismantled equipment parts (slicer blades, blender gaskets, peelers) trap food residues that turn into bacterial biofilms.',
     what: ['Inspect meat slicers, mixers, blenders, graters, and prep knives.', 'Check that removable blades, seals, and gaskets are disassembled, washed, and chemically sanitized daily.', 'Verify no dried food crust or grease buildup.'],
@@ -298,6 +410,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Prevents physical and airborne contamination during kitchen service.',
     severity: 'Critical',
     frequency: 'Process',
+    shift: 'active',
+    shiftTitle: 'Active Service (Prep & Cooking Stations)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Exposed food bowls, garnishes, and intermediate prep items are vulnerable to airborne droplets, dust, overhead condensation, and accidental splashes.',
     what: ['Inspect chef prep counters, pass counter, and intermediate holding stations.', 'Verify food containers are fitted with lids, clean plastic wrap, or food-grade covers when not in active use.', 'Ensure utensils are stored with handles extending outside food.'],
@@ -316,6 +431,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Verify cool-storage temperature to prevent bacterial growth.',
     severity: 'Critical',
     frequency: 'Daily',
+    shift: 'opening',
+    shiftTitle: 'The Opening Shift (Pre-Service Readiness)',
+    timeEstimate: '2–3 mins',
     input: 'temperature',
     why: 'Keeping perishable foods continuously at < 5°C (0°C to < 5°C) suppresses bacterial proliferation and prevents spoilage.',
     what: ['Read the external digital thermometer and verify with an internal calibrated thermometer probe.', 'Check cool room, reach-in refrigerators, and under-counter prep chillers.', 'Verify doors seal tightly and air circulation is not blocked by overfilling.'],
@@ -332,6 +450,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Core FSSAI requirement for deep cold storage.',
     severity: 'Critical',
     frequency: 'Daily',
+    shift: 'opening',
+    shiftTitle: 'The Opening Shift (Pre-Service Readiness)',
+    timeEstimate: '2–3 mins',
     input: 'temperature',
     why: 'Deep freezing at < −18°C stops all microbial growth and halts enzymatic decomposition of frozen meats and raw stocks.',
     what: ['Read the freezer display and verify with a calibrated temperature probe.', 'Check walk-in deep freezers, chest freezers, and ice-cream storage units.', 'Inspect for heavy ice build-up, frost encrustation, or door gasket leaks.'],
@@ -348,6 +469,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Verify cooking or reheating temperatures with a calibrated probe to guarantee pathogens are killed.',
     severity: 'Critical',
     frequency: 'Process',
+    shift: 'active',
+    shiftTitle: 'Active Service (Prep & Cooking Stations)',
+    timeEstimate: '2–3 mins',
     input: 'temperature',
     why: 'Cooking to adequate core temperature destroys vegetative foodborne pathogens (Salmonella, E. coli, Listeria) in meats, poultry, and gravies.',
     what: ['Insert a clean, sanitized probe thermometer into the thickest part of the food.', 'Verify minimum target: Non-veg core ≥ 75°C for 15 sec (or 70°C for 2 min); Veg core ≥ 65°C for 2 min. Reheating: core ≥ 75°C for 2 min.'],
@@ -364,6 +488,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Cool to ≤ 21°C before placing in the fridge. Never place large hot pots directly into cold storage or leave food at room temperature.',
     severity: 'Major',
     frequency: 'Process',
+    shift: 'closing',
+    shiftTitle: 'The Closing Shift (Shutdown & Reset)',
+    timeEstimate: '2–3 mins',
     input: 'temperature',
     why: 'Slow cooling allows spore-forming bacteria (Clostridium perfringens, Bacillus cereus) to germinate and release heat-stable toxins.',
     what: ['Track cooling batches of gravies, rice, lentils, and cooked meats.', 'Verify food cools from 60°C to 21°C within 2 hours, and reaches 5°C within a further 2 hours.', 'Check use of shallow pans, ice baths, or blast chillers.'],
@@ -382,6 +509,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Any active signs are an immediate red flag and reason for license suspension.',
     severity: 'Critical',
     frequency: 'Opening',
+    shift: 'opening',
+    shiftTitle: 'The Opening Shift (Pre-Service Readiness)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Physical pest signs indicate active infestation and direct contamination of kitchen food contact zones.',
     what: ['Inspect dark corners, motor housings behind refrigeration units, under prep sinks, dry storage racks, and false ceilings.', 'Look for live or dead pests (cockroaches, flies, rodents), droppings, rub marks, or gnawed packaging.'],
@@ -398,6 +528,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Devices must be operational and vendor service logs current.',
     severity: 'Critical',
     frequency: 'Daily',
+    shift: 'closing',
+    shiftTitle: 'The Closing Shift (Shutdown & Reset)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Operational pest traps provide early detection and defensive perimeter control before infestations spread.',
     what: ['Verify electric insect light traps / fly-killers are switched on and catch trays/glue boards are clean and not overloaded.', 'Inspect tamper-evident rodent bait boxes around perimeter (must be numbered, secured, and unbroken).', 'Check that monthly professional pest management service logs and pesticide safety data sheets are up to date.'],
@@ -414,6 +547,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Standard hygiene requirement to contain waste and avoid attracting pests.',
     severity: 'Major',
     frequency: 'Daily',
+    shift: 'closing',
+    shiftTitle: 'The Closing Shift (Shutdown & Reset)',
+    timeEstimate: '2–3 mins',
     input: 'scale_1_5',
     why: 'Overflowing, uncovered waste bins attract pests, generate foul odors, and cross-contaminate food handlers.',
     what: ['Check all kitchen waste bins: must be foot-pedal operated with tightly fitting lids and plastic liners.', 'Verify bins are emptied before overflowing (at least at end of each shift).', 'Inspect external waste yard: bins covered, area swept, washed, and free of pooled leachate or fly swarms.'],
@@ -432,6 +568,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Ice is treated as food; dirty machines are a massive hidden source of mold.',
     severity: 'Major',
     frequency: 'Opening',
+    shift: 'specialized',
+    shiftTitle: 'Specialized Stations (Conditional)',
+    timeEstimate: '1–2 mins',
     input: 'scale_1_5',
     why: 'Ice is classified as ready-to-eat food under FSSAI. Contaminated ice machines harbor black mold and slime; scooping ice with drinking glasses causes dangerous glass breakage in the bin.',
     what: ['Open commercial ice machine lid and inspect interior walls, evaporator plate, and water curtain for mold, pink slime, or mineral scale.', 'Check that ice scoop is stainless steel or heavy-duty food-grade plastic, kept in an external sanitized holder (NEVER stored inside ice bin).', 'Verify that glass cups or mugs are NEVER used to scoop ice.'],
@@ -448,6 +587,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Impacts beverage quality and localized hygiene.',
     severity: 'Minor',
     frequency: 'Daily',
+    shift: 'specialized',
+    shiftTitle: 'Specialized Stations (Conditional)',
+    timeEstimate: '1–2 mins',
     input: 'scale_1_5',
     why: 'Beer lines, post-mix soda gun diffusers, and beer faucets accumulate wild yeast, beer stone, bacterial biofilm, and attract fruit flies.',
     what: ['Inspect bar soda guns, beer tap spouts, and fountain dispensing nozzles.', 'Verify nozzles and diffusers are unscrewed and soaked in food-grade sanitizing solution daily.', 'Check draft beer lines cleaning log (must be flushed with line cleaner every 14 days).', 'Verify bar drip trays and drain tubes are flushed with hot water and free of slime.'],
@@ -464,6 +606,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Tamper-evident seals are strictly mandated by FSSAI for all e-commerce deliveries.',
     severity: 'Critical',
     frequency: 'Per shift',
+    shift: 'specialized',
+    shiftTitle: 'Specialized Stations (Conditional)',
+    timeEstimate: '1–2 mins',
     input: 'scale_1_5',
     why: 'For delivery-only orders, packaging is the sole barrier against tampering, vehicular pollution, spills, and microbial contamination during motorcycle transit.',
     what: ['Inspect packaging materials: food-grade containers, leak-proof lids for curries/gravies, steam-vented boxes for fried items.', 'Verify every delivery bag is sealed with a tamper-evident sticker or secure tape.', 'Check order labels: must display packing timestamp, use-by/consumption window (e.g. "Consume within 2 hours"), and clear Veg/Non-Veg markers.'],
@@ -480,6 +625,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Staging temperature control ensures food quality and safety until courier pickup.',
     severity: 'Minor',
     frequency: 'Per shift',
+    shift: 'specialized',
+    shiftTitle: 'Specialized Stations (Conditional)',
+    timeEstimate: '1–2 mins',
     input: 'scale_1_5',
     why: 'Cooked delivery food staged on ambient dispatch tables enters the danger zone (5°C to 60°C) while waiting for delivery riders, causing rapid bacterial growth.',
     what: ['Inspect the delivery dispatch / pass staging area.', 'Verify hot dishes are held in heated pass cabinets or under heat lamps (≥ 65°C) until rider arrival.', 'Verify cold desserts, salads, and beverages are held in dispatch chillers (≤ 5°C) until pickup.', 'Check that ambient staging time never exceeds 15 minutes.'],
@@ -496,6 +644,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Core temperature maintenance during transit is essential to avoid the danger zone.',
     severity: 'Critical',
     frequency: 'Process',
+    shift: 'specialized',
+    shiftTitle: 'Specialized Stations (Conditional)',
+    timeEstimate: '1–2 mins',
     input: 'scale_1_5',
     why: 'Catering logistics involve high-risk transport over road traffic; cooked banquet food must maintain safe temperatures inside insulated transport containers.',
     what: ['Inspect insulated food transport carriers (thermoboxes / Cambros): clean, gasket seals intact, pre-heated or pre-chilled.', 'Record core temperature of food right before loading at kitchen and immediately upon arrival at the banquet venue.', 'Verify transport vehicle is clean and free of non-food items.'],
@@ -512,6 +663,9 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     target: 'Cannot operate a safe temporary food service without potable water and handwashing facilities.',
     severity: 'Critical',
     frequency: 'Opening',
+    shift: 'specialized',
+    shiftTitle: 'Specialized Stations (Conditional)',
+    timeEstimate: '1–2 mins',
     input: 'scale_1_5',
     why: 'Outdoor and banquet venues frequently lack potable plumbing; using raw untreated ground water or lacking handwash stations triggers catastrophic waterborne food poisoning.',
     what: ['Verify dedicated food-grade potable water cans/tankers for cooking, ice, and beverage dispensing.', 'Check setup of a functioning mobile handwashing station at the catering back-of-house area: running water container with turn-tap, liquid soap, and paper towels.', 'Ensure event service staff wash hands before plating buffets.'],
@@ -630,8 +784,14 @@ export type AppPhase1State = {
 
 export const PHASE1_STORAGE_KEY = 'foodsaf365_phase1';
 
+export function isDailyFloorCheck(c: FoodSafeCheck): boolean {
+  return c.shift === 'opening' || c.shift === 'active' || c.shift === 'closing';
+}
+
 export function isScheduledCheck(c: FoodSafeCheck): boolean {
-  return ['Opening', 'Daily', 'Per shift', 'Process', 'As applicable'].includes(c.frequency);
+  // Operational floor checks + applicable specialized stations
+  // Manager's monthly admin audit (Items 7 & 8) is separated to avoid overwhelming floor supervisors
+  return c.shift !== 'monthly_audit';
 }
 
 export function severityForCheck(code: string): 'critical' | 'attention' {
