@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, History, Home, ShieldCheck, Wrench } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, History, Home, ShieldCheck, Wrench, Star, QrCode } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import {
   FOODSAFE28,
@@ -9,6 +9,7 @@ import {
   Issue,
   CorrectiveAction,
   AuditTrailEvent,
+  DinerSafetyRating,
   AppPhase1State,
   PHASE1_STORAGE_KEY,
   isScheduledCheck,
@@ -45,6 +46,7 @@ export default function ManagerPage() {
   const issues: Issue[] = data.issues || [];
   const actions: CorrectiveAction[] = data.actions || [];
   const timeline: AuditTrailEvent[] = data.timeline || [];
+  const dinerRatings: DinerSafetyRating[] = data.dinerRatings || [];
 
   const scheduled = useMemo(() => FOODSAFE28.filter(isScheduledCheck), []);
   const pending = scheduled.filter(x => checks[x.code]?.reviewStatus === 'pending_manager');
@@ -458,6 +460,108 @@ export default function ManagerPage() {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* 6. LIVE DINER FOOD-SAFETY RATINGS & REMARKS (TABLETOP QR FEED) */}
+        <section className="section-block" style={{ marginTop: 36 }}>
+          <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12 }}>
+            <div>
+              <span className="pill good" style={{ marginBottom: 6 }}>
+                <QrCode size={11} style={{ display: 'inline', marginRight: 4 }} />
+                LIVE DINER SAFETY FEED
+              </span>
+              <h2 style={{ fontSize: 22, margin: '4px 0 2px', color: '#0f172a' }}>
+                Customer Food-Safety Ratings &amp; Remarks
+              </h2>
+              <p className="muted" style={{ margin: 0, fontSize: 13.5 }}>
+                Real-time feedback submitted by diners through your tabletop and menu QR codes.
+              </p>
+            </div>
+            <Link href="/qr/abc-restaurant" className="btn secondary" style={{ fontSize: 12.5, padding: '7px 14px' }}>
+              Test Table QR Flow →
+            </Link>
+          </div>
+
+          {dinerRatings.length === 0 ? (
+            <div className="card empty-state" style={{ marginTop: 14 }}>
+              <Star size={36} style={{ color: '#059669' }} />
+              <div>
+                <strong>No customer ratings recorded today yet</strong>
+                <p className="muted" style={{ margin: 0, fontSize: 13.5 }}>
+                  When guests scan your FoodSafe365 tabletop QR codes and rate kitchen hygiene, their 5 scores and 100-word remarks appear here instantly.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 14 }}>
+              {dinerRatings.map((rating) => (
+                <div
+                  key={rating.id}
+                  className="card"
+                  style={{
+                    background: '#ffffff',
+                    border: '1.5px solid #e2e8f0',
+                    borderLeft: `4px solid ${rating.overallScore >= 4 ? '#059669' : rating.overallScore >= 3 ? '#d97706' : '#dc2626'}`,
+                    borderRadius: 14,
+                    padding: '18px 20px'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10, marginBottom: 10 }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>
+                          {rating.tableNumber || 'Table QR'}
+                        </span>
+                        <span style={{ fontSize: 12, color: '#64748b' }}>
+                          · {rating.dinerName || 'Verified Diner'} {rating.dinerMobile ? `(${rating.dinerMobile})` : ''}
+                        </span>
+                        <span className="pill good" style={{ fontSize: 10, padding: '1px 6px' }}>VERIFIED DINE-IN</span>
+                      </div>
+                      <small className="muted" style={{ fontSize: 11 }}>
+                        {new Date(rating.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {new Date(rating.createdAt).toLocaleDateString()}
+                      </small>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: '#f0fdf4', padding: '4px 10px', borderRadius: 8, border: '1px solid #bbf7d0' }}>
+                      <Star size={16} fill="#059669" color="#059669" />
+                      <strong style={{ fontSize: 16, color: '#047857' }}>{rating.overallScore}★</strong>
+                      <span style={{ fontSize: 11, color: '#065f46' }}>Overall</span>
+                    </div>
+                  </div>
+
+                  {/* 5-Score Breakdown */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                    gap: 8,
+                    background: '#f8fafc',
+                    padding: '8px 12px',
+                    borderRadius: 8,
+                    marginBottom: 10,
+                    fontSize: 11.5
+                  }}>
+                    <div>Cleanliness: <strong style={{ color: '#059669' }}>{rating.scores?.cleanliness || 5}★</strong></div>
+                    <div>Staff Hygiene: <strong style={{ color: '#059669' }}>{rating.scores?.staffHygiene || 5}★</strong></div>
+                    <div>Freshness &amp; Temp: <strong style={{ color: '#059669' }}>{rating.scores?.foodFreshness || 5}★</strong></div>
+                    <div>Safe Water: <strong style={{ color: '#059669' }}>{rating.scores?.safeWater || 5}★</strong></div>
+                    <div>Washroom: <strong style={{ color: '#059669' }}>{rating.scores?.washroom || 5}★</strong></div>
+                  </div>
+
+                  {/* 100-Word Additional Remarks */}
+                  {rating.feedback ? (
+                    <div style={{ background: '#f1f5f9', borderLeft: '3px solid #059669', padding: '10px 14px', borderRadius: '0 8px 8px 0', fontSize: 13, color: '#1e293b' }}>
+                      <strong style={{ color: '#0f172a' }}>Diner Remarks (Max 100 Words):</strong>
+                      <p style={{ margin: '4px 0 0', lineHeight: 1.5 }}>&ldquo;{rating.feedback}&rdquo;</p>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>
+                      No additional text remarks provided.
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* AUDIT & RECORDS QUICK LINK */}

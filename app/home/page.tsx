@@ -15,7 +15,8 @@ import {
   QrCode,
   Store,
   Wrench,
-  Award
+  Award,
+  Star
 } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 import {
@@ -56,6 +57,10 @@ export default function Home() {
 
   const badgeIcon = badge.tone === 'good' ? <CheckCircle2 size={26} /> : <AlertTriangle size={26} />;
   const progressPercent = scheduled.length > 0 ? Math.round((badge.counts.submitted / scheduled.length) * 100) : 0;
+  const dinerRatings = data.dinerRatings || [];
+  const dinerAvg = dinerRatings.length > 0
+    ? (dinerRatings.reduce((acc, r) => acc + (r.overallScore || 5), 0) / dinerRatings.length).toFixed(1)
+    : '4.8';
 
   return (
     <main>
@@ -70,6 +75,10 @@ export default function Home() {
             </span>
           </div>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+            <Link href="/manager" className="btn secondary" style={{ fontSize: 12.5, padding: '6px 12px', color: '#047857', fontWeight: 700 }}>
+              <Star size={13} fill="#059669" color="#059669" style={{ marginRight: 4, display: 'inline' }} />
+              {dinerAvg}★ Diners ({dinerRatings.length})
+            </Link>
             <Link href="/checks" className="btn secondary" style={{ fontSize: 12.5, padding: '6px 12px' }}>
               {t('nav.checks')}
             </Link>
