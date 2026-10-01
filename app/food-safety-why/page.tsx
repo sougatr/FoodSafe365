@@ -344,252 +344,288 @@ export default function FoodSafetyWhy() {
         </section>
 
         {/* ========================================================================= */}
-        {/* SECTION 1.5: DEEP DIVE: HOW & WHY ACUTE SHORT-TERM INFECTIONS OCCUR */}
+        {/* SECTION 1.5: FLOWCHARTS & TABLES: HOW & WHY ACUTE INFECTIONS OCCUR */}
         {/* ========================================================================= */}
-        <section style={{ marginBottom: 54 }}>
+        <section style={{ marginBottom: 48 }}>
           <div style={{
-            background: 'linear-gradient(135deg, #351206 0%, #2e0f05 100%)',
-            border: '2px solid rgba(239, 68, 68, 0.45)',
-            borderRadius: 22,
-            padding: '32px 30px',
-            boxShadow: '0 14px 35px -5px rgba(0, 0, 0, 0.5)'
+            background: 'linear-gradient(135deg, #351206 0%, #290d04 100%)',
+            border: '2px solid rgba(239, 68, 68, 0.4)',
+            borderRadius: 20,
+            padding: '28px 24px',
+            boxShadow: '0 12px 30px rgba(0, 0, 0, 0.45)'
           }}>
-            {/* Header Badge & Title */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+            {/* Header Badge */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
               <div style={{
-                width: 44,
-                height: 44,
-                borderRadius: 12,
-                background: 'rgba(239, 68, 68, 0.22)',
+                width: 38,
+                height: 38,
+                borderRadius: 10,
+                background: 'rgba(239, 68, 68, 0.2)',
                 color: '#f87171',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '1px solid rgba(239, 68, 68, 0.4)'
+                border: '1px solid rgba(239, 68, 68, 0.35)'
               }}>
-                <Microscope size={26} />
+                <Microscope size={22} />
               </div>
               <div>
-                <span style={{ fontSize: 11, fontWeight: 800, color: '#f87171', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                  CLINICAL PATHOLOGY &amp; KITCHEN VECTORS
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#f87171', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  RAPID DIAGNOSTIC FLOW
                 </span>
-                <h3 style={{ fontSize: 24, fontWeight: 900, color: '#ffffff', margin: 0 }}>
-                  Acute Short-Term Infections: How &amp; Why Do They Occur?
+                <h3 style={{ fontSize: 22, fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                  Acute Short-Term Infections: How &amp; Why
                 </h3>
               </div>
             </div>
 
-            <p style={{ color: '#fed7aa', fontSize: 15, lineHeight: 1.6, maxWidth: 980, margin: '0 0 28px' }}>
-              Unlike chronic illnesses that develop over months, <strong style={{ color: '#ffffff' }}>acute foodborne infections strike within 30 minutes to 48 hours</strong>. Understanding their exact biological pathway and kitchen root cause is the key to preventing them.
-            </p>
+            {/* FLOWCHART 1: THE "HOW" (Biological Mechanisms) */}
+            <div style={{ marginBottom: 28 }}>
+              <h4 style={{ fontSize: 14, fontWeight: 800, color: '#fb923c', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Zap size={16} /> Flowchart 1: How Pathogens Attack the Human Body
+              </h4>
 
-            {/* PART 1: THE "HOW" - 3 BIOLOGICAL PATHWAYS */}
-            <div style={{ marginBottom: 32 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                <Zap size={18} style={{ color: '#f87171' }} />
-                <h4 style={{ fontSize: 17, fontWeight: 800, color: '#ffffff', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Part 1: The &ldquo;HOW&rdquo; — 3 Biological Attack Mechanisms
-                </h4>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: 18 }}>
-                {/* 1. Intoxication */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {/* Flow 1: Intoxication */}
                 <div style={{
                   background: '#220b03',
-                  border: '1.5px solid rgba(239, 68, 68, 0.35)',
-                  borderRadius: 16,
-                  padding: '20px 22px'
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  borderRadius: 12,
+                  padding: '12px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: 8,
+                  fontSize: 12.5
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <span style={{
-                      background: 'rgba(239, 68, 68, 0.2)',
-                      color: '#f87171',
-                      fontSize: 10.5,
-                      fontWeight: 800,
-                      padding: '3px 8px',
-                      borderRadius: 6
-                    }}>
-                      ⚡ ONSET: 30 MIN – 6 HOURS
-                    </span>
-                    <span style={{ fontSize: 11, color: '#fed7aa', fontWeight: 700 }}>Intoxication</span>
-                  </div>
-                  <h5 style={{ fontSize: 16, fontWeight: 800, color: '#ffffff', margin: '0 0 8px' }}>
-                    1. Pre-Formed Toxins (Intoxication)
-                  </h5>
-                  <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.55, margin: '0 0 10px' }}>
-                    <strong>Pathogens:</strong> <em>Staphylococcus aureus</em> (food handlers' skin/sneezes) &amp; <em>Bacillus cereus</em> (emetic toxin in starchy rice/noodles).
-                  </p>
-                  <p style={{ fontSize: 13, color: '#ffedd5', lineHeight: 1.55, margin: 0 }}>
-                    <strong>Biological Action:</strong> Bacteria synthesize enterotoxins directly inside food while left at room temperature. These toxins are <em>heat-stable</em> (survive boiling/reheating). Once ingested, toxins bind to neural receptors in the gut, firing signals up the vagus nerve to stimulate the brainstem's vomiting center (medulla). Victims suffer sudden, violent nausea and projectile vomiting.
-                  </p>
+                  <span style={{ background: '#ef4444', color: '#ffffff', fontWeight: 800, padding: '3px 8px', borderRadius: 6, fontSize: 11 }}>
+                    INTOXICATION (30m–6h)
+                  </span>
+                  <span style={{ color: '#fed7aa' }}>Food left at room temp</span>
+                  <span style={{ color: '#f87171', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#fed7aa' }}>Staph / B. cereus secretes heat-stable toxins</span>
+                  <span style={{ color: '#f87171', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#fed7aa' }}>Vagus nerve stimulation</span>
+                  <span style={{ color: '#f87171', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#fca5a5', fontWeight: 700, background: 'rgba(239, 68, 68, 0.2)', padding: '2px 8px', borderRadius: 6 }}>
+                    Severe Projectile Vomiting
+                  </span>
                 </div>
 
-                {/* 2. Invasive Infection */}
+                {/* Flow 2: Infection */}
                 <div style={{
                   background: '#220b03',
-                  border: '1.5px solid rgba(249, 115, 22, 0.35)',
-                  borderRadius: 16,
-                  padding: '20px 22px'
+                  border: '1px solid rgba(249, 115, 22, 0.3)',
+                  borderRadius: 12,
+                  padding: '12px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: 8,
+                  fontSize: 12.5
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <span style={{
-                      background: 'rgba(249, 115, 22, 0.2)',
-                      color: '#fb923c',
-                      fontSize: 10.5,
-                      fontWeight: 800,
-                      padding: '3px 8px',
-                      borderRadius: 6
-                    }}>
-                      ⏱️ ONSET: 6 – 48 HOURS
-                    </span>
-                    <span style={{ fontSize: 11, color: '#fed7aa', fontWeight: 700 }}>Invasive Infection</span>
-                  </div>
-                  <h5 style={{ fontSize: 16, fontWeight: 800, color: '#ffffff', margin: '0 0 8px' }}>
-                    2. Invasive Bacterial Proliferation
-                  </h5>
-                  <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.55, margin: '0 0 10px' }}>
-                    <strong>Pathogens:</strong> <em>Salmonella enterica</em> (poultry/raw eggs), <em>Campylobacter jejuni</em>, &amp; pathogenic <em>E. coli</em>.
-                  </p>
-                  <p style={{ fontSize: 13, color: '#ffedd5', lineHeight: 1.55, margin: 0 }}>
-                    <strong>Biological Action:</strong> Live bacteria survive the gastric acid barrier, reach the small intestine or colon, and latch onto enterocyte cells via surface adhesins. They penetrate mucosal walls, triggering an inflammatory cascade (IL-8 cytokine storm), destroying intestinal villi, and disabling fluid absorption. This leads to high fever, severe cramping, and explosive watery/bloody diarrhea.
-                  </p>
+                  <span style={{ background: '#f97316', color: '#ffffff', fontWeight: 800, padding: '3px 8px', borderRadius: 6, fontSize: 11 }}>
+                    INFECTION (6h–48h)
+                  </span>
+                  <span style={{ color: '#fed7aa' }}>Undercooked poultry / cross-contamination</span>
+                  <span style={{ color: '#fb923c', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#fed7aa' }}>Live Salmonella/E. coli survives stomach acid</span>
+                  <span style={{ color: '#fb923c', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#fed7aa' }}>Intestinal mucosal invasion &amp; IL-8 storm</span>
+                  <span style={{ color: '#fb923c', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#fed7aa', fontWeight: 700, background: 'rgba(249, 115, 22, 0.2)', padding: '2px 8px', borderRadius: 6 }}>
+                    High Fever &amp; Cramping Diarrhea
+                  </span>
                 </div>
 
-                {/* 3. Amoebiasis */}
+                {/* Flow 3: Amoebiasis */}
                 <div style={{
                   background: '#220b03',
-                  border: '1.5px solid rgba(234, 179, 8, 0.35)',
-                  borderRadius: 16,
-                  padding: '20px 22px'
+                  border: '1px solid rgba(234, 179, 8, 0.3)',
+                  borderRadius: 12,
+                  padding: '12px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: 8,
+                  fontSize: 12.5
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <span style={{
-                      background: 'rgba(234, 179, 8, 0.2)',
-                      color: '#facc15',
-                      fontSize: 10.5,
-                      fontWeight: 800,
-                      padding: '3px 8px',
-                      borderRadius: 6
-                    }}>
-                      🦠 ONSET: 1 – 4 WEEKS (OR ACUTE)
-                    </span>
-                    <span style={{ fontSize: 11, color: '#fed7aa', fontWeight: 700 }}>Protozoan Parasite</span>
-                  </div>
-                  <h5 style={{ fontSize: 16, fontWeight: 800, color: '#ffffff', margin: '0 0 8px' }}>
-                    3. Parasitic Excystation (Amoebiasis)
-                  </h5>
-                  <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.55, margin: '0 0 10px' }}>
-                    <strong>Pathogen:</strong> <em>Entamoeba histolytica</em> protozoan cysts (fecal-oral vector via water, ice &amp; unwashed raw greens).
-                  </p>
-                  <p style={{ fontSize: 13, color: '#ffedd5', lineHeight: 1.55, margin: 0 }}>
-                    <strong>Biological Action:</strong> Quadrinucleated cysts have tough chitinous walls that resist chlorine and stomach acid. Upon reaching the terminal ileum, they excyst into active amoebic trophozoites. Trophozoites release pore-forming amoebapores and cysteine proteases that physically digest colonic mucosa, creating classic &ldquo;flask-shaped&rdquo; mucosal ulcers, mucus/bloody dysentery, and potential travel via portal veins to cause liver abscesses.
-                  </p>
+                  <span style={{ background: '#eab308', color: '#1f2937', fontWeight: 800, padding: '3px 8px', borderRadius: 6, fontSize: 11 }}>
+                    AMOEBIASIS (Days–Weeks)
+                  </span>
+                  <span style={{ color: '#fed7aa' }}>Unwashed salad / raw water / unwashed hands</span>
+                  <span style={{ color: '#facc15', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#fed7aa' }}>Ingest E. histolytica cysts</span>
+                  <span style={{ color: '#facc15', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#fed7aa' }}>Excysts in ileum; trophozoites lyse mucosa</span>
+                  <span style={{ color: '#facc15', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#fef08a', fontWeight: 700, background: 'rgba(234, 179, 8, 0.2)', padding: '2px 8px', borderRadius: 6 }}>
+                    Amoebic Dysentery &amp; Liver Abscess
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* PART 2: THE "WHY" - 5 OPERATIONAL ROOT CAUSES IN KITCHENS */}
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                <AlertCircle size={18} style={{ color: '#fb923c' }} />
-                <h4 style={{ fontSize: 17, fontWeight: 800, color: '#ffffff', margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Part 2: The &ldquo;WHY&rdquo; — 5 Operational Failures in Commercial Kitchens
-                </h4>
-              </div>
+            {/* FLOWCHART 2: THE "WHY" (Kitchen Vectors) */}
+            <div style={{ marginBottom: 28 }}>
+              <h4 style={{ fontSize: 14, fontWeight: 800, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <UtensilsCrossed size={16} /> Flowchart 2: Why Infections Occur in Commercial Kitchens
+              </h4>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
-                {/* 1. Danger Zone */}
-                <div style={{
-                  background: '#280d04',
-                  border: '1px solid rgba(251, 146, 60, 0.22)',
-                  borderRadius: 14,
-                  padding: '16px 18px'
-                }}>
-                  <strong style={{ color: '#f87171', display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, marginBottom: 6 }}>
-                    <Thermometer size={16} /> 1. Temperature Danger Zone (5°C to 60°C)
-                  </strong>
-                  <p style={{ fontSize: 12.5, color: '#fed7aa', margin: 0, lineHeight: 1.5 }}>
-                    In warm, humid kitchens (28°C–36°C), bacteria undergo binary fission, <strong>doubling every 15–20 minutes</strong>. A pot of cooked curry left on a kitchen slab for 3 hours grows from 1,000 bacteria to over 500,000 bacterial cells, accumulating lethal enterotoxin loads.
-                  </p>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                gap: 12
+              }}>
+                <div style={{ background: '#1e0902', border: '1px solid rgba(251, 146, 60, 0.2)', borderRadius: 10, padding: '12px 14px' }}>
+                  <div style={{ color: '#f87171', fontWeight: 800, fontSize: 12, marginBottom: 4 }}>1. DANGER ZONE ABUSE</div>
+                  <div style={{ color: '#fed7aa', fontSize: 12, lineHeight: 1.4 }}>
+                    Cooked food held between 5°C–60°C ➔ <strong>Bacteria doubles every 20 mins</strong> ➔ Microbial bloom
+                  </div>
                 </div>
 
-                {/* 2. Handwashing & Fecal-Oral */}
-                <div style={{
-                  background: '#280d04',
-                  border: '1px solid rgba(251, 146, 60, 0.22)',
-                  borderRadius: 14,
-                  padding: '16px 18px'
-                }}>
-                  <strong style={{ color: '#fb923c', display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, marginBottom: 6 }}>
-                    <Droplets size={16} /> 2. Fecal-Oral Transmission via Hands
-                  </strong>
-                  <p style={{ fontSize: 12.5, color: '#fed7aa', margin: 0, lineHeight: 1.5 }}>
-                    Food handlers carrying asymptomatic <em>E. histolytica</em> cysts or <em>E. coli</em> who wash hands with water alone (without soap and 20-second vigorous scrubbing) transfer microscopic cysts under their fingernails onto ready-to-eat salads, burger buns, and garnishes.
-                  </p>
+                <div style={{ background: '#1e0902', border: '1px solid rgba(251, 146, 60, 0.2)', borderRadius: 10, padding: '12px 14px' }}>
+                  <div style={{ color: '#fb923c', fontWeight: 800, fontSize: 12, marginBottom: 4 }}>2. CROSS-CONTAMINATION</div>
+                  <div style={{ color: '#fed7aa', fontSize: 12, lineHeight: 1.4 }}>
+                    Raw poultry knife used on salad ➔ <strong>No cooking step</strong> ➔ Live pathogens directly ingested
+                  </div>
                 </div>
 
-                {/* 3. Cross-Contamination */}
-                <div style={{
-                  background: '#280d04',
-                  border: '1px solid rgba(251, 146, 60, 0.22)',
-                  borderRadius: 14,
-                  padding: '16px 18px'
-                }}>
-                  <strong style={{ color: '#fde68a', display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, marginBottom: 6 }}>
-                    <UtensilsCrossed size={16} /> 3. Cross-Contamination (No Kill Step)
-                  </strong>
-                  <p style={{ fontSize: 12.5, color: '#fed7aa', margin: 0, lineHeight: 1.5 }}>
-                    Using the same chopping board or chef knife for raw chicken and subsequent slicing of cucumber, tomatoes, or onions. While cooking chicken kills <em>Salmonella</em>, the raw salad receives no subsequent heating (&ldquo;kill step&rdquo;), transmitting live pathogens straight to the diner.
-                  </p>
+                <div style={{ background: '#1e0902', border: '1px solid rgba(251, 146, 60, 0.2)', borderRadius: 10, padding: '12px 14px' }}>
+                  <div style={{ color: '#facc15', fontWeight: 800, fontSize: 12, marginBottom: 4 }}>3. FECAL-ORAL VECTOR</div>
+                  <div style={{ color: '#fed7aa', fontSize: 12, lineHeight: 1.4 }}>
+                    Restroom visit without 20s soap scrub ➔ <strong>Microscopic cysts under nails</strong> ➔ Transferred to food
+                  </div>
                 </div>
 
-                {/* 4. Dormant Spore Awakening */}
-                <div style={{
-                  background: '#280d04',
-                  border: '1px solid rgba(251, 146, 60, 0.22)',
-                  borderRadius: 14,
-                  padding: '16px 18px'
-                }}>
-                  <strong style={{ color: '#34d399', display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, marginBottom: 6 }}>
-                    <Flame size={16} /> 4. Spore Awakening During Slow Ambient Cooling
-                  </strong>
-                  <p style={{ fontSize: 12.5, color: '#fed7aa', margin: 0, lineHeight: 1.5 }}>
-                    Boiling kills live bacteria but fails to kill bacterial endospores (<em>Bacillus cereus</em> and <em>Clostridium perfringens</em>). When large 30-liter pots of rice or base gravy cool slowly over 6 hours at room temperature, the heat shock wakes up the spores, transforming them into toxin-producing factories.
-                  </p>
+                <div style={{ background: '#1e0902', border: '1px solid rgba(251, 146, 60, 0.2)', borderRadius: 10, padding: '12px 14px' }}>
+                  <div style={{ color: '#34d399', fontWeight: 800, fontSize: 12, marginBottom: 4 }}>4. SLOW AMBIENT COOLING</div>
+                  <div style={{ color: '#fed7aa', fontSize: 12, lineHeight: 1.4 }}>
+                    Large pot cooled slowly on floor ➔ <strong>Heat shock awakens spores</strong> ➔ Toxins generated
+                  </div>
                 </div>
 
-                {/* 5. Untreated Water & Ice */}
-                <div style={{
-                  background: '#280d04',
-                  border: '1px solid rgba(251, 146, 60, 0.22)',
-                  borderRadius: 14,
-                  padding: '16px 18px'
-                }}>
-                  <strong style={{ color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, marginBottom: 6 }}>
-                    <Droplets size={16} /> 5. Contaminated Tap Water &amp; Ice Machines
-                  </strong>
-                  <p style={{ fontSize: 12.5, color: '#fed7aa', margin: 0, lineHeight: 1.5 }}>
-                    Washing fresh mint or coriander in untreated municipal/borewell water containing amoebic cysts or coliform bacteria, or failing to sanitize ice machine reservoirs (where biofilm harboring Pseudomonas and coliforms forms inside frozen nozzles).
-                  </p>
+                <div style={{ background: '#1e0902', border: '1px solid rgba(251, 146, 60, 0.2)', borderRadius: 10, padding: '12px 14px' }}>
+                  <div style={{ color: '#38bdf8', fontWeight: 800, fontSize: 12, marginBottom: 4 }}>5. UNTREATED WATER / ICE</div>
+                  <div style={{ color: '#fed7aa', fontSize: 12, lineHeight: 1.4 }}>
+                    Unfiltered tap water for mint chutney &amp; bar ice ➔ <strong>Cysts &amp; coliforms</strong> ➔ Direct infection
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* SUMMARY DEFENSE CALLOUT */}
-            <div style={{
-              marginTop: 24,
-              background: 'rgba(16, 185, 129, 0.12)',
-              border: '1px solid rgba(52, 211, 153, 0.35)',
-              borderRadius: 14,
-              padding: '14px 18px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12
-            }}>
-              <CheckCircle2 size={24} style={{ color: '#34d399', flexShrink: 0 }} />
-              <div style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.5 }}>
-                <strong style={{ color: '#ffffff' }}>How FoodSafe365 Eliminates These Acute Vectors:</strong> Time-phased opening/closing checklist enforcement, strict 6-color board segregation, mandatory 2-hour discard timer for room-temperature holding, digital probe logging (&gt;75°C core cooking), and semi-annual Form 1A medical stool examinations for all food handlers.
-              </div>
+            {/* TABLE 1: PATHOGEN ATTACK MATRIX */}
+            <div style={{ marginBottom: 24, overflowX: 'auto' }}>
+              <h4 style={{ fontSize: 14, fontWeight: 800, color: '#f87171', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+                Table 1: Pathogen Attack &amp; Incubation Matrix
+              </h4>
+              <table style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                fontSize: 12.5,
+                color: '#fed7aa',
+                background: '#220b03',
+                borderRadius: 12,
+                overflow: 'hidden'
+              }}>
+                <thead>
+                  <tr style={{ background: '#1a0701', borderBottom: '1.5px solid rgba(251, 146, 60, 0.25)', textAlign: 'left' }}>
+                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>Pathogen</th>
+                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>Incubation / Onset</th>
+                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>Attack Mechanism</th>
+                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>Food Vehicle</th>
+                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>Key Symptoms</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
+                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#fca5a5' }}>Staphylococcus aureus</td>
+                    <td style={{ padding: '10px 14px', color: '#f87171', fontWeight: 600 }}>30 min – 4 hours</td>
+                    <td style={{ padding: '10px 14px' }}>Pre-formed heat-stable enterotoxin</td>
+                    <td style={{ padding: '10px 14px' }}>Warm gravies, sliced meats, cream</td>
+                    <td style={{ padding: '10px 14px' }}>Sudden projectile vomiting, cramps</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
+                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#fed7aa' }}>Bacillus cereus</td>
+                    <td style={{ padding: '10px 14px', color: '#fb923c', fontWeight: 600 }}>1 – 6 hours</td>
+                    <td style={{ padding: '10px 14px' }}>Heat-resistant cereulide toxin</td>
+                    <td style={{ padding: '10px 14px' }}>Boiled/fried rice, noodles, starchy base</td>
+                    <td style={{ padding: '10px 14px' }}>Acute nausea, severe vomiting</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
+                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#fde68a' }}>Salmonella enterica</td>
+                    <td style={{ padding: '10px 14px', color: '#fbbf24', fontWeight: 600 }}>12 – 48 hours</td>
+                    <td style={{ padding: '10px 14px' }}>Invasive mucosal enteritis &amp; IL-8 storm</td>
+                    <td style={{ padding: '10px 14px' }}>Undercooked chicken, eggs, cross-contamination</td>
+                    <td style={{ padding: '10px 14px' }}>Fever, cramps, watery diarrhea</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
+                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#a7f3d0' }}>Entamoeba histolytica</td>
+                    <td style={{ padding: '10px 14px', color: '#34d399', fontWeight: 600 }}>1 – 4 weeks (or acute)</td>
+                    <td style={{ padding: '10px 14px' }}>Cyst excystation; trophozoite mucosal lysis</td>
+                    <td style={{ padding: '10px 14px' }}>Unwashed salads, raw chutneys, tap ice</td>
+                    <td style={{ padding: '10px 14px' }}>Bloody dysentery, ulcers, liver abscess</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#bae6fd' }}>Campylobacter jejuni</td>
+                    <td style={{ padding: '10px 14px', color: '#38bdf8', fontWeight: 600 }}>2 – 5 days</td>
+                    <td style={{ padding: '10px 14px' }}>Mucosal invasion with cytolethal toxin</td>
+                    <td style={{ padding: '10px 14px' }}>Raw poultry, cross-contaminated counters</td>
+                    <td style={{ padding: '10px 14px' }}>Bloody diarrhea, high fever, periumbilical pain</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* TABLE 2: KITCHEN FAILURE VS FOODSAFE365 CONTROL */}
+            <div style={{ overflowX: 'auto' }}>
+              <h4 style={{ fontSize: 14, fontWeight: 800, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+                Table 2: Kitchen Failure Point vs. FoodSafe365 Preventive Rule
+              </h4>
+              <table style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                fontSize: 12.5,
+                color: '#fed7aa',
+                background: '#220b03',
+                borderRadius: 12,
+                overflow: 'hidden'
+              }}>
+                <thead>
+                  <tr style={{ background: '#1a0701', borderBottom: '1.5px solid rgba(251, 146, 60, 0.25)', textAlign: 'left' }}>
+                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>Failure Point</th>
+                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>Biological Risk</th>
+                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>FoodSafe365 Control</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
+                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#ffffff' }}>Holding gravies at room temperature</td>
+                    <td style={{ padding: '10px 14px' }}>Danger Zone bacterial doubling (5°C–60°C)</td>
+                    <td style={{ padding: '10px 14px', color: '#34d399', fontWeight: 600 }}>Strict 2-hour discard rule &amp; &lt;5°C refrigeration check</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
+                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#ffffff' }}>Shared knives &amp; chopping boards</td>
+                    <td style={{ padding: '10px 14px' }}>Cross-contamination to raw ready-to-eat salads</td>
+                    <td style={{ padding: '10px 14px', color: '#34d399', fontWeight: 600 }}>6-Color board matrix (Yellow = Poultry, Green = Veg)</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
+                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#ffffff' }}>Slow ambient cooling of deep pots</td>
+                    <td style={{ padding: '10px 14px' }}>Dormant spore germination (B. cereus / C. perfringens)</td>
+                    <td style={{ padding: '10px 14px', color: '#34d399', fontWeight: 600 }}>Blast chilling &lt;90 mins or shallow pans in ice-baths</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
+                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#ffffff' }}>Poor hand hygiene post-restroom</td>
+                    <td style={{ padding: '10px 14px' }}>Fecal-oral transmission of Amoebiasis &amp; E. coli</td>
+                    <td style={{ padding: '10px 14px', color: '#34d399', fontWeight: 600 }}>Stocked sink check + Form 1A semi-annual stool test</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#ffffff' }}>Untreated tap water for ice/chutneys</td>
+                    <td style={{ padding: '10px 14px' }}>Protozoan cyst &amp; coliform ingestion</td>
+                    <td style={{ padding: '10px 14px', color: '#34d399', fontWeight: 600 }}>Certified RO filtration &amp; sanitized ice machines</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </section>
