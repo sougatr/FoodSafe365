@@ -1,12 +1,37 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ShieldCheck, HelpCircle, Mail, Info, FileText, Bot } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ShieldCheck, HelpCircle, Mail, Info, FileText, Bot, User } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
 import ThemeToggle from './ThemeToggle';
 
 export default function GlobalHeader() {
   const pathname = usePathname();
+  const [customerPhone, setCustomerPhone] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const p = localStorage.getItem('foodsafe365_customer_phone');
+      if (p) setCustomerPhone(p);
+
+      const handleAuthUpdate = () => {
+        const updated = localStorage.getItem('foodsafe365_customer_phone');
+        setCustomerPhone(updated);
+      };
+      window.addEventListener('customer-auth-changed', handleAuthUpdate);
+      return () => window.removeEventListener('customer-auth-changed', handleAuthUpdate);
+    }
+  }, []);
+
+  function handleLogout() {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('foodsafe365_customer_phone');
+      localStorage.removeItem('foodsafe365_diner_user');
+      setCustomerPhone(null);
+      window.dispatchEvent(new CustomEvent('customer-auth-changed'));
+    }
+  }
 
   const NAV_ITEMS = [
     { href: '/about', label: 'About Us', icon: Info },
@@ -69,8 +94,67 @@ export default function GlobalHeader() {
           })}
         </nav>
 
-        {/* Controls: Language, Theme, Ask Me Bot */}
+        {/* Controls: Customer Login, Language, Theme, Ask Me Bot */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {customerPhone ? (
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              background: '#f0fdf4',
+              border: '1px solid #86efac',
+              padding: '4px 10px',
+              borderRadius: 9999,
+              fontSize: 12
+            }}>
+              <span style={{ color: '#166534', fontWeight: 700 }}>
+                📱 +91 {customerPhone.length > 5 ? customerPhone.slice(0, 5) + '...' : customerPhone}
+              </span>
+              <button
+                type="button"
+                onClick={handleLogout}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#dc2626',
+                  fontSize: 11,
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  padding: '0 2px'
+                }}
+                title="Log out"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new CustomEvent('open-customer-otp-modal'));
+                }
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                fontSize: 12.5,
+                padding: '6px 12px',
+                borderRadius: 8,
+                background: 'linear-gradient(135deg, #ff5200 0%, #ea580c 100%)',
+                border: 'none',
+                color: '#ffffff',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 2px 6px rgba(255, 82, 0, 0.25)'
+              }}
+              title="Customer Login with Mobile OTP"
+            >
+              <span>📱 Customer Login</span>
+            </button>
+          )}
+
           <LanguageSelector />
           <ThemeToggle />
           <button

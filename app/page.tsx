@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -15,7 +15,14 @@ import {
   UtensilsCrossed,
   Users,
   Wrench,
-  Sparkles
+  Sparkles,
+  Smartphone,
+  Phone,
+  X,
+  Flame,
+  Award,
+  Check,
+  AlertCircle
 } from 'lucide-react';
 import GlobalHeader from '@/components/GlobalHeader';
 import { POPULAR_RESTAURANTS, RestaurantItem } from '@/lib/restaurantsData';
@@ -25,6 +32,158 @@ export default function Landing() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState<'all' | 'mumbai' | 'delhi' | 'bengaluru'>('all');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'delivery' | 'fine_dine' | 'cafe'>('all');
+
+  // Customer Authentication (Mobile OTP) State
+  const [customerPhone, setCustomerPhone] = useState<string | null>(null);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpStep, setOtpStep] = useState<'phone' | 'otp' | 'success'>('phone');
+  const [inputPhone, setInputPhone] = useState('');
+  const [inputOtp, setInputOtp] = useState('');
+  const [otpTimer, setOtpTimer] = useState(30);
+  const [otpError, setOtpError] = useState('');
+
+  // Rating Modal State
+  const [ratingModalRestaurant, setRatingModalRestaurant] = useState<RestaurantItem | null>(null);
+  const [rateTableNum, setRateTableNum] = useState('Table 4');
+  const [rateScores, setRateScores] = useState({ q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 });
+  const [rateRemarks, setRateRemarks] = useState('');
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+
+  // Passport Quick-Peek Modal State
+  const [passportModalRestaurant, setPassportModalRestaurant] = useState<RestaurantItem | null>(null);
+
+  // Toast notification
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let interval: any;
+    if (showOtpModal && otpStep === 'otp' && otpTimer > 0) {
+      interval = setInterval(() => setOtpTimer(prev => prev - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [showOtpModal, otpStep, otpTimer]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const p = localStorage.getItem('foodsafe365_customer_phone');
+      if (p) setCustomerPhone(p);
+
+      const handleOpenOtp = () => {
+        setShowOtpModal(true);
+        setOtpStep('phone');
+        setOtpError('');
+      };
+      const handleAuthUpdate = () => {
+        const updated = localStorage.getItem('foodsafe365_customer_phone');
+        setCustomerPhone(updated);
+      };
+
+      window.addEventListener('open-customer-otp-modal', handleOpenOtp);
+      window.addEventListener('customer-auth-changed', handleAuthUpdate);
+      return () => {
+        window.removeEventListener('open-customer-otp-modal', handleOpenOtp);
+        window.removeEventListener('customer-auth-changed', handleAuthUpdate);
+      };
+    }
+  }, []);
+
+  function showToast(msg: string) {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4500);
+  }
+
+  function handleSendOtp(e: React.FormEvent) {
+    e.preventDefault();
+    const clean = inputPhone.replace(/\D/g, '');
+    if (clean.length < 10) {
+      setOtpError('Please enter a valid 10-digit mobile number');
+      return;
+    }
+    setOtpError('');
+    setOtpStep('otp');
+    setOtpTimer(30);
+  }
+
+  function handleVerifyOtp(e: React.FormEvent) {
+    e.preventDefault();
+    if (!inputOtp.trim()) {
+      setOtpError('Please enter the 4-digit OTP');
+      return;
+    }
+    setOtpError('');
+    setOtpStep('success');
+    const clean = inputPhone.replace(/\D/g, '');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('foodsafe365_customer_phone', clean);
+      localStorage.setItem('foodsafe365_diner_user', JSON.stringify({
+        phone: clean,
+        name: `Diner (+91 ${clean.slice(0, 5)}...)`,
+        verifiedAt: new Date().toISOString()
+      }));
+      window.dispatchEvent(new CustomEvent('customer-auth-changed'));
+    }
+    setCustomerPhone(clean);
+
+    setTimeout(() => {
+      setShowOtpModal(false);
+      setOtpStep('phone');
+      setInputOtp('');
+      showToast(`🎉 Welcome +91 ${clean}! You can now submit verified food-safety ratings.`);
+    }, 1100);
+  }
+
+  function handleLogoutCustomer() {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('foodsafe365_customer_phone');
+      localStorage.removeItem('foodsafe365_diner_user');
+      window.dispatchEvent(new CustomEvent('customer-auth-changed'));
+    }
+    setCustomerPhone(null);
+    showToast('Logged out of diner profile');
+  }
+
+  function handleOpenRating(restaurant: RestaurantItem) {
+    setRatingModalRestaurant(restaurant);
+    setRateScores({ q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 });
+    setRateRemarks('');
+    setRateTableNum(restaurant.tableCode || 'Table 4');
+  }
+
+  function handleSubmitRating(e: React.FormEvent) {
+    e.preventDefault();
+    if (!ratingModalRestaurant) return;
+    setIsSubmittingRating(true);
+
+    const avgScore = (
+      (rateScores.q1 + rateScores.q2 + rateScores.q3 + rateScores.q4 + rateScores.q5) / 5
+    ).toFixed(1);
+
+    const newRating = {
+      id: 'diner_' + Date.now(),
+      outletId: ratingModalRestaurant.id,
+      restaurantName: ratingModalRestaurant.name,
+      location: ratingModalRestaurant.location,
+      tableNumber: rateTableNum,
+      timestamp: new Date().toISOString(),
+      verifiedDiner: Boolean(customerPhone),
+      dinerPhone: customerPhone ? `+91 ${customerPhone.slice(0, 5)}...` : 'Guest Diner',
+      scores: rateScores,
+      averageScore: avgScore,
+      remarks: rateRemarks.trim() || 'Food was served hot and tables were spotlessly clean.'
+    };
+
+    if (typeof window !== 'undefined') {
+      const existing = JSON.parse(localStorage.getItem('foodsafe365_diner_ratings') || '[]');
+      localStorage.setItem('foodsafe365_diner_ratings', JSON.stringify([newRating, ...existing]));
+      window.dispatchEvent(new CustomEvent('foodsafe-rating-submitted'));
+    }
+
+    setTimeout(() => {
+      setIsSubmittingRating(false);
+      setRatingModalRestaurant(null);
+      showToast(`⭐ Thank you! Your ${avgScore}★ audit for ${ratingModalRestaurant.name} was delivered to the General Manager. +50 Karma earned!`);
+    }, 600);
+  }
 
   const filteredRestaurants = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -50,10 +209,27 @@ export default function Landing() {
     );
 
     if (matched) {
-      router.push(`/qr/${matched.id}`);
+      handleOpenRating(matched);
     } else {
-      const slug = searchQuery.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      router.push(`/qr/${slug}?name=${encodeURIComponent(searchQuery.trim())}`);
+      const customRestaurant: RestaurantItem = {
+        id: searchQuery.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        name: searchQuery.trim(),
+        city: 'mumbai',
+        location: 'Custom Dine-In Outlet',
+        tableCode: 'Table QR #01',
+        cuisine: 'Multi-Cuisine',
+        category: 'delivery',
+        badge: 'COMMUNITY FOODSAFE AUDIT',
+        score: '5.0',
+        reviews: 1,
+        lastCheck: 'Today',
+        signals: {
+          cold: { title: 'Cold < 5°C', subtitle: 'Storage Verified' },
+          medical: { title: '100% Medical', subtitle: 'Form 1A Cleared' },
+          pest: { title: 'Pest Safe', subtitle: 'Routine Inspected' }
+        }
+      };
+      handleOpenRating(customRestaurant);
     }
   }
 
@@ -63,7 +239,7 @@ export default function Landing() {
 
       {/* Hero Header */}
       <section style={{
-        background: 'linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%)',
+        background: 'linear-gradient(180deg, #ffffff 0%, #fff7ed 50%, #f0fdf4 100%)',
         borderBottom: '1px solid #e2e8f0',
         paddingTop: 36,
         paddingBottom: 40
@@ -95,6 +271,75 @@ export default function Landing() {
           }}>
             Welcome to FoodSafe365
           </h1>
+
+          {/* Customer Logged-in / Login Banner (Swiggy / Zomato style) */}
+          <div style={{ marginBottom: 20 }}>
+            {customerPhone ? (
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                background: '#ffffff',
+                border: '1.5px solid #86efac',
+                boxShadow: '0 4px 12px rgba(5, 150, 105, 0.1)',
+                borderRadius: 9999,
+                padding: '6px 18px',
+                fontSize: 13,
+                color: '#166534'
+              }}>
+                <span>👤 Logged in as <strong>+91 {customerPhone}</strong> (Verified Food-Safety Auditor)</span>
+                <span style={{ background: '#059669', color: '#fff', padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 800 }}>⭐ 50 Karma</span>
+                <button
+                  type="button"
+                  onClick={handleLogoutCustomer}
+                  style={{ border: 'none', background: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 12, fontWeight: 700, textDecoration: 'underline' }}
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                background: 'linear-gradient(90deg, #fff7ed 0%, #fef3c7 100%)',
+                border: '1.5px solid #fed7aa',
+                boxShadow: '0 4px 12px rgba(255, 82, 0, 0.08)',
+                borderRadius: 9999,
+                padding: '6px 18px',
+                fontSize: 13,
+                color: '#9a3412',
+                flexWrap: 'wrap',
+                justifyContent: 'center'
+              }}>
+                <span>👋 Eating out or ordering online? Rate food safety &amp; verify clean kitchens:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowOtpModal(true);
+                    setOtpStep('phone');
+                    setOtpError('');
+                  }}
+                  style={{
+                    background: 'linear-gradient(135deg, #ff5200 0%, #ea580c 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: 9999,
+                    padding: '5px 14px',
+                    fontSize: 12.5,
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 6px rgba(255, 82, 0, 0.3)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5
+                  }}
+                >
+                  <Smartphone size={13} /> Customer Login with OTP →
+                </button>
+              </div>
+            )}
+          </div>
 
           <p style={{
             fontSize: 'clamp(15.5px, 2vw, 18px)',
@@ -229,14 +474,60 @@ export default function Landing() {
               </div>
 
               <div>
+                {customerPhone ? (
+                  <div style={{
+                    background: '#f0fdf4',
+                    border: '1.5px solid #86efac',
+                    borderRadius: 12,
+                    padding: '10px 14px',
+                    marginBottom: 10,
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#166534', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                      <CheckCircle2 size={16} color="#16a34a" /> Verified Diner: +91 {customerPhone}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: '#15803d', marginTop: 2 }}>
+                      ⭐ 50 FoodSafe Karma Active · Ratings Stamped as Verified
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowOtpModal(true);
+                      setOtpStep('phone');
+                      setOtpError('');
+                    }}
+                    className="btn primary"
+                    style={{
+                      width: '100%',
+                      justifyContent: 'center',
+                      fontSize: 14,
+                      padding: '11px 16px',
+                      fontWeight: 700,
+                      background: 'linear-gradient(135deg, #ff5200 0%, #ea580c 100%)',
+                      border: 'none',
+                      color: '#ffffff',
+                      boxShadow: '0 4px 14px rgba(255, 82, 0, 0.25)',
+                      cursor: 'pointer',
+                      marginBottom: 10,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6
+                    }}
+                  >
+                    <Smartphone size={16} /> Customer Sign In (Mobile OTP) →
+                  </button>
+                )}
+
                 <a
                   href="#diner-section"
                   className="btn secondary"
                   style={{
                     width: '100%',
                     justifyContent: 'center',
-                    fontSize: 14,
-                    padding: '11px 16px',
+                    fontSize: 13.5,
+                    padding: '10px 16px',
                     fontWeight: 700,
                     textDecoration: 'none',
                     color: '#0f172a'
@@ -245,7 +536,7 @@ export default function Landing() {
                   Rate a Restaurant / Find Safe Kitchens ↓
                 </a>
                 <div style={{ textAlign: 'center', marginTop: 10 }}>
-                  <Link href="/qr/abc-restaurant" style={{ fontSize: 12, color: '#475569', fontWeight: 600, textDecoration: 'none' }}>
+                  <Link href="/qr/the-table" style={{ fontSize: 12, color: '#ea580c', fontWeight: 600, textDecoration: 'none' }}>
                     Scan Tabletop QR Code Directly →
                   </Link>
                 </div>
@@ -541,7 +832,7 @@ export default function Landing() {
           )}
         </div>
 
-        {/* Restaurant Cards Grid (Tabletop Verified Audit Cards) */}
+        {/* Restaurant Cards Grid (Swiggy / Zomato Styled Verified Tabletop Audit Cards) */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 20 }}>
           {filteredRestaurants.map(r => (
             <div
@@ -550,13 +841,13 @@ export default function Landing() {
               style={{
                 background: '#ffffff',
                 border: '1.5px solid #e2e8f0',
-                borderLeft: '4px solid #059669',
-                borderRadius: 16,
+                borderTop: '4px solid #ff5200',
+                borderRadius: 18,
                 padding: '22px 24px',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                boxShadow: 'var(--shadow-sm)',
+                boxShadow: '0 6px 20px -4px rgba(0,0,0,0.06)',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -564,7 +855,7 @@ export default function Landing() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                   <div>
                     <span className="pill good" style={{ fontSize: 10.5, padding: '2px 8px', marginBottom: 6, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                      <QrCode size={11} /> TABLETOP VERIFIED AUDIT
+                      <QrCode size={11} /> TABLETOP AUDIT VERIFIED
                     </span>
                     <h4 style={{ fontSize: 20, fontWeight: 800, margin: '4px 0 2px', color: '#0f172a' }}>
                       {r.name}
@@ -573,17 +864,23 @@ export default function Landing() {
                       {r.location} · {r.tableCode}
                     </p>
                   </div>
-                  <div style={{
-                    background: '#ecfdf5',
-                    border: '1px solid #a7f3d0',
-                    borderRadius: 10,
-                    padding: '6px 10px',
-                    textAlign: 'center',
-                    flexShrink: 0
-                  }}>
+                  <button
+                    type="button"
+                    onClick={() => setPassportModalRestaurant(r)}
+                    style={{
+                      background: '#ecfdf5',
+                      border: '1px solid #a7f3d0',
+                      borderRadius: 10,
+                      padding: '6px 10px',
+                      textAlign: 'center',
+                      flexShrink: 0,
+                      cursor: 'pointer'
+                    }}
+                    title="Click to view full verified kitchen passport"
+                  >
                     <span style={{ fontSize: 13, fontWeight: 900, color: '#047857', display: 'block', lineHeight: 1.1 }}>FOODSAFE</span>
-                    <span style={{ fontSize: 9, fontWeight: 700, color: '#065f46', textTransform: 'uppercase' }}>TODAY VERIFIED</span>
-                  </div>
+                    <span style={{ fontSize: 9, fontWeight: 700, color: '#065f46', textTransform: 'uppercase' }}>TODAY VERIFIED 🛡️</span>
+                  </button>
                 </div>
 
                 {/* 3 Physical Signals Bar */}
@@ -615,6 +912,7 @@ export default function Landing() {
                   </div>
                 </div>
 
+                {/* Swiggy/Zomato style Rating Badge Chip */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -623,30 +921,69 @@ export default function Landing() {
                   fontSize: 12.5,
                   color: '#64748b'
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#059669', fontWeight: 800, fontSize: 15 }}>
-                    <Star size={16} fill="#059669" />
+                  <div style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    background: '#047857',
+                    color: '#ffffff',
+                    fontWeight: 800,
+                    fontSize: 13,
+                    padding: '3px 8px',
+                    borderRadius: 6
+                  }}>
+                    <span>★</span>
                     <span>{r.score}</span>
                   </div>
-                  <span>({r.reviews} verified diner ratings)</span>
+                  <span>({r.reviews} verified diner audits)</span>
                 </div>
               </div>
 
-              <div style={{ paddingTop: 14, borderTop: '1px solid #f1f5f9' }}>
-                <Link
-                  href={`/qr/${r.id}`}
+              {/* Dual Action Buttons (Swiggy / Zomato Inspired: Rate in 60s & View Passport) */}
+              <div style={{
+                paddingTop: 14,
+                borderTop: '1px solid #f1f5f9',
+                display: 'flex',
+                gap: 8,
+                flexWrap: 'wrap'
+              }}>
+                <button
+                  type="button"
+                  onClick={() => handleOpenRating(r)}
                   className="btn primary"
                   style={{
-                    width: '100%',
+                    flex: '1 1 150px',
                     justifyContent: 'center',
-                    fontSize: 13.5,
-                    padding: '10px 14px',
-                    background: '#059669',
-                    borderColor: '#059669',
-                    fontWeight: 700
+                    fontSize: 13,
+                    padding: '10px 12px',
+                    background: 'linear-gradient(135deg, #ff5200 0%, #ea580c 100%)',
+                    borderColor: '#ea580c',
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    boxShadow: '0 3px 10px rgba(255, 82, 0, 0.25)',
+                    cursor: 'pointer'
                   }}
                 >
-                  ⭐ Rate Restaurant (5 Safety Questions) →
-                </Link>
+                  <Star size={14} fill="#ffffff" /> Rate Safety (60s)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPassportModalRestaurant(r)}
+                  className="btn secondary"
+                  style={{
+                    flex: '1 1 130px',
+                    justifyContent: 'center',
+                    fontSize: 13,
+                    padding: '10px 12px',
+                    background: '#ecfdf5',
+                    borderColor: '#a7f3d0',
+                    color: '#047857',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <ShieldCheck size={14} /> View Passport
+                </button>
               </div>
             </div>
           ))}
@@ -658,9 +995,9 @@ export default function Landing() {
               padding: '36px 24px',
               textAlign: 'center',
               background: '#ffffff',
-              border: '2px dashed #059669',
+              border: '2px dashed #ff5200',
               borderRadius: 18,
-              boxShadow: '0 4px 12px rgba(5, 150, 105, 0.08)'
+              boxShadow: '0 4px 12px rgba(255, 82, 0, 0.08)'
             }}>
               <div style={{ fontSize: 36, marginBottom: 10 }}>🍽️</div>
               <h4 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', margin: '0 0 8px' }}>
@@ -672,23 +1009,45 @@ export default function Landing() {
                   : 'Try selecting "All Cities" or "All Formats" above, or search for any restaurant by name.'}
               </p>
               {searchQuery && (
-                <Link
-                  href={`/qr/${searchQuery.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}?name=${encodeURIComponent(searchQuery.trim())}`}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const customRestaurant: RestaurantItem = {
+                      id: searchQuery.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+                      name: searchQuery.trim(),
+                      city: 'mumbai',
+                      location: 'Custom Dine-In Outlet',
+                      tableCode: 'Table QR #01',
+                      cuisine: 'Multi-Cuisine',
+                      category: 'delivery',
+                      badge: 'COMMUNITY FOODSAFE AUDIT',
+                      score: '5.0',
+                      reviews: 1,
+                      lastCheck: 'Today',
+                      signals: {
+                        cold: { title: 'Cold < 5°C', subtitle: 'Storage Verified' },
+                        medical: { title: '100% Medical', subtitle: 'Form 1A Cleared' },
+                        pest: { title: 'Pest Safe', subtitle: 'Routine Inspected' }
+                      }
+                    };
+                    handleOpenRating(customRestaurant);
+                  }}
                   className="btn primary"
                   style={{
-                    background: '#059669',
-                    borderColor: '#059669',
+                    background: 'linear-gradient(135deg, #ff5200 0%, #ea580c 100%)',
+                    borderColor: '#ea580c',
                     padding: '12px 24px',
                     fontSize: 14.5,
                     fontWeight: 700,
-                    textDecoration: 'none',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 8
+                    gap: 8,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(255, 82, 0, 0.3)'
                   }}
                 >
                   <Star size={16} fill="#ffffff" /> Rate &ldquo;{searchQuery}&rdquo; on Food Safety (5 Questions) →
-                </Link>
+                </button>
               )}
             </div>
           )}
@@ -698,8 +1057,8 @@ export default function Landing() {
             <div className="card" style={{
               gridColumn: '1 / -1',
               padding: '18px 24px',
-              background: '#f8fafc',
-              border: '1.5px dashed #cbd5e1',
+              background: '#fff7ed',
+              border: '1.5px dashed #fed7aa',
               borderRadius: 14,
               display: 'flex',
               justifyContent: 'space-between',
@@ -708,18 +1067,39 @@ export default function Landing() {
               gap: 12
             }}>
               <div>
-                <strong style={{ color: '#0f172a', fontSize: 14 }}>Looking for a different branch of &ldquo;{searchQuery}&rdquo;?</strong>
+                <strong style={{ color: '#9a3412', fontSize: 14 }}>Looking for a different branch of &ldquo;{searchQuery}&rdquo;?</strong>
                 <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>
                   Submit a custom audit for any outlet location in 60 seconds.
                 </p>
               </div>
-              <Link
-                href={`/qr/${searchQuery.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}?name=${encodeURIComponent(searchQuery.trim())}`}
+              <button
+                type="button"
+                onClick={() => {
+                  const customRestaurant: RestaurantItem = {
+                    id: searchQuery.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+                    name: searchQuery.trim(),
+                    city: 'mumbai',
+                    location: 'Custom Branch',
+                    tableCode: 'Table QR #01',
+                    cuisine: 'Dine-In & Delivery',
+                    category: 'delivery',
+                    badge: 'COMMUNITY FOODSAFE AUDIT',
+                    score: '5.0',
+                    reviews: 1,
+                    lastCheck: 'Today',
+                    signals: {
+                      cold: { title: 'Cold < 5°C', subtitle: 'Storage Verified' },
+                      medical: { title: '100% Medical', subtitle: 'Form 1A Cleared' },
+                      pest: { title: 'Pest Safe', subtitle: 'Inspected' }
+                    }
+                  };
+                  handleOpenRating(customRestaurant);
+                }}
                 className="btn secondary"
-                style={{ fontSize: 13, padding: '8px 16px', fontWeight: 700 }}
+                style={{ fontSize: 13, padding: '8px 16px', fontWeight: 700, borderColor: '#ea580c', color: '#c2410c', background: '#ffffff', cursor: 'pointer' }}
               >
-                Rate Custom &ldquo;{searchQuery}&rdquo; Outlet →
-              </Link>
+                Rate Custom &ldquo;{searchQuery}&rdquo; Outlet Now →
+              </button>
             </div>
           )}
         </div>
@@ -752,6 +1132,706 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      {/* ========================================================================= */}
+      {/* POP-UP 1: CUSTOMER MOBILE OTP LOGIN MODAL (Swiggy / Zomato Style) */}
+      {/* ========================================================================= */}
+      {showOtpModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(15, 23, 42, 0.7)',
+          backdropFilter: 'blur(5px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 16
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: 22,
+            maxWidth: 440,
+            width: '100%',
+            boxShadow: '0 25px 60px -15px rgba(0,0,0,0.3)',
+            overflow: 'hidden',
+            position: 'relative'
+          }}>
+            {/* Top Bar with Close */}
+            <div style={{
+              background: 'linear-gradient(135deg, #ff5200 0%, #ea580c 100%)',
+              padding: '24px 24px 20px',
+              color: '#ffffff',
+              position: 'relative'
+            }}>
+              <button
+                type="button"
+                onClick={() => setShowOtpModal(false)}
+                style={{
+                  position: 'absolute',
+                  top: 16,
+                  right: 16,
+                  background: 'rgba(255,255,255,0.2)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 32,
+                  height: 32,
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={18} />
+              </button>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.25)', padding: '3px 10px', borderRadius: 9999, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', marginBottom: 8 }}>
+                <Smartphone size={12} /> CUSTOMER VERIFICATION
+              </div>
+              <h3 style={{ margin: 0, fontSize: 22, fontWeight: 900 }}>Customer Mobile Sign In</h3>
+              <p style={{ margin: '4px 0 0', fontSize: 13, opacity: 0.9 }}>
+                Submit verified restaurant food-safety ratings and earn Karma points.
+              </p>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: 24 }}>
+              {otpStep === 'phone' && (
+                <form onSubmit={handleSendOtp}>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>
+                    Enter 10-Digit Mobile Number
+                  </label>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    border: '1.5px solid #cbd5e1',
+                    borderRadius: 12,
+                    padding: '10px 14px',
+                    gap: 10,
+                    marginBottom: 12,
+                    background: '#f8fafc'
+                  }}>
+                    <span style={{ fontWeight: 800, color: '#0f172a', fontSize: 15 }}>🇮🇳 +91</span>
+                    <input
+                      type="tel"
+                      maxLength={10}
+                      autoFocus
+                      placeholder="9876543210"
+                      value={inputPhone}
+                      onChange={e => setInputPhone(e.target.value.replace(/\D/g, ''))}
+                      style={{
+                        border: 'none',
+                        outline: 'none',
+                        fontSize: 16,
+                        width: '100%',
+                        fontWeight: 600,
+                        color: '#0f172a',
+                        background: 'transparent'
+                      }}
+                    />
+                  </div>
+
+                  {otpError && (
+                    <div style={{ color: '#dc2626', fontSize: 12.5, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <AlertCircle size={14} /> {otpError}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="btn primary"
+                    style={{
+                      width: '100%',
+                      justifyContent: 'center',
+                      background: 'linear-gradient(135deg, #ff5200 0%, #ea580c 100%)',
+                      borderColor: '#ea580c',
+                      fontSize: 15,
+                      fontWeight: 800,
+                      padding: '12px',
+                      borderRadius: 12,
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 14px rgba(255, 82, 0, 0.3)'
+                    }}
+                  >
+                    Send OTP (Instant SMS) →
+                  </button>
+
+                  <div style={{ textAlign: 'center', marginTop: 14, fontSize: 11.5, color: '#64748b' }}>
+                    By proceeding, you agree to FoodSafe365 terms &amp; community hygiene guidelines.
+                  </div>
+                </form>
+              )}
+
+              {otpStep === 'otp' && (
+                <form onSubmit={handleVerifyOtp}>
+                  <div style={{ textAlign: 'center', marginBottom: 18 }}>
+                    <p style={{ margin: '0 0 4px', fontSize: 13.5, color: '#475569' }}>
+                      We sent a 4-digit code to <strong>+91 {inputPhone}</strong>
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setOtpStep('phone')}
+                      style={{ background: 'none', border: 'none', color: '#ff5200', fontSize: 12, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
+                    >
+                      Change number
+                    </button>
+                  </div>
+
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 8, textAlign: 'center' }}>
+                    Enter 4-Digit Verification Code
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={4}
+                    autoFocus
+                    placeholder="3650"
+                    value={inputOtp}
+                    onChange={e => setInputOtp(e.target.value)}
+                    style={{
+                      border: '2px solid #ff5200',
+                      borderRadius: 12,
+                      padding: '12px',
+                      fontSize: 24,
+                      fontWeight: 900,
+                      textAlign: 'center',
+                      letterSpacing: '0.4em',
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      marginBottom: 12
+                    }}
+                  />
+
+                  {/* 1-Click Demo Auto-fill Helper */}
+                  <div style={{ textAlign: 'center', marginBottom: 14 }}>
+                    <button
+                      type="button"
+                      onClick={() => setInputOtp('3650')}
+                      style={{
+                        background: '#ecfdf5',
+                        border: '1px solid #a7f3d0',
+                        color: '#047857',
+                        borderRadius: 9999,
+                        padding: '4px 12px',
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ⚡ One-Click Test: Fill Demo OTP (3650)
+                    </button>
+                  </div>
+
+                  {otpError && (
+                    <div style={{ color: '#dc2626', fontSize: 12.5, marginBottom: 12, textAlign: 'center' }}>
+                      {otpError}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="btn primary"
+                    style={{
+                      width: '100%',
+                      justifyContent: 'center',
+                      background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                      borderColor: '#047857',
+                      fontSize: 15,
+                      fontWeight: 800,
+                      padding: '12px',
+                      borderRadius: 12,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Verify &amp; Continue →
+                  </button>
+
+                  <div style={{ textAlign: 'center', marginTop: 14, fontSize: 12, color: '#64748b' }}>
+                    {otpTimer > 0 ? (
+                      <span>Resend code in {otpTimer}s</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setOtpTimer(30)}
+                        style={{ background: 'none', border: 'none', color: '#ff5200', fontWeight: 700, cursor: 'pointer' }}
+                      >
+                        Resend OTP Now
+                      </button>
+                    )}
+                  </div>
+                </form>
+              )}
+
+              {otpStep === 'success' && (
+                <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                  <div style={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: '50%',
+                    background: '#ecfdf5',
+                    color: '#059669',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 16px'
+                  }}>
+                    <Check size={32} />
+                  </div>
+                  <h4 style={{ margin: '0 0 6px', fontSize: 20, fontWeight: 900, color: '#0f172a' }}>
+                    Verified Successfully!
+                  </h4>
+                  <p style={{ margin: 0, fontSize: 13.5, color: '#475569' }}>
+                    Welcome to FoodSafe365! Your diner ratings will be stamped with the <strong>Verified Diner Audit</strong> seal.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* POP-UP 2: 60-SECOND INTERACTIVE FOOD SAFETY RATING MODAL */}
+      {/* ========================================================================= */}
+      {ratingModalRestaurant && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(5px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 16
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: 22,
+            maxWidth: 580,
+            width: '100%',
+            maxHeight: '92vh',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 25px 60px -15px rgba(0,0,0,0.3)',
+            overflow: 'hidden'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              background: '#0f172a',
+              color: '#ffffff',
+              padding: '20px 24px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start'
+            }}>
+              <div>
+                <span style={{
+                  background: '#ff5200',
+                  color: '#ffffff',
+                  fontSize: 10,
+                  fontWeight: 900,
+                  padding: '3px 8px',
+                  borderRadius: 9999,
+                  textTransform: 'uppercase'
+                }}>
+                  60-SECOND DINER AUDIT
+                </span>
+                <h3 style={{ margin: '6px 0 2px', fontSize: 21, fontWeight: 900, color: '#ffffff' }}>
+                  {ratingModalRestaurant.name}
+                </h3>
+                <p style={{ margin: 0, fontSize: 12.5, color: '#94a3b8' }}>
+                  {ratingModalRestaurant.location} · {ratingModalRestaurant.cuisine}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRatingModalRestaurant(null)}
+                style={{
+                  background: 'rgba(255,255,255,0.15)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 32,
+                  height: 32,
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <form onSubmit={handleSubmitRating} style={{ padding: 24, overflowY: 'auto' }}>
+              {/* Table code input */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, background: '#f8fafc', padding: '10px 14px', borderRadius: 12, border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>Table Number / Seat Code:</span>
+                <input
+                  type="text"
+                  value={rateTableNum}
+                  onChange={e => setRateTableNum(e.target.value)}
+                  style={{
+                    border: '1px solid #cbd5e1',
+                    borderRadius: 6,
+                    padding: '4px 10px',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    width: 100,
+                    textAlign: 'center'
+                  }}
+                />
+              </div>
+
+              {/* 5 Food Safety Questions with clickable stars */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
+                {[
+                  { key: 'q1', label: '1. Table & Cutlery Hygiene', desc: 'Are tables, glasses, and utensils clean & sanitized?' },
+                  { key: 'q2', label: '2. Staff Grooming & Uniform', desc: 'Are chefs & service staff wearing clean uniforms and aprons?' },
+                  { key: 'q3', label: '3. Food Freshness & Temp', desc: 'Was hot food served steaming (≥75°C) & cold food fresh?' },
+                  { key: 'q4', label: '4. Washroom & Hand-Wash Sink', desc: 'Is hand soap and clean water available at wash stations?' },
+                  { key: 'q5', label: '5. Overall Food Safety Confidence', desc: 'Would you comfortably recommend this kitchen to family?' },
+                ].map(item => {
+                  const val = (rateScores as any)[item.key];
+                  return (
+                    <div key={item.key} style={{ background: '#ffffff', border: '1px solid #f1f5f9', borderRadius: 12, padding: '12px 14px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <strong style={{ fontSize: 13.5, color: '#0f172a' }}>{item.label}</strong>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => setRateScores(prev => ({ ...prev, [item.key]: star }))}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: 2,
+                                color: star <= val ? '#ff5200' : '#cbd5e1',
+                                fontSize: 18
+                              }}
+                            >
+                              ★
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>{item.desc}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* 100-Word Feedback Remark */}
+              <div style={{ marginBottom: 18 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <label style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>
+                    100-Word Additional Feedback for General Manager:
+                  </label>
+                  <span style={{ fontSize: 11.5, color: '#64748b' }}>
+                    {rateRemarks.split(/\s+/).filter(Boolean).length} / 100 words
+                  </span>
+                </div>
+                <textarea
+                  value={rateRemarks}
+                  onChange={e => setRateRemarks(e.target.value)}
+                  placeholder="e.g. Counters were spotless, hot soup was delivered at perfect temperature. Staff washed hands regularly."
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    border: '1.5px solid #cbd5e1',
+                    borderRadius: 12,
+                    padding: '10px 12px',
+                    fontSize: 13,
+                    boxSizing: 'border-box',
+                    fontFamily: 'inherit',
+                    color: '#0f172a'
+                  }}
+                />
+              </div>
+
+              {/* Verified Attribution Note */}
+              <div style={{
+                background: customerPhone ? '#ecfdf5' : '#fff7ed',
+                border: customerPhone ? '1px solid #a7f3d0' : '1px solid #fed7aa',
+                borderRadius: 10,
+                padding: '8px 12px',
+                fontSize: 12,
+                color: customerPhone ? '#047857' : '#9a3412',
+                marginBottom: 18,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6
+              }}>
+                <ShieldCheck size={16} />
+                <span>
+                  {customerPhone ? (
+                    <>Submitting as <strong>+91 {customerPhone}</strong> (Verified Food-Safety Auditor)</>
+                  ) : (
+                    <>Submitting as Guest. <button type="button" onClick={() => setShowOtpModal(true)} style={{ background: 'none', border: 'none', color: '#ff5200', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>Sign in with OTP</button> to earn Karma.</>
+                  )}
+                </span>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <button
+                  type="submit"
+                  disabled={isSubmittingRating}
+                  className="btn primary"
+                  style={{
+                    flex: '1 1 200px',
+                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, #ff5200 0%, #ea580c 100%)',
+                    borderColor: '#ea580c',
+                    fontSize: 14,
+                    fontWeight: 800,
+                    padding: '12px',
+                    borderRadius: 12,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(255, 82, 0, 0.3)'
+                  }}
+                >
+                  {isSubmittingRating ? 'Delivering to GM...' : '🚀 Submit Verified Audit to GM'}
+                </button>
+                <Link
+                  href={`/qr/${ratingModalRestaurant.id}`}
+                  className="btn secondary"
+                  style={{
+                    padding: '12px 16px',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    color: '#0f172a'
+                  }}
+                >
+                  Open Full Page →
+                </Link>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* POP-UP 3: FOODSAFE SAFETY PASSPORT QUICK-PEEK MODAL */}
+      {/* ========================================================================= */}
+      {passportModalRestaurant && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(5px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 16
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: 22,
+            maxWidth: 520,
+            width: '100%',
+            maxHeight: '92vh',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 25px 60px -15px rgba(0,0,0,0.3)',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+              color: '#ffffff',
+              padding: '22px 24px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start'
+            }}>
+              <div>
+                <span style={{
+                  background: 'rgba(255,255,255,0.25)',
+                  fontSize: 10,
+                  fontWeight: 900,
+                  padding: '3px 8px',
+                  borderRadius: 9999,
+                  textTransform: 'uppercase'
+                }}>
+                  VERIFIED FOOD-SAFETY PASSPORT
+                </span>
+                <h3 style={{ margin: '6px 0 2px', fontSize: 22, fontWeight: 900, color: '#ffffff' }}>
+                  {passportModalRestaurant.name}
+                </h3>
+                <p style={{ margin: 0, fontSize: 13, opacity: 0.9 }}>
+                  {passportModalRestaurant.location}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPassportModalRestaurant(null)}
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 32,
+                  height: 32,
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{ padding: 24, overflowY: 'auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  background: '#ecfdf5',
+                  border: '1.5px solid #a7f3d0',
+                  padding: '8px 18px',
+                  borderRadius: 9999,
+                  color: '#047857',
+                  fontWeight: 800,
+                  fontSize: 14
+                }}>
+                  <ShieldCheck size={20} /> PASSPORT STATUS: ACTIVE &amp; VERIFIED TODAY
+                </div>
+              </div>
+
+              {/* 4 Core Pillars Breakdown */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px 14px' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Chiller Temp</div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: '#059669', marginTop: 2 }}>{passportModalRestaurant.signals.cold.title}</div>
+                  <div style={{ fontSize: 11, color: '#475569' }}>{passportModalRestaurant.signals.cold.subtitle}</div>
+                </div>
+
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px 14px' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Staff Health</div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: '#2563eb', marginTop: 2 }}>{passportModalRestaurant.signals.medical.title}</div>
+                  <div style={{ fontSize: 11, color: '#475569' }}>{passportModalRestaurant.signals.medical.subtitle}</div>
+                </div>
+
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px 14px' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Pest Audit</div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: '#7c3aed', marginTop: 2 }}>{passportModalRestaurant.signals.pest.title}</div>
+                  <div style={{ fontSize: 11, color: '#475569' }}>{passportModalRestaurant.signals.pest.subtitle}</div>
+                </div>
+
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px 14px' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Diner Score</div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: '#ea580c', marginTop: 2 }}>★ {passportModalRestaurant.score} / 5.0</div>
+                  <div style={{ fontSize: 11, color: '#475569' }}>{passportModalRestaurant.reviews} verified audits</div>
+                </div>
+              </div>
+
+              {/* Table QR Instructions */}
+              <div style={{
+                background: '#f1f5f9',
+                borderRadius: 14,
+                padding: '14px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+                marginBottom: 20
+              }}>
+                <div style={{ width: 48, height: 48, borderRadius: 10, background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #cbd5e1' }}>
+                  <QrCode size={26} color="#059669" />
+                </div>
+                <div>
+                  <strong style={{ fontSize: 13, color: '#0f172a' }}>Tabletop QR Passport Displayed in Dining Room</strong>
+                  <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>
+                    Guests can scan the acrylic stand on {passportModalRestaurant.tableCode} to verify today&apos;s inspection live.
+                  </p>
+                </div>
+              </div>
+
+              {/* Action */}
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const target = passportModalRestaurant;
+                    setPassportModalRestaurant(null);
+                    handleOpenRating(target);
+                  }}
+                  className="btn primary"
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, #ff5200 0%, #ea580c 100%)',
+                    borderColor: '#ea580c',
+                    fontSize: 14,
+                    fontWeight: 800,
+                    padding: '11px',
+                    borderRadius: 12,
+                    cursor: 'pointer'
+                  }}
+                >
+                  ⭐ Rate This Restaurant (60s)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPassportModalRestaurant(null)}
+                  className="btn secondary"
+                  style={{ padding: '11px 18px', fontSize: 13, fontWeight: 700 }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* FLOATING CELEBRATION TOAST NOTIFICATION */}
+      {/* ========================================================================= */}
+      {toastMessage && (
+        <div style={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          background: '#0f172a',
+          color: '#ffffff',
+          borderRadius: 14,
+          padding: '14px 20px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+          zIndex: 10000,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          maxWidth: 380,
+          border: '1px solid #334155',
+          animation: 'fadeIn 0.2s ease'
+        }}>
+          <Sparkles size={20} color="#ff5200" />
+          <span style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.4 }}>{toastMessage}</span>
+          <button
+            type="button"
+            onClick={() => setToastMessage(null)}
+            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: 2, marginLeft: 'auto' }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </main>
   );
 }
