@@ -28,22 +28,17 @@ import {
   CorrectiveAction,
   AuditTrailEvent
 } from '@/lib/foodsafety28';
+import { POPULAR_RESTAURANTS } from '@/lib/restaurantsData';
 import GlobalHeader from '@/components/GlobalHeader';
 
 export default function TableQrPage() {
   const params = useParams();
   const outletId = (params.outlet_id as string) || 'abc-restaurant';
 
-  const KNOWN_RESTAURANTS: Record<string, { name: string; location: string; table: string }> = {
-    'abc-restaurant': { name: 'ABC Restaurant', location: 'Bandra West, Mumbai', table: 'Table QR #04' },
-    'delhi-spice-hub': { name: 'The Spice Pavilion', location: 'Connaught Place, New Delhi', table: 'Table QR #12' },
-    'bengaluru-cafe-safe': { name: 'GreenLeaf Artisan Bistro', location: 'Indiranagar, Bengaluru', table: 'Table QR #08' }
-  };
-
-  const known = KNOWN_RESTAURANTS[outletId];
-  const [displayName, setDisplayName] = useState(known?.name || outletId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
-  const [displayLocation, setDisplayLocation] = useState(known?.location || 'Verified Dine-In Partner');
-  const [displayTable, setDisplayTable] = useState(known?.table || 'Table QR #04');
+  const matchedFromDb = POPULAR_RESTAURANTS.find(r => r.id === outletId);
+  const [displayName, setDisplayName] = useState(matchedFromDb?.name || outletId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+  const [displayLocation, setDisplayLocation] = useState(matchedFromDb?.location || 'Verified Dine-In Partner');
+  const [displayTable, setDisplayTable] = useState(matchedFromDb?.tableCode || 'Table QR #04');
 
   const [activeTab, setActiveTab] = useState<'rate' | 'complain'>('rate');
   const [tableNumber, setTableNumber] = useState('Table 4');

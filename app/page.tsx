@@ -18,84 +18,35 @@ import {
   Sparkles
 } from 'lucide-react';
 import GlobalHeader from '@/components/GlobalHeader';
+import { POPULAR_RESTAURANTS, RestaurantItem } from '@/lib/restaurantsData';
 
 export default function Landing() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState<'all' | 'mumbai' | 'delhi' | 'bengaluru'>('all');
-
-  const SAMPLE_RESTAURANTS = [
-    {
-      id: 'abc-restaurant',
-      name: 'ABC Restaurant',
-      city: 'mumbai',
-      location: 'Bandra West, Mumbai',
-      tableCode: 'Table QR #04',
-      cuisine: 'Multi-Cuisine · Dine-In & Bar',
-      badge: 'FOODSAFE TODAY VERIFIED',
-      score: '4.8',
-      reviews: 142,
-      lastCheck: 'Today, 09:15 AM',
-      signals: {
-        cold: { title: 'Cold < 5°C', subtitle: 'Refrigeration OK' },
-        medical: { title: '100% Medical', subtitle: 'Stool Test Cleared' },
-        pest: { title: 'Pest Safe', subtitle: 'Inspected Weekly' }
-      }
-    },
-    {
-      id: 'delhi-spice-hub',
-      name: 'The Spice Pavilion',
-      city: 'delhi',
-      location: 'Connaught Place, New Delhi',
-      tableCode: 'Table QR #12',
-      cuisine: 'North Indian & Mughlai Dine-In',
-      badge: 'FOODSAFE TODAY VERIFIED',
-      score: '4.9',
-      reviews: 98,
-      lastCheck: 'Today, 10:00 AM',
-      signals: {
-        cold: { title: 'Cooked ≥ 75°C', subtitle: 'Core Temp Passed' },
-        medical: { title: '100% Medical', subtitle: 'Stool Test Cleared' },
-        pest: { title: 'Pest Safe', subtitle: 'Bait Stations Intact' }
-      }
-    },
-    {
-      id: 'bengaluru-cafe-safe',
-      name: 'GreenLeaf Artisan Bistro',
-      city: 'bengaluru',
-      location: 'Indiranagar, Bengaluru',
-      tableCode: 'Table QR #08',
-      cuisine: 'Continental & Organic Salads',
-      badge: 'FOODSAFE TODAY VERIFIED',
-      score: '4.7',
-      reviews: 210,
-      lastCheck: 'Today, 08:45 AM',
-      signals: {
-        cold: { title: 'Salad < 5°C', subtitle: 'Fresh Prep Chilled' },
-        medical: { title: '100% Medical', subtitle: 'Stool Test Cleared' },
-        pest: { title: 'Pest Safe', subtitle: 'Certified Weekly' }
-      }
-    }
-  ];
+  const [selectedCategory, setSelectedCategory] = useState<'all' | 'delivery' | 'fine_dine' | 'cafe'>('all');
 
   const filteredRestaurants = useMemo(() => {
-    return SAMPLE_RESTAURANTS.filter(r => {
-      const matchCity = selectedCity === 'all' || r.city === selectedCity;
-      const matchQuery = !searchQuery || 
-        r.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        r.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.cuisine.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchCity && matchQuery;
+    const q = searchQuery.toLowerCase().trim();
+    return POPULAR_RESTAURANTS.filter(r => {
+      const matchCity = selectedCity === 'all' || r.city === selectedCity || r.city === 'pan-india';
+      const matchCategory = selectedCategory === 'all' || r.category === selectedCategory;
+      const matchQuery = !q || 
+        r.name.toLowerCase().includes(q) || 
+        r.location.toLowerCase().includes(q) ||
+        r.cuisine.toLowerCase().includes(q);
+      return matchCity && matchCategory && matchQuery;
     });
-  }, [searchQuery, selectedCity]);
+  }, [searchQuery, selectedCity, selectedCategory]);
 
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!searchQuery.trim()) return;
 
-    const matched = SAMPLE_RESTAURANTS.find(r => 
-      r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.id.toLowerCase().includes(searchQuery.toLowerCase())
+    const q = searchQuery.trim().toLowerCase();
+    const matched = POPULAR_RESTAURANTS.find(r => 
+      r.name.toLowerCase().includes(q) ||
+      r.id.toLowerCase().includes(q)
     );
 
     if (matched) {
@@ -497,35 +448,97 @@ export default function Landing() {
             </p>
           </div>
 
-          {/* City Filter Pills */}
-          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
-            {[
-              { id: 'all', label: 'All Cities' },
-              { id: 'mumbai', label: 'Mumbai' },
-              { id: 'delhi', label: 'New Delhi' },
-              { id: 'bengaluru', label: 'Bengaluru' },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setSelectedCity(tab.id as any)}
-                style={{
-                  border: selectedCity === tab.id ? '2px solid #059669' : '1.5px solid #e2e8f0',
-                  background: selectedCity === tab.id ? '#059669' : '#ffffff',
-                  color: selectedCity === tab.id ? '#ffffff' : '#0f172a',
-                  fontWeight: selectedCity === tab.id ? 700 : 600,
-                  fontSize: 13,
-                  borderRadius: 9999,
-                  padding: '6px 14px',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
+          {/* Filter Pills: City & Format Tabs */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-start' }}>
+            {/* City Tabs */}
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {[
+                { id: 'all', label: 'All Cities' },
+                { id: 'mumbai', label: 'Mumbai' },
+                { id: 'delhi', label: 'New Delhi' },
+                { id: 'bengaluru', label: 'Bengaluru' },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setSelectedCity(tab.id as any)}
+                  style={{
+                    border: selectedCity === tab.id ? '2px solid #059669' : '1.5px solid #e2e8f0',
+                    background: selectedCity === tab.id ? '#059669' : '#ffffff',
+                    color: selectedCity === tab.id ? '#ffffff' : '#0f172a',
+                    fontWeight: selectedCity === tab.id ? 700 : 600,
+                    fontSize: 12.5,
+                    borderRadius: 9999,
+                    padding: '5px 12px',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Category / Format Tabs */}
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {[
+                { id: 'all', label: '🍽️ All Formats' },
+                { id: 'delivery', label: '🔥 Swiggy Popular & Delivery' },
+                { id: 'fine_dine', label: '🍷 Fine Dining & Heritage' },
+                { id: 'cafe', label: '☕ Cafés & Bakeries' },
+              ].map(cat => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setSelectedCategory(cat.id as any)}
+                  style={{
+                    border: selectedCategory === cat.id ? '2px solid #047857' : '1.5px solid #e2e8f0',
+                    background: selectedCategory === cat.id ? '#ecfdf5' : '#ffffff',
+                    color: selectedCategory === cat.id ? '#047857' : '#475569',
+                    fontWeight: selectedCategory === cat.id ? 700 : 600,
+                    fontSize: 12,
+                    borderRadius: 9999,
+                    padding: '4px 11px',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
           </div>
+        </div>
+
+        {/* Results Counter / Filter status */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, fontSize: 13, color: '#64748b' }}>
+          <span>
+            Showing <strong>{filteredRestaurants.length}</strong> verified restaurant{filteredRestaurants.length === 1 ? '' : 's'}
+            {searchQuery && <> matching &ldquo;<strong>{searchQuery}</strong>&rdquo;</>}
+          </span>
+          {(searchQuery || selectedCity !== 'all' || selectedCategory !== 'all') && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedCity('all');
+                setSelectedCategory('all');
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#059669',
+                fontWeight: 600,
+                fontSize: 12.5,
+                cursor: 'pointer',
+                textDecoration: 'underline'
+              }}
+            >
+              Reset Filters
+            </button>
+          )}
         </div>
 
         {/* Restaurant Cards Grid (Tabletop Verified Audit Cards) */}
@@ -637,6 +650,78 @@ export default function Landing() {
               </div>
             </div>
           ))}
+
+          {/* Fallback card if no matches or to rate custom outlet */}
+          {filteredRestaurants.length === 0 && (
+            <div className="card" style={{
+              gridColumn: '1 / -1',
+              padding: '36px 24px',
+              textAlign: 'center',
+              background: '#ffffff',
+              border: '2px dashed #059669',
+              borderRadius: 18,
+              boxShadow: '0 4px 12px rgba(5, 150, 105, 0.08)'
+            }}>
+              <div style={{ fontSize: 36, marginBottom: 10 }}>🍽️</div>
+              <h4 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', margin: '0 0 8px' }}>
+                {searchQuery ? `Can't find "${searchQuery}" in our directory?` : 'No restaurants found in this category'}
+              </h4>
+              <p style={{ fontSize: 14, color: '#475569', maxWidth: 540, margin: '0 auto 20px', lineHeight: 1.5 }}>
+                {searchQuery
+                  ? `No problem! FoodSafe365 lets you submit a direct 60-second verified Food Safety Audit & 100-word review for "${searchQuery}" right now.`
+                  : 'Try selecting "All Cities" or "All Formats" above, or search for any restaurant by name.'}
+              </p>
+              {searchQuery && (
+                <Link
+                  href={`/qr/${searchQuery.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}?name=${encodeURIComponent(searchQuery.trim())}`}
+                  className="btn primary"
+                  style={{
+                    background: '#059669',
+                    borderColor: '#059669',
+                    padding: '12px 24px',
+                    fontSize: 14.5,
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8
+                  }}
+                >
+                  <Star size={16} fill="#ffffff" /> Rate &ldquo;{searchQuery}&rdquo; on Food Safety (5 Questions) →
+                </Link>
+              )}
+            </div>
+          )}
+
+          {/* Dynamic "Don't see your specific outlet branch?" card when searching */}
+          {filteredRestaurants.length > 0 && searchQuery && (
+            <div className="card" style={{
+              gridColumn: '1 / -1',
+              padding: '18px 24px',
+              background: '#f8fafc',
+              border: '1.5px dashed #cbd5e1',
+              borderRadius: 14,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 12
+            }}>
+              <div>
+                <strong style={{ color: '#0f172a', fontSize: 14 }}>Looking for a different branch of &ldquo;{searchQuery}&rdquo;?</strong>
+                <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>
+                  Submit a custom audit for any outlet location in 60 seconds.
+                </p>
+              </div>
+              <Link
+                href={`/qr/${searchQuery.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}?name=${encodeURIComponent(searchQuery.trim())}`}
+                className="btn secondary"
+                style={{ fontSize: 13, padding: '8px 16px', fontWeight: 700 }}
+              >
+                Rate Custom &ldquo;{searchQuery}&rdquo; Outlet →
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
