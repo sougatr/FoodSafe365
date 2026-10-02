@@ -711,22 +711,31 @@ export type Issue = {
 
 export type CorrectiveAction = {
   id: string;
-  issueId: string;
+  issueId?: string;
+  outletId?: string;
   checkCode: string;
+  sourceCheckCode?: string;
   title: string;
   description: string;
-  severity: 'attention' | 'critical';
+  severity: 'attention' | 'critical' | 'low' | 'moderate' | 'high';
+  priority?: 'low' | 'medium' | 'high' | 'critical';
   status: 'open' | 'in_progress' | 'awaiting_verification' | 'closed';
   createdAt: string;
+  dueDate?: string | null;
+  assignedTo?: string | null;
+  responsiblePerson?: string | null;
   immediateAction: string;
   correctiveAction: string;
-  rootCause: string;
+  rootCause?: string | null;
   completedAt?: string | null;
   closedAt?: string | null;
   verifiedAt?: string | null;
   verifiedBy?: string | null;
-  verificationStatus?: 'pass' | 'fail' | null;
+  verificationStatus?: 'pass' | 'fail' | 'conditional' | null;
   verificationNote?: string | null;
+  requiresExternalService?: boolean;
+  serviceCategory?: string | null;
+  sourceType?: string;
 };
 
 export type AuditTrailEvent = {
@@ -757,6 +766,46 @@ export type DinerSafetyRating = {
   verifiedDineIn: boolean;
 };
 
+export type ControlMapping = {
+  primaryCheckCode: string;
+  primaryTitle: string;
+  secondaryCheckCodes: string[];
+  rationale: string;
+};
+
+export const CUSTOMER_FEEDBACK_CONTROL_MAP: Record<string, ControlMapping> = {
+  staffHygiene: {
+    primaryCheckCode: 'FS28-05',
+    primaryTitle: 'Did all staff wash their hands with soap before starting work?',
+    secondaryCheckCodes: ['FS28-06', 'FS28-07'],
+    rationale: 'Customer observations of staff hygiene trigger verification of supervisor handwashing audits (FS28-05), sink supplies (FS28-06), and uniforms/hairnets (FS28-07).'
+  },
+  foodHandling: {
+    primaryCheckCode: 'FS28-19',
+    primaryTitle: 'Are all fridges reading below 5°C?',
+    secondaryCheckCodes: ['FS28-21', 'FS28-18'],
+    rationale: 'Customer perceptions of food freshness and temperature trigger operational audits of refrigeration temps (FS28-19), core cooking temps (FS28-21), and holding protection (FS28-18).'
+  },
+  cleanliness: {
+    primaryCheckCode: 'FS28-01',
+    primaryTitle: 'Are all counters, floors, and prep areas clean and clutter-free right now?',
+    secondaryCheckCodes: ['FS28-03', 'FS28-28'],
+    rationale: 'Customer observations of dining and counter cleanliness correlate to operational sanitation of counters/floors (FS28-01), drains (FS28-03), and waste containment (FS28-28).'
+  },
+  safeWater: {
+    primaryCheckCode: 'FS28-06',
+    primaryTitle: 'Are all hand-wash sinks fully stocked with soap and drying towels/tissue?',
+    secondaryCheckCodes: ['FS28-29', 'FS28-01'],
+    rationale: 'Customer water and washroom feedback is operationalized through verification of washroom handwash facilities (FS28-06) and ice machine/water hygiene (FS28-29).'
+  },
+  overallConfidence: {
+    primaryCheckCode: 'FS28-01',
+    primaryTitle: 'Are all counters, floors, and prep areas clean and clutter-free right now?',
+    secondaryCheckCodes: ['FS28-05', 'FS28-19'],
+    rationale: 'Overall dining confidence reflects fundamental foundational hygiene controls across kitchen cleanliness and handler discipline.'
+  }
+};
+
 export type CustomerVoiceCategory = {
   key: string;
   label: string;
@@ -785,11 +834,11 @@ export function calculateCustomerVoiceSummary(ratings: DinerSafetyRating[] = [])
       totalRatings: 0,
       overallScore: 0,
       isEarlyFeedback: false,
-      cleanliness: { key: 'cleanliness', label: 'Cleanliness', score: 0, checkCode: 'FS28-01', checkTitle: 'Counters, floors, and prep areas clean & clutter-free' },
-      staffHygiene: { key: 'staffHygiene', label: 'Staff hygiene', score: 0, checkCode: 'FS28-13', checkTitle: 'Staff handwashing, uniforms, hairnets and clean aprons' },
-      foodHandling: { key: 'foodHandling', label: 'Food handling', score: 0, checkCode: 'FS28-19', checkTitle: 'Cool storage & perishable food temperature control (<5°C)' },
-      overallConfidence: { key: 'overallConfidence', label: 'Overall confidence', score: 0, checkCode: 'FS28-01', checkTitle: 'Daily kitchen hygiene standard' },
-      safeWater: { key: 'safeWater', label: 'Safe water & washroom', score: 0, checkCode: 'FS28-06', checkTitle: 'Safe drinking water & sanitized glass supply' },
+      cleanliness: { key: 'cleanliness', label: 'Cleanliness', score: 0, checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.cleanliness.primaryCheckCode, checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.cleanliness.primaryTitle },
+      staffHygiene: { key: 'staffHygiene', label: 'Staff hygiene', score: 0, checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.staffHygiene.primaryCheckCode, checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.staffHygiene.primaryTitle },
+      foodHandling: { key: 'foodHandling', label: 'Food handling', score: 0, checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.foodHandling.primaryCheckCode, checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.foodHandling.primaryTitle },
+      overallConfidence: { key: 'overallConfidence', label: 'Overall confidence', score: 0, checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.overallConfidence.primaryCheckCode, checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.overallConfidence.primaryTitle },
+      safeWater: { key: 'safeWater', label: 'Safe water & washroom', score: 0, checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.safeWater.primaryCheckCode, checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.safeWater.primaryTitle },
       weakerArea: null,
       recentObservations: []
     };
@@ -811,36 +860,36 @@ export function calculateCustomerVoiceSummary(ratings: DinerSafetyRating[] = [])
     key: 'cleanliness',
     label: 'Cleanliness',
     score: cleanScore,
-    checkCode: 'FS28-01',
-    checkTitle: 'Counters, floors, and prep areas clean & clutter-free'
+    checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.cleanliness.primaryCheckCode,
+    checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.cleanliness.primaryTitle
   };
   const catStaff: CustomerVoiceCategory = {
     key: 'staffHygiene',
     label: 'Staff hygiene',
     score: staffScore,
-    checkCode: 'FS28-13',
-    checkTitle: 'Staff handwashing, uniforms, hairnets and clean aprons'
+    checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.staffHygiene.primaryCheckCode,
+    checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.staffHygiene.primaryTitle
   };
   const catFood: CustomerVoiceCategory = {
     key: 'foodHandling',
     label: 'Food handling',
     score: foodScore,
-    checkCode: 'FS28-19',
-    checkTitle: 'Cool storage & perishable food temperature control (<5°C)'
+    checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.foodHandling.primaryCheckCode,
+    checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.foodHandling.primaryTitle
   };
   const catOverall: CustomerVoiceCategory = {
     key: 'overallConfidence',
     label: 'Overall confidence',
     score: overallAvg,
-    checkCode: 'FS28-01',
-    checkTitle: 'Daily kitchen hygiene standard'
+    checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.overallConfidence.primaryCheckCode,
+    checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.overallConfidence.primaryTitle
   };
   const catWater: CustomerVoiceCategory = {
     key: 'safeWater',
     label: 'Safe water & washroom',
     score: safeWaterScore,
-    checkCode: 'FS28-06',
-    checkTitle: 'Safe drinking water & sanitized glass supply'
+    checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.safeWater.primaryCheckCode,
+    checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.safeWater.primaryTitle
   };
 
   const actionableCategories = [catClean, catStaff, catFood, catWater];

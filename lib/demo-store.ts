@@ -3,6 +3,8 @@ export type DemoAction = {
   dueDate?:string; status:string; rootCause?:string|null; immediateAction?:string|null;
   correctiveAction?:string|null; preventiveAction?:string|null; createdAt:string; closedAt?:string|null;
   sourceType?:string; sourceId?:string; observationId?:string;
+  outletId?:string; sourceCheckCode?:string; requiresExternalService?:boolean; serviceCategory?:string|null;
+  responsiblePerson?:string;
 };
 
 const store = new Map<string, DemoAction>();
@@ -18,7 +20,8 @@ function seed(userId:string) {
       description:'Review Refrigerator 2 after repeated temperature deviations. Protect affected food as appropriate, record the correction and submit it for independent verification.',
       severity:'high', priority:'high', assignedTo:userId, dueDate:today, status:'open',
       rootCause:null, immediateAction:null, correctiveAction:null, preventiveAction:null,
-      createdAt:new Date().toISOString(), closedAt:null, sourceType:'check_response', sourceId:'demo-response-refrigeration', observationId:'demo-observation-refrigeration'
+      createdAt:new Date().toISOString(), closedAt:null, sourceType:'check_response', sourceId:'demo-response-refrigeration', observationId:'demo-observation-refrigeration',
+      outletId:'the-table', sourceCheckCode:'FS28-19', requiresExternalService:true, serviceCategory:'refrigeration'
     },
     {
       id:'demo-action-drain',
@@ -26,7 +29,8 @@ function seed(userId:string) {
       description:'Complete the overdue cold-room drain cleaning and record the corrective action for verification.',
       severity:'medium', priority:'medium', assignedTo:userId, dueDate:yesterday, status:'overdue',
       rootCause:null, immediateAction:null, correctiveAction:null, preventiveAction:null,
-      createdAt:new Date().toISOString(), closedAt:null, sourceType:'manual', sourceId:'demo-drain', observationId:'demo-observation-drain'
+      createdAt:new Date().toISOString(), closedAt:null, sourceType:'manual', sourceId:'demo-drain', observationId:'demo-observation-drain',
+      outletId:'the-table', sourceCheckCode:'FS28-03', requiresExternalService:false
     },
     {
       id:'demo-action-opening-hygiene',
@@ -34,7 +38,8 @@ function seed(userId:string) {
       description:'Review two missed opening-shift hygiene checks and confirm that the opening checklist is understood and assigned.',
       severity:'medium', priority:'medium', assignedTo:userId, dueDate:today, status:'open',
       rootCause:null, immediateAction:null, correctiveAction:null, preventiveAction:null,
-      createdAt:new Date().toISOString(), closedAt:null, sourceType:'manual', sourceId:'demo-opening-hygiene', observationId:'demo-observation-hygiene'
+      createdAt:new Date().toISOString(), closedAt:null, sourceType:'manual', sourceId:'demo-opening-hygiene', observationId:'demo-observation-hygiene',
+      outletId:'the-table', sourceCheckCode:'FS28-05', requiresExternalService:false
     }
   ];
   seedActions.forEach(a=>store.set(a.id,a));
@@ -66,7 +71,12 @@ export function createDemoAction(input: Partial<DemoAction>, userId:string): Dem
     closedAt: input.closedAt ?? null,
     sourceType: input.sourceType,
     sourceId: input.sourceId,
-    observationId: input.observationId
+    observationId: input.observationId,
+    outletId: input.outletId,
+    sourceCheckCode: input.sourceCheckCode,
+    requiresExternalService: input.requiresExternalService || false,
+    serviceCategory: input.serviceCategory ?? null,
+    responsiblePerson: input.responsiblePerson
   };
   store.set(id, action);
   return action;

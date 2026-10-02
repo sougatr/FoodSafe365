@@ -59,6 +59,19 @@ export default function ActionDetail() {
         setCorrective(found.correctiveAction || '');
         setRoot(found.rootCause || '');
         setNote(found.verificationNote || '');
+      } else {
+        fetch(`/api/v1/actions/${params.action_id}`, { cache: 'no-store' })
+          .then(res => res.ok ? res.json() : null)
+          .then(json => {
+            if (json?.data) {
+              const act = json.data;
+              setAction(act);
+              setImmediate(act.immediateAction || '');
+              setCorrective(act.correctiveAction || '');
+              setRoot(act.rootCause || '');
+            }
+          })
+          .catch(() => {});
       }
     };
     refresh();

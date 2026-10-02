@@ -4,7 +4,7 @@ import { query, transaction } from '@/lib/db';
 import { ok, fail } from '@/lib/response';
 import { updateDemoAction } from '@/lib/demo-store';
 export async function POST(req:Request,{params}:{params:{action_id:string}}){
- const auth=await getAuthContext(); if(!auth)return fail('UNAUTHENTICATED','Authentication required',401);
+ const auth=await getAuthContext(req); if(!auth)return fail('UNAUTHENTICATED','Authentication required',401);
  if(!can(auth.role,'actions:verify'))return fail('FORBIDDEN','Only authorised verifiers can verify corrective actions',403);
  let b:any;try{b=await req.json()}catch{return fail('VALIDATION_ERROR','Invalid JSON body',400)}
  if(!['pass','fail','conditional'].includes(b?.result))return fail('VALIDATION_ERROR','result must be pass, fail or conditional',400);

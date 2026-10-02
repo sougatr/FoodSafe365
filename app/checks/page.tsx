@@ -1,12 +1,13 @@
 'use client';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, ClipboardCheck, Home, Info, Star, Thermometer } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, ClipboardCheck, Home, Info, Star, Thermometer, Wrench } from 'lucide-react';
 import {
   FOODSAFE28,
   FoodSafeCheck,
   CheckRecord,
   Issue,
+  CorrectiveAction,
   AuditTrailEvent,
   AppPhase1State,
   PHASE1_STORAGE_KEY,
@@ -60,6 +61,17 @@ export default function Checks() {
   const [selectedFormat, setSelectedFormat] = useState<'all' | 'kitchen' | 'bar_brewery' | 'cloud_kitchen' | 'catering'>('all');
   const [selectedShift, setSelectedShift] = useState<OperationalShift | 'all'>('opening');
   const [feedbackSource, setFeedbackSource] = useState<{ from: string; area: string } | null>(null);
+  const [actionTitle, setActionTitle] = useState('');
+  const [actionIssue, setActionIssue] = useState('');
+  const [actionImmediate, setActionImmediate] = useState('');
+  const [actionCorrective, setActionCorrective] = useState('');
+  const [actionAssignedTo, setActionAssignedTo] = useState('Duty Supervisor');
+  const [actionDueDate, setActionDueDate] = useState('');
+  const [actionPriority, setActionPriority] = useState<'low' | 'medium' | 'high' | 'critical'>('high');
+  const [actionExternalService, setActionExternalService] = useState(false);
+  const [actionServiceCategory, setActionServiceCategory] = useState('cleaning');
+  const [actionCreatedId, setActionCreatedId] = useState<string | null>(null);
+  const [isSavingAction, setIsSavingAction] = useState(false);
 
   useEffect(() => {
     const refresh = () => setData(loadState());
@@ -349,6 +361,101 @@ export default function Checks() {
     saveState(nextState);
     setData(nextState);
     setResult(good ? 'good' : 'attention');
+
+    if (!good) {
+      const defNote = obsNote.trim() || `Recorded value (${recordedValue}) did not satisfy FoodSafe365 standard: ${selected.standard}`;
+      setActionTitle(`[${selected.code}] Deviation: ${selected.title}`);
+      setActionIssue(defNote);
+      setActionImmediate(selected.action || 'Halt process, isolate non-conforming items, and sanitize area immediately.');
+      setActionCorrective(`Verify root cause for ${selected.code}, adjust process controls, and conduct station team refresher.`);
+      setActionPriority(selected.severity === 'Critical' ? 'critical' : 'high');
+      setActionDueDate(new Date(Date.now() + 86400000).toISOString().slice(0, 10));
+      setActionAssignedTo('Duty Supervisor');
+      setActionExternalService(false);
+      setActionServiceCategory(['FS28-19', 'FS28-20'].includes(selected.code) ? 'refrigeration' : ['FS28-26', 'FS28-27'].includes(selected.code) ? 'pest_control' : 'deep_cleaning');
+      setActionCreatedId(null);
+    }
+  }
+
+  async function handleCreateAction() {
+    if (!selected) return;
+    setIsSavingAction(true);
+    const now = new Date().toISOString();
+    const actionId = `action-${selected.id}-${Date.now()}`;
+    const issueId = `issue-${selected.id}-${Date.now()}`;
+
+    const newIssue: Issue = {
+      id: issueId,
+      checkId: selected.id,
+      checkCode: selected.code,
+      title: actionTitle,
+      severity: actionPriority === 'critical' ? 'critical' : 'attention',
+      createdAt: now,
+      status: 'open',
+      alertedAt: now,
+      actionId
+    };
+
+    const newAction: CorrectiveAction = {
+      id: actionId,
+      issueId,
+      outletId: 'the-table',
+      checkCode: selected.code,
+      sourceCheckCode: selected.code,
+      title: actionTitle,
+      description: actionIssue,
+      severity: actionPriority === 'critical' ? 'critical' : 'attention',
+      priority: actionPriority,
+      status: 'open',
+      createdAt: now,
+      dueDate: actionDueDate,
+      assignedTo: actionAssignedTo,
+      responsiblePerson: actionAssignedTo,
+      immediateAction: actionImmediate,
+      correctiveAction: actionCorrective,
+      rootCause: null,
+      requiresExternalService: actionExternalService,
+      serviceCategory: actionExternalService ? actionServiceCategory : null,
+      sourceType: feedbackSource ? 'customer_feedback_trigger' : 'operational_check'
+    };
+
+    const nextState: AppPhase1State = {
+      ...data,
+      issues: [newIssue, ...(data.issues || [])],
+      actions: [newAction, ...(data.actions || [])]
+    };
+
+    saveState(nextState);
+    setData(nextState);
+    setActionCreatedId(actionId);
+
+    try {
+      await fetch('/api/v1/actions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: actionTitle,
+          description: actionIssue,
+          severity: actionPriority === 'critical' ? 'critical' : 'high',
+          priority: actionPriority,
+          immediateAction: actionImmediate,
+          correctiveAction: actionCorrective,
+          dueDate: actionDueDate,
+          assignedTo: actionAssignedTo,
+          responsiblePerson: actionAssignedTo,
+          outletId: 'the-table',
+          sourceCheckCode: selected.code,
+          checkCode: selected.code,
+          sourceType: newAction.sourceType,
+          requiresExternalService: actionExternalService,
+          serviceCategory: actionExternalService ? actionServiceCategory : null
+        })
+      });
+    } catch (err) {
+      console.warn('[Checks] Action API sync error:', err);
+    } finally {
+      setIsSavingAction(false);
+    }
   }
 
   const pendingAttentionCount = today.filter(x => saved[x.code]?.reviewStatus === 'pending_manager' && saved[x.code]?.status === 'attention').length;
@@ -1118,26 +1225,268 @@ export default function Checks() {
               </div>
             </section>
           ) : (
-            <section className={`result-banner ${rating === 'na' ? 'result-good' : result === 'good' ? 'result-good' : 'result-action'}`}>
-              <div className="result-icon">{result === 'good' ? <CheckCircle2 /> : <AlertTriangle />}</div>
-              <div>
-                <p className="eyebrow">SUPERVISOR SUBMISSION</p>
-                <h2>
-                  {rating === 'na'
-                    ? 'Marked as Not Applicable — awaiting manager review'
-                    : result === 'good'
-                    ? 'Observation recorded — awaiting manager review'
-                    : 'Attention observation recorded — sent for manager review'}
-                </h2>
-                <p>
-                  {rating === 'na'
-                    ? 'The control is recorded as Not Applicable (N/A) for this shift/setup. Once approved by the manager, it satisfies today’s badge without penalty.'
-                    : result === 'good'
-                    ? 'The supervisor result is saved as "Pending Manager Review". Once approved by the manager, it satisfies today’s badge criteria.'
-                    : 'The finding has been sent to the manager. The manager will review the record and confirm whether an alert and restaurant corrective action are required.'}
-                </p>
-              </div>
-            </section>
+            <div>
+              {result === 'good' || rating === 'na' ? (
+                <section className="result-banner result-good" style={{ background: '#ecfdf5', border: '1.5px solid #10b981' }}>
+                  <div className="result-icon" style={{ background: '#059669', color: '#ffffff' }}><CheckCircle2 /></div>
+                  <div>
+                    <p className="eyebrow" style={{ color: '#047857' }}>
+                      {feedbackSource ? 'CUSTOMER FEEDBACK RESOLUTION · INTERNAL ASSESSMENT' : 'SUPERVISOR SUBMISSION'}
+                    </p>
+                    <h2 style={{ color: '#064e3b' }}>
+                      {rating === 'na'
+                        ? 'Marked as Not Applicable — awaiting manager review'
+                        : 'Internal assessment confirms control is satisfactory. No corrective action required.'}
+                    </h2>
+                    <p style={{ color: '#047857' }}>
+                      {rating === 'na'
+                        ? 'The control is recorded as Not Applicable (N/A) for this shift/setup. Once approved by the manager, it satisfies today’s badge without penalty.'
+                        : feedbackSource
+                        ? `Operational check conducted in response to customer feedback in ${feedbackSource.area}. Your internal assessment confirms kitchen conditions comply with FoodSafe365 standards. No deviation was observed, so no corrective action is necessary.`
+                        : 'Your internal inspection confirms kitchen conditions comply with FoodSafe365 standards. Observation recorded and sent for manager review.'}
+                    </p>
+                  </div>
+                </section>
+              ) : (
+                <>
+                  <section className="result-banner result-action" style={{ background: '#fef2f2', border: '1.5px solid #ef4444' }}>
+                    <div className="result-icon" style={{ background: '#dc2626', color: '#ffffff' }}><AlertTriangle /></div>
+                    <div>
+                      <p className="eyebrow" style={{ color: '#991b1b' }}>
+                        {feedbackSource ? 'CUSTOMER FEEDBACK TRIGGER · NON-CONFORMANCE CONFIRMED' : 'NON-CONFORMING CHECK · ACTION REQUIRED'}
+                      </p>
+                      <h2 style={{ color: '#7f1d1d' }}>
+                        Internal check identified deviation — below FoodSafe365 standard
+                      </h2>
+                      <p style={{ color: '#991b1b' }}>
+                        {feedbackSource
+                          ? `This operational check was initiated from customer feedback in ${feedbackSource.area}. Internal assessment confirmed conditions are below standard. Create a structured corrective action below to remediate the deviation.`
+                          : 'The observed condition fails the required standard. Establish a structured corrective action, assign a responsible person, and define a due date.'}
+                      </p>
+                    </div>
+                  </section>
+
+                  {actionCreatedId ? (
+                    <div style={{
+                      marginTop: 20,
+                      padding: '18px 22px',
+                      borderRadius: 14,
+                      background: '#ecfdf5',
+                      border: '1.5px solid #059669',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 16,
+                      flexWrap: 'wrap'
+                    }}>
+                      <div>
+                        <span className="pill good" style={{ fontSize: 11 }}>ACTION RECORDED &amp; ASSIGNED</span>
+                        <h3 style={{ fontSize: 16, fontWeight: 800, color: '#064e3b', margin: '4px 0 2px' }}>
+                          Corrective Action #{actionCreatedId} Active
+                        </h3>
+                        <p style={{ margin: 0, fontSize: 13, color: '#047857' }}>
+                          Target resolution: <strong>{actionDueDate}</strong> · Assigned to: <strong>{actionAssignedTo}</strong>
+                          {actionExternalService && ` · Service Category: ${actionServiceCategory}`}
+                        </p>
+                      </div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Link href="/actions" className="btn primary" style={{ fontSize: 13, padding: '7px 14px' }}>
+                          View in Action Centre →
+                        </Link>
+                        <Link href="/manager" className="btn secondary" style={{ fontSize: 13, padding: '7px 14px' }}>
+                          Manager Review
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="card" style={{ marginTop: 20, padding: '22px 24px', border: '1.5px solid #fecaca', background: '#ffffff', borderRadius: 14 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
+                        <div>
+                          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 6 }}>
+                            <span className="pill danger" style={{ fontSize: 11, padding: '2px 8px' }}>
+                              ACTION REQUIRED
+                            </span>
+                            {feedbackSource && (
+                              <span className="pill neutral" style={{ fontSize: 11, padding: '2px 8px', background: '#dbeafe', color: '#1e40af', border: '1px solid #bfdbfe' }}>
+                                CUSTOMER TRIGGER: {feedbackSource.area}
+                              </span>
+                            )}
+                          </div>
+                          <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', margin: '2px 0 4px' }}>
+                            Create Structured Corrective Action
+                          </h3>
+                          <p className="muted" style={{ margin: 0, fontSize: 13 }}>
+                            Pre-populated from internal findings. Define containment, assign responsibility, and track to closure.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
+                        <div>
+                          <label className="field">
+                            <span>Action Title</span>
+                            <input
+                              className="input"
+                              value={actionTitle}
+                              onChange={e => setActionTitle(e.target.value)}
+                              placeholder="e.g. Corrective action for staff hygiene non-conformance"
+                            />
+                          </label>
+                        </div>
+                        <div>
+                          <label className="field">
+                            <span>Priority</span>
+                            <select
+                              className="input"
+                              value={actionPriority}
+                              onChange={e => setActionPriority(e.target.value as any)}
+                            >
+                              <option value="critical">🔴 Critical — Immediate intervention</option>
+                              <option value="high">🟠 High — Remediate within 24h</option>
+                              <option value="medium">🟡 Medium — Remediate this shift</option>
+                              <option value="low">⚪ Low — Routine maintenance</option>
+                            </select>
+                          </label>
+                        </div>
+                      </div>
+
+                      <div style={{ marginTop: 12 }}>
+                        <label className="field">
+                          <span>Issue Identified (Non-conformance finding)</span>
+                          <textarea
+                            className="input textarea"
+                            style={{ minHeight: 60 }}
+                            value={actionIssue}
+                            onChange={e => setActionIssue(e.target.value)}
+                            placeholder="Describe specific finding observed during inspection"
+                          />
+                        </label>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14, marginTop: 12 }}>
+                        <div>
+                          <label className="field">
+                            <span>Immediate Action Taken (On the spot containment)</span>
+                            <textarea
+                              className="input textarea"
+                              style={{ minHeight: 60 }}
+                              value={actionImmediate}
+                              onChange={e => setActionImmediate(e.target.value)}
+                              placeholder="e.g. Discarded compromised food, sanitized area, paused station"
+                            />
+                          </label>
+                        </div>
+                        <div>
+                          <label className="field">
+                            <span>Corrective Action Plan (Prevent recurrence)</span>
+                            <textarea
+                              className="input textarea"
+                              style={{ minHeight: 60 }}
+                              value={actionCorrective}
+                              onChange={e => setActionCorrective(e.target.value)}
+                              placeholder="e.g. Retrain staff, replace equipment seal, adjust line SOP"
+                            />
+                          </label>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginTop: 12 }}>
+                        <div>
+                          <label className="field">
+                            <span>Responsible Person</span>
+                            <input
+                              className="input"
+                              value={actionAssignedTo}
+                              onChange={e => setActionAssignedTo(e.target.value)}
+                              placeholder="e.g. Duty Supervisor / Station Chef"
+                            />
+                          </label>
+                        </div>
+                        <div>
+                          <label className="field">
+                            <span>Due Date</span>
+                            <input
+                              type="date"
+                              className="input"
+                              value={actionDueDate}
+                              onChange={e => setActionDueDate(e.target.value)}
+                            />
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* External Service Provider Toggle */}
+                      <div style={{
+                        marginTop: 16,
+                        padding: '12px 14px',
+                        borderRadius: 10,
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0'
+                      }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                          <input
+                            type="checkbox"
+                            checked={actionExternalService}
+                            onChange={e => setActionExternalService(e.target.checked)}
+                            style={{ width: 17, height: 17, accentColor: '#059669', cursor: 'pointer' }}
+                          />
+                          <div>
+                            <strong style={{ fontSize: 13, color: '#0f172a' }}>Requires External Service Provider</strong>
+                            <div className="muted" style={{ fontSize: 12 }}>
+                              Check if remediation needs outside specialist (e.g., refrigeration repair, pest eradication, calibration, diagnostic camp).
+                            </div>
+                          </div>
+                        </label>
+
+                        {actionExternalService && (
+                          <div style={{ marginTop: 10, paddingLeft: 27 }}>
+                            <label className="field">
+                              <span>Service Category</span>
+                              <select
+                                className="input"
+                                value={actionServiceCategory}
+                                onChange={e => setActionServiceCategory(e.target.value)}
+                              >
+                                <option value="refrigeration">Commercial Refrigeration &amp; Chillers</option>
+                                <option value="pest_control">Professional Pest Management</option>
+                                <option value="deep_cleaning">Kitchen Deep Cleaning &amp; Exhaust/Drains</option>
+                                <option value="equipment">Cooking &amp; Processing Equipment Repair</option>
+                                <option value="water_testing">Water Testing &amp; Filter Service</option>
+                                <option value="occupational_health">Occupational Health &amp; Medical Camp</option>
+                                <option value="training">FoSTaC Supervisor &amp; Staff Training</option>
+                                <option value="calibration">Thermometer &amp; Scale Calibration</option>
+                              </select>
+                            </label>
+                          </div>
+                        )}
+                      </div>
+
+                      <div style={{ marginTop: 18, display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                        <button
+                          type="button"
+                          disabled={isSavingAction}
+                          onClick={handleCreateAction}
+                          className="btn primary"
+                          style={{
+                            background: '#dc2626',
+                            borderColor: '#dc2626',
+                            padding: '10px 20px',
+                            fontSize: 13.5,
+                            fontWeight: 800,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            boxShadow: '0 2px 8px rgba(220, 38, 38, 0.2)'
+                          }}
+                        >
+                          <Wrench size={16} /> {isSavingAction ? 'Creating Action…' : 'CREATE CORRECTIVE ACTION'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           )}
 
           {result && (

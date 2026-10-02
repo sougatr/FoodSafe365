@@ -3,8 +3,8 @@ import { can } from '@/lib/permissions';
 import { query } from '@/lib/db';
 import { ok, fail } from '@/lib/response';
 import { updateDemoAction } from '@/lib/demo-store';
-export async function POST(_:Request,{params}:{params:{action_id:string}}){
- const auth=await getAuthContext(); if(!auth)return fail('UNAUTHENTICATED','Authentication required',401);
+export async function POST(req:Request,{params}:{params:{action_id:string}}){
+ const auth=await getAuthContext(req); if(!auth)return fail('UNAUTHENTICATED','Authentication required',401);
  if(!can(auth.role,'actions:write'))return fail('FORBIDDEN','You do not have permission to submit actions for verification',403);
  if(!process.env.DATABASE_URL){ const demo=updateDemoAction(params.action_id,{status:'awaiting_verification'},auth.userId); if(!demo)return fail('NOT_FOUND','Corrective action not found',404); return ok({actionId:params.action_id,status:demo.status,demo:true}); }
  const action=(await query<any>(`SELECT ca.*,o.organisation_id FROM corrective_actions ca JOIN outlets o ON o.id=ca.outlet_id WHERE ca.id=$1`,[params.action_id]))[0];
