@@ -3,52 +3,52 @@
    ========================================================================== */
 
 :root {
-  /* Brand Accents — Food-Safety Emerald & Swiggy Warm Accents */
+  /* Brand Accents — FoodSafe365 Emerald */
   --green: #10b981;
   --green-dark: #059669;
   --green-light: #34d399;
-  --green-surface: rgba(16, 185, 129, 0.18);
-  --green-border: rgba(52, 211, 153, 0.4);
+  --green-surface: rgba(16, 185, 129, 0.12);
+  --green-border: rgba(16, 185, 129, 0.3);
   
-  /* Primary & Text System — Crisp White & Warm Ivory Cream (High Contrast) */
-  --text: #ffffff;
-  --text-body: #ffedd5;
-  --muted: #fed7aa;
-  --text-light: #fcd34d;
+  /* Primary & Text System — Dark Charcoal & Slate (High Contrast on light) */
+  --text: #0f172a;
+  --text-body: #334155;
+  --muted: #64748b;
+  --text-light: #94a3b8;
   
-  /* Surfaces & Canvas — Rich Dark Orange (Terracotta & Burnt Amber) */
-  --bg: #2b0e04;
-  --card-bg: #3d1406;
-  --surface: #341105;
-  --surface-subtle: #4c1a08;
-  --border: rgba(251, 146, 60, 0.25);
-  --border-subtle: rgba(251, 146, 60, 0.15);
-  --border-focus: #f97316;
+  /* Surfaces & Canvas — Clean Light Warm Neutral / Off-White */
+  --bg: #F7F8F5;
+  --card-bg: #ffffff;
+  --surface: #ffffff;
+  --surface-subtle: #f1f5f0;
+  --border: #e2e8f0;
+  --border-subtle: #f8fafc;
+  --border-focus: #059669;
   
-  /* Zomato & Swiggy Status Accents */
-  --amber: #fbbf24;
-  --amber-dark: #f59e0b;
-  --amber-surface: rgba(245, 158, 11, 0.18);
-  --amber-border: rgba(245, 158, 11, 0.4);
+  /* Status Accents */
+  --amber: #f59e0b;
+  --amber-dark: #d97706;
+  --amber-surface: rgba(245, 158, 11, 0.12);
+  --amber-border: rgba(245, 158, 11, 0.3);
   
-  --red: #f87171;
-  --red-dark: #ef4444;
-  --red-surface: rgba(239, 68, 68, 0.18);
-  --red-border: rgba(239, 68, 68, 0.4);
+  --red: #ef4444;
+  --red-dark: #dc2626;
+  --red-surface: rgba(239, 68, 68, 0.12);
+  --red-border: rgba(239, 68, 68, 0.3);
   
-  --blue: #60a5fa;
-  --blue-dark: #3b82f6;
-  --blue-surface: rgba(59, 130, 246, 0.18);
-  --blue-border: rgba(59, 130, 246, 0.4);
+  --blue: #3b82f6;
+  --blue-dark: #2563eb;
+  --blue-surface: rgba(59, 130, 246, 0.12);
+  --blue-border: rgba(59, 130, 246, 0.3);
   
   --white: #ffffff;
 
-  /* Modern Ambient Drop-Shadows (Dark Glow) */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.45);
-  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(251, 146, 60, 0.15);
-  --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(251, 146, 60, 0.35);
-  --shadow-float: 0 20px 40px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(251, 146, 60, 0.4);
+  /* Modern Ambient Drop-Shadows (Clean Light Canvas) */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-hover: 0 12px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-float: 0 20px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
 
   /* Radius Tokens */
   --radius-sm: 8px;
@@ -306,13 +306,13 @@ button, input, select, textarea {
   padding: 32px 24px;
 }
 
-/* Sticky Glassmorphic Topbar (Zomato / Swiggy Web standard) */
+/* Sticky Glassmorphic Topbar */
 .topbar {
   height: 68px;
-  background: rgba(43, 14, 4, 0.95);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(251, 146, 60, 0.22);
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -325,7 +325,7 @@ button, input, select, textarea {
 
 .brand {
   font-weight: 900;
-  color: #ffffff;
+  color: var(--text);
   font-size: 21px;
   letter-spacing: -0.02em;
   text-decoration: none;
@@ -348,12 +348,12 @@ button, input, select, textarea {
 }
 
 .nav-link:hover {
-  color: #ffffff;
+  color: var(--text);
   background: var(--surface-subtle);
 }
 
 /* ==========================================================================
-   Card System (Urban Company / Swiggy Card Elevation)
+   Card System (Clean Light Elevation & Dark Onboarding Blocks)
    ========================================================================== */
 
 .card {
@@ -367,9 +367,39 @@ button, input, select, textarea {
 
 .card.interactive:hover,
 .link-card:hover {
-  border-color: #fb923c;
+  border-color: var(--green);
   box-shadow: var(--shadow-hover);
   transform: translateY(-2px);
+}
+
+/* Dark Onboarding Block / Cards System */
+.onboarding-card-dark {
+  background: #17231F;
+  border: 1.5px solid rgba(16, 185, 129, 0.25);
+  border-radius: 20px;
+  padding: 28px 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 14px 34px -8px rgba(15, 35, 28, 0.28), 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  position: relative;
+}
+
+.onboarding-card-dark:hover {
+  transform: translateY(-3px);
+  border-color: rgba(16, 185, 129, 0.55);
+  box-shadow: 0 20px 42px -6px rgba(15, 35, 28, 0.38), 0 0 20px rgba(16, 185, 129, 0.15);
+}
+
+.onboarding-card-dark.diner-card {
+  background: #182822;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.onboarding-card-dark.diner-card:hover {
+  border-color: rgba(52, 211, 153, 0.65);
+  box-shadow: 0 20px 42px -6px rgba(18, 40, 34, 0.42), 0 0 20px rgba(52, 211, 153, 0.18);
 }
 
 /* Grids */
@@ -431,17 +461,17 @@ button, input, select, textarea {
 
 .secondary,
 .btn.secondary {
-  background: #3e1507;
-  color: #ffedd5;
+  background: #ffffff;
+  color: var(--text-body);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-xs);
 }
 
 .secondary:hover,
 .btn.secondary:hover {
-  background: #501d0a;
-  border-color: #fb923c;
-  color: #ffffff;
+  background: var(--surface-subtle);
+  border-color: #cbd5e1;
+  color: var(--text);
   transform: translateY(-1px);
 }
 
@@ -544,13 +574,13 @@ button, input, select, textarea {
 .filter-btn,
 .tab {
   border: 1.5px solid var(--border);
-  background: #361205;
+  background: #ffffff;
   border-radius: var(--radius-full);
   padding: 8px 16px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  color: #fed7aa;
+  color: var(--text-body);
   box-shadow: var(--shadow-xs);
   transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
@@ -561,9 +591,9 @@ button, input, select, textarea {
 
 .filter-btn:hover,
 .tab:hover {
-  background: #4a1908;
-  color: #ffffff;
-  border-color: #fb923c;
+  background: var(--surface-subtle);
+  color: var(--text);
+  border-color: #cbd5e1;
 }
 
 .filter-btn.active,
@@ -572,7 +602,7 @@ button, input, select, textarea {
   color: #ffffff;
   border-color: #10b981;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
 }
 
 .filter-btn .tab-count,
