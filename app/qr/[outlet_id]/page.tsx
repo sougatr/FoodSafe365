@@ -79,10 +79,10 @@ export default function TableQrPage() {
 
   const overallRating = ((cleanliness + staffHygiene + foodFreshness + safeWater + washroom) / 5).toFixed(1);
 
-  function handleRatingSubmit(e: React.FormEvent) {
+  async function handleRatingSubmit(e: React.FormEvent) {
     e.preventDefault();
     const newRating: DinerSafetyRating = {
-      id: `rating-${Date.now()}`,
+      id: `cfr-${Date.now()}`,
       outletId,
       outletName: `${displayName} — ${displayLocation}`,
       createdAt: new Date().toISOString(),
@@ -101,6 +101,18 @@ export default function TableQrPage() {
       verifiedDineIn: true
     };
 
+    // 1. Persist to server / database API
+    try {
+      await fetch('/api/v1/customer-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newRating)
+      });
+    } catch (err) {
+      console.warn('[QR Rating] Server API error, saving locally:', err);
+    }
+
+    // 2. Local cache fallback
     try {
       const raw = localStorage.getItem(PHASE1_STORAGE_KEY);
       const state: AppPhase1State = raw ? JSON.parse(raw) : {};

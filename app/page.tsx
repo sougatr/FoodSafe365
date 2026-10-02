@@ -247,7 +247,7 @@ export default function Landing() {
     setRatingConfirmation(null);
   }
 
-  function handleSubmitRating(e: React.FormEvent) {
+  async function handleSubmitRating(e: React.FormEvent) {
     e.preventDefault();
     if (!ratingModalRestaurant) return;
     setIsSubmittingRating(true);
@@ -257,7 +257,7 @@ export default function Landing() {
     ).toFixed(1);
 
     const newRating: DinerSafetyRating = {
-      id: 'diner_' + Date.now(),
+      id: 'cfr_' + Date.now(),
       outletId: ratingModalRestaurant.id,
       outletName: ratingModalRestaurant.name,
       createdAt: new Date().toISOString(),
@@ -269,13 +269,28 @@ export default function Landing() {
         staffHygiene: rateScores.q2,
         foodFreshness: rateScores.q3,
         safeWater: rateScores.q4,
-        washroom: rateScores.q4
+        washroom: rateScores.q5
       },
       overallScore: parseFloat(avgScore),
       feedback: rateRemarks.trim() || undefined,
       verifiedDineIn: true
     };
 
+    // 1. Persist to server / database API so it is retrievable across devices
+    try {
+      const res = await fetch('/api/v1/customer-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newRating)
+      });
+      if (!res.ok) {
+        console.warn('[handleSubmitRating] Server API returned status:', res.status);
+      }
+    } catch (apiErr) {
+      console.warn('[handleSubmitRating] Server API fetch failed, proceeding with local backup:', apiErr);
+    }
+
+    // 2. Also update local storage for immediate responsiveness
     if (typeof window !== 'undefined') {
       try {
         const raw = localStorage.getItem(PHASE1_STORAGE_KEY);
@@ -300,18 +315,16 @@ export default function Landing() {
       window.dispatchEvent(new CustomEvent('foodsafe-rating-submitted'));
     }
 
-    setTimeout(() => {
-      setIsSubmittingRating(false);
-      setRatingConfirmation({
-        restaurantName: ratingModalRestaurant.name,
-        score: avgScore,
-        table: rateTableNum,
-        wantsFeedback,
-        email: wantsFeedback && dinerEmail.trim() ? dinerEmail.trim() : (customerEmail || undefined)
-      });
-      const feedbackMsg = wantsFeedback && dinerEmail.trim() ? ` Direct resolution will be sent to ${dinerEmail.trim()}.` : '';
-      showToast(`⭐ Thank you! Your ${avgScore}★ Customer Feedback for ${ratingModalRestaurant.name} was delivered to restaurant management.${feedbackMsg}`);
-    }, 400);
+    setIsSubmittingRating(false);
+    setRatingConfirmation({
+      restaurantName: ratingModalRestaurant.name,
+      score: avgScore,
+      table: rateTableNum,
+      wantsFeedback,
+      email: wantsFeedback && dinerEmail.trim() ? dinerEmail.trim() : (customerEmail || undefined)
+    });
+    const feedbackMsg = wantsFeedback && dinerEmail.trim() ? ` Direct resolution will be sent to ${dinerEmail.trim()}.` : '';
+    showToast(`⭐ Thank you! Your ${avgScore}★ Customer Feedback for ${ratingModalRestaurant.name} was saved and delivered to restaurant management.${feedbackMsg}`);
   }
 
   function handleAddRestaurant(e: React.FormEvent) {

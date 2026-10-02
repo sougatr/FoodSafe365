@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, History, Home, ShieldCheck, Wrench, Star, QrCode, Info } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, History, Home, ShieldCheck, Wrench, Star, QrCode, Info, RefreshCw, Database, Server } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import {
   FOODSAFE28,
@@ -36,21 +36,79 @@ function saveState(v: AppPhase1State) {
 export default function ManagerPage() {
   const [data, setData] = useState<AppPhase1State>({});
   const [note, setNote] = useState('');
+  const [serverRatings, setServerRatings] = useState<DinerSafetyRating[]>([]);
+  const [isLoadingFeedback, setIsLoadingFeedback] = useState<boolean>(true);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [storageBackend, setStorageBackend] = useState<'postgresql' | 'server_file' | 'local'>('server_file');
+  const [selectedOutletId, setSelectedOutletId] = useState<string>('all');
+
+  async function loadServerFeedback(outletId: string = selectedOutletId) {
+    setIsLoadingFeedback(true);
+    setFeedbackError(null);
+    try {
+      const q = outletId && outletId !== 'all' ? `?outletId=${encodeURIComponent(outletId)}` : '';
+      const res = await fetch(`/api/v1/customer-feedback${q}`, {
+        cache: 'no-store'
+      });
+      if (!res.ok) {
+        if (res.status === 401) {
+          // If unauthenticated, retry with demo mode for preview
+          const retryRes = await fetch(`/api/v1/customer-feedback${q ? q + '&demo=true' : '?demo=true'}`, { cache: 'no-store' });
+          if (retryRes.ok) {
+            const retryJson = await retryRes.json();
+            if (retryJson.data?.ratings) {
+              setServerRatings(retryJson.data.ratings);
+              if (retryJson.data.storage) setStorageBackend(retryJson.data.storage);
+              return;
+            }
+          }
+        }
+        throw new Error(`Server returned status ${res.status}`);
+      }
+      const json = await res.json();
+      if (json.data?.ratings) {
+        setServerRatings(json.data.ratings);
+        if (json.data.storage) setStorageBackend(json.data.storage);
+
+        // Sync local cache
+        try {
+          const raw = localStorage.getItem(PHASE1_STORAGE_KEY);
+          const state: AppPhase1State = raw ? JSON.parse(raw) : {};
+          state.dinerRatings = json.data.ratings;
+          localStorage.setItem(PHASE1_STORAGE_KEY, JSON.stringify(state));
+        } catch {}
+      }
+    } catch (err: any) {
+      console.warn('[Manager] Unable to load server feedback:', err);
+      setFeedbackError(err?.message || 'Server connection error');
+      const local = loadState();
+      if (local.dinerRatings) {
+        setServerRatings(local.dinerRatings);
+        setStorageBackend('local');
+      }
+    } finally {
+      setIsLoadingFeedback(false);
+    }
+  }
 
   useEffect(() => {
     const refresh = () => setData(loadState());
     refresh();
+    loadServerFeedback(selectedOutletId);
     window.addEventListener('foodsaf365:update', refresh);
     return () => window.removeEventListener('foodsaf365:update', refresh);
   }, []);
+
+  // Reload when outlet selection changes
+  useEffect(() => {
+    loadServerFeedback(selectedOutletId);
+  }, [selectedOutletId]);
 
   const checks: Record<string, CheckRecord> = data.checks || {};
   const issues: Issue[] = data.issues || [];
   const actions: CorrectiveAction[] = data.actions || [];
   const timeline: AuditTrailEvent[] = data.timeline || [];
-  const dinerRatings: DinerSafetyRating[] = data.dinerRatings || [];
-
-  const [selectedOutletId, setSelectedOutletId] = useState<string>('all');
+  const dinerRatings: DinerSafetyRating[] = serverRatings.length > 0 ? serverRatings : (data.dinerRatings || []);
 
   const activeRatings = useMemo(() => {
     if (selectedOutletId === 'all') return dinerRatings;
@@ -488,18 +546,33 @@ export default function ManagerPage() {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14, marginBottom: 20 }}>
               <div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 6 }}>
-                  <Star size={12} fill="#059669" color="#059669" /> CUSTOMER VOICE
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    <Star size={12} fill="#059669" color="#059669" /> CUSTOMER VOICE
+                  </div>
+                  {storageBackend === 'postgresql' ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '3px 8px', borderRadius: 999, fontSize: 11, fontWeight: 700 }}>
+                      <Database size={11} /> PostgreSQL Live DB
+                    </span>
+                  ) : storageBackend === 'server_file' ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe', padding: '3px 8px', borderRadius: 999, fontSize: 11, fontWeight: 700 }}>
+                      <Server size={11} /> Server Store (.data)
+                    </span>
+                  ) : (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#fefce8', color: '#854d0e', border: '1px solid #fef08a', padding: '3px 8px', borderRadius: 999, fontSize: 11, fontWeight: 700 }}>
+                      Local Cache
+                    </span>
+                  )}
                 </div>
                 <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: '4px 0 2px' }}>
                   Customer Food-Safety Feedback
                 </h2>
                 <p className="muted" style={{ margin: 0, fontSize: 14 }}>
-                  What diners observed and experienced through your tabletop &amp; menu QR codes.
+                  What diners observed and experienced through your tabletop &amp; menu QR codes across all devices.
                 </p>
               </div>
 
-              {/* Outlet Selector & Test QR */}
+              {/* Outlet Selector, Refresh & Test QR */}
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                 <select
                   value={selectedOutletId}
@@ -522,6 +595,19 @@ export default function ManagerPage() {
                   <option value="bastian-mumbai">Bastian (Mumbai)</option>
                   <option value="peter-cat">Peter Cat (Kolkata)</option>
                 </select>
+
+                <button
+                  type="button"
+                  onClick={() => loadServerFeedback(selectedOutletId)}
+                  disabled={isLoadingFeedback}
+                  className="btn secondary"
+                  style={{ fontSize: 12.5, padding: '7px 12px', display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
+                  title="Fetch latest customer ratings from server persistence layer"
+                >
+                  <RefreshCw size={13} style={{ animation: isLoadingFeedback ? 'spin 1s linear infinite' : 'none' }} />
+                  {isLoadingFeedback ? 'Syncing…' : 'Refresh'}
+                </button>
+
                 <Link
                   href={`/qr/${selectedOutletId === 'all' ? 'abc-restaurant' : selectedOutletId}`}
                   className="btn secondary"
@@ -532,7 +618,39 @@ export default function ManagerPage() {
               </div>
             </div>
 
-            {customerVoice.totalRatings === 0 ? (
+            {feedbackError && (
+              <div style={{
+                marginBottom: 16,
+                padding: '10px 14px',
+                borderRadius: 10,
+                background: '#fffbeb',
+                border: '1px solid #fde68a',
+                fontSize: 13,
+                color: '#b45309',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 10
+              }}>
+                <span>⚠️ {feedbackError} Displaying locally cached ratings.</span>
+                <button
+                  type="button"
+                  onClick={() => loadServerFeedback(selectedOutletId)}
+                  className="btn secondary"
+                  style={{ fontSize: 11, padding: '4px 8px' }}
+                >
+                  Retry Connection
+                </button>
+              </div>
+            )}
+
+            {isLoadingFeedback && dinerRatings.length === 0 ? (
+              <div style={{ padding: '40px 20px', textAlign: 'center', color: '#64748b' }}>
+                <RefreshCw size={26} style={{ animation: 'spin 1s linear infinite', margin: '0 auto 12px', color: '#059669' }} />
+                <h4 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 700, color: '#0f172a' }}>Loading Live Customer Feedback</h4>
+                <p style={{ margin: 0, fontSize: 13 }}>Querying server persistence layer across all registered outlets…</p>
+              </div>
+            ) : customerVoice.totalRatings === 0 ? (
               /* EMPTY STATE */
               <div className="card empty-state" style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', padding: '36px 20px', textAlign: 'center' }}>
                 <Star size={40} style={{ color: '#94a3b8', margin: '0 auto 12px' }} />
