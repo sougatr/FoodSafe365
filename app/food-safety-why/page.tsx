@@ -514,69 +514,6 @@ export default function FoodSafetyWhy() {
               </div>
             </div>
 
-            {/* TABLE 1: PATHOGEN ATTACK MATRIX */}
-            <div style={{ marginBottom: 24, overflowX: 'auto' }}>
-              <h4 style={{ fontSize: 14, fontWeight: 800, color: '#f87171', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
-                Table 1: Pathogen Attack &amp; Incubation Matrix
-              </h4>
-              <table style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                fontSize: 12.5,
-                color: '#fed7aa',
-                background: '#220b03',
-                borderRadius: 12,
-                overflow: 'hidden'
-              }}>
-                <thead>
-                  <tr style={{ background: '#1a0701', borderBottom: '1.5px solid rgba(251, 146, 60, 0.25)', textAlign: 'left' }}>
-                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>Pathogen</th>
-                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>Incubation / Onset</th>
-                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>Attack Mechanism</th>
-                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>Food Vehicle</th>
-                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>Key Symptoms</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
-                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#fca5a5' }}>Staphylococcus aureus</td>
-                    <td style={{ padding: '10px 14px', color: '#f87171', fontWeight: 600 }}>30 min – 4 hours</td>
-                    <td style={{ padding: '10px 14px' }}>Pre-formed heat-stable enterotoxin</td>
-                    <td style={{ padding: '10px 14px' }}>Warm gravies, sliced meats, cream</td>
-                    <td style={{ padding: '10px 14px' }}>Sudden projectile vomiting, cramps</td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
-                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#fed7aa' }}>Bacillus cereus</td>
-                    <td style={{ padding: '10px 14px', color: '#fb923c', fontWeight: 600 }}>1 – 6 hours</td>
-                    <td style={{ padding: '10px 14px' }}>Heat-resistant cereulide toxin</td>
-                    <td style={{ padding: '10px 14px' }}>Boiled/fried rice, noodles, starchy base</td>
-                    <td style={{ padding: '10px 14px' }}>Acute nausea, severe vomiting</td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
-                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#fde68a' }}>Salmonella enterica</td>
-                    <td style={{ padding: '10px 14px', color: '#fbbf24', fontWeight: 600 }}>12 – 48 hours</td>
-                    <td style={{ padding: '10px 14px' }}>Invasive mucosal enteritis &amp; IL-8 storm</td>
-                    <td style={{ padding: '10px 14px' }}>Undercooked chicken, eggs, cross-contamination</td>
-                    <td style={{ padding: '10px 14px' }}>Fever, cramps, watery diarrhea</td>
-                  </tr>
-                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
-                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#a7f3d0' }}>Entamoeba histolytica</td>
-                    <td style={{ padding: '10px 14px', color: '#34d399', fontWeight: 600 }}>1 – 4 weeks (or acute)</td>
-                    <td style={{ padding: '10px 14px' }}>Cyst excystation; trophozoite mucosal lysis</td>
-                    <td style={{ padding: '10px 14px' }}>Unwashed salads, raw chutneys, tap ice</td>
-                    <td style={{ padding: '10px 14px' }}>Bloody dysentery, ulcers, liver abscess</td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#bae6fd' }}>Campylobacter jejuni</td>
-                    <td style={{ padding: '10px 14px', color: '#38bdf8', fontWeight: 600 }}>2 – 5 days</td>
-                    <td style={{ padding: '10px 14px' }}>Mucosal invasion with cytolethal toxin</td>
-                    <td style={{ padding: '10px 14px' }}>Raw poultry, cross-contaminated counters</td>
-                    <td style={{ padding: '10px 14px' }}>Bloody diarrhea, high fever, periumbilical pain</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
             {/* TABLE 2: KITCHEN FAILURE VS FOODSAFE365 CONTROL */}
             <div style={{ overflowX: 'auto' }}>
               <h4 style={{ fontSize: 14, fontWeight: 800, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
@@ -654,7 +591,7 @@ export default function FoodSafetyWhy() {
               borderRadius: 16,
               padding: '20px 22px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Clock size={20} />
                 </div>
@@ -662,8 +599,8 @@ export default function FoodSafetyWhy() {
                   1. Blast Chilling (&lt;90 Min Rule)
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.5, margin: 0 }}>
-                5-star kitchens never cool gravies or stocks at room temperature. High-velocity blast chillers crash core food temperature from <strong>70°C to below 3°C within 90 minutes</strong>, bypassing the bacterial danger zone entirely.
+              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+                Crashes hot core temperature from 70°C to &lt;3°C within 90 minutes, completely bypassing the bacterial danger zone.
               </p>
             </div>
 
@@ -674,7 +611,7 @@ export default function FoodSafetyWhy() {
               borderRadius: 16,
               padding: '20px 22px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Layers size={20} />
                 </div>
@@ -682,8 +619,8 @@ export default function FoodSafetyWhy() {
                   2. 6-Color Chopping Matrix
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.5, margin: 0 }}>
-                Strict physical segregation: 🔴 Red (Raw Meat), 🟡 Yellow (Poultry), 🔵 Blue (Seafood), 🟢 Green (Salads &amp; Veg), ⚪ White (Bakery/Dairy), 🟤 Brown (Cooked Meats). Cross-contamination is physically impossible.
+              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+                Strict color segregation: Red (Meat), Yellow (Poultry), Blue (Fish), Green (Produce), White (Dairy), Brown (Cooked).
               </p>
             </div>
 
@@ -694,7 +631,7 @@ export default function FoodSafetyWhy() {
               borderRadius: 16,
               padding: '20px 22px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Award size={20} />
                 </div>
@@ -702,8 +639,8 @@ export default function FoodSafetyWhy() {
                   3. FIFO &amp; Day-Dot System
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.5, margin: 0 }}>
-                First-In, First-Out inventory with color-coded day stickers (Monday–Sunday). Every container is stamped with preparation time, chef initials, and mandatory discard deadline (max 48 hours for base gravies under 2°C).
+              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+                Color-coded weekday dot stickers stamped with prep time, chef initials, and strict 48-hour discard deadlines.
               </p>
             </div>
 
@@ -714,7 +651,7 @@ export default function FoodSafetyWhy() {
               borderRadius: 16,
               padding: '20px 22px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Thermometer size={20} />
                 </div>
@@ -722,8 +659,8 @@ export default function FoodSafetyWhy() {
                   4. Core Temperature Probing
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.5, margin: 0 }}>
-                Chefs calibrate digital needle probes daily in ice baths. Hot dishes must reach an internal core temperature of <strong>≥75°C (165°F)</strong>, hot holding lines must maintain <strong>≥63°C</strong>, and chillers must hold <strong>&lt;4°C</strong>.
+              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+                Calibrated needle probes log internal cooking core (≥75°C), hot holding (≥63°C), and cold storage (&lt;4°C).
               </p>
             </div>
 
@@ -734,7 +671,7 @@ export default function FoodSafetyWhy() {
               borderRadius: 16,
               padding: '20px 22px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(249, 115, 22, 0.2)', color: '#fb923c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Droplets size={20} />
                 </div>
@@ -742,8 +679,8 @@ export default function FoodSafetyWhy() {
                   5. Digital Oil TPC Meters
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.5, margin: 0 }}>
-                Commercial fryers are tested twice daily with handheld electronic oil testers (Testo 270). The moment Total Polar Compounds reach <strong>24%</strong>, oil is immediately locked, discarded, and repurposed into biodiesel (FSSAI RUCO).
+              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+                Twice-daily digital testing (Testo 270); discarded for biodiesel recycling the moment Total Polar Compounds hit 24%.
               </p>
             </div>
 
@@ -754,7 +691,7 @@ export default function FoodSafetyWhy() {
               borderRadius: 16,
               padding: '20px 22px'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                 <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(168, 85, 247, 0.2)', color: '#c084fc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <HeartPulse size={20} />
                 </div>
@@ -762,8 +699,8 @@ export default function FoodSafetyWhy() {
                   6. Medical Clearance (Form 1A)
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.5, margin: 0 }}>
-                Every kitchen team member undergoes 6-monthly medical tests (stool cultures, typhoid vaccines, skin swabs). 3-sink chemical sanitization strips test active chlorine at 100–200 PPM before cutting raw salads.
+              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+                Mandatory 6-monthly stool cultures &amp; typhoid vaccines, plus chlorine test strips (100–200 PPM) for salad sinks.
               </p>
             </div>
           </div>
