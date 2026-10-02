@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
-import { getAuthContext } from '@/lib/auth';
 import { ok, fail } from '@/lib/response';
 import { getCustomerFeedback, saveCustomerFeedback } from '@/lib/customer-feedback-store';
+import { authorizeFeedbackAccess } from '@/lib/tenant';
 import { DinerSafetyRating } from '@/lib/foodsafety28';
 
 // Validation schema for incoming Customer Food-Safety Ratings
@@ -26,36 +26,76 @@ const FeedbackSchema = z.object({
   verifiedDineIn: z.boolean().default(true),
 });
 
+// Server-side sliding cache for duplicate detection & flood protection
+interface SubmissionEntry {
+  outletId: string;
+  contextKey: string;
+  contentSignature: string;
+  timestamp: number;
+  rating: DinerSafetyRating;
+  storage: 'postgresql' | 'server_file';
+}
+
+const recentSubmissions = new Map<string, SubmissionEntry>();
+const SUBMISSION_COOLDOWN_MS = 60 * 1000; // 60 seconds idempotency window
+const FLOOD_LIMIT_MS = 4 * 1000;          // 4 seconds rapid-fire limit
+
+function cleanupRecentSubmissions() {
+  const now = Date.now();
+  recentSubmissions.forEach((entry, key) => {
+    if (now - entry.timestamp > 120 * 1000) {
+      recentSubmissions.delete(key);
+    }
+  });
+}
+
+function maskDinerPhone(phone?: string): string | undefined {
+  if (!phone) return undefined;
+  const p = phone.trim();
+  if (p.length <= 4) return '***';
+  return p.slice(0, p.length - 5) + '****' + p.slice(-1);
+}
+
 /**
  * GET /api/v1/customer-feedback
- * Retrieves Customer Food-Safety Ratings from persistent storage (PostgreSQL or server file store).
- * Protected for authenticated restaurant managers / supervisors.
+ * Retrieves Customer Food-Safety Ratings from authoritative persistent storage.
+ * Enforces tenant authorization:
+ * - Outlet Manager: strictly scoped to their assigned outletId (403 if attempting another outlet).
+ * - Org Admin / Owner: scoped to outlets in their organisation.
+ * - Platform Admin: unrestricted platform access.
  */
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
-    const outletId = url.searchParams.get('outletId') || 'all';
+    const requestedOutletId = url.searchParams.get('outletId');
+    const isExplicitDemo = url.searchParams.get('demo') === 'true';
 
-    // Verify manager authentication context
-    const auth = await getAuthContext();
-    const authHeaderUserId = req.headers.get('x-foodsafe-user-id');
-    const isDemoMode = process.env.DEMO_MODE === 'true' || url.searchParams.get('demo') === 'true';
-
-    // Must be authenticated as a restaurant manager, have demo session, or have auth headers
-    const isAuthenticated = Boolean(auth || authHeaderUserId || isDemoMode);
-    if (!isAuthenticated) {
-      return fail('UNAUTHENTICATED', 'Authentication required. Please sign in as a restaurant manager.', 401);
+    // 1. Enforce Server-Side Tenant Authorization
+    const authResult = await authorizeFeedbackAccess(requestedOutletId, req, isExplicitDemo);
+    if (!authResult.ok) {
+      return fail(authResult.code, authResult.message, authResult.status);
     }
 
-    const { ratings, storage, count } = await getCustomerFeedback(outletId);
+    // 2. Fetch from Authoritative Storage (targetOutletId is enforced by the authorization layer)
+    const { ratings, storage, count } = await getCustomerFeedback(authResult.targetOutletId);
+
+    // 3. Privacy Safeguard: Mask sensitive customer contact data
+    const sanitizedRatings = ratings.map(r => ({
+      ...r,
+      dinerMobile: maskDinerPhone(r.dinerMobile),
+    }));
 
     return NextResponse.json({
       data: {
-        ratings,
-        outletId,
+        ratings: sanitizedRatings,
+        outletId: authResult.targetOutletId || 'all',
         storage,
-        count,
-        authenticatedUser: auth ? { userId: auth.userId, role: auth.role, outletId: auth.outletId } : 'demo-manager'
+        count: sanitizedRatings.length,
+        authenticatedUser: {
+          userId: authResult.auth.userId,
+          role: authResult.auth.role,
+          authorizedOutletId: authResult.auth.outletId
+        }
       },
       error: null
     }, {
@@ -67,6 +107,9 @@ export async function GET(req: NextRequest) {
     });
   } catch (err: any) {
     console.error('[API /customer-feedback GET] Error:', err);
+    if (err?.message?.startsWith('DATABASE_ERROR')) {
+      return fail('DATABASE_ERROR', 'Production database read operation failed.', 500);
+    }
     return fail('INTERNAL_ERROR', err?.message || 'Failed to retrieve customer feedback', 500);
   }
 }
@@ -74,7 +117,7 @@ export async function GET(req: NextRequest) {
 /**
  * POST /api/v1/customer-feedback
  * Submits a Customer Food-Safety Rating from a diner (Device A).
- * Persists to backend database / server storage so Device B can retrieve it.
+ * Protected by server-side idempotency / anti-duplication cooldown.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -93,13 +136,51 @@ export async function POST(req: NextRequest) {
     }
 
     const validated = parseResult.data;
-    const now = new Date().toISOString();
+    cleanupRecentSubmissions();
+
+    // Derive client identifier for idempotency & rate-limiting
+    const forwardedFor = req.headers.get('x-forwarded-for')?.split(',')[0].trim();
+    const realIp = req.headers.get('x-real-ip');
+    const clientIp = forwardedFor || realIp || 'client';
+    const contextKey = `${clientIp}::${validated.outletId}::${validated.tableNumber || 'notable'}::${validated.dinerMobile || 'nomobile'}`;
+    const contentSignature = `${validated.scores.cleanliness}_${validated.scores.staffHygiene}_${validated.scores.foodFreshness}_${validated.scores.safeWater}_${validated.scores.washroom}_${validated.overallScore}::${(validated.feedback || '').toLowerCase().trim()}`;
+
+    const now = Date.now();
+    const existing = recentSubmissions.get(contextKey);
+
+    if (existing) {
+      const elapsed = now - existing.timestamp;
+
+      // 1. Identical duplicate within 60-second window -> Idempotent acknowledgment
+      if (existing.contentSignature === contentSignature && elapsed < SUBMISSION_COOLDOWN_MS) {
+        return NextResponse.json({
+          data: {
+            rating: existing.rating,
+            storage: existing.storage,
+            duplicate: true,
+            message: 'Your customer food-safety rating for this visit has already been received and logged. Thank you!'
+          },
+          error: null
+        }, {
+          status: 200,
+          headers: {
+            'Cache-Control': 'no-store',
+            'X-FoodSafe-Idempotent': 'true'
+          }
+        });
+      }
+
+      // 2. Rapid-fire flooding limit (submitting different contents under 4s from same context)
+      if (elapsed < FLOOD_LIMIT_MS) {
+        return fail('RATE_LIMITED', 'Please wait a moment before submitting another rating for this restaurant.', 429);
+      }
+    }
 
     const ratingRecord: DinerSafetyRating = {
       id: validated.id || `cfr-${Date.now()}-${randomUUID().slice(0, 8)}`,
       outletId: validated.outletId.trim(),
       outletName: validated.outletName.trim(),
-      createdAt: now,
+      createdAt: new Date().toISOString(),
       dinerName: validated.dinerName?.trim() || undefined,
       dinerMobile: validated.dinerMobile?.trim() || undefined,
       tableNumber: validated.tableNumber?.trim() || undefined,
@@ -117,6 +198,16 @@ export async function POST(req: NextRequest) {
 
     const { rating, storage } = await saveCustomerFeedback(ratingRecord);
 
+    // Record submission in sliding window cache
+    recentSubmissions.set(contextKey, {
+      outletId: validated.outletId,
+      contextKey,
+      contentSignature,
+      timestamp: now,
+      rating,
+      storage
+    });
+
     return NextResponse.json({
       data: {
         rating,
@@ -133,6 +224,9 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: any) {
     console.error('[API /customer-feedback POST] Error:', err);
+    if (err?.message?.startsWith('DATABASE_ERROR')) {
+      return fail('DATABASE_ERROR', 'Production database write operation failed.', 500);
+    }
     return fail('INTERNAL_ERROR', err?.message || 'Failed to submit customer rating', 500);
   }
 }

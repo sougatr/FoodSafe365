@@ -3,7 +3,13 @@ import { Pool, PoolClient, QueryResultRow } from 'pg';
 let pool: Pool | null = null;
 export function getPool() {
   if (!process.env.DATABASE_URL) return null;
-  if (!pool) pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 10, ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined });
+  if (!pool) {
+    const isLocal = process.env.DATABASE_URL.includes('localhost') || 
+                    process.env.DATABASE_URL.includes('127.0.0.1') || 
+                    process.env.DATABASE_URL.includes('sslmode=disable');
+    const ssl = (process.env.NODE_ENV === 'production' && !isLocal) ? { rejectUnauthorized: false } : undefined;
+    pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 10, ssl });
+  }
   return pool;
 }
 export async function query<T extends QueryResultRow = QueryResultRow>(text:string, params:any[]=[]):Promise<T[]> {

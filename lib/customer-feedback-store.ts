@@ -16,8 +16,8 @@ const DEFAULT_SEED_RATINGS: DinerSafetyRating[] = [
     outletId: 'the-table',
     outletName: 'The Table (Colaba)',
     createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    dinerName: 'Priya Mehta',
-    dinerMobile: '+91 98201 12345',
+    dinerName: 'Priya M.',
+    dinerMobile: '+91 98201 ****5',
     tableNumber: 'Table 04',
     scores: {
       cleanliness: 5,
@@ -36,7 +36,7 @@ const DEFAULT_SEED_RATINGS: DinerSafetyRating[] = [
     outletName: 'The Table (Colaba)',
     createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
     dinerName: 'Rohan K.',
-    dinerMobile: '+91 98110 54321',
+    dinerMobile: '+91 98110 ****1',
     tableNumber: 'Table 11',
     scores: {
       cleanliness: 4,
@@ -50,31 +50,12 @@ const DEFAULT_SEED_RATINGS: DinerSafetyRating[] = [
     verifiedDineIn: true
   },
   {
-    id: 'seed-rating-table-3',
-    outletId: 'the-table',
-    outletName: 'The Table (Colaba)',
-    createdAt: new Date(Date.now() - 3600000 * 9).toISOString(),
-    dinerName: 'Ananya S.',
-    dinerMobile: '+91 99800 76543',
-    tableNumber: 'Table 02',
-    scores: {
-      cleanliness: 5,
-      staffHygiene: 4,
-      foodFreshness: 4,
-      safeWater: 4,
-      washroom: 5
-    },
-    overallScore: 4.4,
-    feedback: 'Very hygienic open kitchen setup. Water bottle was sealed and verified.',
-    verifiedDineIn: true
-  },
-  {
     id: 'seed-rating-bastian-1',
     outletId: 'bastian-mumbai',
     outletName: 'Bastian (Bandra West)',
     createdAt: new Date(Date.now() - 3600000 * 3).toISOString(),
-    dinerName: 'Vikram Seth',
-    dinerMobile: '+91 98200 99881',
+    dinerName: 'Vikram S.',
+    dinerMobile: '+91 98200 ****1',
     tableNumber: 'Table 07',
     scores: {
       cleanliness: 4,
@@ -86,29 +67,10 @@ const DEFAULT_SEED_RATINGS: DinerSafetyRating[] = [
     overallScore: 3.8,
     feedback: 'Seafood platter did not seem ice-cold upon arrival at the table.',
     verifiedDineIn: true
-  },
-  {
-    id: 'seed-rating-canteen-1',
-    outletId: 'the-bombay-canteen',
-    outletName: 'The Bombay Canteen',
-    createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-    dinerName: 'Sameer J.',
-    dinerMobile: '+91 98330 11223',
-    tableNumber: 'Table 14',
-    scores: {
-      cleanliness: 5,
-      staffHygiene: 5,
-      foodFreshness: 5,
-      safeWater: 5,
-      washroom: 4
-    },
-    overallScore: 4.8,
-    feedback: 'Top-notch hygiene standards throughout the bar and open kitchen.',
-    verifiedDineIn: true
   }
 ];
 
-// Helper to determine persistent storage file path
+// Helper to determine persistent storage file path (LOCAL DEV ONLY)
 function getFilePath(): string {
   const primaryDir = path.join(process.cwd(), '.data');
   try {
@@ -121,7 +83,7 @@ function getFilePath(): string {
   }
 }
 
-// Read from persistent server file
+// Read from persistent server file (DEV ONLY)
 function readFileStore(): DinerSafetyRating[] {
   const filePath = getFilePath();
   try {
@@ -132,16 +94,15 @@ function readFileStore(): DinerSafetyRating[] {
         return parsed;
       }
     }
-    // Seed initial data if file does not exist or is empty
     writeFileStore(DEFAULT_SEED_RATINGS);
     return DEFAULT_SEED_RATINGS;
   } catch (err) {
-    console.warn('[customer-feedback-store] Error reading file store:', err);
+    console.warn('[customer-feedback-store] Error reading dev file store:', err);
     return DEFAULT_SEED_RATINGS;
   }
 }
 
-// Write to persistent server file atomically
+// Write to persistent server file atomically (DEV ONLY)
 function writeFileStore(ratings: DinerSafetyRating[]): void {
   const filePath = getFilePath();
   try {
@@ -149,7 +110,7 @@ function writeFileStore(ratings: DinerSafetyRating[]): void {
     fs.writeFileSync(tmpPath, JSON.stringify(ratings, null, 2), 'utf-8');
     fs.renameSync(tmpPath, filePath);
   } catch (err) {
-    console.warn('[customer-feedback-store] Error writing file store:', err);
+    console.warn('[customer-feedback-store] Error writing dev file store:', err);
   }
 }
 
@@ -184,8 +145,8 @@ async function ensurePgTable(): Promise<boolean> {
     pgInitialized = true;
     return true;
   } catch (err) {
-    console.warn('[customer-feedback-store] PostgreSQL initialization failed:', err);
-    return false;
+    console.error('[customer-feedback-store] PostgreSQL table initialization failed:', err);
+    throw err;
   }
 }
 
@@ -213,42 +174,41 @@ function mapPgRowToRating(r: any): DinerSafetyRating {
 
 /**
  * Retrieve customer food-safety ratings by outletId.
- * Supports PostgreSQL when DATABASE_URL is set, with seamless fallback to persistent server file store.
+ * In PRODUCTION (when DATABASE_URL is set): PostgreSQL is the SOLE authoritative store.
+ * If PostgreSQL query fails, it throws a database error (no silent JSON fallback).
+ * In LOCAL DEV / DEMO (when DATABASE_URL is unset): Uses .data/customer_feedback.json.
  */
-export async function getCustomerFeedback(outletId?: string): Promise<FeedbackStorageResult> {
+export async function getCustomerFeedback(outletId?: string | null): Promise<FeedbackStorageResult> {
   const targetOutlet = outletId && outletId !== 'all' ? outletId.trim() : null;
 
-  // 1. Attempt PostgreSQL query if DATABASE_URL is configured
+  // 1. PRODUCTION MODE: PostgreSQL is authoritative
   if (process.env.DATABASE_URL) {
     try {
-      const ready = await ensurePgTable();
-      if (ready) {
-        let querySql = `SELECT * FROM customer_feedback`;
-        const params: any[] = [];
-        if (targetOutlet) {
-          querySql += ` WHERE outlet_id = $1`;
-          params.push(targetOutlet);
-        }
-        querySql += ` ORDER BY created_at DESC`;
-
-        const rows = await query<any>(querySql, params);
-        if (rows.length > 0) {
-          const ratings = rows.map(mapPgRowToRating);
-          return { ratings, storage: 'postgresql', count: ratings.length };
-        }
+      await ensurePgTable();
+      let querySql = `SELECT * FROM customer_feedback`;
+      const params: any[] = [];
+      if (targetOutlet) {
+        querySql += ` WHERE outlet_id = $1`;
+        params.push(targetOutlet);
       }
-    } catch (err) {
-      console.warn('[customer-feedback-store] Postgres query fallback triggered:', err);
+      querySql += ` ORDER BY created_at DESC`;
+
+      const rows = await query<any>(querySql, params);
+      const ratings = rows.map(mapPgRowToRating);
+      return { ratings, storage: 'postgresql', count: ratings.length };
+    } catch (err: any) {
+      console.error('[customer-feedback-store] Production PostgreSQL query error:', err);
+      // Hard failure in production — do NOT silently fall back to JSON
+      throw new Error(`DATABASE_ERROR: ${err.message || 'PostgreSQL read operation failed'}`);
     }
   }
 
-  // 2. Persistent Server File Store (for cross-device access without PostgreSQL or during local dev)
+  // 2. DEVELOPMENT / DEMO MODE (DATABASE_URL unset only)
   const allRatings = readFileStore();
   const filtered = targetOutlet
     ? allRatings.filter(r => r.outletId === targetOutlet)
     : allRatings;
 
-  // Sort descending by creation date
   filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return {
@@ -260,54 +220,54 @@ export async function getCustomerFeedback(outletId?: string): Promise<FeedbackSt
 
 /**
  * Save a new Customer Food-Safety Rating.
- * Persists to PostgreSQL if configured, and saves to persistent server file store for guaranteed cross-device availability.
+ * In PRODUCTION (when DATABASE_URL is set): Persists exclusively to PostgreSQL.
+ * If PostgreSQL insert fails, it throws a database error (no silent JSON fallback).
+ * In LOCAL DEV / DEMO (when DATABASE_URL is unset): Saves to .data/customer_feedback.json.
  */
 export async function saveCustomerFeedback(rating: DinerSafetyRating): Promise<{ rating: DinerSafetyRating; storage: 'postgresql' | 'server_file' }> {
-  let storedWithPg = false;
-
-  // 1. Save to PostgreSQL if configured
+  // 1. PRODUCTION MODE: PostgreSQL is authoritative
   if (process.env.DATABASE_URL) {
     try {
-      const ready = await ensurePgTable();
-      if (ready) {
-        await query(
-          `INSERT INTO customer_feedback (
-            id, outlet_id, outlet_name, overall_score, cleanliness_score, staff_hygiene_score,
-            food_freshness_score, safe_water_score, washroom_score, feedback, diner_name,
-            diner_mobile, table_number, verified_dine_in, created_at
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
-          [
-            rating.id,
-            rating.outletId,
-            rating.outletName,
-            rating.overallScore,
-            rating.scores.cleanliness,
-            rating.scores.staffHygiene,
-            rating.scores.foodFreshness,
-            rating.scores.safeWater,
-            rating.scores.washroom,
-            rating.feedback || null,
-            rating.dinerName || null,
-            rating.dinerMobile || null,
-            rating.tableNumber || null,
-            rating.verifiedDineIn ?? true,
-            rating.createdAt || new Date().toISOString()
-          ]
-        );
-        storedWithPg = true;
-      }
-    } catch (err) {
-      console.warn('[customer-feedback-store] PostgreSQL insert failed, falling back to file store:', err);
+      await ensurePgTable();
+      await query(
+        `INSERT INTO customer_feedback (
+          id, outlet_id, outlet_name, overall_score, cleanliness_score, staff_hygiene_score,
+          food_freshness_score, safe_water_score, washroom_score, feedback, diner_name,
+          diner_mobile, table_number, verified_dine_in, created_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+        [
+          rating.id,
+          rating.outletId,
+          rating.outletName,
+          rating.overallScore,
+          rating.scores.cleanliness,
+          rating.scores.staffHygiene,
+          rating.scores.foodFreshness,
+          rating.scores.safeWater,
+          rating.scores.washroom,
+          rating.feedback || null,
+          rating.dinerName || null,
+          rating.dinerMobile || null,
+          rating.tableNumber || null,
+          rating.verifiedDineIn ?? true,
+          rating.createdAt || new Date().toISOString()
+        ]
+      );
+      return { rating, storage: 'postgresql' };
+    } catch (err: any) {
+      console.error('[customer-feedback-store] Production PostgreSQL insert error:', err);
+      // Hard failure in production — do NOT silently fall back to JSON
+      throw new Error(`DATABASE_ERROR: ${err.message || 'PostgreSQL write operation failed'}`);
     }
   }
 
-  // 2. Also persist to persistent server file store (ensuring cross-device sync even across dev restarts)
+  // 2. DEVELOPMENT / DEMO MODE (DATABASE_URL unset only)
   const existing = readFileStore();
   const next = [rating, ...existing.filter(r => r.id !== rating.id)];
   writeFileStore(next);
 
   return {
     rating,
-    storage: storedWithPg ? 'postgresql' : 'server_file'
+    storage: 'server_file'
   };
 }
