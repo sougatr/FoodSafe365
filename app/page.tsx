@@ -26,7 +26,9 @@ import {
   Clock,
   Layers,
   Droplets,
-  HeartPulse
+  HeartPulse,
+  Mail,
+  KeyRound
 } from 'lucide-react';
 import GlobalHeader from '@/components/GlobalHeader';
 import { POPULAR_RESTAURANTS, RestaurantItem } from '@/lib/restaurantsData';
@@ -37,14 +39,18 @@ export default function Landing() {
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'delivery' | 'fine_dine' | 'cafe'>('all');
 
-  // Customer Authentication (Mobile OTP) State
+  // Universal Sign-in State (Mobile or Email for Diner, Restaurant Owner, Service Provider)
   const [customerPhone, setCustomerPhone] = useState<string | null>(null);
-  const [showOtpModal, setShowOtpModal] = useState(false);
-  const [otpStep, setOtpStep] = useState<'phone' | 'otp' | 'success'>('phone');
+  const [customerEmail, setCustomerEmail] = useState<string | null>(null);
+  const [loginRole, setLoginRole] = useState<'diner' | 'restaurant' | 'provider'>('diner');
+  const [loginMethod, setLoginMethod] = useState<'mobile' | 'email'>('mobile');
   const [inputPhone, setInputPhone] = useState('');
+  const [inputEmail, setInputEmail] = useState('');
   const [inputOtp, setInputOtp] = useState('');
   const [otpTimer, setOtpTimer] = useState(30);
   const [otpError, setOtpError] = useState('');
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpStep, setOtpStep] = useState<'phone' | 'otp' | 'success'>('phone');
 
   // Custom Diner-Added Restaurants State
   const [customRestaurants, setCustomRestaurants] = useState<RestaurantItem[]>([]);
@@ -61,6 +67,8 @@ export default function Landing() {
   const [rateTableNum, setRateTableNum] = useState('Table 4');
   const [rateScores, setRateScores] = useState({ q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 });
   const [rateRemarks, setRateRemarks] = useState('');
+  const [wantsFeedback, setWantsFeedback] = useState(false);
+  const [dinerEmail, setDinerEmail] = useState('');
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
 
   // Passport Quick-Peek Modal State
@@ -81,6 +89,8 @@ export default function Landing() {
     if (typeof window !== 'undefined') {
       const p = localStorage.getItem('foodsafe365_customer_phone');
       if (p) setCustomerPhone(p);
+      const em = localStorage.getItem('foodsafe365_customer_email');
+      if (em) setCustomerEmail(em);
 
       const savedCustom = localStorage.getItem('foodsafe365_custom_restaurants');
       if (savedCustom) {
@@ -95,8 +105,10 @@ export default function Landing() {
         setOtpError('');
       };
       const handleAuthUpdate = () => {
-        const updated = localStorage.getItem('foodsafe365_customer_phone');
-        setCustomerPhone(updated);
+        const updatedPhone = localStorage.getItem('foodsafe365_customer_phone');
+        setCustomerPhone(updatedPhone);
+        const updatedEmail = localStorage.getItem('foodsafe365_customer_email');
+        setCustomerEmail(updatedEmail);
       };
 
       window.addEventListener('open-customer-otp-modal', handleOpenOtp);
@@ -115,10 +127,18 @@ export default function Landing() {
 
   function handleSendOtp(e: React.FormEvent) {
     e.preventDefault();
-    const clean = inputPhone.replace(/\D/g, '');
-    if (clean.length < 10) {
-      setOtpError('Please enter a valid 10-digit mobile number');
-      return;
+    if (loginMethod === 'mobile') {
+      const clean = inputPhone.replace(/\D/g, '');
+      if (clean.length < 10) {
+        setOtpError('Please enter a valid 10-digit mobile number');
+        return;
+      }
+    } else {
+      const em = inputEmail.trim();
+      if (!em || !em.includes('@') || !em.includes('.')) {
+        setOtpError('Please enter a valid email address');
+        return;
+      }
     }
     setOtpError('');
     setOtpStep('otp');
@@ -128,38 +148,74 @@ export default function Landing() {
   function handleVerifyOtp(e: React.FormEvent) {
     e.preventDefault();
     if (!inputOtp.trim()) {
-      setOtpError('Please enter the 4-digit OTP');
+      setOtpError('Please enter the 4-digit verification code');
       return;
     }
     setOtpError('');
     setOtpStep('success');
-    const clean = inputPhone.replace(/\D/g, '');
+
+    const identifier = loginMethod === 'mobile' ? `+91 ${inputPhone.replace(/\D/g, '')}` : inputEmail.trim();
+
     if (typeof window !== 'undefined') {
-      localStorage.setItem('foodsafe365_customer_phone', clean);
-      localStorage.setItem('foodsafe365_diner_user', JSON.stringify({
-        phone: clean,
-        name: `Diner (+91 ${clean.slice(0, 5)}...)`,
-        verifiedAt: new Date().toISOString()
-      }));
-      window.dispatchEvent(new CustomEvent('customer-auth-changed'));
+      if (loginRole === 'restaurant') {
+        localStorage.setItem('foodsafe365_restaurant_user', JSON.stringify({
+          identifier,
+          method: loginMethod,
+          role: 'Restaurant Owner / Manager',
+          timestamp: new Date().toISOString()
+        }));
+      } else if (loginRole === 'provider') {
+        localStorage.setItem('foodsafe365_provider_user', JSON.stringify({
+          identifier,
+          method: loginMethod,
+          role: 'Service Provider Partner',
+          timestamp: new Date().toISOString()
+        }));
+      } else {
+        if (loginMethod === 'mobile') {
+          const clean = inputPhone.replace(/\D/g, '');
+          localStorage.setItem('foodsafe365_customer_phone', clean);
+          setCustomerPhone(clean);
+        } else {
+          const em = inputEmail.trim();
+          localStorage.setItem('foodsafe365_customer_email', em);
+          setCustomerEmail(em);
+        }
+        localStorage.setItem('foodsafe365_diner_user', JSON.stringify({
+          identifier,
+          name: `Diner (${identifier})`,
+          verifiedAt: new Date().toISOString()
+        }));
+        window.dispatchEvent(new CustomEvent('customer-auth-changed'));
+      }
     }
-    setCustomerPhone(clean);
 
     setTimeout(() => {
       setShowOtpModal(false);
       setOtpStep('phone');
       setInputOtp('');
-      showToast(`🎉 Welcome +91 ${clean}! You can now submit verified food-safety ratings.`);
+
+      if (loginRole === 'restaurant') {
+        showToast(`🎉 Welcome Restaurant Owner (${identifier})! Opening Kitchen Operations...`);
+        router.push('/home');
+      } else if (loginRole === 'provider') {
+        showToast(`🎉 Welcome Service Partner (${identifier})! Opening Marketplace...`);
+        router.push('/providers');
+      } else {
+        showToast(`🎉 Welcome Diner (${identifier})! Your ratings are now verified with +50 Karma.`);
+      }
     }, 1100);
   }
 
   function handleLogoutCustomer() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('foodsafe365_customer_phone');
+      localStorage.removeItem('foodsafe365_customer_email');
       localStorage.removeItem('foodsafe365_diner_user');
       window.dispatchEvent(new CustomEvent('customer-auth-changed'));
     }
     setCustomerPhone(null);
+    setCustomerEmail(null);
     showToast('Logged out of diner profile');
   }
 
@@ -168,6 +224,8 @@ export default function Landing() {
     setRateScores({ q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 });
     setRateRemarks('');
     setRateTableNum(restaurant.tableCode || 'Table 4');
+    setWantsFeedback(false);
+    setDinerEmail(customerEmail || '');
   }
 
   function handleSubmitRating(e: React.FormEvent) {
@@ -186,8 +244,10 @@ export default function Landing() {
       location: ratingModalRestaurant.location,
       tableNumber: rateTableNum,
       timestamp: new Date().toISOString(),
-      verifiedDiner: Boolean(customerPhone),
-      dinerPhone: customerPhone ? `+91 ${customerPhone.slice(0, 5)}...` : 'Guest Diner',
+      verifiedDiner: Boolean(customerPhone || customerEmail),
+      dinerPhone: customerPhone ? `+91 ${customerPhone.slice(0, 5)}...` : undefined,
+      dinerEmail: wantsFeedback ? dinerEmail.trim() : customerEmail || undefined,
+      wantsFeedback,
       scores: rateScores,
       averageScore: avgScore,
       remarks: rateRemarks.trim() || 'Food was served hot and tables were spotlessly clean.'
@@ -202,7 +262,8 @@ export default function Landing() {
     setTimeout(() => {
       setIsSubmittingRating(false);
       setRatingModalRestaurant(null);
-      showToast(`⭐ Thank you! Your ${avgScore}★ audit for ${ratingModalRestaurant.name} was delivered to the General Manager. +50 Karma earned!`);
+      const feedbackMsg = wantsFeedback && dinerEmail.trim() ? ` Direct resolution will be sent to ${dinerEmail.trim()}.` : '';
+      showToast(`⭐ Thank you! Your ${avgScore}★ audit for ${ratingModalRestaurant.name} was delivered to the General Manager.${feedbackMsg} +50 Karma earned!`);
     }, 600);
   }
 
@@ -476,7 +537,32 @@ export default function Landing() {
                 >
                   Onboard Your Restaurant (Start Free) <ArrowRight size={16} />
                 </Link>
-                <div style={{ textAlign: 'center', marginTop: 10 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, textAlign: 'center', marginTop: 10 }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginRole('restaurant');
+                      setShowOtpModal(true);
+                      setOtpStep('phone');
+                      setOtpError('');
+                    }}
+                    style={{
+                      background: 'rgba(16, 185, 129, 0.15)',
+                      border: '1px solid rgba(52, 211, 153, 0.3)',
+                      color: '#34d399',
+                      padding: '7px 12px',
+                      borderRadius: 10,
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6
+                    }}
+                  >
+                    <KeyRound size={13} /> Restaurant Sign In (Mobile or Email) →
+                  </button>
                   <Link href="/home" style={{ fontSize: 12, color: '#34d399', fontWeight: 600, textDecoration: 'none' }}>
                     Already onboarded? Open Kitchen Operations →
                   </Link>
@@ -549,6 +635,7 @@ export default function Landing() {
                   <button
                     type="button"
                     onClick={() => {
+                      setLoginRole('diner');
                       setShowOtpModal(true);
                       setOtpStep('phone');
                       setOtpError('');
@@ -571,7 +658,7 @@ export default function Landing() {
                       gap: 6
                     }}
                   >
-                    <Smartphone size={16} /> Customer Sign In (Mobile OTP) →
+                    <Smartphone size={16} /> Customer Sign In (Mobile or Email) →
                   </button>
                 )}
 
@@ -657,12 +744,38 @@ export default function Landing() {
                     textDecoration: 'none',
                     color: '#fde68a',
                     background: '#4a1908',
-                    border: '1px solid rgba(245, 158, 11, 0.4)'
+                    border: '1px solid rgba(245, 158, 11, 0.4)',
+                    marginBottom: 8
                   }}
                 >
                   Join as Service Provider →
                 </Link>
-                <div style={{ textAlign: 'center', marginTop: 10 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, textAlign: 'center', marginTop: 8 }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginRole('provider');
+                      setShowOtpModal(true);
+                      setOtpStep('phone');
+                      setOtpError('');
+                    }}
+                    style={{
+                      background: 'rgba(245, 158, 11, 0.15)',
+                      border: '1px solid rgba(245, 158, 11, 0.35)',
+                      color: '#fde68a',
+                      padding: '7px 12px',
+                      borderRadius: 10,
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6
+                    }}
+                  >
+                    <KeyRound size={13} /> Provider Sign In (Mobile or Email) →
+                  </button>
                   <Link href="/providers" style={{ fontSize: 12, color: '#fed7aa', fontWeight: 600, textDecoration: 'none' }}>
                     Browse All 14 Provider Categories →
                   </Link>
@@ -810,6 +923,8 @@ export default function Landing() {
                 { id: 'all', label: 'All Cities' },
                 { id: 'kolkata', label: 'Kolkata' },
                 { id: 'hyderabad', label: 'Hyderabad' },
+                { id: 'pune', label: 'Pune' },
+                { id: 'leh', label: 'Leh (Ladakh)' },
                 { id: 'mumbai', label: 'Mumbai' },
                 { id: 'delhi', label: 'New Delhi' },
                 { id: 'jaipur', label: 'Jaipur' },
@@ -1484,8 +1599,12 @@ export default function Landing() {
           }}>
             {/* Top Bar with Close */}
             <div style={{
-              background: 'linear-gradient(135deg, #ff5200 0%, #ea580c 100%)',
-              padding: '24px 24px 20px',
+              background: loginRole === 'restaurant'
+                ? 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+                : loginRole === 'provider'
+                ? 'linear-gradient(135deg, #d97706 0%, #b45309 100%)'
+                : 'linear-gradient(135deg, #ff5200 0%, #ea580c 100%)',
+              padding: '22px 24px 18px',
               color: '#ffffff',
               position: 'relative'
             }}>
@@ -1511,50 +1630,180 @@ export default function Landing() {
                 <X size={18} />
               </button>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.25)', padding: '3px 10px', borderRadius: 9999, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', marginBottom: 8 }}>
-                <Smartphone size={12} /> CUSTOMER VERIFICATION
+                {loginRole === 'restaurant' && <><UtensilsCrossed size={12} /> RESTAURANT OWNER PORTAL</>}
+                {loginRole === 'provider' && <><Wrench size={12} /> ACCREDITED PROVIDER PORTAL</>}
+                {loginRole === 'diner' && <><Smartphone size={12} /> DINER / PUBLIC ACCESS</>}
               </div>
-              <h3 style={{ margin: 0, fontSize: 22, fontWeight: 900 }}>Customer Mobile Sign In</h3>
+              <h3 style={{ margin: 0, fontSize: 21, fontWeight: 900 }}>
+                {loginRole === 'restaurant' ? 'Restaurant Sign In' : loginRole === 'provider' ? 'Service Provider Sign In' : 'Customer & Diner Sign In'}
+              </h3>
               <p style={{ margin: '4px 0 0', fontSize: 13, opacity: 0.9 }}>
-                Submit verified restaurant food-safety ratings and earn Karma points.
+                {loginRole === 'restaurant'
+                  ? 'Access kitchen checklist operations, staff logs, and food safety passport.'
+                  : loginRole === 'provider'
+                  ? 'Manage incoming service quotation requests and lab diagnostic dispatches.'
+                  : 'Submit verified restaurant hygiene ratings and earn FoodSafe Karma.'}
               </p>
             </div>
 
             {/* Modal Body */}
-            <div style={{ padding: 24 }}>
+            <div style={{ padding: 22 }}>
+              {/* Role Switcher Tabs */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                gap: 6,
+                marginBottom: 16,
+                background: '#1d0902',
+                padding: 4,
+                borderRadius: 12,
+                border: '1px solid rgba(251, 146, 60, 0.2)'
+              }}>
+                {[
+                  { key: 'diner', label: '🍽️ Diner' },
+                  { key: 'restaurant', label: '🍴 Restaurant' },
+                  { key: 'provider', label: '🛠️ Provider' },
+                ].map(r => (
+                  <button
+                    key={r.key}
+                    type="button"
+                    onClick={() => {
+                      setLoginRole(r.key as any);
+                      setOtpError('');
+                    }}
+                    style={{
+                      padding: '7px 4px',
+                      borderRadius: 8,
+                      border: 'none',
+                      background: loginRole === r.key ? '#ff5200' : 'transparent',
+                      color: loginRole === r.key ? '#ffffff' : '#fed7aa',
+                      fontWeight: loginRole === r.key ? 800 : 600,
+                      fontSize: 12,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Method Switcher Tabs (Mobile vs Email) */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+                <button
+                  type="button"
+                  onClick={() => { setLoginMethod('mobile'); setOtpError(''); }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    padding: '8px 10px',
+                    borderRadius: 10,
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    border: loginMethod === 'mobile' ? '1.5px solid #ff5200' : '1px solid rgba(251, 146, 60, 0.2)',
+                    background: loginMethod === 'mobile' ? 'rgba(255, 82, 0, 0.15)' : '#220b03',
+                    color: loginMethod === 'mobile' ? '#ffffff' : '#fed7aa'
+                  }}
+                >
+                  <Smartphone size={14} /> Mobile (SMS OTP)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setLoginMethod('email'); setOtpError(''); }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    padding: '8px 10px',
+                    borderRadius: 10,
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    border: loginMethod === 'email' ? '1.5px solid #ff5200' : '1px solid rgba(251, 146, 60, 0.2)',
+                    background: loginMethod === 'email' ? 'rgba(255, 82, 0, 0.15)' : '#220b03',
+                    color: loginMethod === 'email' ? '#ffffff' : '#fed7aa'
+                  }}
+                >
+                  <Mail size={14} /> Email Address
+                </button>
+              </div>
+
               {otpStep === 'phone' && (
                 <form onSubmit={handleSendOtp}>
-                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#ffffff', marginBottom: 8 }}>
-                    Enter 10-Digit Mobile Number
-                  </label>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    border: '1.5px solid rgba(251, 146, 60, 0.3)',
-                    borderRadius: 12,
-                    padding: '10px 14px',
-                    gap: 10,
-                    marginBottom: 12,
-                    background: '#220b03'
-                  }}>
-                    <span style={{ fontWeight: 800, color: '#fed7aa', fontSize: 15 }}>🇮🇳 +91</span>
-                    <input
-                      type="tel"
-                      maxLength={10}
-                      autoFocus
-                      placeholder="9876543210"
-                      value={inputPhone}
-                      onChange={e => setInputPhone(e.target.value.replace(/\D/g, ''))}
-                      style={{
-                        border: 'none',
-                        outline: 'none',
-                        fontSize: 16,
-                        width: '100%',
-                        fontWeight: 600,
-                        color: '#ffffff',
-                        background: 'transparent'
-                      }}
-                    />
-                  </div>
+                  {loginMethod === 'mobile' ? (
+                    <>
+                      <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#ffffff', marginBottom: 8 }}>
+                        Enter 10-Digit Mobile Number
+                      </label>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        border: '1.5px solid rgba(251, 146, 60, 0.3)',
+                        borderRadius: 12,
+                        padding: '10px 14px',
+                        gap: 10,
+                        marginBottom: 12,
+                        background: '#220b03'
+                      }}>
+                        <span style={{ fontWeight: 800, color: '#fed7aa', fontSize: 15 }}>🇮🇳 +91</span>
+                        <input
+                          type="tel"
+                          maxLength={10}
+                          autoFocus
+                          placeholder="9876543210"
+                          value={inputPhone}
+                          onChange={e => setInputPhone(e.target.value.replace(/\D/g, ''))}
+                          style={{
+                            border: 'none',
+                            outline: 'none',
+                            fontSize: 16,
+                            width: '100%',
+                            fontWeight: 600,
+                            color: '#ffffff',
+                            background: 'transparent'
+                          }}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#ffffff', marginBottom: 8 }}>
+                        Enter Registered Email Address
+                      </label>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        border: '1.5px solid rgba(251, 146, 60, 0.3)',
+                        borderRadius: 12,
+                        padding: '10px 14px',
+                        gap: 10,
+                        marginBottom: 12,
+                        background: '#220b03'
+                      }}>
+                        <Mail size={16} color="#fb923c" />
+                        <input
+                          type="email"
+                          autoFocus
+                          placeholder={loginRole === 'restaurant' ? 'manager@restaurant.com' : loginRole === 'provider' ? 'contact@labservice.com' : 'diner@example.com'}
+                          value={inputEmail}
+                          onChange={e => setInputEmail(e.target.value)}
+                          style={{
+                            border: 'none',
+                            outline: 'none',
+                            fontSize: 15,
+                            width: '100%',
+                            fontWeight: 600,
+                            color: '#ffffff',
+                            background: 'transparent'
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
 
                   {otpError && (
                     <div style={{ color: '#f87171', fontSize: 12.5, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -1578,7 +1827,7 @@ export default function Landing() {
                       boxShadow: '0 4px 14px rgba(255, 82, 0, 0.35)'
                     }}
                   >
-                    Send OTP (Instant SMS) →
+                    {loginMethod === 'mobile' ? 'Send OTP (Instant SMS) →' : 'Send Verification Code (Email) →'}
                   </button>
 
                   <div style={{ textAlign: 'center', marginTop: 14, fontSize: 11.5, color: '#fed7aa' }}>
@@ -1591,14 +1840,17 @@ export default function Landing() {
                 <form onSubmit={handleVerifyOtp}>
                   <div style={{ textAlign: 'center', marginBottom: 18 }}>
                     <p style={{ margin: '0 0 4px', fontSize: 13.5, color: '#fed7aa' }}>
-                      We sent a 4-digit code to <strong style={{ color: '#ffffff' }}>+91 {inputPhone}</strong>
+                      We sent a 4-digit code to{' '}
+                      <strong style={{ color: '#ffffff' }}>
+                        {loginMethod === 'mobile' ? `+91 ${inputPhone}` : inputEmail}
+                      </strong>
                     </p>
                     <button
                       type="button"
                       onClick={() => setOtpStep('phone')}
                       style={{ background: 'none', border: 'none', color: '#fb923c', fontSize: 12, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
                     >
-                      Change number
+                      Change {loginMethod === 'mobile' ? 'number' : 'email'}
                     </button>
                   </div>
 
@@ -1644,7 +1896,7 @@ export default function Landing() {
                         cursor: 'pointer'
                       }}
                     >
-                      ⚡ One-Click Test: Fill Demo OTP (3650)
+                      ⚡ One-Click Test: Fill Demo Code (3650)
                     </button>
                   </div>
 
@@ -1681,7 +1933,7 @@ export default function Landing() {
                         onClick={() => setOtpTimer(30)}
                         style={{ background: 'none', border: 'none', color: '#fb923c', fontWeight: 700, cursor: 'pointer' }}
                       >
-                        Resend OTP Now
+                        Resend Code Now
                       </button>
                     )}
                   </div>
@@ -1707,7 +1959,11 @@ export default function Landing() {
                     Verified Successfully!
                   </h4>
                   <p style={{ margin: 0, fontSize: 13.5, color: '#fed7aa' }}>
-                    Welcome to FoodSafe365! Your diner ratings will be stamped with the <strong>Verified Diner Audit</strong> seal.
+                    {loginRole === 'restaurant'
+                      ? 'Opening Restaurant Kitchen Operations...'
+                      : loginRole === 'provider'
+                      ? 'Opening Service Provider Network...'
+                      : 'Welcome to FoodSafe365! Your diner ratings will be stamped with the Verified Diner Audit seal.'}
                   </p>
                 </div>
               )}
@@ -1885,6 +2141,54 @@ export default function Landing() {
                     fontFamily: 'inherit'
                   }}
                 />
+              </div>
+
+              {/* Request Direct Restaurant Feedback */}
+              <div style={{
+                background: '#2b0e04',
+                border: '1.5px solid rgba(251, 146, 60, 0.25)',
+                borderRadius: 12,
+                padding: '12px 14px',
+                marginBottom: 16
+              }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none' }}>
+                  <input
+                    type="checkbox"
+                    checked={wantsFeedback}
+                    onChange={e => setWantsFeedback(e.target.checked)}
+                    style={{ width: 18, height: 18, accentColor: '#ff5200', cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#ffffff' }}>
+                    Would you like direct feedback / resolution from the restaurant?
+                  </span>
+                </label>
+                {wantsFeedback && (
+                  <div style={{ marginTop: 10 }}>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#fed7aa', marginBottom: 4 }}>
+                      Your Email Address for Restaurant GM response *:
+                    </label>
+                    <input
+                      type="email"
+                      value={dinerEmail}
+                      onChange={e => setDinerEmail(e.target.value)}
+                      placeholder="e.g. yourname@gmail.com"
+                      required={wantsFeedback}
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        borderRadius: 8,
+                        border: '1px solid rgba(251, 146, 60, 0.35)',
+                        background: '#220b03',
+                        color: '#ffffff',
+                        fontSize: 13,
+                        boxSizing: 'border-box'
+                      }}
+                    />
+                    <div style={{ fontSize: 11, color: '#cbd5e1', marginTop: 4 }}>
+                      🔒 We share your email exclusively with this restaurant&apos;s management for audit resolution.
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Verified Attribution Note */}

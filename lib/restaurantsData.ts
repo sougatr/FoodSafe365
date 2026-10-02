@@ -1384,5 +1384,261 @@ export const POPULAR_RESTAURANTS: RestaurantItem[] = [
       medical: { title: '100% Medical', subtitle: 'Staff Hairnets & Aprons' },
       pest: { title: 'Pest Safe', subtitle: 'Spotless Open Kitchen' }
     }
+  },
+
+  // --- LEH (LADAKH) ICONIC DINING ---
+  {
+    id: 'the-tibetan-kitchen-leh',
+    name: 'The Tibetan Kitchen',
+    city: 'leh',
+    location: 'Fort Road, Leh, Ladakh',
+    tableCode: 'Table QR #04',
+    cuisine: 'Authentic Tibetan Thukpa, Tingmo, Momos, Shapta & Ladakhi Stews',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.9',
+    reviews: 1850,
+    lastCheck: 'Today, 10:00 AM',
+    signals: {
+      cold: { title: 'Meat Chilled < 3°C', subtitle: 'High-Altitude Cold Safe' },
+      medical: { title: '100% Medical', subtitle: 'Annual Medical Form 1A' },
+      pest: { title: 'Pest Safe', subtitle: 'Inspected Daily' }
+    }
+  },
+  {
+    id: 'bon-appetit-leh',
+    name: 'Bon Appetit',
+    city: 'leh',
+    location: 'Changspa, Leh, Ladakh',
+    tableCode: 'Table QR #06',
+    cuisine: 'Ladakhi Organic Farm-to-Table, Woodfired Pizzas & Continental',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 1420,
+    lastCheck: 'Today, 09:30 AM',
+    signals: {
+      cold: { title: 'Organic Greens Washed', subtitle: 'RO Purified Water' },
+      medical: { title: '100% Medical', subtitle: 'Hospital Cleared' },
+      pest: { title: 'Pest Safe', subtitle: 'Zero Pests Logged' }
+    }
+  },
+  {
+    id: 'gesmo-restaurant-leh',
+    name: 'Gesmo Restaurant & German Bakery',
+    city: 'leh',
+    location: 'Fort Road, Leh, Ladakh',
+    tableCode: 'Table QR #02',
+    cuisine: 'Heritage Bakery, Yak Cheese Burgers, Apple Pie, Pizza & Breakfast',
+    category: 'iconic_cafe',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.7',
+    reviews: 2150,
+    lastCheck: 'Today, 07:45 AM',
+    signals: {
+      cold: { title: 'Yak Cheese < 4°C', subtitle: 'Chilled Dairy Monitored' },
+      medical: { title: '100% Medical', subtitle: 'All Staff Vaccinated' },
+      pest: { title: 'Pest Safe', subtitle: 'Cleaned Daily' }
+    }
+  },
+  {
+    id: 'chopsticks-noodle-bar-leh',
+    name: 'Chopsticks Noodle Bar',
+    city: 'leh',
+    location: 'Main Bazaar, Leh, Ladakh',
+    tableCode: 'Table QR #08',
+    cuisine: 'Pan-Asian, Pad Thai, Dim Sums, Wok Bowls & Ladakhi Soups',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 1680,
+    lastCheck: 'Today, 11:15 AM',
+    signals: {
+      cold: { title: 'Wok Core ≥ 80°C', subtitle: 'High Heat Kill Step' },
+      medical: { title: '100% Medical', subtitle: 'Staff Hairnets & Aprons' },
+      pest: { title: 'Pest Safe', subtitle: 'Bait Stations Active' }
+    }
+  },
+  {
+    id: 'alchi-kitchen-leh',
+    name: 'Alchi Kitchen',
+    city: 'leh',
+    location: 'Alchi & Skara, Leh, Ladakh',
+    tableCode: 'Table QR #03',
+    cuisine: 'Traditional Khambir, Chutagi, Skyu & Heritage Ladakhi Recipes',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.9',
+    reviews: 980,
+    lastCheck: 'Today, 10:45 AM',
+    signals: {
+      cold: { title: 'Stone Ground Flours', subtitle: 'Pest Free Storage' },
+      medical: { title: '100% Medical', subtitle: 'Local Chef Medical Clear' },
+      pest: { title: 'Pest Safe', subtitle: 'Traditional Clean Hearth' }
+    }
+  },
+  {
+    id: 'summer-harvest-leh',
+    name: 'Summer Harvest',
+    city: 'leh',
+    location: 'Fort Road, Leh, Ladakh',
+    tableCode: 'Table QR #05',
+    cuisine: 'Mutton Momos, Thukpa, Tibetan Gravies & North Indian',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.7',
+    reviews: 1390,
+    lastCheck: 'Today, 11:00 AM',
+    signals: {
+      cold: { title: 'Raw Meat < 2°C', subtitle: 'Separate Bottom Shelf' },
+      medical: { title: '100% Medical', subtitle: 'Form 1A Cleared' },
+      pest: { title: 'Pest Safe', subtitle: 'Traps In Place' }
+    }
+  },
+
+  // --- PUNE CULINARY & SWIGGY ICONS ---
+  {
+    id: 'german-bakery-pune',
+    name: 'German Bakery',
+    city: 'pune',
+    location: 'Koregaon Park, Pune',
+    tableCode: 'Table QR #07',
+    cuisine: 'Iconic Bakery, Red Velvet, Omelettes, Cheesecakes & Artisan Coffee',
+    category: 'iconic_cafe',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 4100,
+    lastCheck: 'Today, 08:30 AM',
+    signals: {
+      cold: { title: 'Bakery Chillers < 4°C', subtitle: 'Dairy Monitored' },
+      medical: { title: '100% Medical', subtitle: 'Semi-Annual Stool Tested' },
+      pest: { title: 'Pest Safe', subtitle: 'Electronic Fly Traps' }
+    }
+  },
+  {
+    id: 'vaishali-restaurant-pune',
+    name: 'Vaishali Restaurant',
+    city: 'pune',
+    location: 'FC Road, Shivajinagar, Pune',
+    tableCode: 'Table QR #12',
+    cuisine: 'Legendary Mysore Masala Dosa, Filter Coffee, SPDP & South Indian',
+    category: 'iconic_cafe',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.9',
+    reviews: 6500,
+    lastCheck: 'Today, 07:15 AM',
+    signals: {
+      cold: { title: 'Dosa Batter Fresh', subtitle: 'Daily Chilled Rotation' },
+      medical: { title: '100% Medical', subtitle: 'Staff FoSTaC Trained' },
+      pest: { title: 'Pest Safe', subtitle: 'Daily Night Sanitize' }
+    }
+  },
+  {
+    id: 'kayani-bakery-pune',
+    name: 'Kayani Bakery',
+    city: 'pune',
+    location: 'East Street, Camp, Pune',
+    tableCode: 'Table QR #01',
+    cuisine: 'Legendary Shrewsbury Biscuits, Mawa Cake, Ginger Biscuits & Parsi Bakes',
+    category: 'iconic_cafe',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.9',
+    reviews: 7800,
+    lastCheck: 'Today, 06:45 AM',
+    signals: {
+      cold: { title: 'Pure Butter Stored', subtitle: 'Hygienic Temperature' },
+      medical: { title: '100% Medical', subtitle: '100% Staff Cleared' },
+      pest: { title: 'Pest Safe', subtitle: 'Airtight Dry Storage' }
+    }
+  },
+  {
+    id: 'shabree-restaurant-pune',
+    name: 'Shabree Restaurant',
+    city: 'pune',
+    location: 'FC Road, Pune',
+    tableCode: 'Table QR #09',
+    cuisine: 'Authentic Maharashtrian Thali, Puran Poli, Pithla Bhakri & Kothimbir Vadi',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 3200,
+    lastCheck: 'Today, 10:45 AM',
+    signals: {
+      cold: { title: 'Hot Thali Serving ≥ 75°C', subtitle: 'Safe Core Temp' },
+      medical: { title: '100% Medical', subtitle: 'Form 1A Certified' },
+      pest: { title: 'Pest Safe', subtitle: 'Weekly Pest Control AMC' }
+    }
+  },
+  {
+    id: 'malaka-spice-pune',
+    name: 'Malaka Spice',
+    city: 'pune',
+    location: 'Koregaon Park & Baner, Pune',
+    tableCode: 'Table QR #15',
+    cuisine: 'Southeast Asian, Thai Curries, Vietnamese Pho & Malaysian Laksa',
+    category: 'fine_dine',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 3400,
+    lastCheck: 'Today, 10:30 AM',
+    signals: {
+      cold: { title: 'Seafood < 2°C', subtitle: 'Segregated Chillers' },
+      medical: { title: '100% Medical', subtitle: 'Hospital Certified' },
+      pest: { title: 'Pest Safe', subtitle: 'IPM Contract Active' }
+    }
+  },
+  {
+    id: 'marz-o-rin-pune',
+    name: 'Marz-O-Rin',
+    city: 'pune',
+    location: 'MG Road, Camp, Pune',
+    tableCode: 'Table QR #04',
+    cuisine: 'Heritage Chutney Sandwiches, Macaroni, Cold Coffee, Bakery & Juices',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.7',
+    reviews: 4200,
+    lastCheck: 'Today, 09:00 AM',
+    signals: {
+      cold: { title: 'Mint Chutney RO Washed', subtitle: 'Cyst Safe Verified' },
+      medical: { title: '100% Medical', subtitle: 'Medical Check Cleared' },
+      pest: { title: 'Pest Safe', subtitle: 'Heritage Kitchen Clean' }
+    }
+  },
+  {
+    id: 'george-restaurant-pune',
+    name: 'George Restaurant',
+    city: 'pune',
+    location: 'Camp, Pune',
+    tableCode: 'Table QR #11',
+    cuisine: 'Famous Persian Biryani, Chicken Tikka, Irani Chai & Mughlai Curries',
+    category: 'swiggy_popular',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.7',
+    reviews: 3900,
+    lastCheck: 'Today, 11:30 AM',
+    signals: {
+      cold: { title: 'Biryani Core ≥ 80°C', subtitle: 'Cooked Hot & Safe' },
+      medical: { title: '100% Medical', subtitle: 'All Staff Screened' },
+      pest: { title: 'Pest Safe', subtitle: 'Traps In Place' }
+    }
+  },
+  {
+    id: 'vohuman-cafe-pune',
+    name: 'Vohuman Cafe',
+    city: 'pune',
+    location: 'Near Pune Railway Station, Sangamvadi, Pune',
+    tableCode: 'Table QR #02',
+    cuisine: 'Legendary Cheese Omelette, Bun Maska, Chai & Parsi Breakfast',
+    category: 'iconic_cafe',
+    badge: 'FOODSAFE TODAY VERIFIED',
+    score: '4.8',
+    reviews: 5100,
+    lastCheck: 'Today, 06:30 AM',
+    signals: {
+      cold: { title: 'Eggs Inspected Fresh', subtitle: 'Crack & Shell Hygiene' },
+      medical: { title: '100% Medical', subtitle: 'Form 1A Active' },
+      pest: { title: 'Pest Safe', subtitle: 'Open Kitchen Verified' }
+    }
   }
 ];

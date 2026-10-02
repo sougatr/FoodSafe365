@@ -28,7 +28,10 @@ import {
   TrendingUp,
   FileCheck,
   Home,
-  Mail
+  Mail,
+  KeyRound,
+  UtensilsCrossed,
+  Smartphone
 } from 'lucide-react';
 import {
   PHASE1_STORAGE_KEY,
@@ -560,11 +563,279 @@ const SERVICES: ServiceItem[] = [
   }
 ];
 
+export type ProviderColumnGroup = {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: string;
+  accent: string;
+  items: {
+    id: string;
+    name: string;
+    icon: string;
+    rating: string;
+    reviews: string;
+    desc: string;
+    tat: string;
+  }[];
+};
+
+const PROVIDER_COLUMNS: ProviderColumnGroup[] = [
+  {
+    id: 'sanitation',
+    title: 'Sanitation & Waste',
+    subtitle: 'Pest control, deep clean & waste disposal',
+    icon: '🧼',
+    accent: '#059669',
+    items: [
+      {
+        id: 'srv-pest-emergency',
+        name: 'Emergency Pest Control & Gel Baiting',
+        icon: '🪲',
+        rating: '4.9',
+        reviews: '3,410',
+        desc: 'Odorless cockroach gel baiting, rodent stations & bio-drain flushing.',
+        tat: 'Arrives in 2h'
+      },
+      {
+        id: 'srv-deep-exhaust',
+        name: 'Exhaust Hood & Grease Duct Steam Wash',
+        icon: '🧼',
+        rating: '4.9',
+        reviews: '2,890',
+        desc: 'High-pressure steam degreasing of hood filters, ducts & kitchen floors.',
+        tat: 'Night shift'
+      },
+      {
+        id: 'srv-waste-mgmt',
+        name: 'Solid & Wet Waste Disposal',
+        icon: '♻️',
+        rating: '4.85',
+        reviews: '780',
+        desc: 'Daily kitchen segregation & municipal compliance certificates.',
+        tat: 'Daily pickup'
+      },
+      {
+        id: 'srv-ruco-oil',
+        name: 'Used Cooking Oil (RUCO) Collection',
+        icon: '🛢️',
+        rating: '4.9',
+        reviews: '1,340',
+        desc: 'FSSAI RUCO bio-diesel conversion with official purchase vouchers.',
+        tat: 'Weekly pickup'
+      },
+      {
+        id: 'srv-garbage-bags',
+        name: 'Heavy-Duty Sullage Bin Liners',
+        icon: '🗑️',
+        rating: '4.8',
+        reviews: '610',
+        desc: 'Color-coded tear-resistant biohazard & wet waste garbage bags.',
+        tat: 'Next-day delivery'
+      }
+    ]
+  },
+  {
+    id: 'labs',
+    title: 'Testing & Calibration Labs',
+    subtitle: 'NABL & BIS certified diagnostic laboratories',
+    icon: '🧪',
+    accent: '#2563eb',
+    items: [
+      {
+        id: 'srv-water-testing',
+        name: 'Drinking Water Potability (IS 10500)',
+        icon: '💧',
+        rating: '4.9',
+        reviews: '1,420',
+        desc: 'E. coli, coliforms & chemical potability testing with QR certificate.',
+        tat: 'Report in 48h'
+      },
+      {
+        id: 'srv-food-testing',
+        name: 'Food Pathogen & Surface Swabs',
+        icon: '🧪',
+        rating: '4.9',
+        reviews: '1,180',
+        desc: 'Microbiological testing (Salmonella, Listeria) & hygiene swab analysis.',
+        tat: 'Report in 72h'
+      },
+      {
+        id: 'srv-calibration',
+        name: 'Thermometer & Gauge Calibration',
+        icon: '⚖️',
+        rating: '4.8',
+        reviews: '890',
+        desc: 'NABL calibration for probe thermometers, chillers & scales.',
+        tat: 'On-site 24h'
+      }
+    ]
+  },
+  {
+    id: 'engineering',
+    title: 'Kitchen Engineering & HVAC',
+    subtitle: 'Chillers, equipment maintenance & plumbing',
+    icon: '❄️',
+    accent: '#0284c7',
+    items: [
+      {
+        id: 'srv-hvac-coolroom',
+        name: 'Walk-in Chiller & Freezer Servicing',
+        icon: '❄️',
+        rating: '4.9',
+        reviews: '1,650',
+        desc: 'Emergency repair for <5°C chillers & < -18°C freezers with gasket fitting.',
+        tat: 'Emergency 3h'
+      },
+      {
+        id: 'srv-equipment-amc',
+        name: 'Kitchen Equipment Servicing & AMC',
+        icon: '🔧',
+        rating: '4.85',
+        reviews: '1,240',
+        desc: 'Maintenance for commercial stoves, dishwashers, steamers & blowers.',
+        tat: 'Same day'
+      },
+      {
+        id: 'srv-hygiene-engineering',
+        name: 'Drain Jetting & SS Grease Traps',
+        icon: '🏗️',
+        rating: '4.9',
+        reviews: '810',
+        desc: 'High-pressure line jetting, SS 304 grease interceptors & odor seals.',
+        tat: 'On-site in 4h'
+      },
+      {
+        id: 'srv-fire-suppression',
+        name: 'Kitchen Fire Safety & Suppression',
+        icon: '🧯',
+        rating: '4.9',
+        reviews: '940',
+        desc: 'Wet chemical fire extinguishers & automated hood suppression maintenance.',
+        tat: 'Next-day inspection'
+      }
+    ]
+  },
+  {
+    id: 'compliance',
+    title: 'Staff Health & Compliance',
+    subtitle: 'Form 1A medicals, vaccines & FoSTaC training',
+    icon: '🩺',
+    accent: '#7c3aed',
+    items: [
+      {
+        id: 'srv-medical-camp',
+        name: 'Staff Medical Fitness (Form 1A)',
+        icon: '🩺',
+        rating: '4.9',
+        reviews: '4,120',
+        desc: 'Doctor on-site medical checkup, skin inspection & stool test report.',
+        tat: 'Certificates in 24h'
+      },
+      {
+        id: 'srv-fostac-training',
+        name: 'FoSTaC Food Safety Supervisor',
+        icon: '🎓',
+        rating: '4.8',
+        reviews: '2,150',
+        desc: 'Government recognized FSSAI supervisor certification workshop.',
+        tat: 'Half-day course'
+      },
+      {
+        id: 'srv-immunization',
+        name: 'Food Handler Immunization',
+        icon: '💉',
+        rating: '4.9',
+        reviews: '920',
+        desc: 'Typhoid conjugate & Hepatitis A vaccination drive for kitchen staff.',
+        tat: 'On-site drive'
+      },
+      {
+        id: 'srv-ppe-supplies',
+        name: 'PPE & Hand Hygiene Consumables',
+        icon: '🧤',
+        rating: '4.8',
+        reviews: '1,560',
+        desc: 'Food-grade nitrile gloves, hairnets, beard masks & sanitizers.',
+        tat: 'Fast delivery'
+      }
+    ]
+  }
+];
+
 export default function ProvidersPage() {
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeBookingService, setActiveBookingService] = useState<ServiceItem | null>(null);
   const [bookingSuccess, setBookingSuccess] = useState<{ id: string; service: ServiceItem; slot: string } | null>(null);
+
+  // Authentication State for Providers & Restaurant Owners
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const [signInRole, setSignInRole] = useState<'provider' | 'restaurant'>('provider');
+  const [signInMethod, setSignInMethod] = useState<'mobile' | 'email'>('mobile');
+  const [signInPhone, setSignInPhone] = useState('');
+  const [signInEmail, setSignInEmail] = useState('');
+  const [signInOtp, setSignInOtp] = useState('');
+  const [signInStep, setSignInStep] = useState<'input' | 'otp' | 'success'>('input');
+  const [signInError, setSignInError] = useState('');
+  const [loggedInUser, setLoggedInUser] = useState<{ role: string; contact: string } | null>(null);
+
+  useEffect(() => {
+    try {
+      const savedRole = localStorage.getItem('foodsafe365_user_role');
+      const savedPhone = localStorage.getItem('foodsafe365_customer_phone');
+      const savedEmail = localStorage.getItem('foodsafe365_user_email');
+      if (savedRole && (savedPhone || savedEmail)) {
+        setLoggedInUser({
+          role: savedRole,
+          contact: savedPhone ? `+91 ${savedPhone}` : (savedEmail || '')
+        });
+      }
+    } catch {}
+  }, []);
+
+  function handleSendSignInOtp(e: React.FormEvent) {
+    e.preventDefault();
+    setSignInError('');
+    if (signInMethod === 'mobile') {
+      if (!/^\d{10}$/.test(signInPhone.trim())) {
+        setSignInError('Please enter a valid 10-digit mobile number.');
+        return;
+      }
+    } else {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signInEmail.trim())) {
+        setSignInError('Please enter a valid email address.');
+        return;
+      }
+    }
+    setSignInStep('otp');
+  }
+
+  function handleVerifySignInOtp(e: React.FormEvent) {
+    e.preventDefault();
+    if (!signInOtp.trim()) {
+      setSignInError('Please enter the 4-digit verification code.');
+      return;
+    }
+    try {
+      localStorage.setItem('foodsafe365_user_role', signInRole);
+      if (signInMethod === 'mobile') {
+        localStorage.setItem('foodsafe365_customer_phone', signInPhone);
+      } else {
+        localStorage.setItem('foodsafe365_user_email', signInEmail);
+      }
+      setLoggedInUser({
+        role: signInRole,
+        contact: signInMethod === 'mobile' ? `+91 ${signInPhone}` : signInEmail
+      });
+    } catch {}
+    setSignInStep('success');
+    setTimeout(() => {
+      setShowSignInModal(false);
+      setSignInStep('input');
+      setSignInOtp('');
+    }, 1200);
+  }
 
   // Provider Partner Application State
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
@@ -721,12 +992,99 @@ export default function ProvidersPage() {
             </span>
             <span className="muted" style={{ fontSize: 13 }}>Verified Diagnostic Labs, Trainers, Technicians &amp; Exterminators</span>
           </div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            {loggedInUser ? (
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                background: '#ecfdf5',
+                border: '1px solid #a7f3d0',
+                padding: '4px 12px',
+                borderRadius: 999,
+                fontSize: 12,
+                color: '#065f46',
+                fontWeight: 700
+              }}>
+                <span>👤 {loggedInUser.role === 'provider' ? 'Provider' : 'Restaurant'}: {loggedInUser.contact}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.removeItem('foodsafe365_user_role');
+                    localStorage.removeItem('foodsafe365_user_email');
+                    localStorage.removeItem('foodsafe365_customer_phone');
+                    setLoggedInUser(null);
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#ef4444',
+                    cursor: 'pointer',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSignInRole('provider');
+                    setShowSignInModal(true);
+                    setSignInStep('input');
+                    setSignInError('');
+                  }}
+                  style={{
+                    fontSize: 12.5,
+                    padding: '6px 12px',
+                    background: '#059669',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5
+                  }}
+                >
+                  <KeyRound size={13} /> Provider Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSignInRole('restaurant');
+                    setShowSignInModal(true);
+                    setSignInStep('input');
+                    setSignInError('');
+                  }}
+                  style={{
+                    fontSize: 12.5,
+                    padding: '6px 12px',
+                    background: '#334155',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5
+                  }}
+                >
+                  <UtensilsCrossed size={13} /> Restaurant Sign In
+                </button>
+              </>
+            )}
             <button
               onClick={() => setIsPartnerModalOpen(true)}
               className="btn primary"
               style={{
-                fontSize: 13,
+                fontSize: 12.5,
                 padding: '6px 14px',
                 background: '#0f172a',
                 display: 'inline-flex',
@@ -736,7 +1094,7 @@ export default function ProvidersPage() {
             >
               <Building2 size={14} /> Partner With Us
             </button>
-            <Link href="/checks" className="btn secondary" style={{ fontSize: 13, padding: '6px 12px' }}>
+            <Link href="/checks" className="btn secondary" style={{ fontSize: 12.5, padding: '6px 12px' }}>
               Today’s Checks
             </Link>
           </div>
@@ -811,25 +1169,26 @@ export default function ProvidersPage() {
           </div>
         </div>
 
-        {/* Search & Categories Bar */}
-        <div style={{ marginBottom: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {/* Search & Provider Columns Layout */}
+        <div style={{ marginBottom: 20 }}>
           {/* Search Input */}
           <div style={{
             position: 'relative',
             background: '#ffffff',
             borderRadius: 14,
             border: '1px solid #cbd5e1',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            marginBottom: 20
           }}>
             <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
             <input
               type="text"
-              placeholder="Search services: 'Stool test', 'Medical check up', 'FoSTaC training', 'Cockroach gel', 'HVAC repair'..."
+              placeholder="Search providers or services: 'Cockroach gel', 'Water testing', 'Chiller repair', 'Form 1A'..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               style={{
                 width: '100%',
-                padding: '14px 16px 14px 44px',
+                padding: '13px 16px 13px 44px',
                 border: 'none',
                 background: 'transparent',
                 fontSize: 14,
@@ -840,257 +1199,150 @@ export default function ProvidersPage() {
             />
           </div>
 
-          {/* User-Requested Category Tabs */}
+          {/* Section Header: Directory Listed in Columns */}
+          <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+            <div>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', margin: '0 0 2px' }}>
+                All 14 Accredited Compliance Services
+              </h2>
+              <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>
+                Direct quote dispatch with verified NABL laboratories, licensed technicians, and trainers.
+              </p>
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#059669', background: '#ecfdf5', padding: '4px 10px', borderRadius: 8 }}>
+              ⚡ 4 Specialized Divisions · Direct GM Dispatch
+            </span>
+          </div>
+
+          {/* 4-COLUMN PROVIDER DIRECTORY GRID (Clean, minimal text, vertical columns) */}
           <div style={{
-            display: 'flex',
-            gap: 8,
-            overflowX: 'auto',
-            paddingBottom: 6,
-            scrollbarWidth: 'none'
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: 16,
+            alignItems: 'start',
+            marginBottom: 36
           }}>
-            {CATEGORIES.map(cat => {
-              const active = selectedCategory === cat.id;
+            {PROVIDER_COLUMNS.map(col => {
+              const filteredItems = col.items.filter(item =>
+                searchQuery.trim() === '' ||
+                item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                item.desc.toLowerCase().includes(searchQuery.toLowerCase())
+              );
+
+              if (filteredItems.length === 0) return null;
+
               return (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
+                <div
+                  key={col.id}
                   style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    padding: '9px 18px',
-                    borderRadius: 999,
-                    fontSize: 13,
-                    fontWeight: active ? 700 : 500,
-                    background: active ? '#059669' : '#ffffff',
-                    color: active ? '#ffffff' : '#334155',
-                    border: active ? '1px solid #059669' : '1px solid #e2e8f0',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    boxShadow: active ? '0 2px 8px rgba(5, 150, 105, 0.25)' : 'none',
-                    transition: 'all 0.15s ease'
+                    background: '#ffffff',
+                    borderRadius: 16,
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column'
                   }}
                 >
-                  <span>{cat.icon}</span>
-                  <span>{cat.label}</span>
-                </button>
+                  {/* Column Header */}
+                  <div style={{
+                    padding: '14px 16px',
+                    background: '#f8fafc',
+                    borderBottom: '1px solid #e2e8f0',
+                    borderTop: `3px solid ${col.accent}`
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                      <span style={{ fontSize: 18 }}>{col.icon}</span>
+                      <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0f172a' }}>
+                        {col.title}
+                      </h3>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 11.5, color: '#64748b' }}>
+                      {col.subtitle}
+                    </p>
+                  </div>
+
+                  {/* Column Provider Items */}
+                  <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {filteredItems.map(item => {
+                      const matchedService = SERVICES.find(s => s.id === item.id) || {
+                        id: item.id,
+                        category: 'pest-control' as ServiceCategory,
+                        categoryLabel: col.title,
+                        icon: item.icon,
+                        title: item.name,
+                        rating: item.rating,
+                        reviewCount: item.reviews,
+                        tat: item.tat,
+                        description: item.desc,
+                        inclusions: [item.desc],
+                        resolvesChecks: ['Standard Compliance Requirement'],
+                        complianceStandard: 'FSSAI Mandate'
+                      };
+
+                      return (
+                        <div
+                          key={item.id}
+                          style={{
+                            background: '#f8fafc',
+                            border: '1px solid #f1f5f9',
+                            borderRadius: 12,
+                            padding: '12px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <span style={{ fontSize: 16 }}>{item.icon}</span>
+                                <h4 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#0f172a', lineHeight: 1.3 }}>
+                                  {item.name}
+                                </h4>
+                              </div>
+                            </div>
+
+                            <p style={{ margin: '4px 0 8px', fontSize: 11.5, color: '#64748b', lineHeight: 1.4 }}>
+                              {item.desc}
+                            </p>
+                          </div>
+
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 6, borderTop: '1px solid #edf2f7' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11.5, fontWeight: 700, color: '#d97706' }}>
+                              <span>★ {item.rating}</span>
+                              <span style={{ color: '#94a3b8', fontWeight: 500 }}>({item.reviews})</span>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => setActiveBookingService(matchedService)}
+                              style={{
+                                background: '#059669',
+                                color: '#ffffff',
+                                border: 'none',
+                                borderRadius: 6,
+                                padding: '5px 11px',
+                                fontSize: 11.5,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 4
+                              }}
+                            >
+                              Request Quote <ArrowRight size={11} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
           </div>
-        </div>
-
-        {/* Informative Banner for Occupational Health */}
-        {selectedCategory === 'occupational-health' && (
-          <div style={{
-            background: '#ecfdf5',
-            border: '1px solid #a7f3d0',
-            borderRadius: 14,
-            padding: '14px 18px',
-            marginBottom: 20,
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: 12
-          }}>
-            <Stethoscope size={20} color="#059669" style={{ flexShrink: 0, marginTop: 2 }} />
-            <div style={{ fontSize: 13, color: '#065f46' }}>
-              <strong>FSSAI Schedule 4 Mandate (Check #8):</strong> All restaurant kitchen and service personnel must undergo a certified medical examination (Form 1A) and 6-monthly stool test screening for enteric pathogens.
-            </div>
-          </div>
-        )}
-
-        {/* Informative Banner for Pest Control */}
-        {selectedCategory === 'pest-control' && (
-          <div style={{
-            background: '#fef3c7',
-            border: '1px solid #fde68a',
-            borderRadius: 14,
-            padding: '14px 18px',
-            marginBottom: 20,
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: 12
-          }}>
-            <Bug size={20} color="#d97706" style={{ flexShrink: 0, marginTop: 2 }} />
-            <div style={{ fontSize: 13, color: '#92400e' }}>
-              <strong>Checks #21 &amp; #22 Resolution:</strong> Integrated pest management (IPM), odorless cockroach gel baiting, and pest-free audit log maintenance.
-            </div>
-          </div>
-        )}
-
-        {/* Informative Banner for HVAC */}
-        {selectedCategory === 'hvac' && (
-          <div style={{
-            background: '#f0f9ff',
-            border: '1px solid #bae6fd',
-            borderRadius: 14,
-            padding: '14px 18px',
-            marginBottom: 20,
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: 12
-          }}>
-            <Wrench size={20} color="#0284c7" style={{ flexShrink: 0, marginTop: 2 }} />
-            <div style={{ fontSize: 13, color: '#0369a1' }}>
-              <strong>Checks #17 &amp; #18 Maintenance:</strong> Emergency HVAC repair for Cool Rooms (&lt;5°C) and Deep Freezers (&lt; -18°C) with gasket seal replacement and calibrated telemetry.
-            </div>
-          </div>
-        )}
-
-        {/* Informative Banner for Food Testing */}
-        {selectedCategory === 'food-testing' && (
-          <div style={{
-            background: '#f5f3ff',
-            border: '1px solid #ddd6fe',
-            borderRadius: 14,
-            padding: '14px 18px',
-            marginBottom: 20,
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: 12
-          }}>
-            <ShieldCheck size={20} color="#7c3aed" style={{ flexShrink: 0, marginTop: 2 }} />
-            <div style={{ fontSize: 13, color: '#5b21b6' }}>
-              <strong>NABL Pathogen Analysis:</strong> Food testing laboratories provide certified microbial screening (Salmonella, Listeria, E. coli) and surface swabs to validate HACCP controls.
-            </div>
-          </div>
-        )}
-
-        {/* Services Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-          gap: 20,
-          marginBottom: 36
-        }}>
-          {filteredServices.map(service => (
-            <div
-              key={service.id}
-              style={{
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: 18,
-                padding: '22px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease'
-              }}
-            >
-              <div>
-                {/* Top Badge & Rating */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                  <span style={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em',
-                    padding: '3px 8px',
-                    borderRadius: 6,
-                    background: '#f1f5f9',
-                    color: '#475569'
-                  }}>
-                    {service.categoryLabel}
-                  </span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 700, color: '#0f172a' }}>
-                    <Star size={14} fill="#f59e0b" color="#f59e0b" />
-                    <span>{service.rating}</span>
-                    <span style={{ color: '#94a3b8', fontWeight: 400 }}>({service.reviewCount})</span>
-                  </div>
-                </div>
-
-                {/* Service Title */}
-                <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                  <span style={{ fontSize: 24 }}>{service.icon}</span>
-                  <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: '0 0 6px', lineHeight: 1.35 }}>
-                    {service.title}
-                  </h3>
-                </div>
-
-                {/* Compliance Badge */}
-                {service.badge && (
-                  <div style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: '#059669',
-                    background: '#ecfdf5',
-                    padding: '2px 8px',
-                    borderRadius: 6,
-                    marginTop: 4,
-                    marginBottom: 10
-                  }}>
-                    <ShieldCheck size={12} /> {service.badge}
-                  </div>
-                )}
-
-                {/* Description */}
-                <p style={{ fontSize: 13, color: '#64748b', margin: '0 0 14px', lineHeight: 1.5 }}>
-                  {service.description}
-                </p>
-
-                {/* Inclusions list */}
-                <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 12, marginBottom: 14 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>
-                    What’s Included
-                  </span>
-                  <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {service.inclusions.map((inc, i) => (
-                      <li key={i} style={{ fontSize: 12, color: '#334155', display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-                        <span style={{ color: '#059669', fontWeight: 700, flexShrink: 0 }}>✓</span>
-                        <span>{inc}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Turnaround Time SLA */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b', marginBottom: 14 }}>
-                  <Clock size={13} color="#94a3b8" />
-                  <span>{service.tat}</span>
-                </div>
-              </div>
-
-              {/* Bottom Quotation Status & Action Button (No Direct Fee) */}
-              <div style={{
-                borderTop: '1px solid #e2e8f0',
-                paddingTop: 14,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12
-              }}>
-                <div>
-                  <div style={{ fontSize: 11, color: '#059669', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                    Commercial Terms
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>
-                    Agreed post-onboarding
-                  </div>
-                  <div style={{ fontSize: 11, color: '#64748b' }}>
-                    Custom quote on assessment
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setActiveBookingService(service)}
-                  className="btn primary"
-                  style={{
-                    fontSize: 13,
-                    padding: '8px 18px',
-                    background: '#059669',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6
-                  }}
-                >
-                  Request Dispatch <ArrowRight size={13} />
-                </button>
-              </div>
-            </div>
-          ))}
         </div>
 
         {/* Callout Section: For Service Providers & Labs */}
@@ -1935,6 +2187,327 @@ ${partnerSuccess.orgName}`
             >
               Done / Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* POPUP MODAL: PROVIDER & RESTAURANT OWNER SIGN IN (MOBILE OTP OR EMAIL) */}
+      {/* ========================================================================= */}
+      {showSignInModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: 16
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: 20,
+            maxWidth: 440,
+            width: '100%',
+            overflow: 'hidden',
+            boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.3)',
+            animation: 'scaleIn 0.2s ease-out'
+          }}>
+            {/* Header */}
+            <div style={{
+              background: signInRole === 'provider'
+                ? 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+                : 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+              padding: '20px 24px',
+              color: '#ffffff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 10,
+                  background: 'rgba(255,255,255,0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {signInRole === 'provider' ? <Wrench size={20} /> : <UtensilsCrossed size={20} />}
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>
+                    {signInRole === 'provider' ? 'Service Provider Sign In' : 'Restaurant Owner Sign In'}
+                  </h3>
+                  <p style={{ margin: '2px 0 0', fontSize: 12, opacity: 0.85 }}>
+                    {signInRole === 'provider' ? 'Access lead dispatch & quotations' : 'Kitchen compliance dashboard'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSignInModal(false)}
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 30,
+                  height: 30,
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: 22 }}>
+              {/* Role Toggle Tabs */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 8,
+                marginBottom: 16,
+                background: '#f1f5f9',
+                padding: 4,
+                borderRadius: 10
+              }}>
+                <button
+                  type="button"
+                  onClick={() => { setSignInRole('provider'); setSignInError(''); }}
+                  style={{
+                    padding: '7px 10px',
+                    borderRadius: 7,
+                    border: 'none',
+                    background: signInRole === 'provider' ? '#ffffff' : 'transparent',
+                    color: signInRole === 'provider' ? '#065f46' : '#64748b',
+                    fontWeight: 700,
+                    fontSize: 12.5,
+                    cursor: 'pointer',
+                    boxShadow: signInRole === 'provider' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                  }}
+                >
+                  🛠️ Service Provider
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setSignInRole('restaurant'); setSignInError(''); }}
+                  style={{
+                    padding: '7px 10px',
+                    borderRadius: 7,
+                    border: 'none',
+                    background: signInRole === 'restaurant' ? '#ffffff' : 'transparent',
+                    color: signInRole === 'restaurant' ? '#0f172a' : '#64748b',
+                    fontWeight: 700,
+                    fontSize: 12.5,
+                    cursor: 'pointer',
+                    boxShadow: signInRole === 'restaurant' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+                  }}
+                >
+                  🍴 Restaurant Owner
+                </button>
+              </div>
+
+              {/* Method Switcher: Mobile vs Email */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+                <button
+                  type="button"
+                  onClick={() => { setSignInMethod('mobile'); setSignInError(''); }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    padding: '8px 10px',
+                    borderRadius: 8,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    border: signInMethod === 'mobile' ? '1.5px solid #059669' : '1px solid #e2e8f0',
+                    background: signInMethod === 'mobile' ? '#ecfdf5' : '#ffffff',
+                    color: signInMethod === 'mobile' ? '#065f46' : '#475569'
+                  }}
+                >
+                  <Smartphone size={13} /> Mobile (SMS OTP)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setSignInMethod('email'); setSignInError(''); }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    padding: '8px 10px',
+                    borderRadius: 8,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    border: signInMethod === 'email' ? '1.5px solid #059669' : '1px solid #e2e8f0',
+                    background: signInMethod === 'email' ? '#ecfdf5' : '#ffffff',
+                    color: signInMethod === 'email' ? '#065f46' : '#475569'
+                  }}
+                >
+                  <Mail size={13} /> Email Address
+                </button>
+              </div>
+
+              {signInStep === 'input' && (
+                <form onSubmit={handleSendSignInOtp}>
+                  {signInMethod === 'mobile' ? (
+                    <div style={{ marginBottom: 14 }}>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                        Enter 10-Digit Mobile Number *
+                      </label>
+                      <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: 10, padding: '9px 12px', gap: 8, background: '#ffffff' }}>
+                        <span style={{ fontWeight: 800, color: '#64748b', fontSize: 14 }}>🇮🇳 +91</span>
+                        <input
+                          type="tel"
+                          maxLength={10}
+                          autoFocus
+                          placeholder="9876543210"
+                          value={signInPhone}
+                          onChange={e => setSignInPhone(e.target.value.replace(/\D/g, ''))}
+                          style={{ border: 'none', outline: 'none', fontSize: 15, width: '100%', fontWeight: 600, color: '#0f172a' }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ marginBottom: 14 }}>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                        Enter Registered Email Address *
+                      </label>
+                      <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #cbd5e1', borderRadius: 10, padding: '9px 12px', gap: 8, background: '#ffffff' }}>
+                        <Mail size={16} color="#64748b" />
+                        <input
+                          type="email"
+                          autoFocus
+                          placeholder={signInRole === 'provider' ? 'contact@pestguard.com' : 'manager@bistro.com'}
+                          value={signInEmail}
+                          onChange={e => setSignInEmail(e.target.value)}
+                          style={{ border: 'none', outline: 'none', fontSize: 14, width: '100%', fontWeight: 600, color: '#0f172a' }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {signInError && (
+                    <div style={{ color: '#dc2626', fontSize: 12, marginBottom: 12, background: '#fef2f2', padding: '6px 10px', borderRadius: 6 }}>
+                      {signInError}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="btn primary"
+                    style={{
+                      width: '100%',
+                      padding: '11px',
+                      background: '#059669',
+                      fontSize: 14,
+                      fontWeight: 700,
+                      borderRadius: 10,
+                      justifyContent: 'center'
+                    }}
+                  >
+                    {signInMethod === 'mobile' ? 'Send OTP (Instant SMS) →' : 'Send Verification Code (Email) →'}
+                  </button>
+                </form>
+              )}
+
+              {signInStep === 'otp' && (
+                <form onSubmit={handleVerifySignInOtp}>
+                  <div style={{ textAlign: 'center', marginBottom: 14 }}>
+                    <p style={{ margin: '0 0 4px', fontSize: 13, color: '#64748b' }}>
+                      Verification code sent to <strong>{signInMethod === 'mobile' ? `+91 ${signInPhone}` : signInEmail}</strong>
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setSignInStep('input')}
+                      style={{ background: 'none', border: 'none', color: '#059669', fontSize: 11.5, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
+                    >
+                      Change {signInMethod === 'mobile' ? 'mobile' : 'email'}
+                    </button>
+                  </div>
+
+                  <input
+                    type="text"
+                    maxLength={4}
+                    autoFocus
+                    placeholder="3650"
+                    value={signInOtp}
+                    onChange={e => setSignInOtp(e.target.value)}
+                    style={{
+                      border: '2px solid #059669',
+                      borderRadius: 10,
+                      padding: '10px',
+                      fontSize: 22,
+                      fontWeight: 800,
+                      textAlign: 'center',
+                      letterSpacing: '0.3em',
+                      width: '100%',
+                      boxSizing: 'border-box',
+                      marginBottom: 10
+                    }}
+                  />
+
+                  {/* 1-Click Demo Auto-fill Helper */}
+                  <div style={{ textAlign: 'center', marginBottom: 12 }}>
+                    <button
+                      type="button"
+                      onClick={() => setSignInOtp('3650')}
+                      style={{
+                        background: '#ecfdf5',
+                        border: '1px solid #a7f3d0',
+                        color: '#059669',
+                        borderRadius: 999,
+                        padding: '3px 10px',
+                        fontSize: 11.5,
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ⚡ Fill Demo Code (3650)
+                    </button>
+                  </div>
+
+                  {signInError && (
+                    <div style={{ color: '#dc2626', fontSize: 12, marginBottom: 12, background: '#fef2f2', padding: '6px 10px', borderRadius: 6, textAlign: 'center' }}>
+                      {signInError}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="btn primary"
+                    style={{ width: '100%', padding: '11px', background: '#059669', fontSize: 14, fontWeight: 700, borderRadius: 10, justifyContent: 'center' }}
+                  >
+                    Verify &amp; Continue →
+                  </button>
+                </form>
+              )}
+
+              {signInStep === 'success' && (
+                <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                  <div style={{ width: 50, height: 50, borderRadius: '50%', background: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                    <Check size={28} />
+                  </div>
+                  <h4 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800, color: '#0f172a' }}>
+                    Signed In Successfully!
+                  </h4>
+                  <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>
+                    Welcome back to FoodSafe365!
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
