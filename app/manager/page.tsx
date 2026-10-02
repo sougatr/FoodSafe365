@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, History, Home, ShieldCheck, Wrench, Star, QrCode } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, History, Home, ShieldCheck, Wrench, Star, QrCode, Info } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import {
   FOODSAFE28,
@@ -10,6 +10,8 @@ import {
   CorrectiveAction,
   AuditTrailEvent,
   DinerSafetyRating,
+  CustomerVoiceSummary,
+  calculateCustomerVoiceSummary,
   AppPhase1State,
   PHASE1_STORAGE_KEY,
   isScheduledCheck,
@@ -47,6 +49,17 @@ export default function ManagerPage() {
   const actions: CorrectiveAction[] = data.actions || [];
   const timeline: AuditTrailEvent[] = data.timeline || [];
   const dinerRatings: DinerSafetyRating[] = data.dinerRatings || [];
+
+  const [selectedOutletId, setSelectedOutletId] = useState<string>('all');
+
+  const activeRatings = useMemo(() => {
+    if (selectedOutletId === 'all') return dinerRatings;
+    return dinerRatings.filter(r => r.outletId === selectedOutletId);
+  }, [dinerRatings, selectedOutletId]);
+
+  const customerVoice: CustomerVoiceSummary = useMemo(() => {
+    return calculateCustomerVoiceSummary(activeRatings);
+  }, [activeRatings]);
 
   const scheduled = useMemo(() => FOODSAFE28.filter(isScheduledCheck), []);
   const pending = scheduled.filter(x => checks[x.code]?.reviewStatus === 'pending_manager');
@@ -462,106 +475,331 @@ export default function ManagerPage() {
           </div>
         </section>
 
-        {/* 6. LIVE DINER FOOD-SAFETY RATINGS & REMARKS (TABLETOP QR FEED) */}
+        {/* ========================================================================= */}
+        {/* 6. CUSTOMER VOICE — WHAT ARE YOUR CUSTOMERS TELLING YOU? */}
+        {/* ========================================================================= */}
         <section className="section-block" style={{ marginTop: 36 }}>
-          <div className="section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12 }}>
-            <div>
-              <span className="pill good" style={{ marginBottom: 6 }}>
-                <QrCode size={11} style={{ display: 'inline', marginRight: 4 }} />
-                LIVE DINER SAFETY FEED
-              </span>
-              <h2 style={{ fontSize: 22, margin: '4px 0 2px', color: '#0f172a' }}>
-                Customer Food-Safety Ratings &amp; Remarks
-              </h2>
-              <p className="muted" style={{ margin: 0, fontSize: 13.5 }}>
-                Real-time feedback submitted by diners through your tabletop and menu QR codes.
-              </p>
-            </div>
-            <Link href="/qr/abc-restaurant" className="btn secondary" style={{ fontSize: 12.5, padding: '7px 14px' }}>
-              Test Table QR Flow →
-            </Link>
-          </div>
-
-          {dinerRatings.length === 0 ? (
-            <div className="card empty-state" style={{ marginTop: 14 }}>
-              <Star size={36} style={{ color: '#059669' }} />
+          <div style={{
+            background: '#ffffff',
+            border: '1.5px solid #e2e8f0',
+            borderRadius: 20,
+            padding: '24px 28px',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14, marginBottom: 20 }}>
               <div>
-                <strong>No customer ratings recorded today yet</strong>
-                <p className="muted" style={{ margin: 0, fontSize: 13.5 }}>
-                  When guests scan your FoodSafe365 tabletop QR codes and rate kitchen hygiene, their 5 scores and 100-word remarks appear here instantly.
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 6 }}>
+                  <Star size={12} fill="#059669" color="#059669" /> CUSTOMER VOICE
+                </div>
+                <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: '4px 0 2px' }}>
+                  Customer Food-Safety Feedback
+                </h2>
+                <p className="muted" style={{ margin: 0, fontSize: 14 }}>
+                  What diners observed and experienced through your tabletop &amp; menu QR codes.
                 </p>
               </div>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 14 }}>
-              {dinerRatings.map((rating) => (
-                <div
-                  key={rating.id}
-                  className="card"
+
+              {/* Outlet Selector & Test QR */}
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                <select
+                  value={selectedOutletId}
+                  onChange={e => setSelectedOutletId(e.target.value)}
                   style={{
-                    background: '#ffffff',
-                    border: '1.5px solid #e2e8f0',
-                    borderLeft: `4px solid ${rating.overallScore >= 4 ? '#059669' : rating.overallScore >= 3 ? '#d97706' : '#dc2626'}`,
-                    borderRadius: 14,
-                    padding: '18px 20px'
+                    background: '#f8fafc',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: 8,
+                    padding: '7px 12px',
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    color: '#0f172a',
+                    cursor: 'pointer'
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10, marginBottom: 10 }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>
-                          {rating.tableNumber || 'Table QR'}
-                        </span>
-                        <span style={{ fontSize: 12, color: '#64748b' }}>
-                          · {rating.dinerName || 'Verified Diner'} {rating.dinerMobile ? `(${rating.dinerMobile})` : ''}
-                        </span>
-                        <span className="pill good" style={{ fontSize: 10, padding: '1px 6px' }}>VERIFIED DINE-IN</span>
-                      </div>
-                      <small className="muted" style={{ fontSize: 11 }}>
-                        {new Date(rating.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {new Date(rating.createdAt).toLocaleDateString()}
-                      </small>
-                    </div>
+                  <option value="all">All Outlets ({dinerRatings.length} feedback)</option>
+                  <option value="abc-restaurant">ABC Restaurant</option>
+                  <option value="the-table">The Table (Mumbai)</option>
+                  <option value="the-bombay-canteen">The Bombay Canteen</option>
+                  <option value="bastian-mumbai">Bastian (Mumbai)</option>
+                  <option value="peter-cat">Peter Cat (Kolkata)</option>
+                </select>
+                <Link
+                  href={`/qr/${selectedOutletId === 'all' ? 'abc-restaurant' : selectedOutletId}`}
+                  className="btn secondary"
+                  style={{ fontSize: 12.5, padding: '7px 12px' }}
+                >
+                  <QrCode size={13} style={{ marginRight: 4 }} /> Test Tabletop QR
+                </Link>
+              </div>
+            </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: '#f0fdf4', padding: '4px 10px', borderRadius: 8, border: '1px solid #bbf7d0' }}>
-                      <Star size={16} fill="#059669" color="#059669" />
-                      <strong style={{ fontSize: 16, color: '#047857' }}>{rating.overallScore}★</strong>
-                      <span style={{ fontSize: 11, color: '#065f46' }}>Overall</span>
+            {customerVoice.totalRatings === 0 ? (
+              /* EMPTY STATE */
+              <div className="card empty-state" style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', padding: '36px 20px', textAlign: 'center' }}>
+                <Star size={40} style={{ color: '#94a3b8', margin: '0 auto 12px' }} />
+                <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>
+                  No customer ratings recorded yet
+                </h3>
+                <p className="muted" style={{ maxWidth: 480, margin: '0 auto 16px', fontSize: 13.5 }}>
+                  Share your tabletop QR code with diners to start receiving verified food-safety feedback directly on your manager dashboard.
+                </p>
+                <Link href="/qr/abc-restaurant" className="btn primary" style={{ fontSize: 13, padding: '8px 16px', background: '#059669', display: 'inline-flex', gap: 6, margin: '0 auto' }}>
+                  <QrCode size={14} /> Open Restaurant Tabletop QR Code
+                </Link>
+              </div>
+            ) : (
+              <>
+                {/* OVERALL SCORE & VOLUME SUMMARY */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                  gap: 16,
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 14,
+                  padding: '18px 20px',
+                  marginBottom: 20
+                }}>
+                  <div>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                      Overall Customer Rating
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
+                      <strong style={{ fontSize: 36, fontWeight: 900, color: '#047857' }}>
+                        {customerVoice.overallScore}
+                      </strong>
+                      <span style={{ fontSize: 18, color: '#64748b', fontWeight: 600 }}>/ 5</span>
+                      <div style={{ display: 'inline-flex', color: '#059669', marginLeft: 4 }}>
+                        <Star size={20} fill="#059669" />
+                      </div>
                     </div>
+                    <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#64748b' }}>
+                      Based on genuine diner table observations
+                    </p>
                   </div>
 
-                  {/* 5-Score Breakdown */}
+                  <div>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                      Number of Ratings
+                    </span>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
+                      <strong style={{ fontSize: 36, fontWeight: 900, color: '#0f172a' }}>
+                        {customerVoice.totalRatings}
+                      </strong>
+                      <span style={{ fontSize: 14, color: '#64748b' }}>
+                        {customerVoice.totalRatings === 1 ? 'diner rating' : 'diner ratings'}
+                      </span>
+                    </div>
+                    <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#64748b' }}>
+                      Customer Feedback (Not an audit or certification)
+                    </p>
+                  </div>
+                </div>
+
+                {/* EARLY FEEDBACK NOTICE (IF 1-2 RATINGS) */}
+                {customerVoice.isEarlyFeedback && (
+                  <div style={{
+                    background: '#fffbeb',
+                    border: '1px solid #fde68a',
+                    borderRadius: 12,
+                    padding: '14px 18px',
+                    marginBottom: 22,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12
+                  }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Info size={18} />
+                    </div>
+                    <div style={{ fontSize: 13.5, color: '#92400e', lineHeight: 1.45 }}>
+                      <strong>Early customer feedback — more ratings are needed to identify a meaningful pattern.</strong>
+                      <div style={{ fontSize: 12.5, color: '#b45309', marginTop: 2 }}>
+                        Displaying initial observations. Trends become statistically reliable once 3 or more diners submit feedback.
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* CATEGORY PATTERNS (WHERE SUFFICIENT DATA EXISTS OR SUMMARY) */}
+                <div style={{ marginBottom: 24 }}>
+                  <h4 style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', margin: '0 0 12px' }}>
+                    Customer Experience Categories
+                  </h4>
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-                    gap: 8,
-                    background: '#f8fafc',
-                    padding: '8px 12px',
-                    borderRadius: 8,
-                    marginBottom: 10,
-                    fontSize: 11.5
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: 12
                   }}>
-                    <div>Cleanliness: <strong style={{ color: '#059669' }}>{rating.scores?.cleanliness || 5}★</strong></div>
-                    <div>Staff Hygiene: <strong style={{ color: '#059669' }}>{rating.scores?.staffHygiene || 5}★</strong></div>
-                    <div>Freshness &amp; Temp: <strong style={{ color: '#059669' }}>{rating.scores?.foodFreshness || 5}★</strong></div>
-                    <div>Safe Water: <strong style={{ color: '#059669' }}>{rating.scores?.safeWater || 5}★</strong></div>
-                    <div>Washroom: <strong style={{ color: '#059669' }}>{rating.scores?.washroom || 5}★</strong></div>
+                    {[
+                      customerVoice.cleanliness,
+                      customerVoice.staffHygiene,
+                      customerVoice.foodHandling,
+                      customerVoice.overallConfidence
+                    ].map(cat => (
+                      <div
+                        key={cat.key}
+                        style={{
+                          background: '#f8fafc',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: 12,
+                          padding: '12px 14px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>{cat.label}</span>
+                          <strong style={{ fontSize: 14, color: cat.score >= 4 ? '#047857' : cat.score >= 3 ? '#d97706' : '#dc2626' }}>
+                            {cat.score} / 5
+                          </strong>
+                        </div>
+                        {/* Visual Progress Track */}
+                        <div style={{ height: 6, background: '#e2e8f0', borderRadius: 999, overflow: 'hidden' }}>
+                          <div
+                            style={{
+                              width: `${Math.min(100, Math.max(0, (cat.score / 5) * 100))}%`,
+                              height: '100%',
+                              background: cat.score >= 4 ? '#059669' : cat.score >= 3 ? '#f59e0b' : '#ef4444',
+                              borderRadius: 999
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
                   </div>
-
-                  {/* 100-Word Additional Remarks */}
-                  {rating.feedback ? (
-                    <div style={{ background: '#f1f5f9', borderLeft: '3px solid #059669', padding: '10px 14px', borderRadius: '0 8px 8px 0', fontSize: 13, color: '#1e293b' }}>
-                      <strong style={{ color: '#0f172a' }}>Diner Remarks (Max 100 Words):</strong>
-                      <p style={{ margin: '4px 0 0', lineHeight: 1.5 }}>&ldquo;{rating.feedback}&rdquo;</p>
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>
-                      No additional text remarks provided.
-                    </div>
-                  )}
                 </div>
-              ))}
-            </div>
-          )}
+
+                {/* WHAT ARE YOUR CUSTOMERS TELLING YOU? (AREAS REQUIRING ATTENTION & ACTION CTA) */}
+                {customerVoice.weakerArea && (
+                  <div style={{
+                    background: '#f0fdf4',
+                    border: '1.5px solid #86efac',
+                    borderRadius: 16,
+                    padding: '20px 22px',
+                    marginBottom: 24
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14 }}>
+                      <div style={{ maxWidth: 640 }}>
+                        <span style={{
+                          fontSize: 11,
+                          fontWeight: 800,
+                          color: '#166534',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          display: 'inline-block',
+                          marginBottom: 4
+                        }}>
+                          WHAT ARE YOUR CUSTOMERS TELLING YOU?
+                        </span>
+                        <h3 style={{ fontSize: 18, fontWeight: 900, color: '#0f2922', margin: '2px 0 6px' }}>
+                          Relatively Weaker Feedback: {customerVoice.weakerArea.label} ({customerVoice.weakerArea.score} / 5)
+                        </h3>
+                        <p style={{ margin: '0 0 10px', fontSize: 13.5, color: '#166534', lineHeight: 1.5 }}>
+                          Customer feedback indicates potential areas requiring operational attention in <strong>{customerVoice.weakerArea.label}</strong>. Convert this observation into a verified kitchen check:
+                        </p>
+                        <div style={{ background: '#ffffff', border: '1px solid #bbf7d0', borderRadius: 8, padding: '8px 12px', fontSize: 12.5, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <ClipboardCheck size={16} style={{ color: '#059669', flexShrink: 0 }} />
+                          <span>
+                            <strong>Recommended FoodSafe365 Control:</strong> {customerVoice.weakerArea.checkCode} — {customerVoice.weakerArea.checkTitle}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* ACTION CTA: [START FOOD SAFETY CHECK] */}
+                      <div>
+                        <Link
+                          href={`/checks?code=${customerVoice.weakerArea.checkCode}&from=customer_feedback&feedbackArea=${encodeURIComponent(customerVoice.weakerArea.label)}`}
+                          className="btn primary"
+                          style={{
+                            background: '#059669',
+                            borderColor: '#059669',
+                            color: '#ffffff',
+                            fontSize: 14,
+                            fontWeight: 800,
+                            padding: '12px 20px',
+                            borderRadius: 12,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            boxShadow: '0 4px 14px rgba(5, 150, 105, 0.35)',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          <ClipboardCheck size={18} /> START FOOD SAFETY CHECK <ArrowRight size={16} />
+                        </Link>
+                        <p style={{ fontSize: 11, color: '#15803D', textAlign: 'center', margin: '6px 0 0', fontWeight: 600 }}>
+                          Opens {customerVoice.weakerArea.checkCode} check
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* RECENT CUSTOMER REMARKS & OBSERVATIONS LOG */}
+                <div>
+                  <h4 style={{ fontSize: 13, fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em', margin: '0 0 12px' }}>
+                    Recent Customer Remarks &amp; Observations
+                  </h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {customerVoice.recentObservations.map(rating => (
+                      <div
+                        key={rating.id}
+                        style={{
+                          background: '#ffffff',
+                          border: '1px solid #e2e8f0',
+                          borderLeft: `4px solid ${rating.overallScore >= 4 ? '#059669' : rating.overallScore >= 3 ? '#f59e0b' : '#ef4444'}`,
+                          borderRadius: 12,
+                          padding: '16px 18px'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ fontSize: 13.5, fontWeight: 800, color: '#0f172a' }}>
+                              {rating.tableNumber || 'Table QR'}
+                            </span>
+                            <span style={{ fontSize: 12, color: '#64748b' }}>
+                              · {rating.dinerName || 'Verified Diner'}
+                            </span>
+                            <span className="pill neutral" style={{ fontSize: 10, padding: '1px 6px' }}>
+                              CUSTOMER FEEDBACK
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <strong style={{ fontSize: 14, color: '#047857' }}>
+                              {rating.overallScore}★
+                            </strong>
+                            <Link
+                              href={`/checks?from=customer_feedback&table=${encodeURIComponent(rating.tableNumber || '')}`}
+                              className="btn secondary"
+                              style={{ fontSize: 11.5, padding: '3px 9px' }}
+                            >
+                              Verify with Check →
+                            </Link>
+                          </div>
+                        </div>
+
+                        {/* 5-score breakdown mini tags */}
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 8, fontSize: 11.5, color: '#475569' }}>
+                          <span>Cleanliness: <strong>{rating.scores?.cleanliness || 5}★</strong></span>
+                          <span>Staff: <strong>{rating.scores?.staffHygiene || 5}★</strong></span>
+                          <span>Food: <strong>{rating.scores?.foodFreshness || 5}★</strong></span>
+                          <span>Water: <strong>{rating.scores?.safeWater || 5}★</strong></span>
+                          <span>Washroom: <strong>{rating.scores?.washroom || 5}★</strong></span>
+                        </div>
+
+                        {rating.feedback ? (
+                          <div style={{ background: '#f8fafc', padding: '8px 12px', borderRadius: 8, fontSize: 13, color: '#1e293b', fontStyle: 'italic', borderLeft: '3px solid #cbd5e1' }}>
+                            &ldquo;{rating.feedback}&rdquo;
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: 12, color: '#94a3b8', fontStyle: 'italic' }}>
+                            No additional text remarks provided.
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </section>
 
         {/* AUDIT & RECORDS QUICK LINK */}

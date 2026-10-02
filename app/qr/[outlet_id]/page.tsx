@@ -310,9 +310,9 @@ export default function TableQrPage() {
                 }}>
                   <Check size={28} />
                 </div>
-                <h2 style={{ fontSize: 20, margin: '0 0 8px' }}>Thank You for Verifying Food Safety!</h2>
+                <h2 style={{ fontSize: 20, margin: '0 0 8px' }}>Thank You for Your Feedback!</h2>
                 <p className="muted" style={{ fontSize: 14, maxWidth: 440, margin: '0 auto 20px' }}>
-                  Your {overallRating}★ audit score has been recorded into the live FoodSafe365 transparency index for {displayName}.
+                  Your {overallRating} / 5 Customer Food-Safety Feedback has been saved and shared with {displayName} management.
                 </p>
                 <button
                   type="button"
@@ -326,9 +326,9 @@ export default function TableQrPage() {
             ) : (
               <form onSubmit={handleRatingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <div>
-                  <h2 style={{ fontSize: 18, margin: '0 0 4px' }}>Diner 5-Touchpoint Safety Audit</h2>
+                  <h2 style={{ fontSize: 18, margin: '0 0 4px' }}>Customer Food-Safety Rating</h2>
                   <p className="muted" style={{ fontSize: 13, margin: 0 }}>
-                    Rate what you observe at your table. High diner scores reward clean restaurants.
+                    Share your observation of table cleanliness, staff hygiene, food handling &amp; temperature, and washroom standards.
                   </p>
                 </div>
 

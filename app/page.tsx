@@ -32,6 +32,12 @@ import {
 } from 'lucide-react';
 import GlobalHeader from '@/components/GlobalHeader';
 import { POPULAR_RESTAURANTS, RestaurantItem } from '@/lib/restaurantsData';
+import {
+  PHASE1_STORAGE_KEY,
+  AppPhase1State,
+  DinerSafetyRating,
+  AuditTrailEvent
+} from '@/lib/foodsafety28';
 
 export default function Landing() {
   const router = useRouter();
@@ -70,6 +76,18 @@ export default function Landing() {
   const [wantsFeedback, setWantsFeedback] = useState(false);
   const [dinerEmail, setDinerEmail] = useState('');
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+  const [ratingConfirmation, setRatingConfirmation] = useState<{
+    restaurantName: string;
+    score: string;
+    table: string;
+    wantsFeedback: boolean;
+    email?: string;
+  } | null>(null);
+
+  // QR Code Scanner / Manual Lookup Modal State
+  const [showQrScanModal, setShowQrScanModal] = useState(false);
+  const [inputQrCode, setInputQrCode] = useState('');
+  const [qrSearchError, setQrSearchError] = useState('');
 
   // Passport Quick-Peek Modal State
   const [passportModalRestaurant, setPassportModalRestaurant] = useState<RestaurantItem | null>(null);
@@ -226,6 +244,7 @@ export default function Landing() {
     setRateTableNum(restaurant.tableCode || 'Table 4');
     setWantsFeedback(false);
     setDinerEmail(customerEmail || '');
+    setRatingConfirmation(null);
   }
 
   function handleSubmitRating(e: React.FormEvent) {
@@ -237,23 +256,45 @@ export default function Landing() {
       (rateScores.q1 + rateScores.q2 + rateScores.q3 + rateScores.q4 + rateScores.q5) / 5
     ).toFixed(1);
 
-    const newRating = {
+    const newRating: DinerSafetyRating = {
       id: 'diner_' + Date.now(),
       outletId: ratingModalRestaurant.id,
-      restaurantName: ratingModalRestaurant.name,
-      location: ratingModalRestaurant.location,
+      outletName: ratingModalRestaurant.name,
+      createdAt: new Date().toISOString(),
+      dinerName: customerPhone ? `Verified Diner (+91 ${customerPhone.slice(0, 5)}...)` : 'Verified Diner',
+      dinerMobile: customerPhone ? `+91 ${customerPhone}` : undefined,
       tableNumber: rateTableNum,
-      timestamp: new Date().toISOString(),
-      verifiedDiner: Boolean(customerPhone || customerEmail),
-      dinerPhone: customerPhone ? `+91 ${customerPhone.slice(0, 5)}...` : undefined,
-      dinerEmail: wantsFeedback ? dinerEmail.trim() : customerEmail || undefined,
-      wantsFeedback,
-      scores: rateScores,
-      averageScore: avgScore,
-      remarks: rateRemarks.trim() || 'Food was served hot and tables were spotlessly clean.'
+      scores: {
+        cleanliness: rateScores.q1,
+        staffHygiene: rateScores.q2,
+        foodFreshness: rateScores.q3,
+        safeWater: rateScores.q4,
+        washroom: rateScores.q4
+      },
+      overallScore: parseFloat(avgScore),
+      feedback: rateRemarks.trim() || undefined,
+      verifiedDineIn: true
     };
 
     if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem(PHASE1_STORAGE_KEY);
+        const state: AppPhase1State = raw ? JSON.parse(raw) : {};
+        state.dinerRatings = [newRating, ...(state.dinerRatings || [])];
+
+        const newEvent: AuditTrailEvent = {
+          id: `event-${Date.now()}`,
+          at: new Date().toISOString(),
+          type: 'Customer Food-Safety Feedback Received',
+          detail: `Customer at ${rateTableNum} submitted feedback (${avgScore}/5★) for ${ratingModalRestaurant.name}.`,
+          status: 'customer_feedback'
+        };
+        state.timeline = [newEvent, ...(state.timeline || [])];
+
+        localStorage.setItem(PHASE1_STORAGE_KEY, JSON.stringify(state));
+        window.dispatchEvent(new Event('foodsaf365:update'));
+      } catch {}
+
       const existing = JSON.parse(localStorage.getItem('foodsafe365_diner_ratings') || '[]');
       localStorage.setItem('foodsafe365_diner_ratings', JSON.stringify([newRating, ...existing]));
       window.dispatchEvent(new CustomEvent('foodsafe-rating-submitted'));
@@ -261,10 +302,16 @@ export default function Landing() {
 
     setTimeout(() => {
       setIsSubmittingRating(false);
-      setRatingModalRestaurant(null);
+      setRatingConfirmation({
+        restaurantName: ratingModalRestaurant.name,
+        score: avgScore,
+        table: rateTableNum,
+        wantsFeedback,
+        email: wantsFeedback && dinerEmail.trim() ? dinerEmail.trim() : (customerEmail || undefined)
+      });
       const feedbackMsg = wantsFeedback && dinerEmail.trim() ? ` Direct resolution will be sent to ${dinerEmail.trim()}.` : '';
-      showToast(`⭐ Thank you! Your ${avgScore}★ audit for ${ratingModalRestaurant.name} was delivered to the General Manager.${feedbackMsg} +50 Karma earned!`);
-    }, 600);
+      showToast(`⭐ Thank you! Your ${avgScore}★ Customer Feedback for ${ratingModalRestaurant.name} was delivered to restaurant management.${feedbackMsg}`);
+    }, 400);
   }
 
   function handleAddRestaurant(e: React.FormEvent) {
@@ -336,16 +383,48 @@ export default function Landing() {
     if (!searchQuery.trim()) return;
 
     const q = searchQuery.trim().toLowerCase();
+    const cleanQr = q.replace(/^https?:\/\/[^\/]+\/qr\//, '').replace(/^table\s*qr\s*#?/i, '').trim();
+
     const matched = allRestaurants.find(r => 
+      r.name.toLowerCase() === q ||
+      r.id.toLowerCase() === q ||
+      r.id.toLowerCase() === cleanQr ||
+      r.tableCode.toLowerCase() === q ||
+      r.tableCode.toLowerCase().includes(cleanQr) ||
       r.name.toLowerCase().includes(q) ||
       r.id.toLowerCase().includes(q)
     );
 
     if (matched) {
       handleOpenRating(matched);
+      showToast(`🎯 Found ${matched.name} (${matched.tableCode}). Opening Customer Feedback...`);
     } else {
       setNewRestName(searchQuery.trim());
       setShowAddModal(true);
+    }
+  }
+
+  function handleQrLookup(qrCodeString: string) {
+    const q = qrCodeString.trim().toLowerCase();
+    const cleanQr = q.replace(/^https?:\/\/[^\/]+\/qr\//, '').replace(/^table\s*qr\s*#?/i, '').trim();
+
+    const matched = allRestaurants.find(r => 
+      r.id.toLowerCase() === q ||
+      r.id.toLowerCase() === cleanQr ||
+      r.tableCode.toLowerCase() === q ||
+      r.tableCode.toLowerCase().includes(cleanQr) ||
+      r.name.toLowerCase() === q ||
+      r.name.toLowerCase().includes(q)
+    );
+
+    if (matched) {
+      setShowQrScanModal(false);
+      setInputQrCode('');
+      setQrSearchError('');
+      handleOpenRating(matched);
+      showToast(`🎯 QR Code Verified: ${matched.name} (${matched.tableCode})`);
+    } else {
+      setQrSearchError(`No restaurant matches QR code "${qrCodeString}". Please check the code or search by restaurant name.`);
     }
   }
 
@@ -870,8 +949,13 @@ export default function Landing() {
               >
                 <Star size={16} fill="#ffffff" /> Rate This Restaurant
               </button>
-              <Link
-                href="/qr/abc-restaurant"
+              <button
+                type="button"
+                onClick={() => {
+                  setShowQrScanModal(true);
+                  setQrSearchError('');
+                  setInputQrCode('');
+                }}
                 className="btn secondary"
                 style={{
                   flex: '1 1 200px',
@@ -880,11 +964,12 @@ export default function Landing() {
                   padding: '10px 16px',
                   background: 'rgba(16, 185, 129, 0.1)',
                   borderColor: 'rgba(16, 185, 129, 0.3)',
-                  color: '#059669'
+                  color: '#059669',
+                  cursor: 'pointer'
                 }}
               >
-                <QrCode size={16} style={{ color: '#059669' }} /> Scan Table QR Code
-              </Link>
+                <QrCode size={16} style={{ color: '#059669' }} /> Scan / Enter Table QR
+              </button>
             </div>
           </form>
 
@@ -2034,7 +2119,7 @@ export default function Landing() {
                   borderRadius: 9999,
                   textTransform: 'uppercase'
                 }}>
-                  60-SECOND DINER AUDIT
+                  CUSTOMER FOOD-SAFETY RATING
                 </span>
                 <h3 style={{ margin: '6px 0 2px', fontSize: 21, fontWeight: 900, color: '#ffffff' }}>
                   {ratingModalRestaurant.name}
@@ -2045,7 +2130,10 @@ export default function Landing() {
               </div>
               <button
                 type="button"
-                onClick={() => setRatingModalRestaurant(null)}
+                onClick={() => {
+                  setRatingModalRestaurant(null);
+                  setRatingConfirmation(null);
+                }}
                 style={{
                   background: 'rgba(255,255,255,0.15)',
                   border: 'none',
@@ -2063,208 +2151,471 @@ export default function Landing() {
               </button>
             </div>
 
-            {/* Modal Scrollable Body */}
-            <form onSubmit={handleSubmitRating} style={{ padding: 24, overflowY: 'auto' }}>
-              {/* Table code input */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, background: '#131b26', padding: '10px 14px', borderRadius: 12, border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                <span style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0' }}>Table Number / Seat Code:</span>
-                <input
-                  type="text"
-                  value={rateTableNum}
-                  onChange={e => setRateTableNum(e.target.value)}
-                  style={{
-                    background: '#0F172A',
-                    border: '1px solid rgba(16, 185, 129, 0.35)',
-                    color: '#ffffff',
-                    borderRadius: 6,
-                    padding: '4px 10px',
-                    fontSize: 13,
-                    fontWeight: 700,
-                    width: 100,
-                    textAlign: 'center'
-                  }}
-                />
-              </div>
+            {/* Modal Body: Either Confirmation State or Rating Form */}
+            {ratingConfirmation ? (
+              <div style={{ padding: '36px 28px', textAlign: 'center', overflowY: 'auto' }}>
+                <div style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: '50%',
+                  background: 'rgba(16, 185, 129, 0.2)',
+                  color: '#34d399',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 18px',
+                  border: '1.5px solid rgba(52, 211, 153, 0.4)'
+                }}>
+                  <Check size={36} />
+                </div>
 
-              {/* 5 Food Safety Questions with clickable stars */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
-                {[
-                  { key: 'q1', label: '1. Table & Cutlery Hygiene', desc: 'Are tables, glasses, and utensils clean & sanitized?' },
-                  { key: 'q2', label: '2. Staff Grooming & Uniform', desc: 'Are chefs & service staff wearing clean uniforms and aprons?' },
-                  { key: 'q3', label: '3. Food Freshness & Temp', desc: 'Was hot food served steaming (≥75°C) & cold food fresh?' },
-                  { key: 'q4', label: '4. Washroom & Hand-Wash Sink', desc: 'Is hand soap and clean water available at wash stations?' },
-                  { key: 'q5', label: '5. Overall Food Safety Confidence', desc: 'Would you comfortably recommend this kitchen to family?' },
-                ].map(item => {
-                  const val = (rateScores as any)[item.key];
-                  return (
-                    <div key={item.key} style={{ background: '#131b26', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 12, padding: '12px 14px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                        <strong style={{ fontSize: 13.5, color: '#ffffff' }}>{item.label}</strong>
-                        <div style={{ display: 'flex', gap: 4 }}>
-                          {[1, 2, 3, 4, 5].map(star => (
-                            <button
-                              key={star}
-                              type="button"
-                              onClick={() => setRateScores(prev => ({ ...prev, [item.key]: star }))}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: 2,
-                                color: star <= val ? '#10b981' : 'rgba(255, 255, 255, 0.15)',
-                                fontSize: 18
-                              }}
-                            >
-                              ★
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <p style={{ margin: 0, fontSize: 12, color: '#cbd5e1' }}>{item.desc}</p>
+                <span style={{
+                  fontSize: 11,
+                  fontWeight: 800,
+                  color: '#34d399',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.04em',
+                  background: 'rgba(16, 185, 129, 0.15)',
+                  padding: '4px 12px',
+                  borderRadius: 999
+                }}>
+                  Feedback Delivered to Management
+                </span>
+
+                <h3 style={{ fontSize: 22, fontWeight: 900, color: '#ffffff', margin: '14px 0 6px' }}>
+                  Thank You for Your Feedback!
+                </h3>
+
+                <p style={{ fontSize: 14, color: '#cbd5e1', maxWidth: 440, margin: '0 auto 20px', lineHeight: 1.5 }}>
+                  Your Customer Food-Safety Rating for <strong>{ratingConfirmation.restaurantName}</strong> has been saved and shared with the restaurant&apos;s kitchen management.
+                </p>
+
+                <div style={{
+                  background: '#131b26',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: 14,
+                  padding: '16px 20px',
+                  textAlign: 'left',
+                  maxWidth: 420,
+                  margin: '0 auto 24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 10
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, color: '#94A3B8' }}>Customer Rating:</span>
+                    <strong style={{ fontSize: 16, color: '#34d399' }}>{ratingConfirmation.score} / 5★</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, color: '#94A3B8' }}>Table / Seat:</span>
+                    <strong style={{ fontSize: 13, color: '#ffffff' }}>{ratingConfirmation.table}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 13, color: '#94A3B8' }}>Signal Type:</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#60a5fa' }}>Customer Voice</span>
+                  </div>
+                  {ratingConfirmation.email && (
+                    <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: 8, fontSize: 12, color: '#94A3B8' }}>
+                      ✉️ GM response requested for: <strong style={{ color: '#ffffff' }}>{ratingConfirmation.email}</strong>
                     </div>
-                  );
-                })}
-              </div>
+                  )}
+                </div>
 
-              {/* 100-Word Feedback Remark */}
-              <div style={{ marginBottom: 18 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <label style={{ fontSize: 13, fontWeight: 700, color: '#ffffff' }}>
-                    100-Word Additional Feedback for General Manager:
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRatingModalRestaurant(null);
+                      setRatingConfirmation(null);
+                    }}
+                    className="btn primary"
+                    style={{
+                      background: '#059669',
+                      borderColor: '#059669',
+                      color: '#ffffff',
+                      padding: '10px 24px',
+                      fontSize: 14,
+                      fontWeight: 800,
+                      borderRadius: 10,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Done
+                  </button>
+                  <Link
+                    href={`/qr/${ratingModalRestaurant.id}`}
+                    className="btn secondary"
+                    style={{
+                      color: '#ffffff',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
+                      padding: '10px 20px',
+                      fontSize: 13,
+                      borderRadius: 10,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    View Restaurant Page →
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmitRating} style={{ padding: 24, overflowY: 'auto' }}>
+                {/* Table code input */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, background: '#131b26', padding: '10px 14px', borderRadius: 12, border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0' }}>Table Number / Seat Code:</span>
+                  <input
+                    type="text"
+                    value={rateTableNum}
+                    onChange={e => setRateTableNum(e.target.value)}
+                    style={{
+                      background: '#0F172A',
+                      border: '1px solid rgba(16, 185, 129, 0.35)',
+                      color: '#ffffff',
+                      borderRadius: 6,
+                      padding: '4px 10px',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      width: 100,
+                      textAlign: 'center'
+                    }}
+                  />
+                </div>
+
+                {/* 5 Food Safety Questions with clickable stars */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
+                  {[
+                    { key: 'q1', label: '1. Table & Cutlery Hygiene', desc: 'Are tables, glasses, and utensils clean & sanitized?' },
+                    { key: 'q2', label: '2. Staff Grooming & Uniform', desc: 'Are chefs & service staff wearing clean uniforms and aprons?' },
+                    { key: 'q3', label: '3. Food Freshness & Temp (Food Handling)', desc: 'Was hot food served steaming (≥75°C) & cold food fresh?' },
+                    { key: 'q4', label: '4. Safe Drinking Water & Washrooms', desc: 'Is safe drinking water and clean hand-wash soap available?' },
+                    { key: 'q5', label: '5. Overall Food Safety Confidence', desc: 'Would you comfortably recommend this kitchen to family?' },
+                  ].map(item => {
+                    const val = (rateScores as any)[item.key];
+                    return (
+                      <div key={item.key} style={{ background: '#131b26', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 12, padding: '12px 14px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                          <strong style={{ fontSize: 13.5, color: '#ffffff' }}>{item.label}</strong>
+                          <div style={{ display: 'flex', gap: 4 }}>
+                            {[1, 2, 3, 4, 5].map(star => (
+                              <button
+                                key={star}
+                                type="button"
+                                onClick={() => setRateScores(prev => ({ ...prev, [item.key]: star }))}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: 2,
+                                  color: star <= val ? '#10b981' : 'rgba(255, 255, 255, 0.15)',
+                                  fontSize: 18
+                                }}
+                              >
+                                ★
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <p style={{ margin: 0, fontSize: 12, color: '#cbd5e1' }}>{item.desc}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Optional Feedback Remark */}
+                <div style={{ marginBottom: 18 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <label style={{ fontSize: 13, fontWeight: 700, color: '#ffffff' }}>
+                      Observations / Comments for Management (Optional):
+                    </label>
+                    <span style={{ fontSize: 11.5, color: '#94A3B8' }}>
+                      {rateRemarks.split(/\s+/).filter(Boolean).length} / 100 words
+                    </span>
+                  </div>
+                  <textarea
+                    value={rateRemarks}
+                    onChange={e => setRateRemarks(e.target.value)}
+                    placeholder="e.g. Counters were spotless, soup was served hot. Service staff followed good hand hygiene."
+                    rows={3}
+                    style={{
+                      width: '100%',
+                      background: '#0F172A',
+                      border: '1.5px solid rgba(255, 255, 255, 0.15)',
+                      color: '#ffffff',
+                      borderRadius: 12,
+                      padding: '10px 12px',
+                      fontSize: 13,
+                      boxSizing: 'border-box',
+                      fontFamily: 'inherit'
+                    }}
+                  />
+                </div>
+
+                {/* Request Direct Restaurant Feedback */}
+                <div style={{
+                  background: '#131b26',
+                  border: '1.5px solid rgba(16, 185, 129, 0.25)',
+                  borderRadius: 12,
+                  padding: '12px 14px',
+                  marginBottom: 16
+                }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none' }}>
+                    <input
+                      type="checkbox"
+                      checked={wantsFeedback}
+                      onChange={e => setWantsFeedback(e.target.checked)}
+                      style={{ width: 18, height: 18, accentColor: '#059669', cursor: 'pointer' }}
+                    />
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#ffffff' }}>
+                      Would you like direct response / resolution from the restaurant?
+                    </span>
                   </label>
-                  <span style={{ fontSize: 11.5, color: '#94A3B8' }}>
-                    {rateRemarks.split(/\s+/).filter(Boolean).length} / 100 words
+                  {wantsFeedback && (
+                    <div style={{ marginTop: 10 }}>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#e2e8f0', marginBottom: 4 }}>
+                        Your Email Address for Restaurant response *:
+                      </label>
+                      <input
+                        type="email"
+                        value={dinerEmail}
+                        onChange={e => setDinerEmail(e.target.value)}
+                        placeholder="e.g. yourname@gmail.com"
+                        required={wantsFeedback}
+                        style={{
+                          width: '100%',
+                          padding: '9px 12px',
+                          borderRadius: 8,
+                          border: '1px solid rgba(255, 255, 255, 0.15)',
+                          background: '#0F172A',
+                          color: '#ffffff',
+                          fontSize: 13,
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                      <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 4 }}>
+                        🔒 We share your email exclusively with this restaurant&apos;s management for feedback follow-up.
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Attribution Note */}
+                <div style={{
+                  background: customerPhone ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.06)',
+                  border: customerPhone ? '1px solid rgba(52, 211, 153, 0.35)' : '1px solid rgba(255, 255, 255, 0.12)',
+                  borderRadius: 10,
+                  padding: '8px 12px',
+                  fontSize: 12,
+                  color: customerPhone ? '#34d399' : '#cbd5e1',
+                  marginBottom: 18,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6
+                }}>
+                  <ShieldCheck size={16} />
+                  <span>
+                    {customerPhone ? (
+                      <>Submitting as <strong style={{ color: '#ffffff' }}>+91 {customerPhone}</strong> (Verified Diner)</>
+                    ) : (
+                      <>Submitting as Diner. <button type="button" onClick={() => setShowOtpModal(true)} style={{ background: 'none', border: 'none', color: '#34d399', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>Sign in with OTP</button> to link your feedback.</>
+                    )}
                   </span>
                 </div>
-                <textarea
-                  value={rateRemarks}
-                  onChange={e => setRateRemarks(e.target.value)}
-                  placeholder="e.g. Counters were spotless, hot soup was delivered at perfect temperature. Staff washed hands regularly."
-                  rows={3}
-                  style={{
-                    width: '100%',
-                    background: '#0F172A',
-                    border: '1.5px solid rgba(255, 255, 255, 0.15)',
-                    color: '#ffffff',
-                    borderRadius: 12,
-                    padding: '10px 12px',
-                    fontSize: 13,
-                    boxSizing: 'border-box',
-                    fontFamily: 'inherit'
-                  }}
-                />
-              </div>
 
-              {/* Request Direct Restaurant Feedback */}
-              <div style={{
-                background: '#131b26',
-                border: '1.5px solid rgba(16, 185, 129, 0.25)',
-                borderRadius: 12,
-                padding: '12px 14px',
-                marginBottom: 16
-              }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none' }}>
-                  <input
-                    type="checkbox"
-                    checked={wantsFeedback}
-                    onChange={e => setWantsFeedback(e.target.checked)}
-                    style={{ width: 18, height: 18, accentColor: '#059669', cursor: 'pointer' }}
-                  />
-                  <span style={{ fontSize: 13, fontWeight: 700, color: '#ffffff' }}>
-                    Would you like direct feedback / resolution from the restaurant?
-                  </span>
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  <button
+                    type="submit"
+                    disabled={isSubmittingRating}
+                    className="btn primary"
+                    style={{
+                      flex: '1 1 200px',
+                      justifyContent: 'center',
+                      background: '#059669',
+                      borderColor: '#059669',
+                      fontSize: 14,
+                      fontWeight: 800,
+                      padding: '12px',
+                      borderRadius: 12,
+                      cursor: 'pointer',
+                      boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)'
+                    }}
+                  >
+                    {isSubmittingRating ? 'Submitting Feedback...' : 'Submit Customer Feedback →'}
+                  </button>
+                  <Link
+                    href={`/qr/${ratingModalRestaurant.id}`}
+                    className="btn secondary"
+                    style={{
+                      padding: '12px 16px',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                      color: '#f1f5f9',
+                      background: 'rgba(255, 255, 255, 0.08)',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
+                      borderRadius: 12
+                    }}
+                  >
+                    Open Full Page →
+                  </Link>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* POP-UP: SCAN / ENTER RESTAURANT TABLE QR CODE MODAL */}
+      {/* ========================================================================= */}
+      {showQrScanModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(6px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 16
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: 20,
+            maxWidth: 480,
+            width: '100%',
+            overflow: 'hidden',
+            boxShadow: '0 25px 60px -15px rgba(0,0,0,0.3)',
+            animation: 'scaleIn 0.2s ease-out'
+          }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+              color: '#ffffff',
+              padding: '20px 24px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <QrCode size={20} />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>Scan or Enter Table QR</h3>
+                  <p style={{ margin: '2px 0 0', fontSize: 12, opacity: 0.85 }}>Identify restaurant and rate food safety</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowQrScanModal(false);
+                  setQrSearchError('');
+                  setInputQrCode('');
+                }}
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: 30,
+                  height: 30,
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer'
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div style={{ padding: 24 }}>
+              <form onSubmit={e => { e.preventDefault(); if (inputQrCode.trim()) handleQrLookup(inputQrCode); }}>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#0F172A', marginBottom: 6 }}>
+                  Enter Table QR Code or Restaurant ID:
                 </label>
-                {wantsFeedback && (
-                  <div style={{ marginTop: 10 }}>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#e2e8f0', marginBottom: 4 }}>
-                      Your Email Address for Restaurant GM response *:
-                    </label>
-                    <input
-                      type="email"
-                      value={dinerEmail}
-                      onChange={e => setDinerEmail(e.target.value)}
-                      placeholder="e.g. yourname@gmail.com"
-                      required={wantsFeedback}
-                      style={{
-                        width: '100%',
-                        padding: '9px 12px',
-                        borderRadius: 8,
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        background: '#0F172A',
-                        color: '#ffffff',
-                        fontSize: 13,
-                        boxSizing: 'border-box'
-                      }}
-                    />
-                    <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 4 }}>
-                      🔒 We share your email exclusively with this restaurant&apos;s management for audit resolution.
-                    </div>
-                  </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    type="text"
+                    value={inputQrCode}
+                    onChange={e => { setInputQrCode(e.target.value); setQrSearchError(''); }}
+                    placeholder="e.g. Table QR #02, the-table, or bastian..."
+                    autoFocus
+                    style={{
+                      flex: 1,
+                      padding: '10px 14px',
+                      borderRadius: 10,
+                      border: '1.5px solid #CBD5E1',
+                      fontSize: 14,
+                      outline: 'none',
+                      color: '#0F172A'
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    className="btn primary"
+                    style={{
+                      background: '#059669',
+                      borderColor: '#059669',
+                      padding: '10px 16px',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      borderRadius: 10,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Verify QR →
+                  </button>
+                </div>
+
+                {qrSearchError && (
+                  <p style={{ color: '#DC2626', fontSize: 12.5, margin: '8px 0 0', fontWeight: 600 }}>
+                    {qrSearchError}
+                  </p>
                 )}
-              </div>
+              </form>
 
-              {/* Verified Attribution Note */}
-              <div style={{
-                background: customerPhone ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.06)',
-                border: customerPhone ? '1px solid rgba(52, 211, 153, 0.35)' : '1px solid rgba(255, 255, 255, 0.12)',
-                borderRadius: 10,
-                padding: '8px 12px',
-                fontSize: 12,
-                color: customerPhone ? '#34d399' : '#cbd5e1',
-                marginBottom: 18,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6
-              }}>
-                <ShieldCheck size={16} />
-                <span>
-                  {customerPhone ? (
-                    <>Submitting as <strong style={{ color: '#ffffff' }}>+91 {customerPhone}</strong> (Verified Food-Safety Auditor)</>
-                  ) : (
-                    <>Submitting as Guest. <button type="button" onClick={() => setShowOtpModal(true)} style={{ background: 'none', border: 'none', color: '#34d399', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>Sign in with OTP</button> to earn Karma.</>
-                  )}
+              <div style={{ marginTop: 20 }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Quick Sample QR Codes:
                 </span>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                  {[
+                    { label: 'The Table (Table QR #02)', code: 'the-table' },
+                    { label: 'Bastian (Table QR #08)', code: 'bastian-mumbai' },
+                    { label: 'Peter Cat (Table QR #03)', code: 'peter-cat' },
+                    { label: 'ABC Restaurant (Table QR #04)', code: 'abc-restaurant' }
+                  ].map(item => (
+                    <button
+                      key={item.code}
+                      type="button"
+                      onClick={() => handleQrLookup(item.code)}
+                      style={{
+                        background: '#F1F5F9',
+                        border: '1px solid #E2E8F0',
+                        borderRadius: 8,
+                        padding: '6px 10px',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: '#334155',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      🏷️ {item.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                <button
-                  type="submit"
-                  disabled={isSubmittingRating}
-                  className="btn primary"
-                  style={{
-                    flex: '1 1 200px',
-                    justifyContent: 'center',
-                    background: '#059669',
-                    borderColor: '#059669',
-                    fontSize: 14,
-                    fontWeight: 800,
-                    padding: '12px',
-                    borderRadius: 12,
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)'
-                  }}
-                >
-                  {isSubmittingRating ? 'Delivering to GM...' : '🚀 Submit Verified Audit to GM'}
-                </button>
-                <Link
-                  href={`/qr/${ratingModalRestaurant.id}`}
-                  className="btn secondary"
-                  style={{
-                    padding: '12px 16px',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    textDecoration: 'none',
-                    color: '#f1f5f9',
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    borderRadius: 12
-                  }}
-                >
-                  Open Full Page →
-                </Link>
+              <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #E2E8F0', fontSize: 12, color: '#64748B', textAlign: 'center', lineHeight: 1.4 }}>
+                ℹ️ Scanning the tabletop QR code directly on your mobile device immediately opens the restaurant&apos;s feedback page.
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

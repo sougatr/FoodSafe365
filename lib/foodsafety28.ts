@@ -748,7 +748,7 @@ export type DinerSafetyRating = {
   scores: {
     cleanliness: number;     // 1-5: Dining Area & Table Cleanliness
     staffHygiene: number;    // 1-5: Server & Staff Hygiene
-    foodFreshness: number;   // 1-5: Food Freshness & Temperature
+    foodFreshness: number;   // 1-5: Food Freshness & Temperature (Food Handling)
     safeWater: number;       // 1-5: Safe Drinking Water & Clean Glasses
     washroom: number;        // 1-5: Washroom & Handwashing Station
   };
@@ -756,6 +756,110 @@ export type DinerSafetyRating = {
   feedback?: string;
   verifiedDineIn: boolean;
 };
+
+export type CustomerVoiceCategory = {
+  key: string;
+  label: string;
+  score: number;
+  checkCode: string;
+  checkTitle: string;
+};
+
+export type CustomerVoiceSummary = {
+  totalRatings: number;
+  overallScore: number;
+  isEarlyFeedback: boolean;
+  cleanliness: CustomerVoiceCategory;
+  staffHygiene: CustomerVoiceCategory;
+  foodHandling: CustomerVoiceCategory;
+  overallConfidence: CustomerVoiceCategory;
+  safeWater: CustomerVoiceCategory;
+  weakerArea: CustomerVoiceCategory | null;
+  recentObservations: DinerSafetyRating[];
+};
+
+export function calculateCustomerVoiceSummary(ratings: DinerSafetyRating[] = []): CustomerVoiceSummary {
+  const total = ratings.length;
+  if (total === 0) {
+    return {
+      totalRatings: 0,
+      overallScore: 0,
+      isEarlyFeedback: false,
+      cleanliness: { key: 'cleanliness', label: 'Cleanliness', score: 0, checkCode: 'FS28-01', checkTitle: 'Counters, floors, and prep areas clean & clutter-free' },
+      staffHygiene: { key: 'staffHygiene', label: 'Staff hygiene', score: 0, checkCode: 'FS28-13', checkTitle: 'Staff handwashing, uniforms, hairnets and clean aprons' },
+      foodHandling: { key: 'foodHandling', label: 'Food handling', score: 0, checkCode: 'FS28-19', checkTitle: 'Cool storage & perishable food temperature control (<5°C)' },
+      overallConfidence: { key: 'overallConfidence', label: 'Overall confidence', score: 0, checkCode: 'FS28-01', checkTitle: 'Daily kitchen hygiene standard' },
+      safeWater: { key: 'safeWater', label: 'Safe water & washroom', score: 0, checkCode: 'FS28-06', checkTitle: 'Safe drinking water & sanitized glass supply' },
+      weakerArea: null,
+      recentObservations: []
+    };
+  }
+
+  const sumCleanliness = ratings.reduce((acc, r) => acc + (r.scores?.cleanliness || 5), 0);
+  const sumStaff = ratings.reduce((acc, r) => acc + (r.scores?.staffHygiene || 5), 0);
+  const sumFood = ratings.reduce((acc, r) => acc + (r.scores?.foodFreshness || 5), 0);
+  const sumSafeWater = ratings.reduce((acc, r) => acc + (r.scores?.safeWater || r.scores?.washroom || 5), 0);
+  const sumOverall = ratings.reduce((acc, r) => acc + (r.overallScore || 5), 0);
+
+  const cleanScore = Number((sumCleanliness / total).toFixed(1));
+  const staffScore = Number((sumStaff / total).toFixed(1));
+  const foodScore = Number((sumFood / total).toFixed(1));
+  const safeWaterScore = Number((sumSafeWater / total).toFixed(1));
+  const overallAvg = Number((sumOverall / total).toFixed(1));
+
+  const catClean: CustomerVoiceCategory = {
+    key: 'cleanliness',
+    label: 'Cleanliness',
+    score: cleanScore,
+    checkCode: 'FS28-01',
+    checkTitle: 'Counters, floors, and prep areas clean & clutter-free'
+  };
+  const catStaff: CustomerVoiceCategory = {
+    key: 'staffHygiene',
+    label: 'Staff hygiene',
+    score: staffScore,
+    checkCode: 'FS28-13',
+    checkTitle: 'Staff handwashing, uniforms, hairnets and clean aprons'
+  };
+  const catFood: CustomerVoiceCategory = {
+    key: 'foodHandling',
+    label: 'Food handling',
+    score: foodScore,
+    checkCode: 'FS28-19',
+    checkTitle: 'Cool storage & perishable food temperature control (<5°C)'
+  };
+  const catOverall: CustomerVoiceCategory = {
+    key: 'overallConfidence',
+    label: 'Overall confidence',
+    score: overallAvg,
+    checkCode: 'FS28-01',
+    checkTitle: 'Daily kitchen hygiene standard'
+  };
+  const catWater: CustomerVoiceCategory = {
+    key: 'safeWater',
+    label: 'Safe water & washroom',
+    score: safeWaterScore,
+    checkCode: 'FS28-06',
+    checkTitle: 'Safe drinking water & sanitized glass supply'
+  };
+
+  const actionableCategories = [catClean, catStaff, catFood, catWater];
+  actionableCategories.sort((a, b) => a.score - b.score);
+  const weaker = actionableCategories[0];
+
+  return {
+    totalRatings: total,
+    overallScore: overallAvg,
+    isEarlyFeedback: total <= 2,
+    cleanliness: catClean,
+    staffHygiene: catStaff,
+    foodHandling: catFood,
+    overallConfidence: catOverall,
+    safeWater: catWater,
+    weakerArea: weaker,
+    recentObservations: [...ratings].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 10)
+  };
+}
 
 export type DinerIncidentReport = {
   id: string;

@@ -59,6 +59,7 @@ export default function Checks() {
   const [reheatMethodOK, setReheatMethodOK] = useState<'yes' | 'no' | ''>('');
   const [selectedFormat, setSelectedFormat] = useState<'all' | 'kitchen' | 'bar_brewery' | 'cloud_kitchen' | 'catering'>('all');
   const [selectedShift, setSelectedShift] = useState<OperationalShift | 'all'>('opening');
+  const [feedbackSource, setFeedbackSource] = useState<{ from: string; area: string } | null>(null);
 
   useEffect(() => {
     const refresh = () => setData(loadState());
@@ -70,6 +71,15 @@ export default function Checks() {
     const focus = q.get('focus');
     const fmt = q.get('format');
     const shift = q.get('shift');
+    const fromParam = q.get('from');
+    const feedbackAreaParam = q.get('feedbackArea');
+
+    if (fromParam === 'customer_feedback') {
+      setFeedbackSource({
+        from: 'customer_feedback',
+        area: feedbackAreaParam || 'Customer Observations',
+      });
+    }
 
     if (fmt === 'bar_brewery' || fmt === 'cloud_kitchen' || fmt === 'catering' || fmt === 'kitchen') {
       setSelectedFormat(fmt);
@@ -388,6 +398,48 @@ export default function Checks() {
           >
             <ChevronLeft size={17} /> {t('nav.backChecks')}
           </button>
+
+          {feedbackSource && (
+            <div style={{
+              marginBottom: 20,
+              padding: '14px 18px',
+              borderRadius: 14,
+              background: '#ecfdf5',
+              border: '1.5px solid #10b981',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 14,
+              boxShadow: '0 2px 8px rgba(16, 185, 129, 0.08)'
+            }}>
+              <div style={{
+                width: 34,
+                height: 34,
+                borderRadius: '50%',
+                background: '#047857',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                marginTop: 2
+              }}>
+                <ClipboardCheck size={18} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#047857', background: '#d1fae5', padding: '2px 8px', borderRadius: 999 }}>
+                    CUSTOMER FEEDBACK TRIGGER
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#064e3b' }}>
+                    Area: {feedbackSource.area}
+                  </span>
+                </div>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#047857', lineHeight: 1.45 }}>
+                  This operational check was initiated from customer feedback highlighting concerns in <strong>{feedbackSource.area}</strong>. Conduct this internal check to assess actual kitchen conditions, record findings, and initiate corrective action if necessary.
+                </p>
+              </div>
+            </div>
+          )}
 
           <div className="checks-header">
             <div>
