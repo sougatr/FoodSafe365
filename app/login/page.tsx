@@ -62,7 +62,7 @@ export default function Login() {
       } else if (role === 'client') {
         // Diner login directs to diner portal
         if (typeof window !== 'undefined') {
-          localStorage.setItem('foodsafe365_diner_user', JSON.stringify({ email, name: 'Verified Diner' }));
+          localStorage.setItem('foodsafe365_diner_user', JSON.stringify({ email, name: 'Customer' }));
         }
         router.push('/diner');
       } else if (role === 'provider') {

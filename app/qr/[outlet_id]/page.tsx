@@ -86,7 +86,7 @@ export default function TableQrPage() {
       outletId,
       outletName: `${displayName} — ${displayLocation}`,
       createdAt: new Date().toISOString(),
-      dinerName: dinerName.trim() || 'Verified Diner',
+      dinerName: dinerName.trim() || 'Customer',
       dinerMobile: dinerPhone.trim() || undefined,
       tableNumber,
       scores: {

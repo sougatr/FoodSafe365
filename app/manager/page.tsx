@@ -873,7 +873,7 @@ export default function ManagerPage() {
                               {rating.tableNumber || 'Table QR'}
                             </span>
                             <span style={{ fontSize: 12, color: '#64748b' }}>
-                              · {rating.dinerName || 'Verified Diner'}
+                              · {rating.dinerName || 'Customer'}
                             </span>
                             <span className="pill neutral" style={{ fontSize: 10, padding: '1px 6px' }}>
                               CUSTOMER FEEDBACK

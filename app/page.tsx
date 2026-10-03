@@ -220,7 +220,7 @@ export default function Landing() {
         showToast(`🎉 Welcome Service Partner (${identifier})! Opening Marketplace...`);
         router.push('/providers');
       } else {
-        showToast(`🎉 Welcome Diner (${identifier})! Your ratings are now verified with +50 Karma.`);
+        showToast(`🎉 Welcome Customer (${identifier})! You can now rate restaurants.`);
       }
     }, 1100);
   }
@@ -234,7 +234,7 @@ export default function Landing() {
     }
     setCustomerPhone(null);
     setCustomerEmail(null);
-    showToast('Logged out of diner profile');
+    showToast('Logged out of customer profile');
   }
 
   function handleOpenRating(restaurant: RestaurantItem) {
@@ -261,7 +261,7 @@ export default function Landing() {
       outletId: ratingModalRestaurant.id,
       outletName: ratingModalRestaurant.name,
       createdAt: new Date().toISOString(),
-      dinerName: customerPhone ? `Verified Diner (+91 ${customerPhone.slice(0, 5)}...)` : 'Verified Diner',
+      dinerName: customerPhone ? `Customer (+91 ${customerPhone.slice(0, 5)}...)` : 'Customer',
       dinerMobile: customerPhone ? `+91 ${customerPhone}` : undefined,
       tableNumber: rateTableNum,
       scores: {
@@ -470,15 +470,35 @@ export default function Landing() {
           </div>
 
           <h1 style={{
-            fontSize: 'clamp(34px, 4.8vw, 50px)',
-            lineHeight: 1.15,
+            fontSize: 'clamp(38px, 5.2vw, 56px)',
+            lineHeight: 1.1,
             fontWeight: 900,
             color: '#0F2922',
-            margin: '0 0 12px',
-            letterSpacing: '-0.025em'
+            margin: '0 0 8px',
+            letterSpacing: '-0.03em'
           }}>
-            Welcome to FoodSafe365
+            FoodSafe365
           </h1>
+
+          <p style={{
+            fontSize: 'clamp(20px, 2.4vw, 24px)',
+            fontWeight: 700,
+            color: '#059669',
+            margin: '0 0 6px'
+          }}>
+            Safer food. Every day.
+          </p>
+
+          <p style={{
+            fontSize: 'clamp(15px, 1.8vw, 17px)',
+            color: '#475569',
+            margin: '0 auto 20px',
+            maxWidth: 620,
+            lineHeight: 1.5,
+            fontWeight: 500
+          }}>
+            Share your food-safety experience.
+          </p>
 
           {/* Customer Logged-in / Login Banner */}
           <div style={{ marginBottom: 22 }}>
@@ -495,8 +515,7 @@ export default function Landing() {
                 fontSize: 13,
                 color: '#047857'
               }}>
-                <span>👤 Logged in as <strong style={{ color: '#064e3b' }}>+91 {customerPhone}</strong> (Verified Food-Safety Auditor)</span>
-                <span style={{ background: '#059669', color: '#fff', padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 800 }}>⭐ 50 Karma</span>
+                <span>👤 Logged in as <strong style={{ color: '#064e3b' }}>+91 {customerPhone}</strong> (Customer)</span>
                 <button
                   type="button"
                   onClick={handleLogoutCustomer}
@@ -514,13 +533,13 @@ export default function Landing() {
                 border: '1.5px solid #E2E8F0',
                 boxShadow: '0 2px 10px rgba(0, 0, 0, 0.04)',
                 borderRadius: 9999,
-                padding: '7px 20px',
+                padding: '6px 18px',
                 fontSize: 13,
                 color: '#334155',
                 flexWrap: 'wrap',
                 justifyContent: 'center'
               }}>
-                <span>👋 Eating out or ordering online? Rate food safety &amp; verify clean kitchens:</span>
+                <span>Rate food safety &amp; share feedback with management:</span>
                 <button
                   type="button"
                   onClick={() => {
@@ -533,8 +552,8 @@ export default function Landing() {
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: 9999,
-                    padding: '6px 16px',
-                    fontSize: 12.5,
+                    padding: '5px 14px',
+                    fontSize: 12,
                     fontWeight: 800,
                     cursor: 'pointer',
                     boxShadow: '0 2px 8px rgba(5, 150, 105, 0.25)',
@@ -543,377 +562,28 @@ export default function Landing() {
                     gap: 6
                   }}
                 >
-                  <Smartphone size={13} /> Customer Login with OTP →
+                  <Smartphone size={13} /> Customer Sign In →
                 </button>
               </div>
             )}
           </div>
 
-          <p style={{
-            fontSize: 'clamp(16px, 2vw, 18.5px)',
-            color: '#475569',
-            margin: '0 auto 36px',
-            maxWidth: 760,
-            lineHeight: 1.55,
-            fontWeight: 500
-          }}>
-            The unified food hygiene platform for <strong style={{ color: '#0F2922', fontWeight: 700 }}>Restaurants</strong>, <strong style={{ color: '#0F2922', fontWeight: 700 }}>Customers</strong>, and <strong style={{ color: '#0F2922', fontWeight: 700 }}>Service Providers</strong>. Choose your onboarding to get started:
-          </p>
-
-          {/* 3 ONBOARDINGS GRID (DARK SOPHISTICATED CARDS ON LIGHT CANVAS) */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-            gap: 22,
-            textAlign: 'left'
-          }}>
-            {/* 1. RESTAURANT ONBOARDING (FEATURED / PRIMARY) */}
-            <div className="card onboarding-card-dark" style={{
-              background: '#17231F',
-              border: '1.5px solid rgba(16, 185, 129, 0.3)',
-              borderRadius: 20,
-              padding: '26px 26px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              boxShadow: '0 12px 32px -8px rgba(15, 35, 28, 0.35)',
-              position: 'relative'
-            }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                  <span style={{
-                    fontSize: 11,
-                    fontWeight: 800,
-                    padding: '3px 10px',
-                    borderRadius: 9999,
-                    background: 'rgba(16, 185, 129, 0.18)',
-                    color: '#34d399',
-                    border: '1px solid rgba(52, 211, 153, 0.35)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em'
-                  }}>
-                    RESTAURANT ONBOARDING
-                  </span>
-                  <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(16, 185, 129, 0.18)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <UtensilsCrossed size={22} />
-                  </div>
-                </div>
-
-                <h3 style={{ fontSize: 21, fontWeight: 900, color: '#ffffff', margin: '0 0 8px' }}>
-                  For Restaurants &amp; Kitchens
-                </h3>
-                <p style={{ fontSize: 13.5, color: '#cbd5e1', lineHeight: 1.55, margin: '0 0 18px' }}>
-                  Set up your outlet in 30 seconds. Run 2–3 min daily shift checks, avoid FDA/FSSAI closures, analyze AI trends, and generate your verified FoodSafe365 Passport.
-                </p>
-
-                <ul style={{ margin: '0 0 22px', paddingLeft: 18, fontSize: 13, color: '#e2e8f0', lineHeight: 1.65 }}>
-                  <li>2–3 min time-phased daily kitchen checklists</li>
-                  <li>Real-time cold-chain &amp; danger zone temperature tracking</li>
-                  <li>Print tabletop &amp; menu QR FoodSafe365 Passport</li>
-                </ul>
-              </div>
-
-              <div>
-                <Link
-                  href="/onboarding"
-                  className="btn primary"
-                  style={{
-                    width: '100%',
-                    justifyContent: 'center',
-                    fontSize: 14,
-                    padding: '12px 16px',
-                    background: '#059669',
-                    borderColor: '#059669',
-                    fontWeight: 700,
-                    textDecoration: 'none',
-                    borderRadius: 12,
-                    boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)'
-                  }}
-                >
-                  Onboard Your Restaurant (Start Free) <ArrowRight size={16} />
-                </Link>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 7, textAlign: 'center', marginTop: 12 }}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLoginRole('restaurant');
-                      setShowOtpModal(true);
-                      setOtpStep('phone');
-                      setOtpError('');
-                    }}
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.08)',
-                      border: '1px solid rgba(255, 255, 255, 0.15)',
-                      color: '#f1f5f9',
-                      padding: '8px 12px',
-                      borderRadius: 10,
-                      fontSize: 12.5,
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 6,
-                      transition: 'all 0.15s ease'
-                    }}
-                  >
-                    <KeyRound size={13} /> Restaurant Sign In (Mobile or Email) →
-                  </button>
-                  <Link href="/home" style={{ fontSize: 12, color: '#34d399', fontWeight: 600, textDecoration: 'none' }}>
-                    Already onboarded? Open Kitchen Operations →
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* 2. CUSTOMER & DINER ONBOARDING (POLISHED STRATEGIC HUB) */}
-            <div className="card onboarding-card-dark diner-card" style={{
-              background: '#182822',
-              border: '1.5px solid rgba(16, 185, 129, 0.35)',
-              borderRadius: 20,
-              padding: '26px 26px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              boxShadow: '0 12px 32px -8px rgba(18, 40, 34, 0.4)'
-            }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                  <span style={{
-                    fontSize: 11,
-                    fontWeight: 800,
-                    padding: '3px 10px',
-                    borderRadius: 9999,
-                    background: 'rgba(16, 185, 129, 0.18)',
-                    color: '#34d399',
-                    border: '1px solid rgba(52, 211, 153, 0.35)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em'
-                  }}>
-                    FOR CUSTOMERS &amp; DINERS
-                  </span>
-                  <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(16, 185, 129, 0.18)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Users size={22} />
-                  </div>
-                </div>
-
-                <h3 style={{ fontSize: 21, fontWeight: 900, color: '#ffffff', margin: '0 0 8px' }}>
-                  For Customers &amp; Diners
-                </h3>
-                <p style={{ fontSize: 13.5, color: '#cbd5e1', lineHeight: 1.55, margin: '0 0 18px' }}>
-                  Scan restaurant or table QR codes, view verified food-safety status, rate kitchens in 60 seconds, and share direct feedback with management.
-                </p>
-
-                <ul style={{ margin: '0 0 22px', paddingLeft: 18, fontSize: 13, color: '#e2e8f0', lineHeight: 1.65 }}>
-                  <li>Scan tabletop QR codes &amp; view Food Safety Passport</li>
-                  <li>5 pure food-safety check indicators + 100-word feedback</li>
-                  <li>Latest checks completed &amp; verified kitchen audit logs</li>
-                </ul>
-              </div>
-
-              <div>
-                {customerPhone ? (
-                  <div style={{
-                    background: 'rgba(16, 185, 129, 0.2)',
-                    border: '1.5px solid rgba(52, 211, 153, 0.4)',
-                    borderRadius: 12,
-                    padding: '10px 14px',
-                    marginBottom: 10,
-                    textAlign: 'center'
-                  }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                      <CheckCircle2 size={16} color="#34d399" /> Verified Diner: +91 {customerPhone}
-                    </div>
-                    <div style={{ fontSize: 11.5, color: '#a7f3d0', marginTop: 2 }}>
-                      ⭐ 50 FoodSafe Karma Active · Ratings Stamped as Verified
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLoginRole('diner');
-                      setShowOtpModal(true);
-                      setOtpStep('phone');
-                      setOtpError('');
-                    }}
-                    className="btn primary"
-                    style={{
-                      width: '100%',
-                      justifyContent: 'center',
-                      fontSize: 14,
-                      padding: '12px 16px',
-                      fontWeight: 700,
-                      background: '#059669',
-                      border: 'none',
-                      color: '#ffffff',
-                      boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)',
-                      cursor: 'pointer',
-                      marginBottom: 10,
-                      borderRadius: 12,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 6
-                    }}
-                  >
-                    <Smartphone size={16} /> Customer Sign In (Mobile or Email) →
-                  </button>
-                )}
-
-                <a
-                  href="#diner-section"
-                  className="btn secondary"
-                  style={{
-                    width: '100%',
-                    justifyContent: 'center',
-                    fontSize: 13.5,
-                    padding: '10px 16px',
-                    fontWeight: 700,
-                    textDecoration: 'none',
-                    color: '#f1f5f9',
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    border: '1px solid rgba(255, 255, 255, 0.16)',
-                    borderRadius: 12
-                  }}
-                >
-                  Rate a Restaurant / Find Safe Kitchens ↓
-                </a>
-                <div style={{ textAlign: 'center', marginTop: 10 }}>
-                  <Link href="/qr/the-table" style={{ fontSize: 12, color: '#34d399', fontWeight: 600, textDecoration: 'none' }}>
-                    Scan Tabletop QR Code Directly →
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* 3. SERVICE PROVIDER ONBOARDING (B2B MARKETPLACE) */}
-            <div className="card onboarding-card-dark" style={{
-              background: '#17231F',
-              border: '1.5px solid rgba(52, 211, 153, 0.3)',
-              borderRadius: 20,
-              padding: '26px 26px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              boxShadow: '0 12px 32px -8px rgba(15, 35, 28, 0.35)'
-            }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                  <span style={{
-                    fontSize: 11,
-                    fontWeight: 800,
-                    padding: '3px 10px',
-                    borderRadius: 9999,
-                    background: 'rgba(52, 211, 153, 0.16)',
-                    color: '#6ee7b7',
-                    border: '1px solid rgba(52, 211, 153, 0.3)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em'
-                  }}>
-                    ACCREDITED B2B PARTNERS
-                  </span>
-                  <div style={{ width: 42, height: 42, borderRadius: 12, background: 'rgba(16, 185, 129, 0.18)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Wrench size={22} />
-                  </div>
-                </div>
-
-                <h3 style={{ fontSize: 21, fontWeight: 900, color: '#ffffff', margin: '0 0 8px' }}>
-                  For Service Providers
-                </h3>
-                <p style={{ fontSize: 13.5, color: '#cbd5e1', lineHeight: 1.55, margin: '0 0 18px' }}>
-                  Connect with commercial restaurants needing Pest Control, Food/Water Testing Labs, HVAC refrigeration, Staff Medical Examinations, and Sanitation.
-                </p>
-
-                <ul style={{ margin: '0 0 22px', paddingLeft: 18, fontSize: 13, color: '#e2e8f0', lineHeight: 1.65 }}>
-                  <li>Direct B2B marketplace connecting with verified kitchens</li>
-                  <li>14 compliance &amp; NABL testing lab categories</li>
-                  <li>Receive real-time service quotation requests</li>
-                </ul>
-              </div>
-
-              <div>
-                <Link
-                  href="/providers"
-                  className="btn primary"
-                  style={{
-                    width: '100%',
-                    justifyContent: 'center',
-                    fontSize: 14,
-                    padding: '12px 16px',
-                    fontWeight: 700,
-                    textDecoration: 'none',
-                    color: '#ffffff',
-                    background: '#059669',
-                    border: 'none',
-                    borderRadius: 12,
-                    boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)',
-                    marginBottom: 8
-                  }}
-                >
-                  Join as Service Provider →
-                </Link>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 7, textAlign: 'center', marginTop: 8 }}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLoginRole('provider');
-                      setShowOtpModal(true);
-                      setOtpStep('phone');
-                      setOtpError('');
-                    }}
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.08)',
-                      border: '1px solid rgba(255, 255, 255, 0.15)',
-                      color: '#f1f5f9',
-                      padding: '8px 12px',
-                      borderRadius: 10,
-                      fontSize: 12.5,
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 6
-                    }}
-                  >
-                    <KeyRound size={13} /> Provider Sign In (Mobile or Email) →
-                  </button>
-                  <Link href="/providers" style={{ fontSize: 12, color: '#34d399', fontWeight: 600, textDecoration: 'none' }}>
-                    Browse All 14 Provider Categories →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* DINER RATING & DISCOVERY LAYER (For Customers & General Public) */}
-      <section id="diner-section" className="container" style={{ maxWidth: 1180, paddingTop: 40, paddingBottom: 48 }}>
-        <div style={{ textAlign: 'center', maxWidth: 840, margin: '0 auto 28px' }}>
-          <h2 style={{ fontSize: 28, fontWeight: 900, color: '#0F2922', margin: '0 0 8px' }}>
-            Rate Any Restaurant on Hygiene &amp; Food Safety
-          </h2>
-          <p style={{ margin: '0 0 20px', fontSize: 15, lineHeight: 1.5, color: '#475569' }}>
-            Search a restaurant or scan its table QR code to submit a 60-second verified food safety audit:
-          </p>
-
-          {/* Quick Search & Rating Gateway Form */}
+          {/* PRIMARY CUSTOMER SEARCH & QR CODE GATEWAY */}
           <form onSubmit={handleSearchSubmit} style={{
-            maxWidth: 640,
+            maxWidth: 680,
             margin: '0 auto',
             background: '#ffffff',
-            borderRadius: 16,
+            borderRadius: 18,
             padding: 8,
             border: '1.5px solid #CBD5E1',
-            boxShadow: '0 8px 30px rgba(0, 0, 0, 0.06)',
+            boxShadow: '0 12px 36px rgba(0, 0, 0, 0.08)',
             display: 'flex',
             flexDirection: 'column',
             gap: 8,
             textAlign: 'left'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', padding: '4px 12px', gap: 10 }}>
-              <Search size={20} style={{ color: '#059669', flexShrink: 0 }} />
+            <div style={{ display: 'flex', alignItems: 'center', padding: '6px 14px', gap: 10 }}>
+              <Search size={22} style={{ color: '#059669', flexShrink: 0 }} />
               <input
                 type="text"
                 placeholder="Search restaurant (e.g. Peter Cat, Paradise, The Table)..."
@@ -922,7 +592,7 @@ export default function Landing() {
                 style={{
                   border: 'none',
                   outline: 'none',
-                  fontSize: 15,
+                  fontSize: 15.5,
                   width: '100%',
                   color: '#0F172A',
                   background: 'transparent'
@@ -952,11 +622,13 @@ export default function Landing() {
                 style={{
                   flex: '1 1 200px',
                   justifyContent: 'center',
-                  fontSize: 13.5,
-                  padding: '10px 16px',
+                  fontSize: 14,
+                  padding: '12px 18px',
                   background: '#059669',
                   borderColor: '#059669',
                   color: '#ffffff',
+                  fontWeight: 700,
+                  borderRadius: 12,
                   boxShadow: '0 2px 8px rgba(5, 150, 105, 0.25)'
                 }}
               >
@@ -973,41 +645,192 @@ export default function Landing() {
                 style={{
                   flex: '1 1 200px',
                   justifyContent: 'center',
-                  fontSize: 13.5,
-                  padding: '10px 16px',
+                  fontSize: 14,
+                  padding: '12px 18px',
                   background: 'rgba(16, 185, 129, 0.1)',
                   borderColor: 'rgba(16, 185, 129, 0.3)',
                   color: '#059669',
+                  fontWeight: 700,
+                  borderRadius: 12,
                   cursor: 'pointer'
                 }}
               >
-                <QrCode size={16} style={{ color: '#059669' }} /> Scan / Enter Table QR
+                <QrCode size={16} style={{ color: '#059669' }} /> Scan / Enter Restaurant QR
               </button>
             </div>
           </form>
 
-          {/* 3 Quick Benefit Metrics */}
+          {/* Customer Benefit Metrics */}
           <div style={{
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
             gap: 22,
-            marginTop: 18,
+            marginTop: 16,
             flexWrap: 'wrap',
             fontSize: 13,
             color: '#475569'
           }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <CheckCircle2 size={15} style={{ color: '#059669' }} /> 5 Pure Food Safety Questions
+              <CheckCircle2 size={15} style={{ color: '#059669' }} /> 5 Customer Food-Safety Questions
             </span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <CheckCircle2 size={15} style={{ color: '#059669' }} /> 100-Word Additional Remarks
+              <CheckCircle2 size={15} style={{ color: '#059669' }} /> Structured Observations &amp; Remarks
             </span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <CheckCircle2 size={15} style={{ color: '#059669' }} /> Direct to General Manager
+              <CheckCircle2 size={15} style={{ color: '#059669' }} /> Direct to Restaurant Management
             </span>
           </div>
+
+          {/* SECONDARY ENTRY: RESTAURANT & SERVICE PROVIDER */}
+          <div style={{
+            marginTop: 36,
+            padding: '18px 22px',
+            background: '#ffffff',
+            borderRadius: 16,
+            border: '1px solid #E2E8F0',
+            maxWidth: 720,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
+          }}>
+            <div style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: '#64748B',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+              marginBottom: 12,
+              textAlign: 'center'
+            }}>
+              Are you a restaurant or food-service professional?
+            </div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+              gap: 12,
+              textAlign: 'left'
+            }}>
+              {/* Restaurant Entry */}
+              <div style={{
+                background: '#F8FAFC',
+                border: '1px solid #E2E8F0',
+                borderRadius: 12,
+                padding: '14px 16px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: 10
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <UtensilsCrossed size={16} color="#059669" />
+                    <strong style={{ fontSize: 14, color: '#0F2922' }}>Restaurant / Kitchen</strong>
+                  </div>
+                  <p style={{ margin: 0, fontSize: 12, color: '#64748B', lineHeight: 1.4 }}>
+                    Kitchen shift checks, customer feedback dashboard &amp; corrective actions.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <Link
+                    href="/onboarding"
+                    style={{
+                      flex: 1,
+                      textAlign: 'center',
+                      background: '#0F2922',
+                      color: '#ffffff',
+                      padding: '7px 10px',
+                      borderRadius: 8,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    Onboarding →
+                  </Link>
+                  <Link
+                    href="/home"
+                    style={{
+                      flex: 1,
+                      textAlign: 'center',
+                      background: '#ffffff',
+                      color: '#0F2922',
+                      border: '1px solid #CBD5E1',
+                      padding: '7px 10px',
+                      borderRadius: 8,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    Kitchen Ops →
+                  </Link>
+                </div>
+              </div>
+
+              {/* Service Provider Entry */}
+              <div style={{
+                background: '#F8FAFC',
+                border: '1px solid #E2E8F0',
+                borderRadius: 12,
+                padding: '14px 16px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: 10
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <Wrench size={16} color="#0284C7" />
+                    <strong style={{ fontSize: 14, color: '#0F2922' }}>Service Provider</strong>
+                  </div>
+                  <p style={{ margin: 0, fontSize: 12, color: '#64748B', lineHeight: 1.4 }}>
+                    Pest control, water/food testing labs, refrigeration &amp; sanitation.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <Link
+                    href="/onboarding/provider"
+                    style={{
+                      flex: 1,
+                      textAlign: 'center',
+                      background: '#0369A1',
+                      color: '#ffffff',
+                      padding: '7px 10px',
+                      borderRadius: 8,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    Onboarding →
+                  </Link>
+                  <Link
+                    href="/providers/dashboard"
+                    style={{
+                      flex: 1,
+                      textAlign: 'center',
+                      background: '#ffffff',
+                      color: '#0369A1',
+                      border: '1px solid #CBD5E1',
+                      padding: '7px 10px',
+                      borderRadius: 8,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    Dashboard →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
+
+      {/* DINER RATING & DISCOVERY LAYER (For Customers & General Public) */}
+      <section id="diner-section" className="container" style={{ maxWidth: 1180, paddingTop: 32, paddingBottom: 48 }}>
 
         {/* Discovery Filter Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 14, marginBottom: 20 }}>
@@ -1019,7 +842,7 @@ export default function Landing() {
               </h3>
             </div>
             <p style={{ margin: 0, fontSize: 13.5, color: '#64748B' }}>
-              Discovered by diners. Verified daily through digital kitchen checklists and transparent hygiene audits.
+              Discovered by customers. Daily kitchen checklists and customer feedback.
             </p>
           </div>
 
@@ -1125,13 +948,13 @@ export default function Landing() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, fontSize: 13, color: '#475569', flexWrap: 'wrap', gap: 8 }}>
           {isSearchActive ? (
             <span>
-              Showing <strong style={{ color: '#0F2922' }}>{filteredRestaurants.length}</strong> matching verified restaurant{filteredRestaurants.length === 1 ? '' : 's'}
+              Showing <strong style={{ color: '#0F2922' }}>{filteredRestaurants.length}</strong> matching restaurant{filteredRestaurants.length === 1 ? '' : 's'}
               {searchQuery && <> for &ldquo;<strong style={{ color: '#0F2922' }}>{searchQuery}</strong>&rdquo;</>}
               {selectedCity !== 'all' && <> in <strong style={{ color: '#0F2922' }}>{selectedCity.toUpperCase()}</strong></>}
             </span>
           ) : (
             <span style={{ color: '#475569', fontSize: 13.5 }}>
-              💡 Type a restaurant name or choose a city above to inspect its verified FoodSafe365 badge:
+              💡 Type a restaurant name or choose a city above to share your food-safety experience:
             </span>
           )}
 
@@ -1197,10 +1020,10 @@ export default function Landing() {
           }}>
             <div style={{ fontSize: 36, marginBottom: 8 }}>🔍</div>
             <h3 style={{ fontSize: 21, fontWeight: 900, color: '#0F2922', margin: '0 0 6px' }}>
-              Search Any Restaurant to Reveal Its Food-Safety Badge
+              Search Any Restaurant to Share Feedback
             </h3>
             <p style={{ fontSize: 14, color: '#475569', maxWidth: 560, margin: '0 auto 20px', lineHeight: 1.5 }}>
-              Type any dining brand or delivery kitchen name above. Verified cold-storage logs, medical clearances, and live table QR ratings will appear instantly.
+              Type any dining brand or delivery kitchen name above. Kitchen logs, hygiene signals, and customer ratings will appear.
             </p>
 
             {/* Quick Trending Dining & Search Chips */}
@@ -1295,7 +1118,7 @@ export default function Landing() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                     <div>
                       <span className="pill good" style={{ fontSize: 10.5, padding: '2px 8px', marginBottom: 6, display: 'inline-flex', alignItems: 'center', gap: 4, background: 'rgba(16, 185, 129, 0.1)', color: '#059669', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-                        <QrCode size={11} /> TABLETOP AUDIT VERIFIED
+                        <QrCode size={11} /> CUSTOMER FEEDBACK ENABLED
                       </span>
                       <h4 style={{ fontSize: 20, fontWeight: 800, margin: '4px 0 2px', color: '#0F172A' }}>
                         {r.name}
@@ -1316,10 +1139,10 @@ export default function Landing() {
                         flexShrink: 0,
                         cursor: 'pointer'
                       }}
-                      title="Click to view full verified kitchen passport"
+                      title="Click to view food safety record"
                     >
                       <span style={{ fontSize: 13, fontWeight: 900, color: '#059669', display: 'block', lineHeight: 1.1 }}>FOODSAFE</span>
-                      <span style={{ fontSize: 9, fontWeight: 700, color: '#047857', textTransform: 'uppercase' }}>TODAY VERIFIED 🛡️</span>
+                      <span style={{ fontSize: 9, fontWeight: 700, color: '#047857', textTransform: 'uppercase' }}>RECORD 🛡️</span>
                     </button>
                   </div>
 
@@ -1375,7 +1198,7 @@ export default function Landing() {
                       <span>★</span>
                       <span>{r.score}</span>
                     </div>
-                    <span>({r.reviews} verified diner audits)</span>
+                    <span>({r.reviews} customer ratings)</span>
                   </div>
                 </div>
 
@@ -1404,7 +1227,7 @@ export default function Landing() {
                       cursor: 'pointer'
                     }}
                   >
-                    <Star size={14} fill="#ffffff" /> Rate Safety (60s)
+                    <Star size={14} fill="#ffffff" /> Rate Restaurant
                   </button>
                   <button
                     type="button"
@@ -1422,7 +1245,7 @@ export default function Landing() {
                       cursor: 'pointer'
                     }}
                   >
-                    <ShieldCheck size={14} /> View Passport
+                    <ShieldCheck size={14} /> View Record
                   </button>
                 </div>
               </div>
@@ -1445,7 +1268,7 @@ export default function Landing() {
                 </h4>
                 <p style={{ fontSize: 14, color: '#475569', maxWidth: 540, margin: '0 auto 20px', lineHeight: 1.5 }}>
                   {searchQuery
-                    ? `Add "${searchQuery}" to FoodSafe365 right now. Its verified badge will be created immediately and you can submit a 60-second food safety audit!`
+                    ? `Add "${searchQuery}" to FoodSafe365 right now. Its profile will be created immediately and you can submit your customer food-safety rating!`
                     : 'Try selecting "All Cities" or "All Formats" above, or search for any restaurant by name.'}
                 </p>
                 {searchQuery && (
@@ -1741,18 +1564,18 @@ export default function Landing() {
               </button>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.25)', padding: '3px 10px', borderRadius: 9999, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', marginBottom: 8 }}>
                 {loginRole === 'restaurant' && <><UtensilsCrossed size={12} /> RESTAURANT OWNER PORTAL</>}
-                {loginRole === 'provider' && <><Wrench size={12} /> ACCREDITED PROVIDER PORTAL</>}
-                {loginRole === 'diner' && <><Smartphone size={12} /> DINER / PUBLIC ACCESS</>}
+                {loginRole === 'provider' && <><Wrench size={12} /> SERVICE PROVIDER PORTAL</>}
+                {loginRole === 'diner' && <><Smartphone size={12} /> CUSTOMER ACCESS</>}
               </div>
               <h3 style={{ margin: 0, fontSize: 21, fontWeight: 900 }}>
-                {loginRole === 'restaurant' ? 'Restaurant Sign In' : loginRole === 'provider' ? 'Service Provider Sign In' : 'Customer & Diner Sign In'}
+                {loginRole === 'restaurant' ? 'Restaurant Sign In' : loginRole === 'provider' ? 'Service Provider Sign In' : 'Customer Sign In'}
               </h3>
               <p style={{ margin: '4px 0 0', fontSize: 13, opacity: 0.9 }}>
                 {loginRole === 'restaurant'
-                  ? 'Access kitchen checklist operations, staff logs, and food safety passport.'
+                  ? 'Access kitchen checklist operations, staff logs, and customer feedback.'
                   : loginRole === 'provider'
                   ? 'Manage incoming service quotation requests and lab diagnostic dispatches.'
-                  : 'Submit verified restaurant hygiene ratings and earn FoodSafe Karma.'}
+                  : 'Submit customer food-safety ratings and share feedback with restaurants.'}
               </p>
             </div>
 
@@ -2073,7 +1896,7 @@ export default function Landing() {
                       ? 'Opening Restaurant Kitchen Operations...'
                       : loginRole === 'provider'
                       ? 'Opening Service Provider Network...'
-                      : 'Welcome to FoodSafe365! Your diner ratings will be stamped with the Verified Diner Audit seal.'}
+                      : 'Welcome to FoodSafe365! You can now share customer food-safety feedback.'}
                   </p>
                 </div>
               )}
@@ -2428,9 +2251,9 @@ export default function Landing() {
                   <ShieldCheck size={16} />
                   <span>
                     {customerPhone ? (
-                      <>Submitting as <strong style={{ color: '#ffffff' }}>+91 {customerPhone}</strong> (Verified Diner)</>
+                      <>Submitting as <strong style={{ color: '#ffffff' }}>+91 {customerPhone}</strong> (Customer)</>
                     ) : (
-                      <>Submitting as Diner. <button type="button" onClick={() => setShowOtpModal(true)} style={{ background: 'none', border: 'none', color: '#34d399', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>Sign in with OTP</button> to link your feedback.</>
+                      <>Submitting as Customer. <button type="button" onClick={() => setShowOtpModal(true)} style={{ background: 'none', border: 'none', color: '#34d399', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}>Sign in with OTP</button> to link your feedback.</>
                     )}
                   </span>
                 </div>
@@ -2680,7 +2503,7 @@ export default function Landing() {
                   borderRadius: 9999,
                   textTransform: 'uppercase'
                 }}>
-                  VERIFIED FOOD-SAFETY PASSPORT
+                  FOODSAFE365 RECORD
                 </span>
                 <h3 style={{ margin: '6px 0 2px', fontSize: 22, fontWeight: 900, color: '#ffffff' }}>
                   {passportModalRestaurant.name}
@@ -2723,7 +2546,7 @@ export default function Landing() {
                   fontWeight: 800,
                   fontSize: 14
                 }}>
-                  <ShieldCheck size={20} /> PASSPORT STATUS: ACTIVE &amp; VERIFIED TODAY
+                  <ShieldCheck size={20} /> RECORD STATUS: ACTIVE FOOD-SAFETY PROFILE
                 </div>
               </div>
 
@@ -2748,9 +2571,9 @@ export default function Landing() {
                 </div>
 
                 <div style={{ background: '#131b26', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 12, padding: '12px 14px' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase' }}>Diner Score</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase' }}>Customer Score</div>
                   <div style={{ fontSize: 16, fontWeight: 900, color: '#10b981', marginTop: 2 }}>★ {passportModalRestaurant.score} / 5.0</div>
-                  <div style={{ fontSize: 11, color: '#cbd5e1' }}>{passportModalRestaurant.reviews} verified audits</div>
+                  <div style={{ fontSize: 11, color: '#cbd5e1' }}>{passportModalRestaurant.reviews} customer ratings</div>
                 </div>
               </div>
 
@@ -2769,9 +2592,9 @@ export default function Landing() {
                   <QrCode size={26} color="#34d399" />
                 </div>
                 <div>
-                  <strong style={{ fontSize: 13, color: '#ffffff' }}>Tabletop QR Passport Displayed in Dining Room</strong>
+                  <strong style={{ fontSize: 13, color: '#ffffff' }}>Tabletop QR Code Displayed in Dining Room</strong>
                   <p style={{ margin: 0, fontSize: 12, color: '#cbd5e1' }}>
-                    Guests can scan the acrylic stand on {passportModalRestaurant.tableCode} to verify today&apos;s inspection live.
+                    Guests can scan the acrylic stand on {passportModalRestaurant.tableCode} to share direct food-safety feedback.
                   </p>
                 </div>
               </div>
@@ -2799,7 +2622,7 @@ export default function Landing() {
                     boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)'
                   }}
                 >
-                  ⭐ Rate This Restaurant (60s)
+                  ⭐ Rate This Restaurant
                 </button>
                 <button
                   type="button"
@@ -2893,7 +2716,7 @@ export default function Landing() {
             {/* Form */}
             <form onSubmit={handleAddRestaurant} style={{ padding: '24px' }}>
               <p style={{ fontSize: 13, color: '#cbd5e1', marginTop: 0, marginBottom: 16 }}>
-                Can&apos;t find your dining spot or cloud kitchen? Register it right now on FoodSafe365 to instantly inspect or submit a verified audit.
+                Can&apos;t find your dining spot or cloud kitchen? Add it to FoodSafe365 to rate its food safety.
               </p>
 
               {addError && (
