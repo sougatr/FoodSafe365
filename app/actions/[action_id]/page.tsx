@@ -1,7 +1,24 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { AlertTriangle, CheckCircle2, ChevronLeft, Home, ShieldCheck, Wrench, Clock, FileText } from 'lucide-react';
+import { 
+  AlertTriangle, 
+  CheckCircle2, 
+  ChevronLeft, 
+  Home, 
+  ShieldCheck, 
+  Wrench, 
+  Clock, 
+  FileText,
+  Calendar,
+  Building2,
+  User,
+  Phone,
+  ArrowRight,
+  RefreshCw,
+  XCircle,
+  HelpCircle
+} from 'lucide-react';
 import { useParams } from 'next/navigation';
 import {
   CorrectiveAction,
@@ -10,6 +27,11 @@ import {
   AppPhase1State,
   PHASE1_STORAGE_KEY
 } from '@/lib/foodsafety28';
+import { 
+  ServiceProvider, 
+  ServiceRequest, 
+  CONTROLLED_SERVICE_CATEGORIES 
+} from '@/lib/service-provider-contracts';
 
 function loadState(): AppPhase1State {
   try {
@@ -38,6 +60,19 @@ function label(s: string) {
   }
 }
 
+function inferCategory(act: CorrectiveAction): string {
+  if (act.serviceCategory) return act.serviceCategory;
+  const code = act.checkCode || (act as any).sourceCheckCode || '';
+  if (['FS28-26', 'FS28-27'].includes(code) || /pest/i.test(act.title + ' ' + act.description)) return 'pest_control';
+  if (['FS28-19', 'FS28-20'].includes(code) || /refrig|chiller|freezer|cold/i.test(act.title + ' ' + act.description)) return 'refrigeration';
+  if (['FS28-01', 'FS28-02', 'FS28-03', 'FS28-04'].includes(code) || /clean|grease|drain|exhaust/i.test(act.title + ' ' + act.description)) return 'deep_cleaning';
+  if (['FS28-13', 'FS28-14'].includes(code) || /water|potability/i.test(act.title + ' ' + act.description)) return 'water_testing';
+  if (['FS28-08'].includes(code) || /fostac|training/i.test(act.title + ' ' + act.description)) return 'training';
+  if (['FS28-09'].includes(code) || /medical|health/i.test(act.title + ' ' + act.description)) return 'occupational_health';
+  if (['FS28-21'].includes(code) || /calibrat/i.test(act.title + ' ' + act.description)) return 'calibration';
+  return 'equipment';
+}
+
 export default function ActionDetail() {
   const params = useParams<{ action_id: string }>();
   const [data, setData] = useState<AppPhase1State>({});
@@ -47,6 +82,37 @@ export default function ActionDetail() {
   const [root, setRoot] = useState('');
   const [note, setNote] = useState('');
   const [message, setMessage] = useState('');
+
+  // Service Provider Stage 3 states
+  const [serviceRequest, setServiceRequest] = useState<ServiceRequest | null>(null);
+  const [matchingProviders, setMatchingProviders] = useState<ServiceProvider[]>([]);
+  const [selectedProviderId, setSelectedProviderId] = useState<string>('');
+  const [showDiscovery, setShowDiscovery] = useState(false);
+  const [discoveryLoading, setDiscoveryLoading] = useState(false);
+  const [requestNotes, setRequestNotes] = useState('');
+  const [preferredDate, setPreferredDate] = useState('');
+  const [submittingRequest, setSubmittingRequest] = useState(false);
+  const [confirmingService, setConfirmingService] = useState(false);
+
+  const fetchServiceRequest = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/v1/service-requests?correctiveActionId=${params.action_id}`, {
+        headers: {
+          'x-foodsafe-user-id': 'demo-user',
+          'x-foodsafe-org-id': 'demo-org',
+          'x-foodsafe-outlet-id': 'the-table',
+          'x-foodsafe-role': 'manager'
+        },
+        cache: 'no-store'
+      });
+      const json = await res.json();
+      if (res.ok && json.data && json.data.length > 0) {
+        setServiceRequest(json.data[0]);
+      }
+    } catch (err) {
+      console.warn('Could not fetch linked service request:', err);
+    }
+  }, [params.action_id]);
 
   useEffect(() => {
     const refresh = () => {
@@ -75,9 +141,10 @@ export default function ActionDetail() {
       }
     };
     refresh();
+    fetchServiceRequest();
     window.addEventListener('foodsaf365:update', refresh);
     return () => window.removeEventListener('foodsaf365:update', refresh);
-  }, [params.action_id]);
+  }, [params.action_id, fetchServiceRequest]);
 
   if (!action) {
     return (
@@ -309,60 +376,396 @@ export default function ActionDetail() {
           </div>
         </div>
 
-        {/* FoodSafe Verified Service Partner Integration */}
+        {/* STAGE 3: CONTEXTUAL SERVICE PROVIDER WORKFLOW */}
         {action.status !== 'closed' && (
-          <div style={{
-            background: '#ffffff',
-            border: '1px solid #cbd5e1',
-            borderRadius: 16,
-            padding: '16px 20px',
-            marginBottom: 24,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 16,
-            boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ marginBottom: 24 }}>
+            {/* 1. IF ACTIVE SERVICE REQUEST EXISTS */}
+            {serviceRequest ? (
               <div style={{
-                width: 40,
-                height: 40,
-                borderRadius: 10,
-                background: '#ecfdf5',
-                color: '#059669',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 20,
-                flexShrink: 0
+                background: '#ffffff',
+                border: '1.5px solid #cbd5e1',
+                borderRadius: 16,
+                padding: '20px 24px',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
               }}>
-                {action.checkCode === 'FS28-08' ? '🎓' : action.checkCode === 'FS28-09' ? '🩺' : ['FS28-26', 'FS28-27'].includes(action.checkCode) ? '🪲' : ['FS28-19', 'FS28-20'].includes(action.checkCode) ? '❄️' : '✨'}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 14 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                      <span style={{
+                        background: serviceRequest.status === 'restaurant_confirmed' ? '#ecfdf5' : serviceRequest.status === 'completed' ? '#eff6ff' : serviceRequest.status === 'in_progress' ? '#fff7ed' : '#fef3c7',
+                        color: serviceRequest.status === 'restaurant_confirmed' ? '#065f46' : serviceRequest.status === 'completed' ? '#1d4ed8' : serviceRequest.status === 'in_progress' ? '#c2410c' : '#b45309',
+                        fontSize: 11,
+                        fontWeight: 800,
+                        padding: '3px 10px',
+                        borderRadius: 20,
+                        textTransform: 'uppercase'
+                      }}>
+                        {serviceRequest.status === 'restaurant_confirmed'
+                          ? '✅ Service Confirmed by Restaurant'
+                          : serviceRequest.status === 'completed'
+                          ? '🔵 Service Completed by Provider'
+                          : serviceRequest.status === 'in_progress'
+                          ? '🟠 Service In Progress'
+                          : serviceRequest.status === 'accepted'
+                          ? '🟢 Accepted by Provider'
+                          : '🟡 Service Requested'}
+                      </span>
+                      <span style={{ fontSize: 12, color: '#64748b' }}>Req #{serviceRequest.id}</span>
+                    </div>
+                    <h3 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 2px', color: '#0F172A' }}>
+                      Assigned Partner: {serviceRequest.providerName}
+                    </h3>
+                    <p style={{ margin: 0, fontSize: 13, color: '#64748b' }}>
+                      Category: {serviceRequest.serviceCategory.replace(/_/g, ' ').toUpperCase()} · Requested: {new Date(serviceRequest.requestedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <Link
+                    href="/providers/dashboard"
+                    target="_blank"
+                    style={{
+                      fontSize: 12,
+                      color: '#059669',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      fontWeight: 600,
+                      padding: '4px 8px',
+                      background: '#ecfdf5',
+                      borderRadius: 6
+                    }}
+                  >
+                    Provider Portal View →
+                  </Link>
+                </div>
+
+                {serviceRequest.notes && (
+                  <div style={{
+                    background: '#f8fafc',
+                    borderRadius: 8,
+                    padding: '10px 14px',
+                    fontSize: 13,
+                    color: '#334155',
+                    marginBottom: 14
+                  }}>
+                    <strong>Remediation Notes:</strong> {serviceRequest.notes}
+                  </div>
+                )}
+
+                {/* RESTAURANT CONFIRMATION PROMPT WHEN SERVICE IS COMPLETED */}
+                {serviceRequest.status === 'completed' && (
+                  <div style={{
+                    background: '#eff6ff',
+                    border: '1.5px solid #93c5fd',
+                    borderRadius: 12,
+                    padding: '16px 20px',
+                    marginTop: 12,
+                    marginBottom: 14
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                      <CheckCircle2 size={20} color="#1d4ed8" />
+                      <strong style={{ fontSize: 15, color: '#1e3a8a' }}>
+                        Service completed by {serviceRequest.providerName}. Please inspect and confirm on-site.
+                      </strong>
+                    </div>
+                    <p style={{ margin: '0 0 12px', fontSize: 13, color: '#3b82f6', lineHeight: 1.5 }}>
+                      Confirming external completion marks this service verified and automatically advances the corrective action to Manager Verification.
+                    </p>
+                    <button
+                      onClick={async () => {
+                        setConfirmingService(true);
+                        try {
+                          const res = await fetch(`/api/v1/service-requests/${serviceRequest.id}`, {
+                            method: 'PATCH',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'x-foodsafe-user-id': 'demo-user',
+                              'x-foodsafe-role': 'manager',
+                              'x-foodsafe-outlet-id': 'the-table'
+                            },
+                            body: JSON.stringify({ status: 'restaurant_confirmed' })
+                          });
+                          const json = await res.json();
+                          if (!res.ok) throw new Error(json?.error?.message || 'Confirmation failed');
+                          
+                          setServiceRequest(json.data);
+                          
+                          // Advance action to awaiting_verification
+                          const nextActions = (data.actions || []).map(a =>
+                            a.id === action.id ? { ...a, status: 'awaiting_verification' as const } : a
+                          );
+                          const nextState = { ...data, actions: nextActions };
+                          saveState(nextState);
+                          setAction(prev => prev ? { ...prev, status: 'awaiting_verification' } : null);
+                          setMessage('Service confirmed by restaurant. Ticket moved to Step 2: Manager Verification.');
+                        } catch (err: any) {
+                          alert(err.message || 'Error confirming service');
+                        } finally {
+                          setConfirmingService(false);
+                        }
+                      }}
+                      disabled={confirmingService}
+                      style={{
+                        padding: '10px 18px',
+                        background: '#059669',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: 8,
+                        fontSize: 14,
+                        fontWeight: 700,
+                        cursor: confirmingService ? 'not-allowed' : 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 8
+                      }}
+                    >
+                      {confirmingService ? 'Confirming...' : 'Confirm Service Work & Move to Verification'} <ArrowRight size={16} />
+                    </button>
+                  </div>
+                )}
+
+                {/* NON-NEGOTIABLE COMPLIANCE PRINCIPLE */}
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 8,
+                  padding: '10px 14px',
+                  fontSize: 12,
+                  color: '#64748b',
+                  lineHeight: 1.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8
+                }}>
+                  <ShieldCheck size={16} color="#059669" style={{ flexShrink: 0 }} />
+                  <span>
+                    <strong>FoodSafe365 Governance Principle:</strong> Service completion by an external partner does not equal food safety certification. An internal restaurant manager must inspect the premises and verify the correction in Step 2.
+                  </span>
+                </div>
               </div>
-              <div>
-                <strong style={{ fontSize: 14, color: '#0f172a', display: 'block' }}>
-                  {action.checkCode === 'FS28-08'
-                    ? 'Need Accredited FoSTaC Food Safety Supervisor & Staff Training?'
-                    : action.checkCode === 'FS28-09'
-                    ? 'Need 6-Monthly Staff Medical Checkups, Form 1A Certificates & Stool Tests?'
-                    : ['FS28-26', 'FS28-27'].includes(action.checkCode)
-                    ? 'Need Urgent Professional Pest Control Eradication or Trap Servicing?'
-                    : ['FS28-19', 'FS28-20'].includes(action.checkCode)
-                    ? 'Need Commercial Refrigeration / Cold Room Breakdown Repair?'
-                    : 'Need an accredited service partner to resolve this issue?'}
-                </strong>
-                <p className="muted" style={{ margin: '2px 0 0', fontSize: 12 }}>
-                  Book on-demand FoodSafe verified providers with official compliance certificates for manager verification.
-                </p>
+            ) : (
+              /* 2. NO SERVICE REQUEST YET: CONTEXTUAL DISCOVERY */
+              <div style={{
+                background: '#ffffff',
+                border: '1.5px solid #cbd5e1',
+                borderRadius: 16,
+                padding: '20px 24px',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 12,
+                      background: '#ecfdf5',
+                      color: '#059669',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 22,
+                      flexShrink: 0
+                    }}>
+                      <Wrench size={22} />
+                    </div>
+                    <div>
+                      <strong style={{ fontSize: 16, color: '#0f172a', display: 'block' }}>
+                        Need Professional Help? Find Relevant Service Providers
+                      </strong>
+                      <p className="muted" style={{ margin: '2px 0 0', fontSize: 13 }}>
+                        FoodSafe365 connects this corrective action directly to verified specialist providers for remediation.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={async () => {
+                      if (!showDiscovery) {
+                        setShowDiscovery(true);
+                        setDiscoveryLoading(true);
+                        const cat = inferCategory(action);
+                        try {
+                          const res = await fetch(`/api/v1/providers?category=${cat}&city=Mumbai`);
+                          const json = await res.json();
+                          if (res.ok && json.data) {
+                            setMatchingProviders(json.data);
+                            if (json.data.length > 0) {
+                              setSelectedProviderId(json.data[0].id);
+                            }
+                          }
+                        } catch (e) {
+                          console.warn('Failed to load providers:', e);
+                        } finally {
+                          setDiscoveryLoading(false);
+                        }
+                      } else {
+                        setShowDiscovery(false);
+                      }
+                    }}
+                    style={{
+                      background: showDiscovery ? '#f1f5f9' : '#059669',
+                      color: showDiscovery ? '#334155' : '#ffffff',
+                      border: showDiscovery ? '1px solid #cbd5e1' : 'none',
+                      borderRadius: 8,
+                      padding: '10px 18px',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6
+                    }}
+                  >
+                    {showDiscovery ? 'Close Provider Search' : `Find ${inferCategory(action).replace(/_/g, ' ').toUpperCase()} Partners →`}
+                  </button>
+                </div>
+
+                {/* EXPANDABLE PROVIDER DISCOVERY PANEL */}
+                {showDiscovery && (
+                  <div style={{ marginTop: 20, paddingTop: 18, borderTop: '1px solid #e2e8f0' }}>
+                    <h4 style={{ fontSize: 15, fontWeight: 700, color: '#0F172A', margin: '0 0 12px' }}>
+                      Available FoodSafe365 Partners in Mumbai for "{inferCategory(action).replace(/_/g, ' ')}"
+                    </h4>
+
+                    {discoveryLoading ? (
+                      <p className="muted" style={{ fontSize: 13 }}>Searching verified providers...</p>
+                    ) : matchingProviders.length === 0 ? (
+                      <div style={{ padding: '16px', background: '#f8fafc', borderRadius: 8, fontSize: 13, color: '#64748b' }}>
+                        No specific providers currently registered in this city for this category. You may still register an external agency or assign internal staff.
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 18 }}>
+                        {matchingProviders.map(p => {
+                          const isSelected = selectedProviderId === p.id;
+                          return (
+                            <div
+                              key={p.id}
+                              onClick={() => setSelectedProviderId(p.id)}
+                              style={{
+                                padding: '14px 16px',
+                                borderRadius: 10,
+                                border: isSelected ? '2px solid #059669' : '1px solid #cbd5e1',
+                                background: isSelected ? '#ecfdf5' : '#ffffff',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                              }}
+                            >
+                              <div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                  <strong style={{ fontSize: 14, color: '#0f172a' }}>{p.businessName}</strong>
+                                  <span style={{ fontSize: 11, background: '#e2e8f0', color: '#334155', padding: '2px 6px', borderRadius: 4 }}>
+                                    {p.city}
+                                  </span>
+                                </div>
+                                <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#64748b' }}>
+                                  {p.description}
+                                </p>
+                              </div>
+
+                              <input
+                                type="radio"
+                                name="selected_provider"
+                                checked={isSelected}
+                                onChange={() => setSelectedProviderId(p.id)}
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {matchingProviders.length > 0 && (
+                      <div style={{ background: '#f8fafc', padding: '16px', borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+                          <div>
+                            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#334155', marginBottom: 4 }}>
+                              Preferred Service Date (Optional)
+                            </label>
+                            <input
+                              type="date"
+                              value={preferredDate}
+                              onChange={e => setPreferredDate(e.target.value)}
+                              style={{ width: '100%', padding: '8px 10px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: 13, boxSizing: 'border-box' }}
+                            />
+                          </div>
+                          <div>
+                            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#334155', marginBottom: 4 }}>
+                              Additional Notes for Technician
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Please visit before 11 AM before lunch rush."
+                              value={requestNotes}
+                              onChange={e => setRequestNotes(e.target.value)}
+                              style={{ width: '100%', padding: '8px 10px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: 13, boxSizing: 'border-box' }}
+                            />
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={async () => {
+                            const p = matchingProviders.find(x => x.id === selectedProviderId);
+                            if (!p) {
+                              alert('Please select a service provider');
+                              return;
+                            }
+                            setSubmittingRequest(true);
+                            try {
+                              const res = await fetch('/api/v1/service-requests', {
+                                method: 'POST',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  'x-foodsafe-user-id': 'demo-user',
+                                  'x-foodsafe-role': 'manager',
+                                  'x-foodsafe-outlet-id': 'the-table'
+                                },
+                                body: JSON.stringify({
+                                  correctiveActionId: action.id,
+                                  correctiveActionTitle: action.title,
+                                  providerId: p.id,
+                                  providerName: p.businessName,
+                                  serviceCategory: inferCategory(action),
+                                  problemDescription: action.description,
+                                  notes: requestNotes,
+                                  scheduledAt: preferredDate || undefined,
+                                  outletName: 'ABC Restaurant',
+                                  outletCity: 'Mumbai'
+                                })
+                              });
+                              const json = await res.json();
+                              if (!res.ok) throw new Error(json?.error?.message || 'Failed to dispatch request');
+                              setServiceRequest(json.data);
+                              setShowDiscovery(false);
+                              setMessage(`Service request sent to ${p.businessName}. You can track status above.`);
+                            } catch (err: any) {
+                              alert(err.message || 'Error submitting request');
+                            } finally {
+                              setSubmittingRequest(false);
+                            }
+                          }}
+                          disabled={submittingRequest || !selectedProviderId}
+                          style={{
+                            padding: '10px 18px',
+                            background: '#059669',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: 8,
+                            fontSize: 13,
+                            fontWeight: 700,
+                            cursor: submittingRequest ? 'not-allowed' : 'pointer'
+                          }}
+                        >
+                          {submittingRequest ? 'Dispatching Request...' : 'Send Service Request to Provider'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>
-            <Link
-              href={`/providers?check=${action.checkCode}&actionId=${action.id}`}
-              target="_blank"
-              className="btn primary"
-              style={{ background: '#059669', whiteSpace: 'nowrap', fontSize: 13, padding: '9px 16px' }}
-            >
-              Book Service Partner →
-            </Link>
+            )}
           </div>
         )}
 

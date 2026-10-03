@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "test:stage3": "tsc tests/test-stage3-service-providers.ts lib/service-provider-store.ts lib/demo-store.ts lib/db.ts lib/service-provider-contracts.ts --module nodenext --moduleResolution nodenext --target es2022 --outDir .data/test_dist && node .data/test_dist/tests/test-stage3-service-providers.js && rm -rf .data/test_dist",
     "mobile:sync": "cap sync",
     "mobile:ios": "cap open ios",
     "mobile:android": "cap open android"

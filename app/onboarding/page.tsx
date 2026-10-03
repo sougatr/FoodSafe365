@@ -160,7 +160,7 @@ export default function Onboarding() {
       <div className="container" style={{ maxWidth: 860, paddingTop: 36 }}>
         <div className="card" style={{ padding: '36px 32px', borderRadius: 20 }}>
           
-          <div style={{ marginBottom: 28 }}>
+          <div style={{ marginBottom: 20 }}>
             <span className="pill good" style={{ fontSize: 11, padding: '4px 10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               RESTAURANT ONBOARDING
             </span>
@@ -170,6 +170,46 @@ export default function Onboarding() {
             <p className="lead muted" style={{ fontSize: 16, margin: 0 }}>
               Set up your outlet in 30 seconds. Your kitchen team can immediately start today’s daily food safety protocol without cumbersome questionnaires.
             </p>
+          </div>
+
+          {/* Service Provider Switcher Banner */}
+          <div style={{
+            background: '#f0fdf4',
+            border: '1px solid #bbf7d0',
+            borderRadius: 12,
+            padding: '12px 18px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 24,
+            flexWrap: 'wrap',
+            gap: 10
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 18 }}>🛠️</span>
+              <div>
+                <strong style={{ fontSize: 13, color: '#166534', display: 'block' }}>
+                  Are you a Food-Safety Service Provider or Contractor?
+                </strong>
+                <span style={{ fontSize: 12, color: '#15803d' }}>
+                  Pest control, refrigeration technicians, testing labs, or deep cleaning agencies.
+                </span>
+              </div>
+            </div>
+            <Link
+              href="/onboarding/provider"
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                color: '#ffffff',
+                background: '#059669',
+                padding: '6px 12px',
+                borderRadius: 6,
+                textDecoration: 'none'
+              }}
+            >
+              Onboard as Service Partner →
+            </Link>
           </div>
 
           <form onSubmit={handleSave}>
