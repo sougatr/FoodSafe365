@@ -26,10 +26,8 @@ interface CategoryCardItem {
   id: string;
   code: string;
   name: string;
-  cueType: 'fssai_meat' | 'fssai_fruit_veg' | 'fssai_milk' | 'foodsafe';
   accentColor: string;
   selectedBg: string;
-  badgeText?: string;
   icon: any;
 }
 
@@ -38,18 +36,15 @@ const CATEGORY_CARDS: CategoryCardItem[] = [
     id: 'cat-meat',
     code: 'meat_fresh',
     name: 'Meat & Chicken',
-    cueType: 'fssai_meat',
-    accentColor: '#DC2626', // Red visual cue (corresponds to FSSAI Meat Retail)
+    accentColor: '#DC2626', // FoodSafe365 visual category colour
     selectedBg: '#FEF2F2',
-    badgeText: 'FSSAI Meat visual cue',
     icon: Drumstick
   },
   {
     id: 'cat-fish',
     code: 'seafood_fresh',
     name: 'Fish & Seafood',
-    cueType: 'foodsafe',
-    accentColor: '#0891B2', // FoodSafe365 subtle professional cyan
+    accentColor: '#0891B2', // FoodSafe365 visual category colour
     selectedBg: '#ECFEFF',
     icon: Fish
   },
@@ -57,18 +52,15 @@ const CATEGORY_CARDS: CategoryCardItem[] = [
     id: 'cat-milk',
     code: 'dairy_milk',
     name: 'Milk & Dairy',
-    cueType: 'fssai_milk',
-    accentColor: '#2563EB', // Blue visual cue (corresponds to FSSAI Milk Retail)
+    accentColor: '#2563EB', // FoodSafe365 visual category colour
     selectedBg: '#EFF6FF',
-    badgeText: 'FSSAI Milk visual cue',
     icon: Milk
   },
   {
     id: 'cat-frozen',
     code: 'frozen_foods',
     name: 'Frozen Foods',
-    cueType: 'foodsafe',
-    accentColor: '#4F46E5', // FoodSafe365 subtle professional indigo
+    accentColor: '#4F46E5', // FoodSafe365 visual category colour
     selectedBg: '#EEF2FF',
     icon: Snowflake
   },
@@ -76,18 +68,15 @@ const CATEGORY_CARDS: CategoryCardItem[] = [
     id: 'cat-produce',
     code: 'fresh_produce',
     name: 'Fresh Fruits & Vegetables',
-    cueType: 'fssai_fruit_veg',
-    accentColor: '#16A34A', // Green visual cue (corresponds to FSSAI Fruit & Vegetable Retail)
+    accentColor: '#16A34A', // FoodSafe365 visual category colour
     selectedBg: '#F0FDF4',
-    badgeText: 'FSSAI Fruit & Veg visual cue',
     icon: Apple
   },
   {
     id: 'cat-bakery',
     code: 'bakery_packaged',
     name: 'Bakery',
-    cueType: 'foodsafe',
-    accentColor: '#D97706', // FoodSafe365 subtle warm amber
+    accentColor: '#D97706', // FoodSafe365 visual category colour
     selectedBg: '#FFFBEB',
     icon: Cake
   },
@@ -95,8 +84,7 @@ const CATEGORY_CARDS: CategoryCardItem[] = [
     id: 'cat-packaged',
     code: 'other_packaged',
     name: 'Packaged Foods',
-    cueType: 'foodsafe',
-    accentColor: '#7C3AED', // FoodSafe365 subtle professional violet
+    accentColor: '#7C3AED', // FoodSafe365 visual category colour
     selectedBg: '#F5F3FF',
     icon: Package
   },
@@ -104,8 +92,7 @@ const CATEGORY_CARDS: CategoryCardItem[] = [
     id: 'cat-staples',
     code: 'dry_groceries',
     name: 'Dry Groceries & Staples',
-    cueType: 'foodsafe',
-    accentColor: '#78716C', // FoodSafe365 subtle warm stone
+    accentColor: '#78716C', // FoodSafe365 visual category colour
     selectedBg: '#F5F5F4',
     icon: Boxes
   }
@@ -427,9 +414,14 @@ export default function GroceryOnboardingPage() {
               </h1>
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                <p style={{ fontSize: 14, color: '#64748B', margin: 0 }}>
-                  Select all that apply.
-                </p>
+                <div>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#334155', display: 'block' }}>
+                    FoodSafe365 product categories
+                  </span>
+                  <span style={{ fontSize: 12.5, color: '#64748B' }}>
+                    Select all that apply.
+                  </span>
+                </div>
                 <span style={{
                   fontSize: 12.5,
                   fontWeight: 700,
@@ -540,17 +532,43 @@ export default function GroceryOnboardingPage() {
                 })}
               </div>
 
-              {/* Exact required small explanatory line */}
-              <p style={{
-                fontSize: 12,
-                color: '#64748B',
-                fontStyle: 'italic',
+              {/* FSSAI FSDB BUSINESS TYPE DISTINCTION */}
+              <div style={{
                 margin: '16px 0 24px',
-                textAlign: 'center',
-                lineHeight: 1.4
+                padding: '12px 14px',
+                borderRadius: 12,
+                background: '#F8FAFC',
+                border: '1px solid #E2E8F0',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6
               }}>
-                Colours are visual cues inspired by FSSAI Food Safety Display Board categories where applicable.
-              </p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{
+                      width: 14,
+                      height: 14,
+                      borderRadius: 3,
+                      background: '#64748B', // Grey: Official FSSAI FSDB display colour for Retail Store
+                      border: '1px solid #475569',
+                      flexShrink: 0
+                    }} />
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: '#1E293B' }}>
+                      FSSAI business-type display colour:
+                    </span>
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: '#475569' }}>
+                      Retail Store — Grey
+                    </span>
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: '#94A3B8' }}>
+                    Food Safety Display Board (FSDB)
+                  </span>
+                </div>
+
+                <p style={{ margin: 0, fontSize: 11.5, color: '#64748B', lineHeight: 1.45 }}>
+                  Colours on the cards above are FoodSafe365 operational cues for easy recognition. Official FSSAI Food Safety Display Board colour coding identifies food business types (e.g. Retail Store — Grey, Restaurant — Purple, Fruit &amp; Veg — Green, Meat — Red, Milk — Blue).
+                </p>
+              </div>
 
               <button
                 type="submit"
