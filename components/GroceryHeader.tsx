@@ -1,16 +1,19 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   ShoppingBag,
-  Truck,
-  Layers,
-  Thermometer,
-  RotateCw,
+  Home,
+  BookOpen,
   ClipboardCheck,
   AlertTriangle,
+  ChevronDown,
+  Truck,
+  Thermometer,
+  Layers,
+  RotateCw,
   CheckCircle2,
-  Home,
   Store
 } from 'lucide-react';
 
@@ -19,25 +22,35 @@ interface GroceryHeaderProps {
   branchName?: string;
 }
 
-export default function GroceryHeader({ outletName = 'Nature Fresh Market', branchName = 'Bandra West' }: GroceryHeaderProps) {
+export default function GroceryHeader({
+  outletName = 'Nature Fresh Market',
+  branchName = 'Bandra West'
+}: GroceryHeaderProps) {
   const pathname = usePathname();
+  const [showOpsMenu, setShowOpsMenu] = useState(false);
 
-  const NAV_ITEMS = [
-    { href: '/grocery', label: 'Overview', icon: Store },
-    { href: '/grocery/receiving', label: 'Receiving', icon: Truck },
-    { href: '/grocery/storage', label: 'Storage & Zones', icon: Layers },
-    { href: '/grocery/temperature', label: 'Temperature', icon: Thermometer },
-    { href: '/grocery/stock', label: 'FIFO / FEFO Stock', icon: RotateCw },
-    { href: '/grocery/daily-check', label: 'Daily Checks (22)', icon: ClipboardCheck }
+  const PRIMARY_NAV = [
+    { href: '/grocery', label: 'HOME', icon: Home, exact: true },
+    { href: '/grocery/learn', label: 'LEARN', icon: BookOpen, startsWith: true },
+    { href: '/grocery/daily-check', label: 'DAILY CHECK', icon: ClipboardCheck },
+    { href: '/grocery/actions', label: 'ACTIONS', icon: AlertTriangle }
+  ];
+
+  const SECONDARY_OPS = [
+    { href: '/grocery/receiving', label: 'Dockside Receiving', desc: 'Inspect incoming food deliveries', icon: Truck },
+    { href: '/grocery/temperature', label: 'Temperature Monitoring', desc: 'Log chiller & freezer probes', icon: Thermometer },
+    { href: '/grocery/storage', label: 'Storage & Zones', desc: 'Manage zones & cross-contamination rules', icon: Layers },
+    { href: '/grocery/stock', label: 'FIFO / FEFO Stock', desc: 'Batch expiry tracking & safety quarantine', icon: RotateCw },
+    { href: '/actions?status=awaiting_verification', label: 'Verification Register', desc: 'Supervisor & manager sign-offs', icon: CheckCircle2 }
   ];
 
   return (
     <div style={{ background: '#0F172A', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: '#ffffff' }}>
-      {/* Sub-bar with Store identity & Quick Actions */}
+      {/* Top Banner with Store identity & Frontline Quick Action */}
       <div style={{
         maxWidth: 1200,
         margin: '0 auto',
-        padding: '12px 24px',
+        padding: '12px 20px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -46,14 +59,15 @@ export default function GroceryHeader({ outletName = 'Nature Fresh Market', bran
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{
-            width: 36,
-            height: 36,
-            borderRadius: 8,
+            width: 38,
+            height: 38,
+            borderRadius: 10,
             background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#ffffff'
+            color: '#ffffff',
+            boxShadow: '0 2px 8px rgba(5, 150, 105, 0.35)'
           }}>
             <ShoppingBag size={20} />
           </div>
@@ -61,84 +75,110 @@ export default function GroceryHeader({ outletName = 'Nature Fresh Market', bran
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <strong style={{ fontSize: 16, color: '#ffffff' }}>{outletName}</strong>
               <span style={{
-                fontSize: 11,
-                fontWeight: 700,
+                fontSize: 10.5,
+                fontWeight: 800,
                 color: '#34d399',
-                background: 'rgba(16, 185, 129, 0.2)',
+                background: 'rgba(16, 185, 129, 0.18)',
+                border: '1px solid rgba(52, 211, 153, 0.3)',
                 padding: '2px 8px',
-                borderRadius: 999
+                borderRadius: 999,
+                letterSpacing: '0.04em'
               }}>
                 GROCERY STORE
               </span>
             </div>
             <div style={{ fontSize: 12, color: '#94A3B8' }}>
-              Branch: {branchName} · FSSAI Retail Operational Module
+              Branch: {branchName} · Safer food. Every day.
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <Link
-            href="/actions"
+        {/* Secondary Manager / Operations Dropdown */}
+        <div style={{ position: 'relative' }}>
+          <button
+            type="button"
+            onClick={() => setShowOpsMenu(!showOpsMenu)}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 6,
               fontSize: 12.5,
               fontWeight: 700,
-              padding: '6px 14px',
+              padding: '7px 14px',
               borderRadius: 8,
-              background: 'rgba(239, 68, 68, 0.15)',
-              color: '#f87171',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              textDecoration: 'none'
+              background: showOpsMenu ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.08)',
+              color: '#e2e8f0',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
             }}
           >
-            <AlertTriangle size={14} /> Corrective Actions
-          </Link>
-          <Link
-            href="/actions?status=awaiting_verification"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              fontSize: 12.5,
-              fontWeight: 700,
-              padding: '6px 14px',
-              borderRadius: 8,
-              background: 'rgba(59, 130, 246, 0.15)',
-              color: '#60a5fa',
-              border: '1px solid rgba(59, 130, 246, 0.3)',
-              textDecoration: 'none'
-            }}
-          >
-            <CheckCircle2 size={14} /> Verifications
-          </Link>
-          <Link
-            href="/home"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              fontSize: 12.5,
-              fontWeight: 600,
-              padding: '6px 12px',
-              borderRadius: 8,
-              background: 'rgba(255, 255, 255, 0.08)',
-              color: '#cbd5e1',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-              textDecoration: 'none'
-            }}
-          >
-            <Home size={14} /> Home
-          </Link>
+            <span>Manager &amp; Tools</span>
+            <ChevronDown size={14} style={{ transform: showOpsMenu ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+          </button>
+
+          {showOpsMenu && (
+            <div
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: 'calc(100% + 8px)',
+                width: 280,
+                background: '#1E293B',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: 12,
+                boxShadow: '0 12px 28px rgba(0, 0, 0, 0.35)',
+                zIndex: 100,
+                overflow: 'hidden',
+                padding: '6px'
+              }}
+            >
+              <div style={{ padding: '8px 12px 4px', fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Advanced Operations
+              </div>
+              {SECONDARY_OPS.map(op => {
+                const Icon = op.icon;
+                return (
+                  <Link
+                    key={op.href}
+                    href={op.href}
+                    onClick={() => setShowOpsMenu(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      padding: '8px 10px',
+                      borderRadius: 8,
+                      textDecoration: 'none',
+                      color: '#ffffff',
+                      transition: 'background 0.12s ease'
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    <div style={{ padding: 4, borderRadius: 6, background: 'rgba(5, 150, 105, 0.2)', color: '#34d399', marginTop: 1 }}>
+                      <Icon size={15} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9' }}>{op.label}</div>
+                      <div style={{ fontSize: 11, color: '#94a3b8' }}>{op.desc}</div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Navigation tabs */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', display: 'flex', gap: 6, overflowX: 'auto' }}>
-        {NAV_ITEMS.map(item => {
-          const isActive = pathname === item.href;
+      {/* Simplified Primary Navigation: HOME | LEARN | DAILY CHECK | ACTIONS */}
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px', display: 'flex', gap: 4, overflowX: 'auto' }}>
+        {PRIMARY_NAV.map(item => {
+          const isActive = item.exact
+            ? pathname === item.href
+            : item.startsWith
+            ? pathname.startsWith(item.href)
+            : pathname === item.href;
           const Icon = item.icon;
           return (
             <Link
@@ -148,17 +188,18 @@ export default function GroceryHeader({ outletName = 'Nature Fresh Market', bran
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 8,
-                padding: '10px 16px',
-                fontSize: 13,
-                fontWeight: isActive ? 800 : 500,
+                padding: '12px 18px',
+                fontSize: 13.5,
+                fontWeight: isActive ? 800 : 600,
                 color: isActive ? '#34d399' : '#94A3B8',
                 borderBottom: isActive ? '3px solid #10b981' : '3px solid transparent',
                 textDecoration: 'none',
                 whiteSpace: 'nowrap',
+                letterSpacing: '0.03em',
                 transition: 'all 0.15s ease'
               }}
             >
-              <Icon size={16} />
+              <Icon size={17} color={isActive ? '#34d399' : '#94A3B8'} />
               {item.label}
             </Link>
           );

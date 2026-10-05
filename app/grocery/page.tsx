@@ -3,625 +3,644 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
-  ShoppingBag,
-  Truck,
-  Layers,
-  Thermometer,
-  RotateCw,
-  Sparkles,
   ClipboardCheck,
   AlertTriangle,
-  CheckCircle2,
-  AlertCircle,
+  Thermometer,
+  Layers,
+  Truck,
+  RotateCw,
+  BookOpen,
   ArrowRight,
   ShieldCheck,
-  TrendingDown,
-  Calendar,
+  CheckCircle2,
+  AlertCircle,
   Clock,
-  ExternalLink,
-  ChevronRight
+  Sparkles,
+  Store
 } from 'lucide-react';
 import GlobalHeader from '@/components/GlobalHeader';
 import GroceryHeader from '@/components/GroceryHeader';
 import { GroceryAlert } from '@/lib/grocery-types';
 
-export default function GroceryDashboardPage() {
+export default function GroceryHomePage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  const fetchDashboard = async () => {
-    try {
-      let outletId = 'store-nature-basket-bandra';
-      if (typeof window !== 'undefined') {
-        const savedId = localStorage.getItem('foodsafe365_grocery_outlet_id');
-        if (savedId) outletId = savedId;
-      }
-
-      const res = await fetch(`/api/v1/grocery/dashboard?outletId=${encodeURIComponent(outletId)}`);
-      const json = await res.json();
-      if (res.ok && json.success) {
-        setData(json.data);
-      } else {
-        setError(json.message || 'Failed to load dashboard data');
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load dashboard data');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    fetchDashboard();
+    async function loadData() {
+      try {
+        let outletId = 'store-nature-basket-bandra';
+        if (typeof window !== 'undefined') {
+          const saved = localStorage.getItem('foodsafe365_grocery_outlet_id');
+          if (saved) outletId = saved;
+        }
+
+        const res = await fetch(`/api/v1/grocery/dashboard?outletId=${encodeURIComponent(outletId)}`);
+        const json = await res.json();
+        if (res.ok && (json.success || json.data)) {
+          setData(json.data || json);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
   }, []);
 
   const counts = data?.counts || {};
+  const outlet = data?.outlet || { name: "Nature's Basket", branchName: 'Bandra West Flagship', managerName: 'Rajesh Nair' };
   const alerts: GroceryAlert[] = data?.alerts || [];
-  const outlet = data?.outlet || { name: 'Nature Fresh Market', branchName: 'Bandra West Flagship' };
+
+  const managerName = outlet.managerName || 'Rajesh';
+  const checkDoneToday = Boolean(counts.dailyChecksCount && counts.dailyChecksCount > 0);
+  const activeTempAlerts = alerts.filter(a => a.type === 'TEMP_BREACH' && a.status === 'OPEN').length;
+  const openActionsCount = counts.openActionsCount || 0;
+  const expiringStockCount = counts.expiringStockCount || 0;
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg, #f8fafc)', display: 'flex', flexDirection: 'column' }}>
       <GlobalHeader />
       <GroceryHeader outletName={outlet.name} branchName={outlet.branchName} />
 
-      <main style={{ flex: 1, maxWidth: 1200, margin: '0 auto', padding: '24px 20px', width: '100%' }}>
-        {/* Top Operational Metrics Header */}
+      <main style={{ flex: 1, maxWidth: 1100, margin: '0 auto', padding: '24px 20px 48px', width: '100%' }}>
+        {/* FRONTLINE WELCOME HEADER */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
+            {outlet.name} · {outlet.branchName || 'Retail Food Store'}
+          </div>
+          <h1 style={{ fontSize: 'clamp(24px, 3vw, 32px)', fontWeight: 900, color: 'var(--text, #0f172a)', margin: 0 }}>
+            Good morning, {managerName} 👋
+          </h1>
+          <p style={{ margin: '6px 0 0', fontSize: 14.5, color: '#64748B' }}>
+            Safer food. Every day. Here is what needs your attention today.
+          </p>
+        </div>
+
+        {/* FOUR SMALL STATUS INDICATORS */}
         <div style={{
-          background: 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: 12,
+          marginBottom: 32
+        }}>
+          {/* Indicator 1: Daily Check */}
+          <Link
+            href="/grocery/daily-check"
+            style={{
+              background: '#ffffff',
+              border: checkDoneToday ? '1.5px solid #10b981' : '1.5px solid #fbbf24',
+              borderRadius: 14,
+              padding: '14px 16px',
+              textDecoration: 'none',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              transition: 'transform 0.15s ease'
+            }}
+          >
+            <div style={{
+              width: 38,
+              height: 38,
+              borderRadius: 10,
+              background: checkDoneToday ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+              color: checkDoneToday ? '#059669' : '#d97706',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <ClipboardCheck size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: 11.5, fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>
+                Daily Check
+              </div>
+              <div style={{ fontSize: 14.5, fontWeight: 800, color: '#0F172A' }}>
+                {checkDoneToday ? 'Completed' : 'Pending Today'}
+              </div>
+            </div>
+          </Link>
+
+          {/* Indicator 2: Temperature Alerts */}
+          <Link
+            href="/grocery/temperature"
+            style={{
+              background: '#ffffff',
+              border: activeTempAlerts > 0 ? '1.5px solid #ef4444' : '1px solid #E2E8F0',
+              borderRadius: 14,
+              padding: '14px 16px',
+              textDecoration: 'none',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12
+            }}
+          >
+            <div style={{
+              width: 38,
+              height: 38,
+              borderRadius: 10,
+              background: activeTempAlerts > 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.12)',
+              color: activeTempAlerts > 0 ? '#dc2626' : '#059669',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <Thermometer size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: 11.5, fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>
+                Temperature Alerts
+              </div>
+              <div style={{ fontSize: 14.5, fontWeight: 800, color: activeTempAlerts > 0 ? '#dc2626' : '#0F172A' }}>
+                {activeTempAlerts > 0 ? `${activeTempAlerts} Alert${activeTempAlerts > 1 ? 's' : ''}` : 'All Normal'}
+              </div>
+            </div>
+          </Link>
+
+          {/* Indicator 3: Open Actions */}
+          <Link
+            href="/grocery/actions"
+            style={{
+              background: '#ffffff',
+              border: openActionsCount > 0 ? '1.5px solid #f97316' : '1px solid #E2E8F0',
+              borderRadius: 14,
+              padding: '14px 16px',
+              textDecoration: 'none',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12
+            }}
+          >
+            <div style={{
+              width: 38,
+              height: 38,
+              borderRadius: 10,
+              background: openActionsCount > 0 ? 'rgba(249, 115, 22, 0.15)' : 'rgba(16, 185, 129, 0.12)',
+              color: openActionsCount > 0 ? '#ea580c' : '#059669',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <AlertTriangle size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: 11.5, fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>
+                Open Actions
+              </div>
+              <div style={{ fontSize: 14.5, fontWeight: 800, color: '#0F172A' }}>
+                {openActionsCount > 0 ? `${openActionsCount} Need Action` : '0 Issues'}
+              </div>
+            </div>
+          </Link>
+
+          {/* Indicator 4: Expiring Products */}
+          <Link
+            href="/grocery/stock"
+            style={{
+              background: '#ffffff',
+              border: expiringStockCount > 0 ? '1.5px solid #ef4444' : '1px solid #E2E8F0',
+              borderRadius: 14,
+              padding: '14px 16px',
+              textDecoration: 'none',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12
+            }}
+          >
+            <div style={{
+              width: 38,
+              height: 38,
+              borderRadius: 10,
+              background: expiringStockCount > 0 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(16, 185, 129, 0.12)',
+              color: expiringStockCount > 0 ? '#dc2626' : '#059669',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0
+            }}>
+              <RotateCw size={20} />
+            </div>
+            <div>
+              <div style={{ fontSize: 11.5, fontWeight: 700, color: '#64748B', textTransform: 'uppercase' }}>
+                Expiring Products
+              </div>
+              <div style={{ fontSize: 14.5, fontWeight: 800, color: expiringStockCount > 0 ? '#dc2626' : '#0F172A' }}>
+                {expiringStockCount > 0 ? `${expiringStockCount} Need Attention` : 'All Fresh'}
+              </div>
+            </div>
+          </Link>
+        </div>
+
+        {/* PROMINENT CARD: TODAY'S DAILY CHECK */}
+        <div style={{
+          background: 'linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%)',
           borderRadius: 20,
-          padding: '24px 28px',
+          padding: '28px 32px',
           color: '#ffffff',
           boxShadow: '0 8px 24px rgba(6, 78, 59, 0.25)',
-          marginBottom: 28
+          marginBottom: 36,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 20
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14 }}>
-            <div>
-              <span style={{
-                fontSize: 11,
-                fontWeight: 800,
-                color: '#6ee7b7',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                background: 'rgba(255, 255, 255, 0.15)',
-                padding: '4px 10px',
-                borderRadius: 999
-              }}>
-                RETAIL FOOD SAFETY OPERATIONAL WORKFLOW
-              </span>
-              <h1 style={{ fontSize: 26, fontWeight: 900, margin: '10px 0 4px', letterSpacing: '-0.02em' }}>
-                Grocery Food Safety
-              </h1>
-              <p style={{ margin: 0, fontSize: 13.5, color: '#a7f3d0', maxWidth: 640, lineHeight: 1.5 }}>
-                RECEIVE → STORE → MONITOR → ALERT → ACT → VERIFY
-              </p>
+          <div>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              background: 'rgba(255, 255, 255, 0.18)',
+              padding: '4px 12px',
+              borderRadius: 999,
+              fontSize: 11.5,
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              marginBottom: 10
+            }}>
+              <Clock size={13} />
+              <span>ROUTINE STORE CHECK</span>
             </div>
-
-            <div style={{ display: 'flex', gap: 10 }}>
-              <Link
-                href="/grocery/daily-check"
-                style={{
-                  background: '#ffffff',
-                  color: '#065f46',
-                  padding: '10px 20px',
-                  borderRadius: 10,
-                  fontSize: 13,
-                  fontWeight: 800,
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                }}
-              >
-                <ClipboardCheck size={16} /> Start Daily 22 Check
-              </Link>
+            <h2 style={{ fontSize: 24, fontWeight: 900, margin: '0 0 6px', letterSpacing: '-0.02em' }}>
+              Today's Daily Food Safety Check
+            </h2>
+            <p style={{ margin: '0 0 10px', fontSize: 14, color: '#a7f3d0' }}>
+              Complete your routine food-safety check to ensure clean premises, chilled stock, and safe food.
+            </p>
+            <div style={{ display: 'flex', gap: 14, fontSize: 13, color: '#d1fae5', fontWeight: 600 }}>
+              <span>✓ 22 checks</span>
+              <span>•</span>
+              <span>⏱ About 5 minutes</span>
+              <span>•</span>
+              <span>📋 Simple YES / NO</span>
             </div>
           </div>
 
-          {/* Operational Metrics Bar */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-            gap: 12,
-            marginTop: 22,
-            paddingTop: 18,
-            borderTop: '1px solid rgba(255, 255, 255, 0.15)'
-          }}>
-            <div style={{ background: 'rgba(0, 0, 0, 0.18)', borderRadius: 12, padding: '12px 14px' }}>
-              <span style={{ fontSize: 11.5, color: '#a7f3d0' }}>Today&apos;s Checks</span>
-              <div style={{ fontSize: 22, fontWeight: 900, marginTop: 4, display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                <span>{counts.todayChecksCompleted || 0} / 22</span>
-                <span style={{ fontSize: 11, color: counts.todayChecksCompleted === 22 ? '#34d399' : '#fde047' }}>
-                  {counts.todayChecksCompleted === 22 ? 'Done' : 'Pending'}
-                </span>
+          <div>
+            <Link
+              href="/grocery/daily-check"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                background: '#ffffff',
+                color: '#064e3b',
+                padding: '14px 28px',
+                borderRadius: 14,
+                fontSize: 15,
+                fontWeight: 800,
+                textDecoration: 'none',
+                boxShadow: '0 4px 14px rgba(0, 0, 0, 0.15)',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <span>START DAILY CHECK</span>
+              <ArrowRight size={18} />
+            </Link>
+          </div>
+        </div>
+
+        {/* SECTION: LEARN FOOD SAFETY (3 LARGE CARDS) */}
+        <div style={{ marginBottom: 36 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 18 }}>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                LEARN → DO → CHECK → ACT
+              </div>
+              <h2 style={{ fontSize: 21, fontWeight: 900, color: 'var(--text, #0f172a)', margin: '4px 0 0' }}>
+                Learn Food Safety
+              </h2>
+            </div>
+            <Link
+              href="/grocery/learn"
+              style={{ fontSize: 13, fontWeight: 700, color: '#059669', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}
+            >
+              <span>View All Lessons</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
+            {/* CARD 1: RECEIVE FOOD SAFELY */}
+            <div style={{
+              background: '#ffffff',
+              border: '1.5px solid #E2E8F0',
+              borderRadius: 18,
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.03)'
+            }}>
+              <div>
+                <div style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 12,
+                  background: 'rgba(5, 150, 105, 0.12)',
+                  color: '#059669',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 16
+                }}>
+                  <Truck size={24} />
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  STEP 1 · RECEIVING
+                </div>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0F172A', margin: '4px 0 8px' }}>
+                  Receive Food Safely
+                </h3>
+                <p style={{ fontSize: 13.5, color: '#64748B', lineHeight: 1.5, margin: '0 0 16px' }}>
+                  Learn how to check food when it arrives at your dock: delivery truck, packaging seals, date markings, and temperature.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <Link
+                  href="/grocery/learn/receiving"
+                  style={{
+                    flex: 1,
+                    textAlign: 'center',
+                    background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                    color: '#ffffff',
+                    padding: '10px 18px',
+                    borderRadius: 10,
+                    fontSize: 13.5,
+                    fontWeight: 700,
+                    textDecoration: 'none'
+                  }}
+                >
+                  Learn
+                </Link>
+                <Link
+                  href="/grocery/receiving"
+                  style={{
+                    textAlign: 'center',
+                    background: '#f1f5f9',
+                    color: '#334155',
+                    padding: '10px 14px',
+                    borderRadius: 10,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    textDecoration: 'none'
+                  }}
+                  title="Try Receiving Form"
+                >
+                  Try Now
+                </Link>
               </div>
             </div>
 
-            <div style={{ background: 'rgba(0, 0, 0, 0.18)', borderRadius: 12, padding: '12px 14px' }}>
-              <span style={{ fontSize: 11.5, color: '#a7f3d0' }}>Temperature Alerts</span>
-              <div style={{ fontSize: 22, fontWeight: 900, marginTop: 4, color: counts.tempBreaches > 0 ? '#fca5a5' : '#34d399' }}>
-                {counts.tempBreaches || 0}
+            {/* CARD 2: STORE FOOD SAFELY */}
+            <div style={{
+              background: '#ffffff',
+              border: '1.5px solid #E2E8F0',
+              borderRadius: 18,
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.03)'
+            }}>
+              <div>
+                <div style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 12,
+                  background: 'rgba(2, 132, 199, 0.12)',
+                  color: '#0284c7',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 16
+                }}>
+                  <Layers size={24} />
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  STEP 2 · STORAGE &amp; FEFO
+                </div>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0F172A', margin: '4px 0 8px' }}>
+                  Store Food Safely
+                </h3>
+                <p style={{ fontSize: 13.5, color: '#64748B', lineHeight: 1.5, margin: '0 0 16px' }}>
+                  Learn where different foods should be stored, how to separate raw meat from ready-to-eat foods, and First Expiry, First Out.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <Link
+                  href="/grocery/learn/storage"
+                  style={{
+                    flex: 1,
+                    textAlign: 'center',
+                    background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                    color: '#ffffff',
+                    padding: '10px 18px',
+                    borderRadius: 10,
+                    fontSize: 13.5,
+                    fontWeight: 700,
+                    textDecoration: 'none'
+                  }}
+                >
+                  Learn
+                </Link>
+                <Link
+                  href="/grocery/stock"
+                  style={{
+                    textAlign: 'center',
+                    background: '#f1f5f9',
+                    color: '#334155',
+                    padding: '10px 14px',
+                    borderRadius: 10,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    textDecoration: 'none'
+                  }}
+                  title="View Stock"
+                >
+                  View Stock
+                </Link>
               </div>
             </div>
 
-            <div style={{ background: 'rgba(0, 0, 0, 0.18)', borderRadius: 12, padding: '12px 14px' }}>
-              <span style={{ fontSize: 11.5, color: '#a7f3d0' }}>Expired Stock (Pull Now)</span>
-              <div style={{ fontSize: 22, fontWeight: 900, marginTop: 4, color: counts.expiredStockCount > 0 ? '#fca5a5' : '#34d399' }}>
-                {counts.expiredStockCount || 0}
+            {/* CARD 3: CONTROL TEMPERATURE */}
+            <div style={{
+              background: '#ffffff',
+              border: '1.5px solid #E2E8F0',
+              borderRadius: 18,
+              padding: '24px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.03)'
+            }}>
+              <div>
+                <div style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 12,
+                  background: 'rgba(234, 88, 12, 0.12)',
+                  color: '#ea580c',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 16
+                }}>
+                  <Thermometer size={24} />
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 800, color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  STEP 3 · TEMPERATURE CONTROL
+                </div>
+                <h3 style={{ fontSize: 18, fontWeight: 800, color: '#0F172A', margin: '4px 0 8px' }}>
+                  Control Temperature
+                </h3>
+                <p style={{ fontSize: 13.5, color: '#64748B', lineHeight: 1.5, margin: '0 0 16px' }}>
+                  Learn how to check chillers and freezers, what green/amber/red mean, and what to do if temperatures drift.
+                </p>
               </div>
-            </div>
-
-            <div style={{ background: 'rgba(0, 0, 0, 0.18)', borderRadius: 12, padding: '12px 14px' }}>
-              <span style={{ fontSize: 11.5, color: '#a7f3d0' }}>Near Expiry (FEFO)</span>
-              <div style={{ fontSize: 22, fontWeight: 900, marginTop: 4, color: '#fde047' }}>
-                {counts.nearExpiryCount || 0}
-              </div>
-            </div>
-
-            <div style={{ background: 'rgba(0, 0, 0, 0.18)', borderRadius: 12, padding: '12px 14px' }}>
-              <span style={{ fontSize: 11.5, color: '#a7f3d0' }}>Receiving Exceptions</span>
-              <div style={{ fontSize: 22, fontWeight: 900, marginTop: 4 }}>
-                {counts.receivingExceptionsToday || 0}
+              <div style={{ display: 'flex', gap: 10 }}>
+                <Link
+                  href="/grocery/learn/temperature"
+                  style={{
+                    flex: 1,
+                    textAlign: 'center',
+                    background: 'linear-gradient(135deg, #ea580c 0%, #c2410c 100%)',
+                    color: '#ffffff',
+                    padding: '10px 18px',
+                    borderRadius: 10,
+                    fontSize: 13.5,
+                    fontWeight: 700,
+                    textDecoration: 'none'
+                  }}
+                >
+                  Learn
+                </Link>
+                <Link
+                  href="/grocery/temperature"
+                  style={{
+                    textAlign: 'center',
+                    background: '#f1f5f9',
+                    color: '#334155',
+                    padding: '10px 14px',
+                    borderRadius: 10,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    textDecoration: 'none'
+                  }}
+                  title="Log Temperatures"
+                >
+                  Log Temp
+                </Link>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ACTIVE ALERTS FEED (IF ANY) */}
-        {alerts.length > 0 && (
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <h2 style={{ fontSize: 16, fontWeight: 800, color: '#0F2922', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <AlertTriangle size={18} color="#dc2626" /> Active Food Safety Alerts ({alerts.length})
-              </h2>
-              <span style={{ fontSize: 12, color: '#64748B' }}>Real-time exception triggers</span>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {alerts.map(alt => (
-                <div
-                  key={alt.id}
-                  style={{
-                    background: alt.severity === 'RED' ? '#fef2f2' : '#fffbeb',
-                    border: `1.5px solid ${alt.severity === 'RED' ? 'rgba(239, 68, 68, 0.35)' : 'rgba(245, 158, 11, 0.35)'}`,
-                    borderRadius: 12,
-                    padding: '14px 18px',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: 12
-                  }}
-                >
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                    <div style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 8,
-                      background: alt.severity === 'RED' ? '#fee2e2' : '#fef3c7',
-                      color: alt.severity === 'RED' ? '#dc2626' : '#d97706',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <AlertCircle size={18} />
-                    </div>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{
-                          fontSize: 10.5,
-                          fontWeight: 800,
-                          padding: '1px 6px',
-                          borderRadius: 4,
-                          background: alt.severity === 'RED' ? '#dc2626' : '#d97706',
-                          color: '#ffffff'
-                        }}>
-                          {alt.severity}
-                        </span>
-                        <strong style={{ fontSize: 14, color: '#0F172A' }}>{alt.title}</strong>
-                      </div>
-                      <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#475569', lineHeight: 1.4 }}>
-                        {alt.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    {alt.type === 'TEMP_BREACH' && (
-                      <Link
-                        href="/grocery/temperature"
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 700,
-                          padding: '6px 14px',
-                          borderRadius: 8,
-                          background: '#dc2626',
-                          color: '#ffffff',
-                          textDecoration: 'none'
-                        }}
-                      >
-                        Check Equipment →
-                      </Link>
-                    )}
-                    {alt.type === 'EXPIRED_PRODUCT' && (
-                      <Link
-                        href="/grocery/stock"
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 700,
-                          padding: '6px 14px',
-                          borderRadius: 8,
-                          background: '#dc2626',
-                          color: '#ffffff',
-                          textDecoration: 'none'
-                        }}
-                      >
-                        Quarantine Stock →
-                      </Link>
-                    )}
-                    {alt.type === 'SEGREGATION_RISK' && (
-                      <Link
-                        href="/grocery/storage"
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 700,
-                          padding: '6px 14px',
-                          borderRadius: 8,
-                          background: '#dc2626',
-                          color: '#ffffff',
-                          textDecoration: 'none'
-                        }}
-                      >
-                        Fix Storage →
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 7 PRIMARY OPERATIONAL CARDS */}
-        <h2 style={{ fontSize: 16, fontWeight: 800, color: '#0F2922', marginBottom: 14 }}>
-          Core Operational Workflows
-        </h2>
-
+        {/* SECONDARY OPERATIONAL SHORTCUTS */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-          gap: 16
+          background: '#ffffff',
+          border: '1px solid #E2E8F0',
+          borderRadius: 16,
+          padding: '20px 24px',
+          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.02)'
         }}>
-          {/* 1. RECEIVING */}
-          <Link
-            href="/grocery/receiving"
-            style={{
-              textDecoration: 'none',
-              background: '#ffffff',
-              border: '1px solid #E2E8F0',
-              borderRadius: 16,
-              padding: '20px 22px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              transition: 'all 0.15s ease',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <div style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  background: 'rgba(5, 150, 105, 0.12)',
-                  color: '#059669',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <Truck size={22} />
-                </div>
-                <span style={{ fontSize: 11, fontWeight: 800, color: '#059669', background: 'rgba(5, 150, 105, 0.1)', padding: '2px 8px', borderRadius: 999 }}>
-                  STEP 1
-                </span>
+          <div style={{ fontSize: 12, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 14 }}>
+            Operations &amp; Advanced Tools
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+            <Link
+              href="/grocery/receiving"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 14px',
+                borderRadius: 10,
+                background: '#F8FAFC',
+                border: '1px solid #E2E8F0',
+                textDecoration: 'none',
+                color: '#1E293B'
+              }}
+            >
+              <Truck size={18} color="#059669" />
+              <div>
+                <strong style={{ fontSize: 13, display: 'block' }}>Dockside Receiving</strong>
+                <span style={{ fontSize: 11.5, color: '#64748B' }}>Record delivery inspection</span>
               </div>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0F172A', margin: '0 0 6px' }}>
-                1. RECEIVING
-              </h3>
-              <p style={{ fontSize: 13, color: '#64748B', margin: 0, lineHeight: 1.45 }}>
-                &ldquo;Check today&apos;s incoming food&rdquo; · Inspect suppliers, packaging, seal integrity, and delivery temperatures before acceptance.
-              </p>
-            </div>
-            <div style={{ marginTop: 18, paddingTop: 12, borderTop: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#059669' }}>Log Incoming Batch</span>
-              <ChevronRight size={16} color="#059669" />
-            </div>
-          </Link>
+            </Link>
 
-          {/* 2. STORAGE */}
-          <Link
-            href="/grocery/storage"
-            style={{
-              textDecoration: 'none',
-              background: '#ffffff',
-              border: '1px solid #E2E8F0',
-              borderRadius: 16,
-              padding: '20px 22px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              transition: 'all 0.15s ease',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <div style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  background: 'rgba(14, 165, 233, 0.12)',
-                  color: '#0284c7',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <Layers size={22} />
-                </div>
-                <span style={{ fontSize: 11, fontWeight: 800, color: '#0284c7', background: 'rgba(14, 165, 233, 0.1)', padding: '2px 8px', borderRadius: 999 }}>
-                  STEP 2
-                </span>
+            <Link
+              href="/grocery/temperature"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 14px',
+                borderRadius: 10,
+                background: '#F8FAFC',
+                border: '1px solid #E2E8F0',
+                textDecoration: 'none',
+                color: '#1E293B'
+              }}
+            >
+              <Thermometer size={18} color="#ea580c" />
+              <div>
+                <strong style={{ fontSize: 13, display: 'block' }}>Chillers &amp; Freezers</strong>
+                <span style={{ fontSize: 11.5, color: '#64748B' }}>Log probe temperatures</span>
               </div>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0F172A', margin: '0 0 6px' }}>
-                2. STORAGE
-              </h3>
-              <p style={{ fontSize: 13, color: '#64748B', margin: 0, lineHeight: 1.45 }}>
-                &ldquo;Are food products stored correctly?&rdquo; · Zone mapping, food vs chemical segregation, off-floor pallet elevation, and raw vs RTE separation.
-              </p>
-            </div>
-            <div style={{ marginTop: 18, paddingTop: 12, borderTop: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#0284c7' }}>View Storage Zones</span>
-              <ChevronRight size={16} color="#0284c7" />
-            </div>
-          </Link>
+            </Link>
 
-          {/* 3. TEMPERATURE */}
-          <Link
-            href="/grocery/temperature"
-            style={{
-              textDecoration: 'none',
-              background: '#ffffff',
-              border: '1px solid #E2E8F0',
-              borderRadius: 16,
-              padding: '20px 22px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              transition: 'all 0.15s ease',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <div style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  background: 'rgba(99, 102, 241, 0.12)',
-                  color: '#4f46e5',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <Thermometer size={22} />
-                </div>
-                <span style={{ fontSize: 11, fontWeight: 800, color: '#4f46e5', background: 'rgba(99, 102, 241, 0.1)', padding: '2px 8px', borderRadius: 999 }}>
-                  STEP 3
-                </span>
+            <Link
+              href="/grocery/storage"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 14px',
+                borderRadius: 10,
+                background: '#F8FAFC',
+                border: '1px solid #E2E8F0',
+                textDecoration: 'none',
+                color: '#1E293B'
+              }}
+            >
+              <Layers size={18} color="#0284c7" />
+              <div>
+                <strong style={{ fontSize: 13, display: 'block' }}>Storage &amp; Zones</strong>
+                <span style={{ fontSize: 11.5, color: '#64748B' }}>Segregation &amp; layouts</span>
               </div>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0F172A', margin: '0 0 6px' }}>
-                3. TEMPERATURE
-              </h3>
-              <p style={{ fontSize: 13, color: '#64748B', margin: 0, lineHeight: 1.45 }}>
-                &ldquo;Monitor chillers &amp; freezers&rdquo; · Routine twice-daily logging for dairy (≤5°C), meat chillers, and deep freezers (≤-18°C).
-              </p>
-            </div>
-            <div style={{ marginTop: 18, paddingTop: 12, borderTop: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#4f46e5' }}>Log Readings</span>
-              <ChevronRight size={16} color="#4f46e5" />
-            </div>
-          </Link>
+            </Link>
 
-          {/* 4. STOCK ROTATION */}
-          <Link
-            href="/grocery/stock"
-            style={{
-              textDecoration: 'none',
-              background: '#ffffff',
-              border: '1px solid #E2E8F0',
-              borderRadius: 16,
-              padding: '20px 22px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              transition: 'all 0.15s ease',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <div style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  background: 'rgba(234, 88, 12, 0.12)',
-                  color: '#ea580c',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <RotateCw size={22} />
-                </div>
-                <span style={{ fontSize: 11, fontWeight: 800, color: '#ea580c', background: 'rgba(234, 88, 12, 0.1)', padding: '2px 8px', borderRadius: 999 }}>
-                  STEP 4
-                </span>
+            <Link
+              href="/grocery/stock"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 14px',
+                borderRadius: 10,
+                background: '#F8FAFC',
+                border: '1px solid #E2E8F0',
+                textDecoration: 'none',
+                color: '#1E293B'
+              }}
+            >
+              <RotateCw size={18} color="#7c3aed" />
+              <div>
+                <strong style={{ fontSize: 13, display: 'block' }}>FIFO / FEFO Stock</strong>
+                <span style={{ fontSize: 11.5, color: '#64748B' }}>Batch expiry &amp; quarantine</span>
               </div>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0F172A', margin: '0 0 6px' }}>
-                4. STOCK ROTATION
-              </h3>
-              <p style={{ fontSize: 13, color: '#64748B', margin: 0, lineHeight: 1.45 }}>
-                &ldquo;FIFO / FEFO&rdquo; · First Expiry First Out stock rotation. Real-time expiry alerts and quarantine safety locks.
-              </p>
-            </div>
-            <div style={{ marginTop: 18, paddingTop: 12, borderTop: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#ea580c' }}>Manage Batches</span>
-              <ChevronRight size={16} color="#ea580c" />
-            </div>
-          </Link>
-
-          {/* 5. HYGIENE & DAILY CHECKS */}
-          <Link
-            href="/grocery/daily-check"
-            style={{
-              textDecoration: 'none',
-              background: '#ffffff',
-              border: '1px solid #E2E8F0',
-              borderRadius: 16,
-              padding: '20px 22px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              transition: 'all 0.15s ease',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <div style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  background: 'rgba(16, 185, 129, 0.12)',
-                  color: '#059669',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <ClipboardCheck size={22} />
-                </div>
-                <span style={{ fontSize: 11, fontWeight: 800, color: '#059669', background: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: 999 }}>
-                  STEP 5
-                </span>
-              </div>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0F172A', margin: '0 0 6px' }}>
-                5. HYGIENE &amp; CHECKS
-              </h3>
-              <p style={{ fontSize: 13, color: '#64748B', margin: 0, lineHeight: 1.45 }}>
-                &ldquo;Store cleanliness &amp; pest control&rdquo; · 22 FSSAI-aligned operational checks: waste bins, pest light traps, and sanitary maintenance.
-              </p>
-            </div>
-            <div style={{ marginTop: 18, paddingTop: 12, borderTop: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#059669' }}>Run 22 Daily Checks</span>
-              <ChevronRight size={16} color="#059669" />
-            </div>
-          </Link>
-
-          {/* 6. CORRECTIVE ACTIONS */}
-          <Link
-            href="/actions"
-            style={{
-              textDecoration: 'none',
-              background: '#ffffff',
-              border: '1px solid #E2E8F0',
-              borderRadius: 16,
-              padding: '20px 22px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              transition: 'all 0.15s ease',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <div style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  background: 'rgba(239, 68, 68, 0.12)',
-                  color: '#dc2626',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <AlertTriangle size={22} />
-                </div>
-                <span style={{ fontSize: 11, fontWeight: 800, color: '#dc2626', background: 'rgba(239, 68, 68, 0.1)', padding: '2px 8px', borderRadius: 999 }}>
-                  STEP 6
-                </span>
-              </div>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0F172A', margin: '0 0 6px' }}>
-                6. CORRECTIVE ACTIONS
-              </h3>
-              <p style={{ fontSize: 13, color: '#64748B', margin: 0, lineHeight: 1.45 }}>
-                &ldquo;Problems requiring action&rdquo; · Assign responsible staff, specify immediate corrections, root causes, and external service requests.
-              </p>
-            </div>
-            <div style={{ marginTop: 18, paddingTop: 12, borderTop: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#dc2626' }}>View Action Register</span>
-              <ChevronRight size={16} color="#dc2626" />
-            </div>
-          </Link>
-
-          {/* 7. VERIFICATION */}
-          <Link
-            href="/actions?status=awaiting_verification"
-            style={{
-              textDecoration: 'none',
-              background: '#ffffff',
-              border: '1px solid #E2E8F0',
-              borderRadius: 16,
-              padding: '20px 22px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              transition: 'all 0.15s ease',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <div style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  background: 'rgba(59, 130, 246, 0.12)',
-                  color: '#2563eb',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <CheckCircle2 size={22} />
-                </div>
-                <span style={{ fontSize: 11, fontWeight: 800, color: '#2563eb', background: 'rgba(59, 130, 246, 0.1)', padding: '2px 8px', borderRadius: 999 }}>
-                  STEP 7
-                </span>
-              </div>
-              <h3 style={{ fontSize: 17, fontWeight: 800, color: '#0F172A', margin: '0 0 6px' }}>
-                7. VERIFICATION
-              </h3>
-              <p style={{ fontSize: 13, color: '#64748B', margin: 0, lineHeight: 1.45 }}>
-                &ldquo;Actions awaiting verification&rdquo; · Independent review of completed corrective actions before closing. Prevents self-closing of food risks.
-              </p>
-            </div>
-            <div style={{ marginTop: 18, paddingTop: 12, borderTop: '1px solid #F1F5F9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#2563eb' }}>Verify Completed Actions</span>
-              <ChevronRight size={16} color="#2563eb" />
-            </div>
-          </Link>
+            </Link>
+          </div>
         </div>
       </main>
     </div>
