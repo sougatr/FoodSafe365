@@ -1,5 +1,6 @@
 import { query } from './db';
 import { getAuthContext, AuthContext } from './auth';
+import { getRestaurantEntry } from './unclaimed-restaurant-store';
 
 export async function requireOutletAccess(outletId: string, req?: Request) {
   const auth = await getAuthContext(req);
@@ -35,12 +36,31 @@ export type FeedbackAuthorizationResult =
  * - platform_admin: Can access all or any specific outlet.
  * - org_admin / owner: Can access all or specific outlets belonging to their organisation.
  * - outlet_manager / manager / food_safety_supervisor: Can strictly access their assigned outlet only.
+ * - Unclaimed restaurants cannot be accessed by managers until claimed and verified.
  */
 export async function authorizeFeedbackAccess(
   requestedOutletId: string | null,
   req?: Request,
   allowExplicitDemo: boolean = false
 ): Promise<FeedbackAuthorizationResult> {
+  const requested = requestedOutletId && requestedOutletId !== 'all' ? requestedOutletId.trim() : null;
+
+  // Check if requested restaurant is UNCLAIMED
+  if (requested) {
+    const restEntry = getRestaurantEntry(requested);
+    if (restEntry && (restEntry.status === 'UNCLAIMED' || restEntry.status === 'DISCOVERED' || restEntry.status === 'INVITED')) {
+      const authCheck = await getAuthContext(req);
+      if (!authCheck || authCheck.role !== 'platform_admin') {
+        return {
+          ok: false,
+          status: 403,
+          code: 'RESTAURANT_UNCLAIMED',
+          message: `Access denied: ${restEntry.name || requested} has not yet claimed its FoodSafe365 profile. Ownership verification and claim required.`
+        };
+      }
+    }
+  }
+
   const auth = await getAuthContext(req);
 
   // If unauthenticated, allow only if explicitly in local demo mode (DATABASE_URL unset)
@@ -49,10 +69,10 @@ export async function authorizeFeedbackAccess(
       const demoAuth: AuthContext = {
         userId: 'demo-manager',
         organisationId: 'demo-org',
-        outletId: requestedOutletId && requestedOutletId !== 'all' ? requestedOutletId : 'the-table',
+        outletId: requested && requested !== 'all' ? requested : 'the-table',
         role: 'outlet_manager'
       };
-      return { ok: true, auth: demoAuth, targetOutletId: requestedOutletId };
+      return { ok: true, auth: demoAuth, targetOutletId: requested };
     }
     return {
       ok: false,
@@ -61,8 +81,6 @@ export async function authorizeFeedbackAccess(
       message: 'Authentication required. Please sign in as a restaurant manager.'
     };
   }
-
-  const requested = requestedOutletId && requestedOutletId !== 'all' ? requestedOutletId.trim() : null;
 
   // 1. Platform administrator: unrestricted access
   if (auth.role === 'platform_admin') {

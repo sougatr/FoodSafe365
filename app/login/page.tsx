@@ -2,9 +2,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Home, Utensils, Building2, User, CheckCircle2, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Home, Utensils, Building2, User, CheckCircle2, ArrowRight, ShieldCheck, ShoppingBag } from 'lucide-react';
 
-export type UserRole = 'restaurant' | 'client' | 'provider';
+export type UserRole = 'restaurant' | 'grocery' | 'client' | 'provider';
 
 export default function Login() {
   const [role, setRole] = useState<UserRole>('restaurant');
@@ -18,7 +18,7 @@ export default function Login() {
     if (typeof window !== 'undefined') {
       const q = new URLSearchParams(window.location.search);
       const requestedRole = q.get('role') as UserRole;
-      if (requestedRole && ['restaurant', 'client', 'provider'].includes(requestedRole)) {
+      if (requestedRole && ['restaurant', 'grocery', 'client', 'provider'].includes(requestedRole)) {
         handleRoleChange(requestedRole);
       }
     }
@@ -30,6 +30,9 @@ export default function Login() {
     if (newRole === 'restaurant') {
       setEmail('demo@foodsafe365.com');
       setPassword('demo');
+    } else if (newRole === 'grocery') {
+      setEmail('manager.bandra@naturefresh.example.com');
+      setPassword('grocery123');
     } else if (newRole === 'client') {
       setEmail('diner@foodsafe365.com');
       setPassword('diner123');
@@ -59,6 +62,12 @@ export default function Login() {
           // Allow demo login
         }
         router.push('/home');
+      } else if (role === 'grocery') {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('foodsafe365_grocery_outlet_id', 'store-nature-basket-bandra');
+          localStorage.setItem('foodsafe365_outlet_id', 'store-nature-basket-bandra');
+        }
+        router.push('/grocery');
       } else if (role === 'client') {
         // Diner login directs to diner portal
         if (typeof window !== 'undefined') {
@@ -108,12 +117,12 @@ export default function Login() {
         </Link>
       </div>
 
-      <div className="container" style={{ maxWidth: 540, paddingTop: 40, paddingBottom: 60 }}>
+      <div className="container" style={{ maxWidth: 600, paddingTop: 40, paddingBottom: 60 }}>
         {/* Role Selector Tabs */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr',
-          gap: 8,
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 6,
           background: '#e2e8f0',
           padding: 6,
           borderRadius: 14,
@@ -123,69 +132,92 @@ export default function Login() {
             type="button"
             onClick={() => handleRoleChange('restaurant')}
             style={{
-              padding: '10px 8px',
+              padding: '10px 4px',
               borderRadius: 10,
-              fontSize: 13,
-              fontWeight: 600,
+              fontSize: 12,
+              fontWeight: 700,
               border: 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 6,
+              gap: 4,
               background: role === 'restaurant' ? '#ffffff' : 'transparent',
               color: role === 'restaurant' ? '#0f172a' : '#64748b',
               boxShadow: role === 'restaurant' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
               transition: 'all 0.15s'
             }}
           >
-            <Utensils size={15} /> Restaurant
+            <Utensils size={14} /> Restaurant
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleRoleChange('grocery')}
+            style={{
+              padding: '10px 4px',
+              borderRadius: 10,
+              fontSize: 12,
+              fontWeight: 700,
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 4,
+              background: role === 'grocery' ? '#ffffff' : 'transparent',
+              color: role === 'grocery' ? '#059669' : '#64748b',
+              boxShadow: role === 'grocery' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+              transition: 'all 0.15s'
+            }}
+          >
+            <ShoppingBag size={14} /> Grocery
           </button>
 
           <button
             type="button"
             onClick={() => handleRoleChange('client')}
             style={{
-              padding: '10px 8px',
+              padding: '10px 4px',
               borderRadius: 10,
-              fontSize: 13,
-              fontWeight: 600,
+              fontSize: 12,
+              fontWeight: 700,
               border: 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 6,
+              gap: 4,
               background: role === 'client' ? '#ffffff' : 'transparent',
               color: role === 'client' ? '#059669' : '#64748b',
               boxShadow: role === 'client' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
               transition: 'all 0.15s'
             }}
           >
-            <User size={15} /> Diner / Client
+            <User size={14} /> Diner
           </button>
 
           <button
             type="button"
             onClick={() => handleRoleChange('provider')}
             style={{
-              padding: '10px 8px',
+              padding: '10px 4px',
               borderRadius: 10,
-              fontSize: 13,
-              fontWeight: 600,
+              fontSize: 12,
+              fontWeight: 700,
               border: 'none',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 6,
+              gap: 4,
               background: role === 'provider' ? '#ffffff' : 'transparent',
-              color: role === 'provider' ? '#2563eb' : '#64748b',
+              color: role === 'provider' ? '#059669' : '#64748b',
               boxShadow: role === 'provider' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
               transition: 'all 0.15s'
             }}
           >
-            <Building2 size={15} /> Provider
+            <Building2 size={14} /> Provider
           </button>
         </div>
 
@@ -201,6 +233,18 @@ export default function Login() {
                 <h1 style={{ fontSize: 24, marginTop: 10, marginBottom: 6 }}>Restaurant Sign In</h1>
                 <p className="muted" style={{ fontSize: 14 }}>
                   Access daily 28 kitchen safeguards, refrigerator logs, corrective actions, and manager review.
+                </p>
+              </>
+            )}
+
+            {role === 'grocery' && (
+              <>
+                <span className="pill good" style={{ fontSize: 11, padding: '3px 8px', background: 'rgba(5, 150, 105, 0.15)', color: '#047857' }}>
+                  GROCERY &amp; RETAIL FOOD STORE PORTAL
+                </span>
+                <h1 style={{ fontSize: 24, marginTop: 10, marginBottom: 6 }}>Grocery Store Sign In</h1>
+                <p className="muted" style={{ fontSize: 14 }}>
+                  Access incoming food receiving, chiller/freezer monitoring, FIFO/FEFO stock rotation, and 22 retail checks.
                 </p>
               </>
             )}

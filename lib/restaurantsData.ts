@@ -1,3 +1,5 @@
+import type { RestaurantStatus } from './unclaimed-restaurant-store';
+
 export interface RestaurantItem {
   id: string;
   name: string;
@@ -10,6 +12,7 @@ export interface RestaurantItem {
   score: string;
   reviews: number;
   lastCheck: string;
+  status?: RestaurantStatus;
   signals: {
     cold: { title: string; subtitle: string };
     medical: { title: string; subtitle: string };
@@ -103,6 +106,7 @@ export const POPULAR_RESTAURANTS: RestaurantItem[] = [
     score: '4.7',
     reviews: 620,
     lastCheck: 'Today, 07:45 AM',
+    status: 'UNCLAIMED',
     signals: {
       cold: { title: 'Cold Storage < 5°C', subtitle: 'Chilled OK' },
       medical: { title: '100% Medical', subtitle: 'Form 1A Current' },

@@ -28,7 +28,8 @@ import {
   Droplets,
   HeartPulse,
   Mail,
-  KeyRound
+  KeyRound,
+  ShoppingBag
 } from 'lucide-react';
 import GlobalHeader from '@/components/GlobalHeader';
 import { POPULAR_RESTAURANTS, RestaurantItem } from '@/lib/restaurantsData';
@@ -77,11 +78,13 @@ export default function Landing() {
   const [dinerEmail, setDinerEmail] = useState('');
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const [ratingConfirmation, setRatingConfirmation] = useState<{
+    restaurantId: string;
     restaurantName: string;
     score: string;
     table: string;
     wantsFeedback: boolean;
     email?: string;
+    isUnclaimed?: boolean;
   } | null>(null);
 
   // QR Code Scanner / Manual Lookup Modal State
@@ -273,8 +276,14 @@ export default function Landing() {
       },
       overallScore: parseFloat(avgScore),
       feedback: rateRemarks.trim() || undefined,
-      verifiedDineIn: true
+      verifiedDineIn: true,
+      responseRequested: wantsFeedback,
+      consentToShareContact: wantsFeedback,
+      customerEmail: wantsFeedback && dinerEmail.trim() ? dinerEmail.trim() : (customerEmail || undefined),
+      customerPhone: customerPhone ? `+91 ${customerPhone}` : undefined
     };
+
+    let isUnclaimed = ratingModalRestaurant.status === 'UNCLAIMED' || ratingModalRestaurant.status === 'DISCOVERED';
 
     // 1. Persist to server / database API so it is retrievable across devices
     try {
@@ -283,7 +292,12 @@ export default function Landing() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newRating)
       });
-      if (!res.ok) {
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data && typeof json.data.isUnclaimed === 'boolean') {
+          isUnclaimed = json.data.isUnclaimed;
+        }
+      } else {
         console.warn('[handleSubmitRating] Server API returned status:', res.status);
       }
     } catch (apiErr) {
@@ -312,19 +326,32 @@ export default function Landing() {
 
       const existing = JSON.parse(localStorage.getItem('foodsafe365_diner_ratings') || '[]');
       localStorage.setItem('foodsafe365_diner_ratings', JSON.stringify([newRating, ...existing]));
+      localStorage.setItem('foodsafe365_outlet_id', ratingModalRestaurant.id);
+      localStorage.setItem('foodsafe365_setup', JSON.stringify({
+        name: ratingModalRestaurant.name,
+        city: ratingModalRestaurant.city || 'Mumbai',
+        createdAt: new Date().toISOString()
+      }));
       window.dispatchEvent(new CustomEvent('foodsafe-rating-submitted'));
     }
 
     setIsSubmittingRating(false);
     setRatingConfirmation({
+      restaurantId: ratingModalRestaurant.id,
       restaurantName: ratingModalRestaurant.name,
       score: avgScore,
       table: rateTableNum,
       wantsFeedback,
-      email: wantsFeedback && dinerEmail.trim() ? dinerEmail.trim() : (customerEmail || undefined)
+      email: wantsFeedback && dinerEmail.trim() ? dinerEmail.trim() : (customerEmail || undefined),
+      isUnclaimed
     });
-    const feedbackMsg = wantsFeedback && dinerEmail.trim() ? ` Direct resolution will be sent to ${dinerEmail.trim()}.` : '';
-    showToast(`⭐ Thank you! Your ${avgScore}★ Customer Feedback for ${ratingModalRestaurant.name} was saved and delivered to restaurant management.${feedbackMsg}`);
+
+    if (isUnclaimed) {
+      showToast(`⭐ Thank you! Your Customer Food-Safety Rating for ${ratingModalRestaurant.name} has been recorded by FoodSafe365.`);
+    } else {
+      const feedbackMsg = wantsFeedback && dinerEmail.trim() ? ` Direct resolution will be sent to ${dinerEmail.trim()}.` : '';
+      showToast(`⭐ Thank you! Your ${avgScore}★ Customer Feedback for ${ratingModalRestaurant.name} was saved and shared with restaurant management.${feedbackMsg}`);
+    }
   }
 
   function handleAddRestaurant(e: React.FormEvent) {
@@ -703,14 +730,70 @@ export default function Landing() {
               marginBottom: 12,
               textAlign: 'center'
             }}>
-              Are you a restaurant or food-service professional?
+              Are you a food business or service professional?
             </div>
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
               gap: 12,
               textAlign: 'left'
             }}>
+              {/* Grocery Store Entry */}
+              <div style={{
+                background: '#F8FAFC',
+                border: '1px solid #E2E8F0',
+                borderRadius: 12,
+                padding: '14px 16px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: 10
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <ShoppingBag size={16} color="#059669" />
+                    <strong style={{ fontSize: 14, color: '#0F2922' }}>Grocery Store</strong>
+                  </div>
+                  <p style={{ margin: 0, fontSize: 12, color: '#64748B', lineHeight: 1.4 }}>
+                    Receiving inspection, cold storage, FIFO/FEFO stock rotation &amp; checks.
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <Link
+                    href="/onboarding/grocery"
+                    style={{
+                      flex: 1,
+                      textAlign: 'center',
+                      background: '#047857',
+                      color: '#ffffff',
+                      padding: '7px 8px',
+                      borderRadius: 8,
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    Onboard →
+                  </Link>
+                  <Link
+                    href="/grocery"
+                    style={{
+                      flex: 1,
+                      textAlign: 'center',
+                      background: '#ffffff',
+                      color: '#047857',
+                      border: '1px solid #CBD5E1',
+                      padding: '7px 8px',
+                      borderRadius: 8,
+                      fontSize: 11.5,
+                      fontWeight: 700,
+                      textDecoration: 'none'
+                    }}
+                  >
+                    Dashboard →
+                  </Link>
+                </div>
+              </div>
               {/* Restaurant Entry */}
               <div style={{
                 background: '#F8FAFC',
@@ -2005,26 +2088,75 @@ export default function Landing() {
                   <Check size={36} />
                 </div>
 
-                <span style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  color: '#34d399',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
-                  background: 'rgba(16, 185, 129, 0.15)',
-                  padding: '4px 12px',
-                  borderRadius: 999
-                }}>
-                  Feedback Delivered to Management
-                </span>
+                {ratingConfirmation.isUnclaimed ? (
+                  <>
+                    <span style={{
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: '#60a5fa',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em',
+                      background: 'rgba(59, 130, 246, 0.15)',
+                      padding: '4px 12px',
+                      borderRadius: 999
+                    }}>
+                      RECORDED BY FOODSAFE365
+                    </span>
 
-                <h3 style={{ fontSize: 22, fontWeight: 900, color: '#ffffff', margin: '14px 0 6px' }}>
-                  Thank You for Your Feedback!
-                </h3>
+                    <h3 style={{ fontSize: 22, fontWeight: 900, color: '#ffffff', margin: '14px 0 6px' }}>
+                      Thank You for Your Feedback!
+                    </h3>
 
-                <p style={{ fontSize: 14, color: '#cbd5e1', maxWidth: 440, margin: '0 auto 20px', lineHeight: 1.5 }}>
-                  Your Customer Food-Safety Rating for <strong>{ratingConfirmation.restaurantName}</strong> has been saved and shared with the restaurant&apos;s kitchen management.
-                </p>
+                    <p style={{ fontSize: 14, color: '#cbd5e1', maxWidth: 440, margin: '0 auto 12px', lineHeight: 1.5 }}>
+                      Your Customer Food-Safety Rating for <strong>{ratingConfirmation.restaurantName}</strong> has been recorded by FoodSafe365.
+                    </p>
+
+                    <div style={{
+                      background: 'rgba(59, 130, 246, 0.08)',
+                      border: '1px solid rgba(59, 130, 246, 0.25)',
+                      borderRadius: 10,
+                      padding: '10px 14px',
+                      maxWidth: 440,
+                      margin: '0 auto 20px',
+                      fontSize: 12.5,
+                      color: '#93c5fd',
+                      lineHeight: 1.4
+                    }}>
+                      ℹ️ This restaurant has not yet claimed its FoodSafe365 profile. We&apos;ll make this feedback available to the restaurant through its FoodSafe365 profile.
+                      <div style={{ marginTop: 8 }}>
+                        <Link
+                          href={`/claim/${ratingConfirmation.restaurantId}`}
+                          style={{ color: '#38bdf8', fontWeight: 700, textDecoration: 'underline' }}
+                        >
+                          Claim this restaurant profile →
+                        </Link>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <span style={{
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: '#34d399',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em',
+                      background: 'rgba(16, 185, 129, 0.15)',
+                      padding: '4px 12px',
+                      borderRadius: 999
+                    }}>
+                      FEEDBACK DELIVERED TO MANAGEMENT
+                    </span>
+
+                    <h3 style={{ fontSize: 22, fontWeight: 900, color: '#ffffff', margin: '14px 0 6px' }}>
+                      Thank You for Your Feedback!
+                    </h3>
+
+                    <p style={{ fontSize: 14, color: '#cbd5e1', maxWidth: 440, margin: '0 auto 20px', lineHeight: 1.5 }}>
+                      Your Customer Food-Safety Rating for <strong>{ratingConfirmation.restaurantName}</strong> has been saved and shared with the restaurant&apos;s kitchen management.
+                    </p>
+                  </>
+                )}
 
                 <div style={{
                   background: '#131b26',
@@ -2229,7 +2361,7 @@ export default function Landing() {
                         }}
                       />
                       <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 4 }}>
-                        🔒 We share your email exclusively with this restaurant&apos;s management for feedback follow-up.
+                        🔒 Your contact details will be shared with this restaurant only so that it can respond to your feedback.
                       </div>
                     </div>
                   )}

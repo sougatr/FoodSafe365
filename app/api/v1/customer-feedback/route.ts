@@ -5,6 +5,7 @@ import { ok, fail } from '@/lib/response';
 import { getCustomerFeedback, saveCustomerFeedback } from '@/lib/customer-feedback-store';
 import { authorizeFeedbackAccess } from '@/lib/tenant';
 import { DinerSafetyRating } from '@/lib/foodsafety28';
+import { getRestaurantEntry, processCustomerFeedbackForUnclaimedRestaurant } from '@/lib/unclaimed-restaurant-store';
 
 // Validation schema for incoming Customer Food-Safety Ratings
 const FeedbackSchema = z.object({
@@ -24,6 +25,10 @@ const FeedbackSchema = z.object({
   overallScore: z.number().min(1).max(5),
   feedback: z.string().max(1500).optional(),
   verifiedDineIn: z.boolean().default(true),
+  responseRequested: z.boolean().optional().default(false),
+  consentToShareContact: z.boolean().optional().default(false),
+  customerEmail: z.string().email().optional().or(z.literal('')),
+  customerPhone: z.string().optional(),
 });
 
 // Server-side sliding cache for duplicate detection & flood protection
@@ -194,9 +199,24 @@ export async function POST(req: NextRequest) {
       overallScore: Math.round(validated.overallScore * 10) / 10,
       feedback: validated.feedback?.trim() || '',
       verifiedDineIn: validated.verifiedDineIn ?? true,
+      responseRequested: validated.responseRequested,
+      consentToShareContact: validated.consentToShareContact,
+      customerEmail: validated.customerEmail?.trim() || undefined,
+      customerPhone: validated.customerPhone?.trim() || undefined,
     };
 
     const { rating, storage } = await saveCustomerFeedback(ratingRecord);
+
+    // Check if the restaurant is UNCLAIMED and process mock outbox notification if eligible
+    const restEntry = getRestaurantEntry(ratingRecord.outletId);
+    const isUnclaimed = restEntry ? (restEntry.status === 'UNCLAIMED' || restEntry.status === 'DISCOVERED' || restEntry.status === 'INVITED') : false;
+
+    let notificationResult: any = null;
+    if (isUnclaimed) {
+      const origin = req.headers.get('origin') || req.headers.get('host') || 'http://localhost:3000';
+      const baseUrl = origin.startsWith('http') ? origin : `http://${origin}`;
+      notificationResult = processCustomerFeedbackForUnclaimedRestaurant(rating, { baseUrl });
+    }
 
     // Record submission in sliding window cache
     recentSubmissions.set(contextKey, {
@@ -208,18 +228,26 @@ export async function POST(req: NextRequest) {
       storage
     });
 
+    const responseMessage = isUnclaimed
+      ? 'Your Customer Food-Safety Rating has been recorded by FoodSafe365. This restaurant has not yet claimed its FoodSafe365 profile.'
+      : 'Customer food-safety feedback submitted successfully and persisted to server storage.';
+
     return NextResponse.json({
       data: {
         rating,
         storage,
-        message: 'Customer food-safety feedback submitted successfully and persisted to server storage.'
+        isUnclaimed,
+        notificationGenerated: notificationResult?.generated ?? false,
+        notificationId: notificationResult?.notification?.id,
+        message: responseMessage
       },
       error: null
     }, {
       status: 201,
       headers: {
         'Cache-Control': 'no-store',
-        'X-FoodSafe-Storage': storage
+        'X-FoodSafe-Storage': storage,
+        'X-FoodSafe-Unclaimed': isUnclaimed ? 'true' : 'false'
       }
     });
   } catch (err: any) {

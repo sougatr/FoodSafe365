@@ -764,6 +764,10 @@ export type DinerSafetyRating = {
   overallScore: number;      // Average of scores (e.g. 4.6)
   feedback?: string;
   verifiedDineIn: boolean;
+  responseRequested?: boolean;
+  consentToShareContact?: boolean;
+  customerEmail?: string;
+  customerPhone?: string;
 };
 
 export type ControlMapping = {

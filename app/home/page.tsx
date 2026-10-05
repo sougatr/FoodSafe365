@@ -45,6 +45,19 @@ export default function Home() {
       try {
         const d = JSON.parse(localStorage.getItem(PHASE1_STORAGE_KEY) || '{}');
         setData(d);
+        if (!d.dinerRatings || d.dinerRatings.length === 0) {
+          fetch('/api/v1/customer-feedback?demo=true')
+            .then(res => res.json())
+            .then(json => {
+              if (json.data?.ratings) {
+                const current = JSON.parse(localStorage.getItem(PHASE1_STORAGE_KEY) || '{}');
+                current.dinerRatings = json.data.ratings;
+                localStorage.setItem(PHASE1_STORAGE_KEY, JSON.stringify(current));
+                setData(current);
+              }
+            })
+            .catch(() => {});
+        }
       } catch {
         setData({});
       }
@@ -61,7 +74,17 @@ export default function Home() {
 
   const badgeIcon = badge.tone === 'good' ? <CheckCircle2 size={26} /> : <AlertTriangle size={26} />;
   const progressPercent = scheduled.length > 0 ? Math.round((badge.counts.submitted / scheduled.length) * 100) : 0;
-  const dinerRatings = data.dinerRatings || [];
+  const allDinerRatings = data.dinerRatings || [];
+  const dinerRatings = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      const activeOutlet = localStorage.getItem('foodsafe365_outlet_id');
+      if (activeOutlet && activeOutlet !== 'all') {
+        const filtered = allDinerRatings.filter(r => r.outletId === activeOutlet);
+        if (filtered.length > 0) return filtered;
+      }
+    }
+    return allDinerRatings;
+  }, [allDinerRatings]);
   const dinerAvg = dinerRatings.length > 0
     ? (dinerRatings.reduce((acc, r) => acc + (r.overallScore || 5), 0) / dinerRatings.length).toFixed(1)
     : '4.8';

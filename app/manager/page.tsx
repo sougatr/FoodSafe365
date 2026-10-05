@@ -41,12 +41,35 @@ export default function ManagerPage() {
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
   const [storageBackend, setStorageBackend] = useState<'postgresql' | 'server_file' | 'local'>('server_file');
   const [selectedOutletId, setSelectedOutletId] = useState<string>('all');
+  const [activeRestaurantName, setActiveRestaurantName] = useState<string>('Leopold Cafe & Bar');
+
+  function resolveRestaurantName(outletId: string): string {
+    if (outletId === 'leopold-cafe') return 'Leopold Cafe & Bar';
+    if (outletId === 'the-table') return 'The Table';
+    if (outletId === 'the-bombay-canteen') return 'The Bombay Canteen';
+    if (outletId === 'bastian-mumbai') return 'Bastian';
+    if (outletId === 'peter-cat') return 'Peter Cat';
+    if (outletId === 'abc-restaurant') return 'ABC Restaurant';
+    if (typeof window !== 'undefined') {
+      try {
+        const setupStr = localStorage.getItem('foodsafe365_setup');
+        if (setupStr) {
+          const setup = JSON.parse(setupStr);
+          if (setup.name) return setup.name;
+        }
+      } catch {}
+    }
+    return outletId === 'all' ? 'All Outlets' : 'Restaurant';
+  }
 
   async function loadServerFeedback(outletId: string = selectedOutletId) {
     setIsLoadingFeedback(true);
     setFeedbackError(null);
     try {
       const q = outletId && outletId !== 'all' ? `?outletId=${encodeURIComponent(outletId)}` : '';
+      let receivedRatings: DinerSafetyRating[] = [];
+      let backendStorage: 'postgresql' | 'server_file' | 'local' = 'server_file';
+
       const res = await fetch(`/api/v1/customer-feedback${q}`, {
         cache: 'no-store'
       });
@@ -57,27 +80,49 @@ export default function ManagerPage() {
           if (retryRes.ok) {
             const retryJson = await retryRes.json();
             if (retryJson.data?.ratings) {
-              setServerRatings(retryJson.data.ratings);
-              if (retryJson.data.storage) setStorageBackend(retryJson.data.storage);
-              return;
+              receivedRatings = retryJson.data.ratings;
+              if (retryJson.data.storage) backendStorage = retryJson.data.storage;
             }
           }
+        } else {
+          throw new Error(`Server returned status ${res.status}`);
         }
-        throw new Error(`Server returned status ${res.status}`);
+      } else {
+        const json = await res.json();
+        if (json.data?.ratings) {
+          receivedRatings = json.data.ratings;
+          if (json.data.storage) backendStorage = json.data.storage;
+        }
       }
-      const json = await res.json();
-      if (json.data?.ratings) {
-        setServerRatings(json.data.ratings);
-        if (json.data.storage) setStorageBackend(json.data.storage);
 
-        // Sync local cache
-        try {
-          const raw = localStorage.getItem(PHASE1_STORAGE_KEY);
-          const state: AppPhase1State = raw ? JSON.parse(raw) : {};
-          state.dinerRatings = json.data.ratings;
-          localStorage.setItem(PHASE1_STORAGE_KEY, JSON.stringify(state));
-        } catch {}
+      // SAFELY MERGE with local cache so newly submitted client ratings are NEVER wiped out
+      const local = loadState();
+      const localRatings: DinerSafetyRating[] = local.dinerRatings || [];
+      const mergedMap = new Map<string, DinerSafetyRating>();
+
+      // 1. Add server ratings
+      for (const r of receivedRatings) {
+        mergedMap.set(r.id, r);
       }
+      // 2. Preserve any local ratings not in server ratings
+      for (const r of localRatings) {
+        if (!mergedMap.has(r.id)) {
+          mergedMap.set(r.id, r);
+        }
+      }
+
+      const mergedList = Array.from(mergedMap.values()).sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+      setServerRatings(mergedList);
+      setStorageBackend(backendStorage);
+
+      // Sync local cache with merged list
+      try {
+        local.dinerRatings = mergedList;
+        localStorage.setItem(PHASE1_STORAGE_KEY, JSON.stringify(local));
+      } catch {}
     } catch (err: any) {
       console.warn('[Manager] Unable to load server feedback:', err);
       setFeedbackError(err?.message || 'Server connection error');
@@ -94,13 +139,24 @@ export default function ManagerPage() {
   useEffect(() => {
     const refresh = () => setData(loadState());
     refresh();
-    loadServerFeedback(selectedOutletId);
+
+    if (typeof window !== 'undefined') {
+      const savedOutlet = localStorage.getItem('foodsafe365_outlet_id');
+      const targetOutlet = savedOutlet && savedOutlet !== 'all' ? savedOutlet : 'leopold-cafe';
+      setSelectedOutletId(targetOutlet);
+      setActiveRestaurantName(resolveRestaurantName(targetOutlet));
+      loadServerFeedback(targetOutlet);
+    } else {
+      loadServerFeedback(selectedOutletId);
+    }
+
     window.addEventListener('foodsaf365:update', refresh);
     return () => window.removeEventListener('foodsaf365:update', refresh);
   }, []);
 
   // Reload when outlet selection changes
   useEffect(() => {
+    setActiveRestaurantName(resolveRestaurantName(selectedOutletId));
     loadServerFeedback(selectedOutletId);
   }, [selectedOutletId]);
 
@@ -237,7 +293,7 @@ export default function ManagerPage() {
           <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
             <Home size={14} /> Home
           </Link>
-          <div className="muted" style={{ fontSize: 13 }}>ABC Restaurant · Manager</div>
+          <div className="muted" style={{ fontSize: 13 }}>{activeRestaurantName} · Manager</div>
         </div>
       </div>
 
@@ -589,11 +645,12 @@ export default function ManagerPage() {
                   }}
                 >
                   <option value="all">All Outlets ({dinerRatings.length} feedback)</option>
-                  <option value="abc-restaurant">ABC Restaurant</option>
+                  <option value="leopold-cafe">Leopold Cafe &amp; Bar (Mumbai)</option>
                   <option value="the-table">The Table (Mumbai)</option>
                   <option value="the-bombay-canteen">The Bombay Canteen</option>
                   <option value="bastian-mumbai">Bastian (Mumbai)</option>
                   <option value="peter-cat">Peter Cat (Kolkata)</option>
+                  <option value="abc-restaurant">ABC Restaurant</option>
                 </select>
 
                 <button
@@ -609,7 +666,7 @@ export default function ManagerPage() {
                 </button>
 
                 <Link
-                  href={`/qr/${selectedOutletId === 'all' ? 'abc-restaurant' : selectedOutletId}`}
+                  href={`/qr/${selectedOutletId === 'all' ? 'leopold-cafe' : selectedOutletId}`}
                   className="btn secondary"
                   style={{ fontSize: 12.5, padding: '7px 12px' }}
                 >
@@ -660,7 +717,7 @@ export default function ManagerPage() {
                 <p className="muted" style={{ maxWidth: 480, margin: '0 auto 16px', fontSize: 13.5 }}>
                   Share your tabletop QR code with diners to start receiving verified food-safety feedback directly on your manager dashboard.
                 </p>
-                <Link href="/qr/abc-restaurant" className="btn primary" style={{ fontSize: 13, padding: '8px 16px', background: '#059669', display: 'inline-flex', gap: 6, margin: '0 auto' }}>
+                <Link href={`/qr/${selectedOutletId === 'all' ? 'leopold-cafe' : selectedOutletId}`} className="btn primary" style={{ fontSize: 13, padding: '8px 16px', background: '#059669', display: 'inline-flex', gap: 6, margin: '0 auto' }}>
                   <QrCode size={14} /> Open Restaurant Tabletop QR Code
                 </Link>
               </div>

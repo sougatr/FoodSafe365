@@ -67,8 +67,31 @@ const DEFAULT_SEED_RATINGS: DinerSafetyRating[] = [
     overallScore: 3.8,
     feedback: 'Seafood platter did not seem ice-cold upon arrival at the table.',
     verifiedDineIn: true
+  },
+  {
+    id: 'seed-rating-leopold-1',
+    outletId: 'leopold-cafe',
+    outletName: 'Leopold Cafe & Bar',
+    createdAt: new Date(Date.now() - 3600000 * 1).toISOString(),
+    dinerName: 'Arjun S.',
+    dinerMobile: '+91 98200 ****2',
+    tableNumber: 'Table QR #1',
+    scores: {
+      cleanliness: 5,
+      staffHygiene: 4,
+      foodFreshness: 5,
+      safeWater: 5,
+      washroom: 4
+    },
+    overallScore: 4.6,
+    feedback: 'TEST LEOPOLD 123 — please confirm this feedback appears in manager dashboard',
+    verifiedDineIn: true
   }
 ];
+
+declare global {
+  var __foodsafe_feedback_store: DinerSafetyRating[] | undefined;
+}
 
 // Helper to determine persistent storage file path (LOCAL DEV ONLY)
 function getFilePath(): string {
@@ -85,25 +108,31 @@ function getFilePath(): string {
 
 // Read from persistent server file (DEV ONLY)
 function readFileStore(): DinerSafetyRating[] {
+  if (globalThis.__foodsafe_feedback_store && globalThis.__foodsafe_feedback_store.length > 0) {
+    return globalThis.__foodsafe_feedback_store;
+  }
   const filePath = getFilePath();
   try {
     if (fs.existsSync(filePath)) {
       const raw = fs.readFileSync(filePath, 'utf-8');
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
+        globalThis.__foodsafe_feedback_store = parsed;
         return parsed;
       }
     }
     writeFileStore(DEFAULT_SEED_RATINGS);
+    globalThis.__foodsafe_feedback_store = DEFAULT_SEED_RATINGS;
     return DEFAULT_SEED_RATINGS;
   } catch (err) {
     console.warn('[customer-feedback-store] Error reading dev file store:', err);
-    return DEFAULT_SEED_RATINGS;
+    return globalThis.__foodsafe_feedback_store || DEFAULT_SEED_RATINGS;
   }
 }
 
 // Write to persistent server file atomically (DEV ONLY)
 function writeFileStore(ratings: DinerSafetyRating[]): void {
+  globalThis.__foodsafe_feedback_store = ratings;
   const filePath = getFilePath();
   try {
     const tmpPath = `${filePath}.tmp.${Date.now()}`;

@@ -212,6 +212,46 @@ export default function Onboarding() {
             </Link>
           </div>
 
+          {/* Grocery Store Switcher Banner */}
+          <div style={{
+            background: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: 12,
+            padding: '12px 18px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 24,
+            flexWrap: 'wrap',
+            gap: 10
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 18 }}>🛒</span>
+              <div>
+                <strong style={{ fontSize: 13, color: '#1e40af', display: 'block' }}>
+                  Are you a Grocery Store or Retail Supermarket?
+                </strong>
+                <span style={{ fontSize: 12, color: '#2563eb' }}>
+                  Food safety controls for receiving, cold storage, FIFO/FEFO stock rotation &amp; hygiene.
+                </span>
+              </div>
+            </div>
+            <Link
+              href="/onboarding/grocery"
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                color: '#ffffff',
+                background: '#2563eb',
+                padding: '6px 12px',
+                borderRadius: 6,
+                textDecoration: 'none'
+              }}
+            >
+              Onboard as Grocery Store →
+            </Link>
+          </div>
+
           <form onSubmit={handleSave}>
             {/* Basic Information */}
             <div className="grid grid2" style={{ gap: 18, marginBottom: 26 }}>
