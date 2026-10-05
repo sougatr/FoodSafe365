@@ -67,7 +67,32 @@ async function runGroceryTests() {
   console.log(`✅ TEST A PASSED: Outlet ${createdOutlet.name} created with ${defaultZones.length} zones and ${defaultEq.length} cooling units`);
 
   // ----------------------------------------------------------------
-  // TEST B: Grocery product categories & temperature rules (A through J)
+  // TEST A2: Simplified 3-Step Grocery Onboarding Persistence
+  // ----------------------------------------------------------------
+  console.log('\n--- TEST A2: SIMPLIFIED 3-STEP GROCERY ONBOARDING ---');
+  const simpleOutletId = `store-simple-${Date.now()}`;
+  const simpleOutlet = saveGroceryOutlet({
+    id: simpleOutletId,
+    name: 'Nature Fresh Mart',
+    branchName: 'Bengaluru Store',
+    address: 'Nature Fresh Mart, Bengaluru',
+    city: 'Bengaluru',
+    managerName: 'Priya Sharma',
+    dailyCheckPerson: 'Priya Sharma',
+    contactNumber: 'Not provided',
+    contactEmail: `manager@${simpleOutletId}.example.com`,
+    fssaiNumber: '10000000000000',
+    storeType: 'supermarket',
+    selectedCategories: ['dairy_milk', 'fresh_produce', 'dry_groceries']
+  });
+
+  const fetchedSimple = getGroceryOutlet(simpleOutletId);
+  assert(fetchedSimple, 'Simplified onboarding outlet must be saved and retrievable');
+  assert.strictEqual(fetchedSimple.name, 'Nature Fresh Mart');
+  assert.strictEqual(fetchedSimple.city, 'Bengaluru');
+  assert.strictEqual(fetchedSimple.dailyCheckPerson, 'Priya Sharma');
+  assert.deepStrictEqual(fetchedSimple.selectedCategories, ['dairy_milk', 'fresh_produce', 'dry_groceries']);
+  console.log('✅ TEST A2 PASSED: Simplified onboarding persisted outlet name, city, categories, and daily-check person');
   // ----------------------------------------------------------------
   console.log('\n--- TEST B: PRODUCT CATEGORIES & TEMPERATURE THRESHOLDS (A-J) ---');
   assert.strictEqual(GROCERY_PRODUCT_CATEGORIES.length, 10, 'Must support 10 categories (A through J)');

@@ -4,41 +4,134 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  ShoppingBag,
   Store,
-  CheckCircle2,
-  ShieldCheck,
-  ArrowRight,
   ChevronLeft,
-  Building2,
+  ArrowRight,
+  CheckCircle2,
+  Circle,
+  Drumstick,
+  Fish,
+  Milk,
+  Snowflake,
+  Apple,
+  Cake,
+  Package,
+  Boxes,
   User,
-  Phone,
-  Mail,
-  MapPin,
-  FileText,
   AlertCircle
 } from 'lucide-react';
 import GlobalHeader from '@/components/GlobalHeader';
-import { GROCERY_PRODUCT_CATEGORIES } from '@/lib/grocery-types';
+
+interface CategoryCardItem {
+  id: string;
+  code: string;
+  name: string;
+  cueType: 'fssai_meat' | 'fssai_fruit_veg' | 'fssai_milk' | 'foodsafe';
+  accentColor: string;
+  selectedBg: string;
+  badgeText?: string;
+  icon: any;
+}
+
+const CATEGORY_CARDS: CategoryCardItem[] = [
+  {
+    id: 'cat-meat',
+    code: 'meat_fresh',
+    name: 'Meat & Chicken',
+    cueType: 'fssai_meat',
+    accentColor: '#DC2626', // Red visual cue (corresponds to FSSAI Meat Retail)
+    selectedBg: '#FEF2F2',
+    badgeText: 'FSSAI Meat visual cue',
+    icon: Drumstick
+  },
+  {
+    id: 'cat-fish',
+    code: 'seafood_fresh',
+    name: 'Fish & Seafood',
+    cueType: 'foodsafe',
+    accentColor: '#0891B2', // FoodSafe365 subtle professional cyan
+    selectedBg: '#ECFEFF',
+    icon: Fish
+  },
+  {
+    id: 'cat-milk',
+    code: 'dairy_milk',
+    name: 'Milk & Dairy',
+    cueType: 'fssai_milk',
+    accentColor: '#2563EB', // Blue visual cue (corresponds to FSSAI Milk Retail)
+    selectedBg: '#EFF6FF',
+    badgeText: 'FSSAI Milk visual cue',
+    icon: Milk
+  },
+  {
+    id: 'cat-frozen',
+    code: 'frozen_foods',
+    name: 'Frozen Foods',
+    cueType: 'foodsafe',
+    accentColor: '#4F46E5', // FoodSafe365 subtle professional indigo
+    selectedBg: '#EEF2FF',
+    icon: Snowflake
+  },
+  {
+    id: 'cat-produce',
+    code: 'fresh_produce',
+    name: 'Fresh Fruits & Vegetables',
+    cueType: 'fssai_fruit_veg',
+    accentColor: '#16A34A', // Green visual cue (corresponds to FSSAI Fruit & Vegetable Retail)
+    selectedBg: '#F0FDF4',
+    badgeText: 'FSSAI Fruit & Veg visual cue',
+    icon: Apple
+  },
+  {
+    id: 'cat-bakery',
+    code: 'bakery_packaged',
+    name: 'Bakery',
+    cueType: 'foodsafe',
+    accentColor: '#D97706', // FoodSafe365 subtle warm amber
+    selectedBg: '#FFFBEB',
+    icon: Cake
+  },
+  {
+    id: 'cat-packaged',
+    code: 'other_packaged',
+    name: 'Packaged Foods',
+    cueType: 'foodsafe',
+    accentColor: '#7C3AED', // FoodSafe365 subtle professional violet
+    selectedBg: '#F5F3FF',
+    icon: Package
+  },
+  {
+    id: 'cat-staples',
+    code: 'dry_groceries',
+    name: 'Dry Groceries & Staples',
+    cueType: 'foodsafe',
+    accentColor: '#78716C', // FoodSafe365 subtle warm stone
+    selectedBg: '#F5F5F4',
+    icon: Boxes
+  }
+];
 
 export default function GroceryOnboardingPage() {
   const router = useRouter();
 
-  const [name, setName] = useState('');
-  const [branchName, setBranchName] = useState('');
-  const [storeType, setStoreType] = useState('supermarket');
+  // Wizard step: 1 = Store Details, 2 = What Do You Sell, 3 = Daily Check Person
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+
+  // Step 1: Store details
+  const [storeName, setStoreName] = useState('');
   const [city, setCity] = useState('Mumbai');
-  const [address, setAddress] = useState('');
-  const [managerName, setManagerName] = useState('');
-  const [contactNumber, setContactNumber] = useState('');
-  const [contactEmail, setContactEmail] = useState('');
-  const [fssaiNumber, setFssaiNumber] = useState('');
+
+  // Step 2: What do you sell?
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
     'dairy_milk',
     'fresh_produce',
     'bakery_packaged',
     'dry_groceries'
   ]);
+
+  // Step 3: Daily check person
+  const [dailyCheckPerson, setDailyCheckPerson] = useState('');
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -48,22 +141,31 @@ export default function GroceryOnboardingPage() {
     );
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleStep1Continue = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (!storeName.trim()) {
+      setError('Please enter your store or outlet name.');
+      return;
+    }
+    setStep(2);
+  };
+
+  const handleStep2Continue = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    if (selectedCategories.length === 0) {
+      setError('Please select at least one category to continue.');
+      return;
+    }
+    setStep(3);
+  };
+
+  const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!name.trim()) {
-      setError('Please provide your grocery store or chain name.');
-      return;
-    }
-    if (!branchName.trim()) {
-      setError('Please provide the outlet or branch name.');
-      return;
-    }
-    if (!contactNumber.trim()) {
-      setError('Please provide a contact phone number.');
-      return;
-    }
+    const assignedPerson = dailyCheckPerson.trim() || 'Store Manager';
 
     setSaving(true);
     try {
@@ -71,16 +173,11 @@ export default function GroceryOnboardingPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: name.trim(),
-          branchName: branchName.trim(),
-          storeType,
-          city,
-          address: address.trim() || `${branchName.trim()}, ${city}`,
-          managerName: managerName.trim() || 'Store Manager',
-          contactNumber: contactNumber.trim(),
-          contactEmail: contactEmail.trim(),
-          fssaiNumber: fssaiNumber.trim() || '10000000000000',
-          selectedCategories
+          name: storeName.trim(),
+          city: city.trim() || 'Mumbai',
+          selectedCategories,
+          dailyCheckPerson: assignedPerson,
+          managerName: assignedPerson
         })
       });
 
@@ -99,7 +196,6 @@ export default function GroceryOnboardingPage() {
       router.push('/grocery');
     } catch (err: any) {
       setError(err.message || 'An error occurred during onboarding.');
-    } finally {
       setSaving(false);
     }
   };
@@ -108,39 +204,70 @@ export default function GroceryOnboardingPage() {
     <div style={{ minHeight: '100vh', background: 'var(--bg, #f8fafc)', display: 'flex', flexDirection: 'column' }}>
       <GlobalHeader />
 
-      <main style={{ flex: 1, padding: '36px 20px', maxWidth: 900, margin: '0 auto', width: '100%' }}>
-        <div style={{ marginBottom: 24 }}>
-          <Link
-            href="/home"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#64748B', textDecoration: 'none', marginBottom: 12 }}
-          >
-            <ChevronLeft size={16} /> Back to Home
-          </Link>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-            <div style={{
-              width: 44,
-              height: 44,
-              borderRadius: 12,
-              background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(5, 150, 105, 0.25)'
-            }}>
-              <Store size={24} />
-            </div>
-            <div>
-              <h1 style={{ fontSize: 26, fontWeight: 900, color: 'var(--text, #0f172a)', margin: 0 }}>
-                Grocery Store &amp; Retail Food Store Onboarding
-              </h1>
-              <p style={{ fontSize: 14, color: '#64748B', margin: '4px 0 0' }}>
-                Setup food-safety controls for receiving, cold storage, FIFO/FEFO stock rotation, and hygiene.
-              </p>
-            </div>
+      <main style={{
+        flex: 1,
+        padding: '32px 16px 48px',
+        maxWidth: 540,
+        margin: '0 auto',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center'
+      }}>
+        {/* TOP BACK LINK & STEP PROGRESS BAR */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            {step === 1 ? (
+              <Link
+                href="/home"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  fontSize: 13,
+                  color: '#64748B',
+                  textDecoration: 'none'
+                }}
+              >
+                <ChevronLeft size={16} /> Back to Home
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setError('');
+                  setStep(s => (s === 3 ? 2 : 1) as 1 | 2);
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  fontSize: 13,
+                  color: '#64748B',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0
+                }}
+              >
+                <ChevronLeft size={16} /> Back
+              </button>
+            )}
+
+            <span style={{ fontSize: 12.5, fontWeight: 700, color: '#059669', background: 'rgba(5, 150, 105, 0.1)', padding: '2px 8px', borderRadius: 12 }}>
+              Step {step} of 3
+            </span>
+          </div>
+
+          {/* Clean 3-segment progress bar */}
+          <div style={{ display: 'flex', gap: 6 }}>
+            <div style={{ flex: 1, height: 4, borderRadius: 2, background: '#059669', transition: 'background 0.2s' }} />
+            <div style={{ flex: 1, height: 4, borderRadius: 2, background: step >= 2 ? '#059669' : '#CBD5E1', transition: 'background 0.2s' }} />
+            <div style={{ flex: 1, height: 4, borderRadius: 2, background: step >= 3 ? '#059669' : '#CBD5E1', transition: 'background 0.2s' }} />
           </div>
         </div>
 
+        {/* ERROR NOTIFICATION */}
         {error && (
           <div style={{
             background: 'rgba(239, 68, 68, 0.1)',
@@ -154,336 +281,396 @@ export default function GroceryOnboardingPage() {
             gap: 10,
             marginBottom: 20
           }}>
-            <AlertCircle size={18} /> {error}
+            <AlertCircle size={18} style={{ flexShrink: 0 }} />
+            <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSave} style={{
+        {/* CARD CONTAINER */}
+        <div style={{
           background: 'var(--surface, #ffffff)',
           border: '1px solid var(--border, #e2e8f0)',
-          borderRadius: 16,
-          padding: '28px 24px',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.04)'
+          borderRadius: 20,
+          padding: '32px 24px',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
         }}>
-          {/* Section 1: Store & Branch Info */}
-          <div style={{ marginBottom: 28 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 800, color: '#0F2922', borderBottom: '1px solid #E2E8F0', paddingBottom: 8, marginBottom: 18 }}>
-              1. Store Details
-            </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-              <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                  Store / Retail Chain Name *
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  placeholder="e.g. Nature Fresh Market, SuperMart"
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 8,
-                    border: '1.5px solid #CBD5E1',
-                    fontSize: 14,
-                    boxSizing: 'border-box'
-                  }}
-                />
+
+          {/* ======================================================== */}
+          {/* STEP 1: STORE DETAILS */}
+          {/* ======================================================== */}
+          {step === 1 && (
+            <form onSubmit={handleStep1Continue}>
+              <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(5, 150, 105, 0.25)',
+                marginBottom: 16
+              }}>
+                <Store size={22} />
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                  Outlet / Branch Name *
-                </label>
-                <input
-                  type="text"
-                  value={branchName}
-                  onChange={e => setBranchName(e.target.value)}
-                  placeholder="e.g. Bandra West, Indiranagar Branch"
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 8,
-                    border: '1.5px solid #CBD5E1',
-                    fontSize: 14,
-                    boxSizing: 'border-box'
-                  }}
-                />
+              <h1 style={{
+                fontSize: 'clamp(22px, 5vw, 26px)',
+                fontWeight: 900,
+                color: '#0F172A',
+                margin: '0 0 6px',
+                lineHeight: 1.25
+              }}>
+                What’s your store called?
+              </h1>
+
+              <p style={{ fontSize: 14, color: '#64748B', margin: '0 0 24px', lineHeight: 1.45 }}>
+                Enter your store name and city to set up your food-safety workflow in seconds.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18, marginBottom: 28 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                    Store / Outlet Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={storeName}
+                    onChange={e => setStoreName(e.target.value)}
+                    placeholder="e.g. Green Harvest Grocery, FreshMart"
+                    autoFocus
+                    required
+                    style={{
+                      width: '100%',
+                      minHeight: 48,
+                      padding: '12px 14px',
+                      borderRadius: 10,
+                      border: '1.5px solid #CBD5E1',
+                      fontSize: 15,
+                      boxSizing: 'border-box',
+                      color: '#0F172A',
+                      outline: 'none',
+                      transition: 'border-color 0.15s ease'
+                    }}
+                    onFocus={e => (e.currentTarget.style.borderColor = '#059669')}
+                    onBlur={e => (e.currentTarget.style.borderColor = '#CBD5E1')}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={e => setCity(e.target.value)}
+                    placeholder="e.g. Mumbai, Bengaluru, Delhi"
+                    style={{
+                      width: '100%',
+                      minHeight: 48,
+                      padding: '12px 14px',
+                      borderRadius: 10,
+                      border: '1.5px solid #CBD5E1',
+                      fontSize: 15,
+                      boxSizing: 'border-box',
+                      color: '#0F172A',
+                      outline: 'none',
+                      transition: 'border-color 0.15s ease'
+                    }}
+                    onFocus={e => (e.currentTarget.style.borderColor = '#059669')}
+                    onBlur={e => (e.currentTarget.style.borderColor = '#CBD5E1')}
+                  />
+                </div>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                  Store Format / Type
-                </label>
-                <select
-                  value={storeType}
-                  onChange={e => setStoreType(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 8,
-                    border: '1.5px solid #CBD5E1',
-                    fontSize: 14,
-                    boxSizing: 'border-box',
-                    background: '#fff'
-                  }}
-                >
-                  <option value="supermarket">Supermarket (Multi-category)</option>
-                  <option value="hypermarket">Hypermarket / Big Format</option>
-                  <option value="convenience">Convenience Store</option>
-                  <option value="neighborhood_kirana">Neighborhood Retail / Kirana</option>
-                  <option value="standalone_grocery">Standalone Grocery Store</option>
-                  <option value="specialty_food">Specialty Gourmet / Organic Store</option>
-                  <option value="other">Other Retail Food Store</option>
-                </select>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                  City
-                </label>
-                <input
-                  type="text"
-                  value={city}
-                  onChange={e => setCity(e.target.value)}
-                  placeholder="e.g. Mumbai, Bengaluru, Delhi"
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 8,
-                    border: '1.5px solid #CBD5E1',
-                    fontSize: 14,
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-            </div>
-
-            <div style={{ marginTop: 14 }}>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                Store Physical Address
-              </label>
-              <input
-                type="text"
-                value={address}
-                onChange={e => setAddress(e.target.value)}
-                placeholder="e.g. Plot 42, Hill Road, Bandra West, Mumbai 400050"
+              <button
+                type="submit"
                 style={{
                   width: '100%',
-                  padding: '10px 14px',
-                  borderRadius: 8,
-                  border: '1.5px solid #CBD5E1',
-                  fontSize: 14,
-                  boxSizing: 'border-box'
+                  minHeight: 50,
+                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: 12,
+                  fontSize: 15,
+                  fontWeight: 800,
+                  letterSpacing: '0.02em',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  boxShadow: '0 4px 12px rgba(5, 150, 105, 0.25)'
                 }}
-              />
-            </div>
-          </div>
+              >
+                <span>CONTINUE</span>
+                <ArrowRight size={18} />
+              </button>
+            </form>
+          )}
 
-          {/* Section 2: Management & FSSAI Licensing */}
-          <div style={{ marginBottom: 28 }}>
-            <h2 style={{ fontSize: 16, fontWeight: 800, color: '#0F2922', borderBottom: '1px solid #E2E8F0', paddingBottom: 8, marginBottom: 18 }}>
-              2. Management &amp; Statutory Compliance
-            </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-              <div>
+          {/* ======================================================== */}
+          {/* STEP 2: WHAT DO YOU SELL? */}
+          {/* ======================================================== */}
+          {step === 2 && (
+            <form onSubmit={handleStep2Continue}>
+              <h1 style={{
+                fontSize: 'clamp(22px, 5vw, 26px)',
+                fontWeight: 900,
+                color: '#0F172A',
+                margin: '0 0 6px',
+                lineHeight: 1.25
+              }}>
+                What do you sell?
+              </h1>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                <p style={{ fontSize: 14, color: '#64748B', margin: 0 }}>
+                  Select all that apply.
+                </p>
+                <span style={{
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  color: selectedCategories.length > 0 ? '#059669' : '#64748B',
+                  background: selectedCategories.length > 0 ? 'rgba(5, 150, 105, 0.1)' : '#F1F5F9',
+                  padding: '3px 10px',
+                  borderRadius: 20
+                }}>
+                  {selectedCategories.length} {selectedCategories.length === 1 ? 'category' : 'categories'} selected
+                </span>
+              </div>
+
+              {/* 8 SELECTABLE CARDS */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+                gap: 10,
+                marginBottom: 16
+              }}>
+                {CATEGORY_CARDS.map(cat => {
+                  const isSelected = selectedCategories.includes(cat.code);
+                  const Icon = cat.icon;
+
+                  return (
+                    <div
+                      key={cat.id}
+                      onClick={() => toggleCategory(cat.code)}
+                      role="checkbox"
+                      aria-checked={isSelected}
+                      tabIndex={0}
+                      onKeyDown={e => {
+                        if (e.key === ' ' || e.key === 'Enter') {
+                          e.preventDefault();
+                          toggleCategory(cat.code);
+                        }
+                      }}
+                      style={{
+                        border: isSelected ? `2px solid ${cat.accentColor}` : '1.5px solid #E2E8F0',
+                        background: isSelected ? cat.selectedBg : '#FFFFFF',
+                        borderRadius: 12,
+                        padding: '12px 14px',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 12,
+                        minHeight: 56,
+                        boxSizing: 'border-box'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 8,
+                          background: isSelected ? 'rgba(255, 255, 255, 0.8)' : '#F8FAFC',
+                          border: `1px solid ${isSelected ? cat.accentColor : '#E2E8F0'}`,
+                          color: cat.accentColor,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}>
+                          <Icon size={18} />
+                        </div>
+
+                        <div style={{ minWidth: 0 }}>
+                          <span style={{
+                            display: 'block',
+                            fontSize: 13.5,
+                            fontWeight: isSelected ? 800 : 600,
+                            color: '#0F172A',
+                            lineHeight: 1.3
+                          }}>
+                            {cat.name}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Obvious checkmark indicator */}
+                      <div style={{ flexShrink: 0 }}>
+                        {isSelected ? (
+                          <div style={{
+                            width: 22,
+                            height: 22,
+                            borderRadius: '50%',
+                            background: cat.accentColor,
+                            color: '#FFFFFF',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <CheckCircle2 size={16} />
+                          </div>
+                        ) : (
+                          <div style={{
+                            width: 20,
+                            height: 20,
+                            borderRadius: '50%',
+                            border: '1.5px solid #CBD5E1',
+                            background: '#FFFFFF'
+                          }} />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Exact required small explanatory line */}
+              <p style={{
+                fontSize: 12,
+                color: '#64748B',
+                fontStyle: 'italic',
+                margin: '16px 0 24px',
+                textAlign: 'center',
+                lineHeight: 1.4
+              }}>
+                Colours are visual cues inspired by FSSAI Food Safety Display Board categories where applicable.
+              </p>
+
+              <button
+                type="submit"
+                style={{
+                  width: '100%',
+                  minHeight: 50,
+                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: 12,
+                  fontSize: 15,
+                  fontWeight: 800,
+                  letterSpacing: '0.02em',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  boxShadow: '0 4px 12px rgba(5, 150, 105, 0.25)'
+                }}
+              >
+                <span>CONTINUE</span>
+                <ArrowRight size={18} />
+              </button>
+            </form>
+          )}
+
+          {/* ======================================================== */}
+          {/* STEP 3: WHO WILL DO THE DAILY CHECK? */}
+          {/* ======================================================== */}
+          {step === 3 && (
+            <form onSubmit={handleFinalSubmit}>
+              <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, #059669 0%, #10B981 100%)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(5, 150, 105, 0.25)',
+                marginBottom: 16
+              }}>
+                <User size={22} />
+              </div>
+
+              <h1 style={{
+                fontSize: 'clamp(22px, 5vw, 26px)',
+                fontWeight: 900,
+                color: '#0F172A',
+                margin: '0 0 6px',
+                lineHeight: 1.25
+              }}>
+                Who will do the daily check?
+              </h1>
+
+              <p style={{ fontSize: 14, color: '#64748B', margin: '0 0 24px', lineHeight: 1.45 }}>
+                Enter the name of the person responsible for store hygiene and daily checks.
+              </p>
+
+              <div style={{ marginBottom: 28 }}>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                  Store Manager / Responsible Person
+                  Name
                 </label>
                 <input
                   type="text"
-                  value={managerName}
-                  onChange={e => setManagerName(e.target.value)}
-                  placeholder="e.g. Rajesh Nair"
+                  value={dailyCheckPerson}
+                  onChange={e => setDailyCheckPerson(e.target.value)}
+                  placeholder="e.g. Rajesh Nair, Priya Sharma"
+                  autoFocus
                   style={{
                     width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 8,
+                    minHeight: 48,
+                    padding: '12px 14px',
+                    borderRadius: 10,
                     border: '1.5px solid #CBD5E1',
-                    fontSize: 14,
-                    boxSizing: 'border-box'
+                    fontSize: 15,
+                    boxSizing: 'border-box',
+                    color: '#0F172A',
+                    outline: 'none',
+                    transition: 'border-color 0.15s ease'
                   }}
+                  onFocus={e => (e.currentTarget.style.borderColor = '#059669')}
+                  onBlur={e => (e.currentTarget.style.borderColor = '#CBD5E1')}
                 />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                  Contact Phone Number *
-                </label>
-                <input
-                  type="tel"
-                  value={contactNumber}
-                  onChange={e => setContactNumber(e.target.value)}
-                  placeholder="e.g. +91 98200 44556"
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 8,
-                    border: '1.5px solid #CBD5E1',
-                    fontSize: 14,
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                  Official Email Address
-                </label>
-                <input
-                  type="email"
-                  value={contactEmail}
-                  onChange={e => setContactEmail(e.target.value)}
-                  placeholder="e.g. manager@store.example.com"
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 8,
-                    border: '1.5px solid #CBD5E1',
-                    fontSize: 14,
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                  FSSAI License / Registration Number
-                </label>
-                <input
-                  type="text"
-                  value={fssaiNumber}
-                  onChange={e => setFssaiNumber(e.target.value)}
-                  placeholder="14-digit FSSAI number (e.g. 11521012000456)"
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: 8,
-                    border: '1.5px solid #CBD5E1',
-                    fontSize: 14,
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Section 3: Food Products Handled (A through J) */}
-          <div style={{ marginBottom: 32 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid #E2E8F0', paddingBottom: 8, marginBottom: 14 }}>
-              <div>
-                <h2 style={{ fontSize: 16, fontWeight: 800, color: '#0F2922', margin: 0 }}>
-                  3. Food Product Categories Handled
-                </h2>
-                <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#64748B' }}>
-                  Select the categories your store carries. Controls will customize automatically (temperature monitoring, segregation, FEFO).
+                <p style={{ margin: '6px 0 0', fontSize: 12.5, color: '#64748B' }}>
+                  This person will complete the daily food safety check.
                 </p>
               </div>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#059669' }}>
-                {selectedCategories.length} Selected
-              </span>
-            </div>
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-              gap: 12
-            }}>
-              {GROCERY_PRODUCT_CATEGORIES.map(cat => {
-                const isSelected = selectedCategories.includes(cat.code);
-                return (
-                  <div
-                    key={cat.code}
-                    onClick={() => toggleCategory(cat.code)}
-                    style={{
-                      border: isSelected ? '1.5px solid #059669' : '1px solid #E2E8F0',
-                      background: isSelected ? 'rgba(16, 185, 129, 0.05)' : '#F8FAFC',
-                      borderRadius: 12,
-                      padding: '12px 16px',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                      display: 'flex',
-                      gap: 12,
-                      alignItems: 'flex-start'
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => {}} // Controlled by container onClick
-                      style={{ marginTop: 3, accentColor: '#059669', width: 17, height: 17 }}
-                    />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                        <span style={{
-                          fontSize: 10,
-                          fontWeight: 800,
-                          color: '#059669',
-                          background: 'rgba(5, 150, 105, 0.15)',
-                          padding: '1px 6px',
-                          borderRadius: 4
-                        }}>
-                          {cat.letter}
-                        </span>
-                        <strong style={{ fontSize: 13.5, color: '#0F172A' }}>{cat.name}</strong>
-                      </div>
-                      <p style={{ margin: '0 0 6px', fontSize: 12, color: '#64748B', lineHeight: 1.35 }}>
-                        {cat.description}
-                      </p>
-                      {cat.requiresTemperatureControl && (
-                        <div style={{ fontSize: 11, fontWeight: 700, color: '#0369a1', display: 'flex', gap: 8 }}>
-                          <span>❄️ Temp: ≤ {cat.defaultMaxTemp}°C</span>
-                        </div>
-                      )}
-                      {cat.subcategories && (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
-                          {cat.subcategories.map(sub => (
-                            <span key={sub} style={{ fontSize: 10.5, color: '#475569', background: '#ffffff', border: '1px solid #E2E8F0', borderRadius: 4, padding: '1px 6px' }}>
-                              {sub}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+              <button
+                type="submit"
+                disabled={saving}
+                style={{
+                  width: '100%',
+                  minHeight: 50,
+                  background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: 12,
+                  fontSize: 15,
+                  fontWeight: 800,
+                  letterSpacing: '0.02em',
+                  cursor: saving ? 'wait' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  boxShadow: '0 4px 12px rgba(5, 150, 105, 0.25)',
+                  opacity: saving ? 0.8 : 1
+                }}
+              >
+                <span>{saving ? 'SETTING UP STORE...' : 'START USING FOODSAFE365'}</span>
+                {!saving && <ArrowRight size={18} />}
+              </button>
+            </form>
+          )}
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, paddingTop: 16, borderTop: '1px solid #E2E8F0' }}>
-            <Link
-              href="/home"
-              className="btn secondary"
-              style={{ padding: '12px 24px', fontSize: 14, textDecoration: 'none' }}
-            >
-              Cancel
-            </Link>
-            <button
-              type="submit"
-              disabled={saving}
-              className="btn primary"
-              style={{
-                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                color: '#ffffff',
-                border: 'none',
-                padding: '12px 32px',
-                fontSize: 14,
-                fontWeight: 800,
-                borderRadius: 10,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8
-              }}
-            >
-              {saving ? 'Setting Up...' : 'Complete Onboarding & Enter Store'} <ArrowRight size={16} />
-            </button>
-          </div>
-        </form>
+        </div>
       </main>
     </div>
   );

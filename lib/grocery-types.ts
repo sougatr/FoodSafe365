@@ -125,6 +125,7 @@ export interface GroceryOutlet {
   address: string;
   city: string;
   managerName: string;
+  dailyCheckPerson?: string;
   contactNumber: string;
   contactEmail: string;
   fssaiNumber: string;
