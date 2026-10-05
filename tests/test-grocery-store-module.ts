@@ -149,7 +149,75 @@ async function runGroceryTests() {
   assert.strictEqual(rejectDelivery.receiving.decision, 'REJECT');
   assert.strictEqual(rejectDelivery.actionCreated, true, 'Rejected shipment must automatically spawn corrective action');
   assert(rejectDelivery.receiving.correctiveActionId, 'Must have corrective action ID');
-  console.log('✅ TEST C PASSED: Receiving engine accepted compliant batch and rejected abused batch with corrective action');
+
+  // 3. Exact user scenario test: Supplier "dd", Product "milk", blank mobile/email, use-by "05/10/2026", 1°C dock temp
+  const userScenario = recordReceivingItem({
+    outletId: 'store-nature-basket-bandra',
+    supplier: 'dd',
+    product: 'milk',
+    productCategory: 'dairy_milk',
+    quantity: '10',
+    useByDate: '05/10/2026',
+    packagingCondition: 'intact',
+    productCondition: 'acceptable',
+    temperature: 1,
+    isTempSensitive: true,
+    receivingPerson: 'Duty Supervisor',
+    decision: 'ACCEPT',
+    inspectionChecklist: {
+      approvedSupplier: true,
+      acceptableCondition: true,
+      packagingIntact: true,
+      noLeakageOrDamage: true,
+      dateMarkingAcceptable: true,
+      temperatureAppropriate: true,
+      suitableForStorage: true,
+      withinCapacity: true
+    }
+  });
+
+  assert.strictEqual(userScenario.receiving.supplier, 'dd');
+  assert.strictEqual(userScenario.receiving.product, 'milk');
+  assert.strictEqual(userScenario.receiving.decision, 'ACCEPT');
+  assert(userScenario.stockCreated, 'Stock must be created on ACCEPT');
+  assert.strictEqual(userScenario.stockCreated.storageZoneName, 'Dairy & Milk Walk-in Chiller');
+  assert.strictEqual(userScenario.stockCreated.expiryDate, '2026-10-05', 'Date 05/10/2026 must be normalized to 2026-10-05');
+
+  // Verify persistence in getReceivingLogs
+  const allReceivings = getReceivingLogs('store-nature-basket-bandra');
+  const foundDd = allReceivings.find(r => r.id === userScenario.receiving.id);
+  assert(foundDd, 'Receiving record must persist and be retrievable from getReceivingLogs');
+  assert.strictEqual(foundDd.supplier, 'dd');
+
+  // 4. HOLD decision test
+  const holdDelivery = recordReceivingItem({
+    outletId: testOutletId,
+    supplier: 'Metro Organics',
+    product: 'Artisanal Yogurt',
+    productCategory: 'dairy_milk',
+    quantity: '25 tubs',
+    packagingCondition: 'intact',
+    productCondition: 'acceptable',
+    temperature: 4.8,
+    isTempSensitive: true,
+    receivingPerson: 'Vikas Sharma',
+    decision: 'HOLD',
+    rejectionReason: 'Awaiting lab COA certificate before release',
+    inspectionChecklist: {
+      approvedSupplier: true,
+      acceptableCondition: true,
+      packagingIntact: true,
+      noLeakageOrDamage: true,
+      dateMarkingAcceptable: true,
+      temperatureAppropriate: true,
+      suitableForStorage: true,
+      withinCapacity: true
+    }
+  });
+  assert.strictEqual(holdDelivery.receiving.decision, 'HOLD');
+  assert.strictEqual(holdDelivery.actionCreated, true, 'HOLD must spawn tracking corrective action');
+
+  console.log('✅ TEST C PASSED: Receiving engine accepted compliant batch (including exact "dd" milk scenario with blank mobile), held batch, and rejected abused batch with corrective action');
 
   // ----------------------------------------------------------------
   // TEST D: Temperature log creation & status evaluation

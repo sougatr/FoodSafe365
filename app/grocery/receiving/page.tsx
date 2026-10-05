@@ -67,8 +67,9 @@ export default function GroceryReceivingPage() {
       }
       const res = await fetch(`/api/v1/grocery/receiving?outletId=${encodeURIComponent(outletId)}`);
       const json = await res.json();
-      if (res.ok && json.success) {
-        setLogs(json.data.logs || []);
+      if (res.ok) {
+        const records = json.data?.logs || json.logs || (Array.isArray(json.data) ? json.data : []);
+        setLogs(records);
       }
     } catch {} finally {
       setLoading(false);
@@ -136,8 +137,8 @@ export default function GroceryReceivingPage() {
       });
 
       const json = await res.json();
-      if (res.ok && json.success) {
-        setToast(`✅ Receiving record saved (${decision}) for ${product}.`);
+      if (res.ok && (json.success || json.data)) {
+        setToast('Receiving entry recorded successfully.');
         setShowForm(false);
         // Reset form
         setProduct('');
@@ -150,10 +151,11 @@ export default function GroceryReceivingPage() {
         setRejectionReason('');
         fetchReceivingLogs();
       } else {
-        alert(json.message || 'Failed to record receiving entry.');
+        const errorMsg = json.message || json.error?.message || 'Unable to record receiving entry. Please try again.';
+        alert(errorMsg);
       }
     } catch (err: any) {
-      alert(err.message || 'Error recording receiving');
+      alert(err.message || 'Unable to record receiving entry. Please try again.');
     } finally {
       setSubmitting(false);
     }

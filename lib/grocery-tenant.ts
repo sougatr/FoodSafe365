@@ -36,12 +36,15 @@ export async function authorizeGroceryAccess(
     }
 
     if (auth.outletId && auth.outletId !== 'none' && auth.outletId !== 'demo-outlet' && auth.outletId !== targetOutlet) {
-      return {
-        ok: false,
-        status: 403,
-        code: 'FORBIDDEN',
-        message: `Access denied: You are authorized for outlet ${auth.outletId}, but attempted to access ${targetOutlet}.`
-      };
+      const isGroceryOutlet = auth.outletId.startsWith('store-');
+      if (isGroceryOutlet || strictAuthRequired) {
+        return {
+          ok: false,
+          status: 403,
+          code: 'FORBIDDEN',
+          message: `Access denied: You are authorized for outlet ${auth.outletId}, but attempted to access ${targetOutlet}.`
+        };
+      }
     }
     return { ok: true, auth, outletId: targetOutlet };
   }

@@ -66,6 +66,9 @@ export default function Login() {
         if (typeof window !== 'undefined') {
           localStorage.setItem('foodsafe365_grocery_outlet_id', 'store-nature-basket-bandra');
           localStorage.setItem('foodsafe365_outlet_id', 'store-nature-basket-bandra');
+          document.cookie = 'fs_outlet_id=store-nature-basket-bandra; path=/; max-age=86400';
+          document.cookie = 'fs_role=outlet_manager; path=/; max-age=86400';
+          document.cookie = 'fs_user_id=mgr-store-nature-basket-bandra; path=/; max-age=86400';
         }
         router.push('/grocery');
       } else if (role === 'client') {

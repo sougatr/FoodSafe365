@@ -911,14 +911,46 @@ export function recordReceivingItem(input: {
   let stockCreated: GroceryStockItem | undefined;
   if (input.decision === 'ACCEPT') {
     const zones = getStorageZones(input.outletId);
-    let matchedZone = zones.find(z => z.type === input.productCategory as any);
+    const categoryToZoneType: Record<string, string[]> = {
+      dairy_milk: ['milk_dairy', 'dairy', 'chiller'],
+      meat_fresh: ['meat_chicken', 'meat', 'chiller'],
+      seafood_fresh: ['fish_seafood', 'seafood', 'chiller'],
+      frozen_foods: ['freezer'],
+      produce_fresh: ['fresh_produce', 'ambient_dry'],
+      cut_produce: ['milk_dairy', 'fresh_produce', 'chiller'],
+      bakery_packaged: ['ambient_dry'],
+      dry_staples: ['ambient_dry'],
+      temp_sensitive_other: ['milk_dairy', 'chiller'],
+      other_packaged: ['ambient_dry']
+    };
+
+    const targetTypes = categoryToZoneType[input.productCategory] || [input.productCategory, 'ambient_dry'];
+    let matchedZone = zones.find(z => targetTypes.includes(z.type));
     if (!matchedZone) {
-      matchedZone = zones.find(z => z.type === 'ambient_dry') || zones[0];
+      matchedZone = zones.find(z => z.type === 'ambient_dry') || (zones.length > 0 ? zones[0] : undefined);
+    }
+
+    const defaultFallbackZone: GroceryStorageZone = {
+      id: `zone-${input.outletId}-inward`,
+      outletId: input.outletId,
+      name: 'Receiving Inward Storage',
+      type: 'ambient_dry',
+      description: 'Receiving dock inward temporary storage'
+    };
+    const finalZone = matchedZone || defaultFallbackZone;
+
+    let expiry = input.useByDate;
+    if (expiry) {
+      const parts = expiry.split(/[\/\-]/);
+      if (parts.length === 3 && parts[2].length === 4) {
+        expiry = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+      }
+    } else {
+      expiry = new Date(Date.now() + 86400000 * 7).toISOString().slice(0, 10);
     }
 
     const qtyNum = parseInt(input.quantity.replace(/\D/g, ''), 10) || 1;
     const stockId = `stk-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    const expiry = input.useByDate || new Date(Date.now() + 86400000 * 7).toISOString().slice(0, 10);
 
     stockCreated = {
       id: stockId,
@@ -930,15 +962,15 @@ export function recordReceivingItem(input: {
       unit: input.quantity.replace(/[0-9]/g, '').trim() || 'units',
       dateReceived: now.slice(0, 10),
       expiryDate: expiry,
-      storageZoneId: matchedZone ? matchedZone.id : 'zone-default',
-      storageZoneName: matchedZone ? matchedZone.name : 'General Storage',
+      storageZoneId: finalZone.id,
+      storageZoneName: finalZone.name,
       status: 'ACTIVE',
       auditTrail: [
         {
           timestamp: now,
           action: 'RECEIVED_AND_ACCEPTED',
           user: input.receivingPerson,
-          details: `Accepted from ${input.supplier} and assigned to ${matchedZone ? matchedZone.name : 'General Storage'}`
+          details: `Accepted from ${input.supplier} and assigned to ${finalZone.name}`
         }
       ],
       createdAt: now,

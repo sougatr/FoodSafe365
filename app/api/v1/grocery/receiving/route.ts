@@ -1,18 +1,34 @@
-import { ok, fail } from '@/lib/response';
+import { NextResponse } from 'next/server';
 import { getReceivingLogs, recordReceivingItem } from '@/lib/grocery-store';
 import { authorizeGroceryAccess } from '@/lib/grocery-tenant';
 
 export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const requestedOutlet = url.searchParams.get('outletId');
+  try {
+    const url = new URL(req.url);
+    const requestedOutlet = url.searchParams.get('outletId');
 
-  const auth = await authorizeGroceryAccess(requestedOutlet, req);
-  if (!auth.ok) {
-    return fail(auth.code, auth.message, auth.status);
+    const auth = await authorizeGroceryAccess(requestedOutlet, req);
+    if (!auth.ok) {
+      return NextResponse.json({
+        success: false,
+        error: { code: auth.code, message: auth.message },
+        message: auth.message
+      }, { status: auth.status });
+    }
+
+    const logs = getReceivingLogs(auth.outletId);
+    return NextResponse.json({
+      success: true,
+      data: { logs, count: logs.length }
+    }, { status: 200 });
+  } catch (err: any) {
+    console.error('[API GET /api/v1/grocery/receiving] Error:', err);
+    return NextResponse.json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: 'Unable to retrieve receiving records.' },
+      message: 'Unable to retrieve receiving records.'
+    }, { status: 500 });
   }
-
-  const logs = getReceivingLogs(auth.outletId);
-  return ok({ logs, count: logs.length });
 }
 
 export async function POST(req: Request) {
@@ -22,11 +38,20 @@ export async function POST(req: Request) {
 
     const auth = await authorizeGroceryAccess(requestedOutlet, req);
     if (!auth.ok) {
-      return fail(auth.code, auth.message, auth.status);
+      console.warn('[API POST /api/v1/grocery/receiving] Auth failure:', auth.code, auth.message);
+      return NextResponse.json({
+        success: false,
+        error: { code: auth.code, message: auth.message },
+        message: auth.message
+      }, { status: auth.status });
     }
 
     if (!body.product || !body.supplier) {
-      return fail('VALIDATION_ERROR', 'Product name and supplier are required.', 400);
+      return NextResponse.json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'Product name and supplier are required.' },
+        message: 'Product name and supplier are required.'
+      }, { status: 400 });
     }
 
     const result = recordReceivingItem({
@@ -42,7 +67,7 @@ export async function POST(req: Request) {
       productCondition: body.productCondition || 'acceptable',
       temperature: typeof body.temperature === 'number' ? body.temperature : undefined,
       isTempSensitive: Boolean(body.isTempSensitive),
-      receivingPerson: body.receivingPerson || 'Receiving Staff',
+      receivingPerson: body.receivingPerson || 'Duty Supervisor',
       decision: body.decision || 'ACCEPT',
       rejectionReason: body.rejectionReason,
       evidenceUrl: body.evidenceUrl,
@@ -58,8 +83,17 @@ export async function POST(req: Request) {
       }
     });
 
-    return ok(result, 201);
+    return NextResponse.json({
+      success: true,
+      data: result,
+      message: 'Receiving entry recorded successfully.'
+    }, { status: 201 });
   } catch (err: any) {
-    return fail('SERVER_ERROR', err.message || 'Failed to record receiving entry', 500);
+    console.error('[API POST /api/v1/grocery/receiving] Server Error:', err);
+    return NextResponse.json({
+      success: false,
+      error: { code: 'SERVER_ERROR', message: err.message || 'Unable to record receiving entry. Please try again.' },
+      message: 'Unable to record receiving entry. Please try again.'
+    }, { status: 500 });
   }
 }
