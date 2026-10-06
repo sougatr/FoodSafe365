@@ -120,8 +120,8 @@ export default function FoodSafetyChatbot() {
           aria-label="Ask Me (FoodSafe AI Assistant)"
           style={{
             position: 'fixed',
-            bottom: 24,
-            right: 24,
+            bottom: 'calc(env(safe-area-inset-bottom, 0px) + 32px)',
+            right: 'max(env(safe-area-inset-right, 0px), 18px)',
             zIndex: 9999,
             display: 'flex',
             alignItems: 'center',
@@ -164,10 +164,10 @@ export default function FoodSafetyChatbot() {
           className="foodsafe-chatbot-window card"
           style={{
             position: 'fixed',
-            bottom: 24,
-            right: 24,
+            bottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)',
+            right: 'max(env(safe-area-inset-right, 0px), 16px)',
             width: 'min(440px, calc(100vw - 32px))',
-            height: 'min(620px, calc(100vh - 48px))',
+            height: 'min(620px, calc(100vh - 72px))',
             zIndex: 10000,
             display: 'flex',
             flexDirection: 'column',

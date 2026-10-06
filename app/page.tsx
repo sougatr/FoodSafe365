@@ -29,7 +29,8 @@ import {
   HeartPulse,
   Mail,
   KeyRound,
-  ShoppingBag
+  ShoppingBag,
+  User
 } from 'lucide-react';
 import GlobalHeader from '@/components/GlobalHeader';
 import { POPULAR_RESTAURANTS, RestaurantItem } from '@/lib/restaurantsData';
@@ -58,6 +59,7 @@ export default function Landing() {
   const [otpError, setOtpError] = useState('');
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otpStep, setOtpStep] = useState<'phone' | 'otp' | 'success'>('phone');
+  const [showHomeAccountMenu, setShowHomeAccountMenu] = useState(false);
 
   // Custom Diner-Added Restaurants State
   const [customRestaurants, setCustomRestaurants] = useState<RestaurantItem[]>([]);
@@ -469,7 +471,7 @@ export default function Landing() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F7F8F5' }}>
+    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F7F8F5', width: '100%', maxWidth: '100vw', overflowX: 'hidden', boxSizing: 'border-box' }}>
       <GlobalHeader />
 
       {/* Hero Header */}
@@ -530,26 +532,83 @@ export default function Landing() {
           {/* Customer Logged-in / Login Banner */}
           <div style={{ marginBottom: 22 }}>
             {customerPhone ? (
-              <div style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 10,
-                background: 'rgba(16, 185, 129, 0.12)',
-                border: '1.5px solid rgba(16, 185, 129, 0.35)',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-                borderRadius: 9999,
-                padding: '7px 20px',
-                fontSize: 13,
-                color: '#047857'
-              }}>
-                <span>👤 Logged in as <strong style={{ color: '#064e3b' }}>+91 {customerPhone}</strong> (Customer)</span>
+              <div style={{ position: 'relative', display: 'inline-block' }}>
                 <button
                   type="button"
-                  onClick={handleLogoutCustomer}
-                  style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 12, fontWeight: 700, textDecoration: 'underline' }}
+                  onClick={() => setShowHomeAccountMenu(!showHomeAccountMenu)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    background: '#ffffff',
+                    border: '1.5px solid rgba(16, 185, 129, 0.4)',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                    borderRadius: 9999,
+                    padding: '6px 16px',
+                    fontSize: 13,
+                    color: '#047857',
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                  aria-label="Account Settings"
                 >
-                  Logout
+                  <User size={15} style={{ color: '#059669' }} />
+                  <span>+91 {customerPhone} (Customer)</span>
+                  <span style={{ fontSize: 11, color: '#64748B' }}>▾</span>
                 </button>
+
+                {showHomeAccountMenu && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 8px)',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: '#ffffff',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: 14,
+                    boxShadow: '0 12px 28px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.05)',
+                    padding: '14px 16px',
+                    width: 250,
+                    zIndex: 100,
+                    textAlign: 'left'
+                  }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
+                      Account
+                    </div>
+                    <div style={{ fontSize: 13.5, fontWeight: 800, color: '#0F172A', marginBottom: 2 }}>
+                      +91 {customerPhone}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#059669', marginBottom: 12 }}>
+                      Verified Diner / Customer
+                    </div>
+                    <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: 10 }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowHomeAccountMenu(false);
+                          handleLogoutCustomer();
+                        }}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 8,
+                          padding: '9px 12px',
+                          border: 'none',
+                          background: 'rgba(239, 68, 68, 0.08)',
+                          color: '#dc2626',
+                          borderRadius: 8,
+                          fontSize: 13,
+                          fontWeight: 700,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Log Out
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div style={{
