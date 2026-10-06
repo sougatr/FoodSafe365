@@ -4,7 +4,7 @@ export type DemoAction = {
   correctiveAction?:string|null; preventiveAction?:string|null; createdAt:string; closedAt?:string|null;
   sourceType?:string; sourceId?:string; observationId?:string;
   outletId?:string; sourceCheckCode?:string; requiresExternalService?:boolean; serviceCategory?:string|null;
-  responsiblePerson?:string;
+  responsiblePerson?:string; verificationNote?:string|null;
 };
 
 const store = new Map<string, DemoAction>();

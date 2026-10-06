@@ -7,6 +7,7 @@ import type {
   ProviderVerificationStatus,
   ServiceProvider,
   ServiceRequestStatus,
+  ServiceRequestAuditEntry,
   ServiceRequest
 } from './service-provider-contracts';
 import { CONTROLLED_SERVICE_CATEGORIES } from './service-provider-contracts';
@@ -16,10 +17,10 @@ export type {
   ProviderVerificationStatus,
   ServiceProvider,
   ServiceRequestStatus,
+  ServiceRequestAuditEntry,
   ServiceRequest
 };
 export { CONTROLLED_SERVICE_CATEGORIES };
-
 
 const DEFAULT_SEED_PROVIDERS: ServiceProvider[] = [
   {
@@ -185,18 +186,25 @@ async function ensurePgTables(): Promise<boolean> {
         outlet_id text NOT NULL,
         outlet_name text NOT NULL,
         outlet_city text,
+        outlet_address text,
         corrective_action_id text NOT NULL,
         corrective_action_title text NOT NULL,
         provider_id text NOT NULL,
         provider_name text NOT NULL,
         service_category text NOT NULL,
         problem_description text NOT NULL,
+        priority text DEFAULT 'high',
+        contact_person text,
+        contact_phone text,
         notes text,
+        completion_notes text,
+        rejection_notes text,
         status text NOT NULL,
         requested_at timestamptz DEFAULT now(),
         scheduled_at timestamptz NULL,
         completed_at timestamptz NULL,
-        confirmed_at timestamptz NULL
+        confirmed_at timestamptz NULL,
+        audit_trail jsonb DEFAULT '[]'::jsonb
       );
 
       CREATE INDEX IF NOT EXISTS idx_srv_requests_outlet ON restaurant_service_requests(outlet_id);
@@ -360,12 +368,16 @@ export async function listServiceRequests(filter: {
   const rows = await query<any>(`
     SELECT 
       id, organisation_id "organisationId", outlet_id "outletId", outlet_name "outletName",
-      outlet_city "outletCity", corrective_action_id "correctiveActionId",
+      outlet_city "outletCity", outlet_address "outletAddress",
+      corrective_action_id "correctiveActionId",
       corrective_action_title "correctiveActionTitle", provider_id "providerId",
       provider_name "providerName", service_category "serviceCategory",
-      problem_description "problemDescription", notes, status,
+      problem_description "problemDescription", priority, contact_person "contactPerson",
+      contact_phone "contactPhone", notes, completion_notes "completionNotes",
+      rejection_notes "rejectionNotes", status,
       requested_at "requestedAt", scheduled_at "scheduledAt",
-      completed_at "completedAt", confirmed_at "confirmedAt"
+      completed_at "completedAt", confirmed_at "confirmedAt",
+      audit_trail "auditTrail"
     FROM restaurant_service_requests
     ${where}
     ORDER BY requested_at DESC
@@ -384,12 +396,16 @@ export async function getServiceRequestById(id: string): Promise<ServiceRequest 
   const rows = await query<any>(`
     SELECT 
       id, organisation_id "organisationId", outlet_id "outletId", outlet_name "outletName",
-      outlet_city "outletCity", corrective_action_id "correctiveActionId",
+      outlet_city "outletCity", outlet_address "outletAddress",
+      corrective_action_id "correctiveActionId",
       corrective_action_title "correctiveActionTitle", provider_id "providerId",
       provider_name "providerName", service_category "serviceCategory",
-      problem_description "problemDescription", notes, status,
+      problem_description "problemDescription", priority, contact_person "contactPerson",
+      contact_phone "contactPhone", notes, completion_notes "completionNotes",
+      rejection_notes "rejectionNotes", status,
       requested_at "requestedAt", scheduled_at "scheduledAt",
-      completed_at "completedAt", confirmed_at "confirmedAt"
+      completed_at "completedAt", confirmed_at "confirmedAt",
+      audit_trail "auditTrail"
     FROM restaurant_service_requests
     WHERE id = $1
   `, [id]);
@@ -402,17 +418,31 @@ export async function createServiceRequest(data: {
   outletId: string;
   outletName: string;
   outletCity?: string;
+  outletAddress?: string;
   correctiveActionId: string;
   correctiveActionTitle: string;
   providerId: string;
   providerName: string;
   serviceCategory: string;
   problemDescription: string;
+  priority?: 'critical' | 'high' | 'medium' | 'low' | string;
+  contactPerson?: string;
+  contactPhone?: string;
   notes?: string;
   scheduledAt?: string;
 }): Promise<ServiceRequest> {
   const id = `req-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
   const now = new Date().toISOString();
+
+  const initialAudit: ServiceRequestAuditEntry[] = [
+    {
+      timestamp: now,
+      user: data.contactPerson || 'Restaurant Team',
+      action: 'Created service request',
+      status: 'requested',
+      notes: data.problemDescription
+    }
+  ];
 
   const request: ServiceRequest = {
     id,
@@ -420,18 +450,23 @@ export async function createServiceRequest(data: {
     outletId: data.outletId,
     outletName: data.outletName,
     outletCity: data.outletCity || 'Mumbai',
+    outletAddress: data.outletAddress || '',
     correctiveActionId: data.correctiveActionId,
     correctiveActionTitle: data.correctiveActionTitle,
     providerId: data.providerId,
     providerName: data.providerName,
     serviceCategory: data.serviceCategory,
     problemDescription: data.problemDescription,
+    priority: data.priority || 'high',
+    contactPerson: data.contactPerson || 'Duty Manager',
+    contactPhone: data.contactPhone || '',
     notes: data.notes || '',
     status: 'requested',
     requestedAt: now,
     scheduledAt: data.scheduledAt || null,
     completedAt: null,
-    confirmedAt: null
+    confirmedAt: null,
+    auditTrail: initialAudit
   };
 
   if (!process.env.DATABASE_URL) {
@@ -444,16 +479,18 @@ export async function createServiceRequest(data: {
   await ensurePgTables();
   await query(`
     INSERT INTO restaurant_service_requests(
-      id, organisation_id, outlet_id, outlet_name, outlet_city,
+      id, organisation_id, outlet_id, outlet_name, outlet_city, outlet_address,
       corrective_action_id, corrective_action_title, provider_id, provider_name,
-      service_category, problem_description, notes, status,
-      requested_at, scheduled_at
+      service_category, problem_description, priority, contact_person, contact_phone,
+      notes, status, requested_at, scheduled_at, audit_trail
     )
-    VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'requested', now(), $13)
+    VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, 'requested', now(), $17, $18)
   `, [
     request.id, request.organisationId, request.outletId, request.outletName, request.outletCity,
-    request.correctiveActionId, request.correctiveActionTitle, request.providerId, request.providerName,
-    request.serviceCategory, request.problemDescription, request.notes, request.scheduledAt
+    request.outletAddress, request.correctiveActionId, request.correctiveActionTitle, request.providerId,
+    request.providerName, request.serviceCategory, request.problemDescription, request.priority,
+    request.contactPerson, request.contactPhone, request.notes, request.scheduledAt,
+    JSON.stringify(initialAudit)
   ]);
 
   return request;
@@ -462,9 +499,33 @@ export async function createServiceRequest(data: {
 export async function updateServiceRequestStatus(
   id: string,
   newStatus: ServiceRequestStatus,
-  notes?: string
+  notes?: string,
+  actor?: string
 ): Promise<ServiceRequest | null> {
   const now = new Date().toISOString();
+
+  const existing = await getServiceRequestById(id);
+  if (!existing) return null;
+
+  const isRejection = existing.status === 'completed' && newStatus === 'in_progress';
+
+  const actionMap: Record<ServiceRequestStatus, string> = {
+    requested: 'Created service request',
+    accepted: 'Provider accepted request',
+    declined: 'Provider declined request',
+    in_progress: isRejection ? 'Returned for further action' : 'Provider started service',
+    completed: 'Provider completed service',
+    restaurant_confirmed: 'Restaurant verified completion',
+    cancelled: 'Request cancelled'
+  };
+
+  const auditEntry: ServiceRequestAuditEntry = {
+    timestamp: now,
+    user: actor || (newStatus === 'restaurant_confirmed' ? 'Restaurant Manager' : 'Service Provider'),
+    action: actionMap[newStatus] || `Status updated to ${newStatus}`,
+    status: newStatus,
+    notes: notes || undefined
+  };
 
   if (!process.env.DATABASE_URL) {
     const list = readFileStore(getRequestsFilePath(), DEFAULT_SEED_REQUESTS);
@@ -472,8 +533,20 @@ export async function updateServiceRequestStatus(
     if (!item) return null;
     item.status = newStatus;
     if (notes) item.notes = notes;
-    if (newStatus === 'completed' && !item.completedAt) item.completedAt = now;
-    if (newStatus === 'restaurant_confirmed' && !item.confirmedAt) item.confirmedAt = now;
+    if (newStatus === 'completed') {
+      if (!item.completedAt) item.completedAt = now;
+      if (notes) item.completionNotes = notes;
+    }
+    if (newStatus === 'restaurant_confirmed' && !item.confirmedAt) {
+      item.confirmedAt = now;
+    }
+    if (isRejection && notes) {
+      item.rejectionNotes = notes;
+    }
+
+    if (!item.auditTrail) item.auditTrail = [];
+    item.auditTrail.push(auditEntry);
+
     writeFileStore(getRequestsFilePath(), list);
     return item;
   }
@@ -488,10 +561,22 @@ export async function updateServiceRequestStatus(
   }
   if (newStatus === 'completed') {
     sets.push(`completed_at = COALESCE(completed_at, now())`);
+    if (notes) {
+      params.push(notes);
+      sets.push(`completion_notes = $${params.length}`);
+    }
   }
   if (newStatus === 'restaurant_confirmed') {
     sets.push(`confirmed_at = COALESCE(confirmed_at, now())`);
   }
+  if (isRejection && notes) {
+    params.push(notes);
+    sets.push(`rejection_notes = $${params.length}`);
+  }
+
+  // Append to audit_trail jsonb
+  params.push(JSON.stringify(auditEntry));
+  sets.push(`audit_trail = COALESCE(audit_trail, '[]'::jsonb) || $${params.length}::jsonb`);
 
   const rows = await query<any>(`
     UPDATE restaurant_service_requests
@@ -499,12 +584,16 @@ export async function updateServiceRequestStatus(
     WHERE id = $1
     RETURNING 
       id, organisation_id "organisationId", outlet_id "outletId", outlet_name "outletName",
-      outlet_city "outletCity", corrective_action_id "correctiveActionId",
+      outlet_city "outletCity", outlet_address "outletAddress",
+      corrective_action_id "correctiveActionId",
       corrective_action_title "correctiveActionTitle", provider_id "providerId",
       provider_name "providerName", service_category "serviceCategory",
-      problem_description "problemDescription", notes, status,
+      problem_description "problemDescription", priority, contact_person "contactPerson",
+      contact_phone "contactPhone", notes, completion_notes "completionNotes",
+      rejection_notes "rejectionNotes", status,
       requested_at "requestedAt", scheduled_at "scheduledAt",
-      completed_at "completedAt", confirmed_at "confirmedAt"
+      completed_at "completedAt", confirmed_at "confirmedAt",
+      audit_trail "auditTrail"
   `, params);
 
   return rows[0] || null;

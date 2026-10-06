@@ -58,18 +58,25 @@ export async function GET(req: Request) {
       outletId: r.outletId,
       outletName: r.outletName,
       outletCity: r.outletCity,
+      outletAddress: r.outletAddress,
       correctiveActionId: r.correctiveActionId,
       correctiveActionTitle: r.correctiveActionTitle,
       providerId: r.providerId,
       providerName: r.providerName,
       serviceCategory: r.serviceCategory,
       problemDescription: r.problemDescription,
+      priority: r.priority,
+      contactPerson: r.contactPerson,
+      contactPhone: r.contactPhone,
       notes: r.notes,
+      completionNotes: r.completionNotes,
+      rejectionNotes: r.rejectionNotes,
       status: r.status,
       requestedAt: r.requestedAt,
       scheduledAt: r.scheduledAt,
       completedAt: r.completedAt,
-      confirmedAt: r.confirmedAt
+      confirmedAt: r.confirmedAt,
+      auditTrail: r.auditTrail || []
     }));
 
     return ok(sanitized);
@@ -104,10 +111,14 @@ export async function POST(req: Request) {
       providerName,
       serviceCategory,
       problemDescription,
+      priority,
+      contactPerson,
+      contactPhone,
       notes,
       scheduledAt,
       outletName,
-      outletCity
+      outletCity,
+      outletAddress
     } = body || {};
 
     if (!correctiveActionId || typeof correctiveActionId !== 'string') {
@@ -138,12 +149,16 @@ export async function POST(req: Request) {
       outletId: auth.outletId || 'demo-outlet',
       outletName: (outletName || 'Restaurant Kitchen').trim(),
       outletCity: (outletCity || 'Mumbai').trim(),
+      outletAddress: (outletAddress || '').trim(),
       correctiveActionId: correctiveActionId.trim(),
       correctiveActionTitle: (correctiveActionTitle || 'Food-Safety Corrective Action').trim(),
       providerId: providerId.trim(),
       providerName: (resolvedProviderName || 'FoodSafe Service Partner').trim(),
       serviceCategory: serviceCategory.trim(),
       problemDescription: problemDescription.trim(),
+      priority: priority || 'high',
+      contactPerson: (contactPerson || 'Duty Manager').trim(),
+      contactPhone: (contactPhone || '').trim(),
       notes: typeof notes === 'string' ? notes.trim() : '',
       scheduledAt: typeof scheduledAt === 'string' ? scheduledAt.trim() : undefined
     });

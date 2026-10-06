@@ -42,18 +42,25 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       outletId: request.outletId,
       outletName: request.outletName,
       outletCity: request.outletCity,
+      outletAddress: request.outletAddress,
       correctiveActionId: request.correctiveActionId,
       correctiveActionTitle: request.correctiveActionTitle,
       providerId: request.providerId,
       providerName: request.providerName,
       serviceCategory: request.serviceCategory,
       problemDescription: request.problemDescription,
+      priority: request.priority,
+      contactPerson: request.contactPerson,
+      contactPhone: request.contactPhone,
       notes: request.notes,
+      completionNotes: request.completionNotes,
+      rejectionNotes: request.rejectionNotes,
       status: request.status,
       requestedAt: request.requestedAt,
       scheduledAt: request.scheduledAt,
       completedAt: request.completedAt,
-      confirmedAt: request.confirmedAt
+      confirmedAt: request.confirmedAt,
+      auditTrail: request.auditTrail || []
     });
   } catch (error: any) {
     console.error('[API /service-requests/[id]] Error retrieving request:', error);
@@ -102,6 +109,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
     const isProvider = auth.role === 'vendor' || auth.role === 'provider' || !!auth.providerId;
     const activeProviderId = auth.providerId || auth.userId;
+    const actorName = (isProvider ? request.providerName : auth.userId) || 'Manager';
 
     if (isProvider) {
       if (request.providerId !== activeProviderId) {
@@ -133,7 +141,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
       const restaurantAllowedTransitions: Record<string, string[]> = {
         requested: ['cancelled'],
-        completed: ['restaurant_confirmed']
+        completed: ['restaurant_confirmed', 'in_progress'] // in_progress when restaurant says "NEEDS FURTHER ACTION"
       };
 
       const allowedNext = restaurantAllowedTransitions[request.status] || [];
@@ -149,7 +157,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     const updated = await updateServiceRequestStatus(
       params.id,
       targetStatus as ServiceRequestStatus,
-      typeof notes === 'string' ? notes : undefined
+      typeof notes === 'string' ? notes : undefined,
+      actorName
     );
 
     // CRITICAL: When restaurant confirms service completion:
@@ -167,6 +176,24 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
       } else {
         try {
           updateDemoAction(updated.correctiveActionId, { status: 'awaiting_verification' }, auth.userId);
+        } catch (demoErr) {
+          console.warn('[service-requests/[id]] Failed to update demo corrective action status:', demoErr);
+        }
+      }
+    } else if (targetStatus === 'in_progress' && !isProvider && updated?.correctiveActionId) {
+      // Restaurant requested further action: action stays in_progress
+      if (process.env.DATABASE_URL) {
+        try {
+          await query(
+            `UPDATE corrective_actions SET status = 'in_progress' WHERE id = $1`,
+            [updated.correctiveActionId]
+          );
+        } catch (dbErr) {
+          console.warn('[service-requests/[id]] Failed to update corrective action status in DB:', dbErr);
+        }
+      } else {
+        try {
+          updateDemoAction(updated.correctiveActionId, { status: 'in_progress' }, auth.userId);
         } catch (demoErr) {
           console.warn('[service-requests/[id]] Failed to update demo corrective action status:', demoErr);
         }

@@ -30,7 +30,9 @@ import {
 import { 
   ServiceProvider, 
   ServiceRequest, 
-  CONTROLLED_SERVICE_CATEGORIES 
+  CONTROLLED_SERVICE_CATEGORIES,
+  isExternalServiceRequired,
+  inferServiceCategory
 } from '@/lib/service-provider-contracts';
 
 function loadState(): AppPhase1State {
@@ -60,19 +62,6 @@ function label(s: string) {
   }
 }
 
-function inferCategory(act: CorrectiveAction): string {
-  if (act.serviceCategory) return act.serviceCategory;
-  const code = act.checkCode || (act as any).sourceCheckCode || '';
-  if (['FS28-26', 'FS28-27'].includes(code) || /pest/i.test(act.title + ' ' + act.description)) return 'pest_control';
-  if (['FS28-19', 'FS28-20'].includes(code) || /refrig|chiller|freezer|cold/i.test(act.title + ' ' + act.description)) return 'refrigeration';
-  if (['FS28-01', 'FS28-02', 'FS28-03', 'FS28-04'].includes(code) || /clean|grease|drain|exhaust/i.test(act.title + ' ' + act.description)) return 'deep_cleaning';
-  if (['FS28-13', 'FS28-14'].includes(code) || /water|potability/i.test(act.title + ' ' + act.description)) return 'water_testing';
-  if (['FS28-08'].includes(code) || /fostac|training/i.test(act.title + ' ' + act.description)) return 'training';
-  if (['FS28-09'].includes(code) || /medical|health/i.test(act.title + ' ' + act.description)) return 'occupational_health';
-  if (['FS28-21'].includes(code) || /calibrat/i.test(act.title + ' ' + act.description)) return 'calibration';
-  return 'equipment';
-}
-
 export default function ActionDetail() {
   const params = useParams<{ action_id: string }>();
   const [data, setData] = useState<AppPhase1State>({});
@@ -87,12 +76,24 @@ export default function ActionDetail() {
   const [serviceRequest, setServiceRequest] = useState<ServiceRequest | null>(null);
   const [matchingProviders, setMatchingProviders] = useState<ServiceProvider[]>([]);
   const [selectedProviderId, setSelectedProviderId] = useState<string>('');
-  const [showDiscovery, setShowDiscovery] = useState(false);
+  const [handledInternally, setHandledInternally] = useState(false);
+  const [showRequestForm, setShowRequestForm] = useState(false);
   const [discoveryLoading, setDiscoveryLoading] = useState(false);
-  const [requestNotes, setRequestNotes] = useState('');
+  
+  // Service Request form fields
+  const [requestPriority, setRequestPriority] = useState<string>('high');
+  const [requestProblemDesc, setRequestProblemDesc] = useState<string>('');
   const [preferredDate, setPreferredDate] = useState('');
+  const [contactPerson, setContactPerson] = useState('Store Manager');
+  const [contactPhone, setContactPhone] = useState('+91 98200 12345');
+  const [requestNotes, setRequestNotes] = useState('');
   const [submittingRequest, setSubmittingRequest] = useState(false);
+  
+  // Verification states
   const [confirmingService, setConfirmingService] = useState(false);
+  const [showNeedsFurtherAction, setShowNeedsFurtherAction] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [rejectingService, setRejectingService] = useState(false);
 
   const fetchServiceRequest = useCallback(async () => {
     try {
@@ -401,7 +402,7 @@ export default function ActionDetail() {
                         textTransform: 'uppercase'
                       }}>
                         {serviceRequest.status === 'restaurant_confirmed'
-                          ? '✅ Service Confirmed by Restaurant'
+                          ? '✅ Service Verified by Restaurant'
                           : serviceRequest.status === 'completed'
                           ? '🔵 Service Completed by Provider'
                           : serviceRequest.status === 'in_progress'
@@ -459,69 +460,216 @@ export default function ActionDetail() {
                     background: '#eff6ff',
                     border: '1.5px solid #93c5fd',
                     borderRadius: 12,
-                    padding: '16px 20px',
+                    padding: '18px 22px',
                     marginTop: 12,
-                    marginBottom: 14
+                    marginBottom: 16
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                      <CheckCircle2 size={20} color="#1d4ed8" />
-                      <strong style={{ fontSize: 15, color: '#1e3a8a' }}>
-                        Service completed by {serviceRequest.providerName}. Please inspect and confirm on-site.
+                      <CheckCircle2 size={22} color="#1d4ed8" />
+                      <strong style={{ fontSize: 16, color: '#1e3a8a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        SERVICE COMPLETED
                       </strong>
                     </div>
-                    <p style={{ margin: '0 0 12px', fontSize: 13, color: '#3b82f6', lineHeight: 1.5 }}>
-                      Confirming external completion marks this service verified and automatically advances the corrective action to Manager Verification.
-                    </p>
-                    <button
-                      onClick={async () => {
-                        setConfirmingService(true);
-                        try {
-                          const res = await fetch(`/api/v1/service-requests/${serviceRequest.id}`, {
-                            method: 'PATCH',
-                            headers: {
-                              'Content-Type': 'application/json',
-                              'x-foodsafe-user-id': 'demo-user',
-                              'x-foodsafe-role': 'manager',
-                              'x-foodsafe-outlet-id': 'the-table'
-                            },
-                            body: JSON.stringify({ status: 'restaurant_confirmed' })
-                          });
-                          const json = await res.json();
-                          if (!res.ok) throw new Error(json?.error?.message || 'Confirmation failed');
-                          
-                          setServiceRequest(json.data);
-                          
-                          // Advance action to awaiting_verification
-                          const nextActions = (data.actions || []).map(a =>
-                            a.id === action.id ? { ...a, status: 'awaiting_verification' as const } : a
-                          );
-                          const nextState = { ...data, actions: nextActions };
-                          saveState(nextState);
-                          setAction(prev => prev ? { ...prev, status: 'awaiting_verification' } : null);
-                          setMessage('Service confirmed by restaurant. Ticket moved to Step 2: Manager Verification.');
-                        } catch (err: any) {
-                          alert(err.message || 'Error confirming service');
-                        } finally {
-                          setConfirmingService(false);
-                        }
-                      }}
-                      disabled={confirmingService}
-                      style={{
-                        padding: '10px 18px',
-                        background: '#059669',
-                        color: '#ffffff',
-                        border: 'none',
-                        borderRadius: 8,
-                        fontSize: 14,
-                        fontWeight: 700,
-                        cursor: confirmingService ? 'not-allowed' : 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 8
-                      }}
-                    >
-                      {confirmingService ? 'Confirming...' : 'Confirm Service Work & Move to Verification'} <ArrowRight size={16} />
-                    </button>
+
+                    <div style={{ fontSize: 13.5, color: '#1e293b', marginBottom: 14, lineHeight: 1.6 }}>
+                      <div><strong>Partner:</strong> {serviceRequest.providerName}</div>
+                      <div><strong>Category:</strong> {serviceRequest.serviceCategory.replace(/_/g, ' ').toUpperCase()}</div>
+                      <div><strong>Completion notes:</strong> {serviceRequest.completionNotes || serviceRequest.notes || 'Work completed per food safety standards.'}</div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                      <button
+                        onClick={async () => {
+                          setConfirmingService(true);
+                          try {
+                            const res = await fetch(`/api/v1/service-requests/${serviceRequest.id}`, {
+                              method: 'PATCH',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'x-foodsafe-user-id': 'demo-user',
+                                'x-foodsafe-role': 'manager',
+                                'x-foodsafe-outlet-id': 'the-table'
+                              },
+                              body: JSON.stringify({ status: 'restaurant_confirmed' })
+                            });
+                            const json = await res.json();
+                            if (!res.ok) throw new Error(json?.error?.message || 'Confirmation failed');
+                            
+                            setServiceRequest(json.data);
+                            
+                            const now = new Date().toISOString();
+                            const auditEvent: AuditTrailEvent = {
+                              id: `evt-srv-verify-${Date.now()}`,
+                              at: now,
+                              type: 'External service verified',
+                              detail: `External service completed by ${serviceRequest.providerName} verified by Manager.`,
+                              status: 'awaiting_verification'
+                            };
+
+                            // Advance action to awaiting_verification
+                            const nextActions = (data.actions || []).map(a =>
+                              a.id === action.id ? { ...a, status: 'awaiting_verification' as const } : a
+                            );
+                            const nextState = {
+                              ...data,
+                              actions: nextActions,
+                              timeline: [auditEvent, ...(data.timeline || [])]
+                            };
+                            saveState(nextState);
+                            setData(nextState);
+                            setAction(prev => prev ? { ...prev, status: 'awaiting_verification' } : null);
+                            setMessage('Service verified by restaurant manager. Corrective action moved to Step 2: Manager Verification.');
+                          } catch (err: any) {
+                            alert(err.message || 'Error verifying service');
+                          } finally {
+                            setConfirmingService(false);
+                          }
+                        }}
+                        disabled={confirmingService}
+                        style={{
+                          padding: '10px 18px',
+                          background: '#059669',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: 8,
+                          fontSize: 13.5,
+                          fontWeight: 800,
+                          cursor: confirmingService ? 'not-allowed' : 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 8
+                        }}
+                      >
+                        <CheckCircle2 size={16} />
+                        {confirmingService ? 'Verifying...' : 'VERIFY COMPLETION'}
+                      </button>
+
+                      <button
+                        onClick={() => setShowNeedsFurtherAction(!showNeedsFurtherAction)}
+                        style={{
+                          padding: '10px 18px',
+                          background: '#ffffff',
+                          color: '#dc2626',
+                          border: '1.5px solid #fca5a5',
+                          borderRadius: 8,
+                          fontSize: 13.5,
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 8
+                        }}
+                      >
+                        <AlertTriangle size={16} />
+                        NEEDS FURTHER ACTION
+                      </button>
+                    </div>
+
+                    {showNeedsFurtherAction && (
+                      <div style={{ marginTop: 16, padding: 14, background: '#ffffff', borderRadius: 8, border: '1px solid #cbd5e1' }}>
+                        <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                          Please provide brief explanation: Why does this need further action?
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={rejectionReason}
+                          onChange={e => setRejectionReason(e.target.value)}
+                          placeholder="e.g. Chiller still fluctuating above 8°C. Door gasket needs resealing."
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            borderRadius: 6,
+                            border: '1px solid #cbd5e1',
+                            fontSize: 13,
+                            boxSizing: 'border-box',
+                            marginBottom: 10
+                          }}
+                        />
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button
+                            onClick={async () => {
+                              if (!rejectionReason.trim()) {
+                                alert('Please enter an explanation of what needs further action.');
+                                return;
+                              }
+                              setRejectingService(true);
+                              try {
+                                const res = await fetch(`/api/v1/service-requests/${serviceRequest.id}`, {
+                                  method: 'PATCH',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                    'x-foodsafe-user-id': 'demo-user',
+                                    'x-foodsafe-role': 'manager',
+                                    'x-foodsafe-outlet-id': 'the-table'
+                                  },
+                                  body: JSON.stringify({
+                                    status: 'in_progress',
+                                    notes: rejectionReason
+                                  })
+                                });
+                                const json = await res.json();
+                                if (!res.ok) throw new Error(json?.error?.message || 'Failed to update request');
+
+                                setServiceRequest(json.data);
+                                const now = new Date().toISOString();
+                                const auditEvent: AuditTrailEvent = {
+                                  id: `evt-srv-reopen-${Date.now()}`,
+                                  at: now,
+                                  type: 'Restaurant requested further action',
+                                  detail: `External service rejected by Manager: "${rejectionReason}". Request returned to in-progress.`,
+                                  status: 'in_progress'
+                                };
+
+                                const nextActions = (data.actions || []).map(a =>
+                                  a.id === action.id ? { ...a, status: 'in_progress' as const } : a
+                                );
+                                const nextState = {
+                                  ...data,
+                                  actions: nextActions,
+                                  timeline: [auditEvent, ...(data.timeline || [])]
+                                };
+                                saveState(nextState);
+                                setData(nextState);
+                                setAction(prev => prev ? { ...prev, status: 'in_progress' } : null);
+                                setShowNeedsFurtherAction(false);
+                                setMessage('Request returned to In Progress. Provider notified with your notes.');
+                              } catch (err: any) {
+                                alert(err.message || 'Error submitting explanation');
+                              } finally {
+                                setRejectingService(false);
+                              }
+                            }}
+                            disabled={rejectingService}
+                            style={{
+                              padding: '8px 14px',
+                              background: '#dc2626',
+                              color: '#ffffff',
+                              border: 'none',
+                              borderRadius: 6,
+                              fontSize: 12.5,
+                              fontWeight: 700,
+                              cursor: rejectingService ? 'not-allowed' : 'pointer'
+                            }}
+                          >
+                            {rejectingService ? 'Submitting...' : 'Return to In Progress'}
+                          </button>
+                          <button
+                            onClick={() => setShowNeedsFurtherAction(false)}
+                            style={{
+                              padding: '8px 12px',
+                              background: '#f1f5f9',
+                              color: '#475569',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: 6,
+                              fontSize: 12.5,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -544,47 +692,94 @@ export default function ActionDetail() {
                   </span>
                 </div>
               </div>
-            ) : (
-              /* 2. NO SERVICE REQUEST YET: CONTEXTUAL DISCOVERY */
-              <div style={{
-                background: '#ffffff',
-                border: '1.5px solid #cbd5e1',
-                borderRadius: 16,
-                padding: '20px 24px',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 12,
-                      background: '#ecfdf5',
+            ) : isExternalServiceRequired(action) ? (
+              /* 2. NO SERVICE REQUEST YET & EXTERNAL SERVICE IS REQUIRED */
+              handledInternally ? (
+                <div style={{
+                  background: '#f8fafc',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: 12,
+                  padding: '14px 18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: 10
+                }}>
+                  <div style={{ fontSize: 13, color: '#475569' }}>
+                    <strong>Notice:</strong> Handling internally without external service provider.
+                  </div>
+                  <button
+                    onClick={() => {
+                      setHandledInternally(false);
+                      setShowRequestForm(true);
+                      const cat = inferServiceCategory(action);
+                      fetch(`/api/v1/providers?category=${cat}&city=Mumbai`)
+                        .then(r => r.json())
+                        .then(j => {
+                          if (j?.data) {
+                            setMatchingProviders(j.data);
+                            if (j.data.length > 0) setSelectedProviderId(j.data[0].id);
+                          }
+                        })
+                        .catch(() => {});
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
                       color: '#059669',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: 22,
-                      flexShrink: 0
+                      fontSize: 13,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      padding: 0
+                    }}
+                  >
+                    Need external help? Find a service provider →
+                  </button>
+                </div>
+              ) : !showRequestForm ? (
+                <div style={{
+                  background: '#ffffff',
+                  border: '1.5px solid #cbd5e1',
+                  borderRadius: 16,
+                  padding: '22px 24px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <AlertTriangle size={20} color="#d97706" />
+                    <span style={{
+                      fontSize: 13,
+                      fontWeight: 800,
+                      color: '#b45309',
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase'
                     }}>
-                      <Wrench size={22} />
-                    </div>
-                    <div>
-                      <strong style={{ fontSize: 16, color: '#0f172a', display: 'block' }}>
-                        Need Professional Help? Find Relevant Service Providers
-                      </strong>
-                      <p className="muted" style={{ margin: '2px 0 0', fontSize: 13 }}>
-                        FoodSafe365 connects this corrective action directly to verified specialist providers for remediation.
-                      </p>
-                    </div>
+                      EXTERNAL HELP MAY BE NEEDED
+                    </span>
                   </div>
 
-                  <button
-                    onClick={async () => {
-                      if (!showDiscovery) {
-                        setShowDiscovery(true);
+                  <p style={{ margin: '0 0 6px', fontSize: 14.5, color: '#0F172A', fontWeight: 600 }}>
+                    Issue: <span style={{ fontWeight: 400, color: '#334155' }}>{action.description || action.title}</span>
+                  </p>
+
+                  <p style={{ margin: '0 0 18px', fontSize: 14, color: '#0F172A', fontWeight: 600 }}>
+                    Recommended service: <span style={{
+                      fontWeight: 700,
+                      color: '#059669',
+                      background: '#ecfdf5',
+                      padding: '2px 8px',
+                      borderRadius: 6
+                    }}>
+                      {CONTROLLED_SERVICE_CATEGORIES.find(c => c.id === inferServiceCategory(action))?.label || inferServiceCategory(action).replace(/_/g, ' ').toUpperCase()}
+                    </span>
+                  </p>
+
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    <button
+                      onClick={async () => {
+                        setShowRequestForm(true);
                         setDiscoveryLoading(true);
-                        const cat = inferCategory(action);
+                        const cat = inferServiceCategory(action);
                         try {
                           const res = await fetch(`/api/v1/providers?category=${cat}&city=Mumbai`);
                           const json = await res.json();
@@ -599,43 +794,189 @@ export default function ActionDetail() {
                         } finally {
                           setDiscoveryLoading(false);
                         }
-                      } else {
-                        setShowDiscovery(false);
-                      }
-                    }}
-                    style={{
-                      background: showDiscovery ? '#f1f5f9' : '#059669',
-                      color: showDiscovery ? '#334155' : '#ffffff',
-                      border: showDiscovery ? '1px solid #cbd5e1' : 'none',
-                      borderRadius: 8,
-                      padding: '10px 18px',
-                      fontSize: 13,
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 6
-                    }}
-                  >
-                    {showDiscovery ? 'Close Provider Search' : `Find ${inferCategory(action).replace(/_/g, ' ').toUpperCase()} Partners →`}
-                  </button>
-                </div>
+                      }}
+                      style={{
+                        background: '#059669',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: 8,
+                        padding: '10px 18px',
+                        fontSize: 13.5,
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 6
+                      }}
+                    >
+                      <Wrench size={16} />
+                      FIND A SERVICE PROVIDER
+                    </button>
 
-                {/* EXPANDABLE PROVIDER DISCOVERY PANEL */}
-                {showDiscovery && (
-                  <div style={{ marginTop: 20, paddingTop: 18, borderTop: '1px solid #e2e8f0' }}>
-                    <h4 style={{ fontSize: 15, fontWeight: 700, color: '#0F172A', margin: '0 0 12px' }}>
-                      Available FoodSafe365 Partners in Mumbai for "{inferCategory(action).replace(/_/g, ' ')}"
-                    </h4>
+                    <button
+                      onClick={() => setHandledInternally(true)}
+                      style={{
+                        background: '#f8fafc',
+                        color: '#475569',
+                        border: '1.5px solid #cbd5e1',
+                        borderRadius: 8,
+                        padding: '10px 16px',
+                        fontSize: 13.5,
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      HANDLE INTERNALLY
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* SERVICE REQUEST FORM */
+                <div style={{
+                  background: '#ffffff',
+                  border: '1.5px solid #cbd5e1',
+                  borderRadius: 16,
+                  padding: '24px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <div>
+                      <span style={{ fontSize: 12, fontWeight: 800, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        SERVICE REQUEST
+                      </span>
+                      <h3 style={{ margin: '4px 0 0', fontSize: 18, fontWeight: 800, color: '#0F172A' }}>
+                        Request Professional External Remediation
+                      </h3>
+                    </div>
+                    <button
+                      onClick={() => setShowRequestForm(false)}
+                      style={{ background: 'none', border: 'none', color: '#64748b', fontSize: 13, cursor: 'pointer' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, marginBottom: 14 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                        Business / Outlet Name
+                      </label>
+                      <input
+                        type="text"
+                        disabled
+                        value="ABC Restaurant - Bandra"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: 13, boxSizing: 'border-box' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                        Issue Summary
+                      </label>
+                      <input
+                        type="text"
+                        disabled
+                        value={action.title}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: 13, boxSizing: 'border-box' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                        Service Category
+                      </label>
+                      <input
+                        type="text"
+                        disabled
+                        value={CONTROLLED_SERVICE_CATEGORIES.find(c => c.id === inferServiceCategory(action))?.label || inferServiceCategory(action)}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #e2e8f0', background: '#f8fafc', fontSize: 13, boxSizing: 'border-box' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                        Priority
+                      </label>
+                      <select
+                        value={requestPriority}
+                        onChange={e => setRequestPriority(e.target.value)}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: 13, background: '#fff', boxSizing: 'border-box' }}
+                      >
+                        <option value="low">Low Priority</option>
+                        <option value="medium">Medium Priority</option>
+                        <option value="high">High Priority</option>
+                        <option value="urgent">Urgent</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                      Description of Problem (Editable)
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={requestProblemDesc || action.description}
+                      onChange={e => setRequestProblemDesc(e.target.value)}
+                      placeholder="Describe what assistance or parts are required..."
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: 13, boxSizing: 'border-box' }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, marginBottom: 16 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                        Preferred Date / Time
+                      </label>
+                      <input
+                        type="date"
+                        value={preferredDate}
+                        onChange={e => setPreferredDate(e.target.value)}
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: 13, boxSizing: 'border-box' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                        Contact Person
+                      </label>
+                      <input
+                        type="text"
+                        value={contactPerson}
+                        onChange={e => setContactPerson(e.target.value)}
+                        placeholder="e.g. Ramesh Kumar (Store Manager)"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: 13, boxSizing: 'border-box' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                        Phone Number
+                      </label>
+                      <input
+                        type="text"
+                        value={contactPhone}
+                        onChange={e => setContactPhone(e.target.value)}
+                        placeholder="e.g. +91 98200 12345"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: 13, boxSizing: 'border-box' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Matching Providers */}
+                  <div style={{ marginBottom: 18 }}>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+                      Select Verified Service Provider
+                    </label>
 
                     {discoveryLoading ? (
-                      <p className="muted" style={{ fontSize: 13 }}>Searching verified providers...</p>
+                      <p className="muted" style={{ fontSize: 13 }}>Loading available verified providers...</p>
                     ) : matchingProviders.length === 0 ? (
-                      <div style={{ padding: '16px', background: '#f8fafc', borderRadius: 8, fontSize: 13, color: '#64748b' }}>
-                        No specific providers currently registered in this city for this category. You may still register an external agency or assign internal staff.
+                      <div style={{ padding: 12, background: '#f8fafc', borderRadius: 8, fontSize: 13, color: '#64748b' }}>
+                        No specialized providers found for this category in Mumbai. You may proceed with internal remediation.
                       </div>
                     ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 18 }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                         {matchingProviders.map(p => {
                           const isSelected = selectedProviderId === p.id;
                           return (
@@ -643,8 +984,8 @@ export default function ActionDetail() {
                               key={p.id}
                               onClick={() => setSelectedProviderId(p.id)}
                               style={{
-                                padding: '14px 16px',
-                                borderRadius: 10,
+                                padding: '12px 14px',
+                                borderRadius: 8,
                                 border: isSelected ? '2px solid #059669' : '1px solid #cbd5e1',
                                 background: isSelected ? '#ecfdf5' : '#ffffff',
                                 cursor: 'pointer',
@@ -654,17 +995,14 @@ export default function ActionDetail() {
                               }}
                             >
                               <div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                  <strong style={{ fontSize: 14, color: '#0f172a' }}>{p.businessName}</strong>
-                                  <span style={{ fontSize: 11, background: '#e2e8f0', color: '#334155', padding: '2px 6px', borderRadius: 4 }}>
-                                    {p.city}
-                                  </span>
-                                </div>
-                                <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#64748b' }}>
+                                <strong style={{ fontSize: 14, color: '#0F172A' }}>{p.businessName}</strong>
+                                <span style={{ marginLeft: 8, fontSize: 11, background: '#e2e8f0', color: '#334155', padding: '2px 6px', borderRadius: 4 }}>
+                                  {p.city}
+                                </span>
+                                <p style={{ margin: '3px 0 0', fontSize: 12, color: '#64748b' }}>
                                   {p.description}
                                 </p>
                               </div>
-
                               <input
                                 type="radio"
                                 name="selected_provider"
@@ -676,96 +1014,87 @@ export default function ActionDetail() {
                         })}
                       </div>
                     )}
-
-                    {matchingProviders.length > 0 && (
-                      <div style={{ background: '#f8fafc', padding: '16px', borderRadius: 10, border: '1px solid #e2e8f0' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-                          <div>
-                            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#334155', marginBottom: 4 }}>
-                              Preferred Service Date (Optional)
-                            </label>
-                            <input
-                              type="date"
-                              value={preferredDate}
-                              onChange={e => setPreferredDate(e.target.value)}
-                              style={{ width: '100%', padding: '8px 10px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: 13, boxSizing: 'border-box' }}
-                            />
-                          </div>
-                          <div>
-                            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#334155', marginBottom: 4 }}>
-                              Additional Notes for Technician
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="e.g. Please visit before 11 AM before lunch rush."
-                              value={requestNotes}
-                              onChange={e => setRequestNotes(e.target.value)}
-                              style={{ width: '100%', padding: '8px 10px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: 13, boxSizing: 'border-box' }}
-                            />
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={async () => {
-                            const p = matchingProviders.find(x => x.id === selectedProviderId);
-                            if (!p) {
-                              alert('Please select a service provider');
-                              return;
-                            }
-                            setSubmittingRequest(true);
-                            try {
-                              const res = await fetch('/api/v1/service-requests', {
-                                method: 'POST',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                  'x-foodsafe-user-id': 'demo-user',
-                                  'x-foodsafe-role': 'manager',
-                                  'x-foodsafe-outlet-id': 'the-table'
-                                },
-                                body: JSON.stringify({
-                                  correctiveActionId: action.id,
-                                  correctiveActionTitle: action.title,
-                                  providerId: p.id,
-                                  providerName: p.businessName,
-                                  serviceCategory: inferCategory(action),
-                                  problemDescription: action.description,
-                                  notes: requestNotes,
-                                  scheduledAt: preferredDate || undefined,
-                                  outletName: 'ABC Restaurant',
-                                  outletCity: 'Mumbai'
-                                })
-                              });
-                              const json = await res.json();
-                              if (!res.ok) throw new Error(json?.error?.message || 'Failed to dispatch request');
-                              setServiceRequest(json.data);
-                              setShowDiscovery(false);
-                              setMessage(`Service request sent to ${p.businessName}. You can track status above.`);
-                            } catch (err: any) {
-                              alert(err.message || 'Error submitting request');
-                            } finally {
-                              setSubmittingRequest(false);
-                            }
-                          }}
-                          disabled={submittingRequest || !selectedProviderId}
-                          style={{
-                            padding: '10px 18px',
-                            background: '#059669',
-                            color: '#ffffff',
-                            border: 'none',
-                            borderRadius: 8,
-                            fontSize: 13,
-                            fontWeight: 700,
-                            cursor: submittingRequest ? 'not-allowed' : 'pointer'
-                          }}
-                        >
-                          {submittingRequest ? 'Dispatching Request...' : 'Send Service Request to Provider'}
-                        </button>
-                      </div>
-                    )}
                   </div>
-                )}
-              </div>
-            )}
+
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <button
+                      onClick={async () => {
+                        const p = matchingProviders.find(x => x.id === selectedProviderId);
+                        if (!p) {
+                          alert('Please select a service provider');
+                          return;
+                        }
+                        setSubmittingRequest(true);
+                        try {
+                          const res = await fetch('/api/v1/service-requests', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'x-foodsafe-user-id': 'demo-user',
+                              'x-foodsafe-role': 'manager',
+                              'x-foodsafe-outlet-id': 'the-table'
+                            },
+                            body: JSON.stringify({
+                              correctiveActionId: action.id,
+                              correctiveActionTitle: action.title,
+                              providerId: p.id,
+                              providerName: p.businessName,
+                              serviceCategory: inferServiceCategory(action),
+                              problemDescription: requestProblemDesc || action.description,
+                              priority: requestPriority,
+                              contactPerson: contactPerson,
+                              contactPhone: contactPhone,
+                              notes: requestNotes,
+                              scheduledAt: preferredDate || undefined,
+                              outletName: 'ABC Restaurant',
+                              outletCity: 'Mumbai'
+                            })
+                          });
+                          const json = await res.json();
+                          if (!res.ok) throw new Error(json?.error?.message || 'Failed to dispatch request');
+                          setServiceRequest(json.data);
+                          setShowRequestForm(false);
+                          setMessage(`Service request sent to ${p.businessName}. You can track status above.`);
+                        } catch (err: any) {
+                          alert(err.message || 'Error submitting request');
+                        } finally {
+                          setSubmittingRequest(false);
+                        }
+                      }}
+                      disabled={submittingRequest || !selectedProviderId}
+                      style={{
+                        padding: '10px 18px',
+                        background: '#059669',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: 8,
+                        fontSize: 13.5,
+                        fontWeight: 800,
+                        cursor: submittingRequest ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {submittingRequest ? 'Sending Request...' : 'SEND SERVICE REQUEST'}
+                    </button>
+
+                    <button
+                      onClick={() => setShowRequestForm(false)}
+                      style={{
+                        padding: '10px 16px',
+                        background: '#f8fafc',
+                        color: '#475569',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: 8,
+                        fontSize: 13.5,
+                        fontWeight: 700,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )
+            ) : null}
           </div>
         )}
 

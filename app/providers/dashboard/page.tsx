@@ -16,17 +16,22 @@ import {
   Calendar, 
   MapPin, 
   FileText,
-  UserCheck
+  UserCheck,
+  AlertTriangle,
+  User,
+  Phone,
+  X
 } from 'lucide-react';
 import { ServiceRequest } from '@/lib/service-provider-contracts';
 
 export default function ProviderDashboardPage() {
   const [provider, setProvider] = useState<any>(null);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
-  const [activeTab, setActiveTab] = useState<'new' | 'active' | 'completed'>('new');
+  const [activeTab, setActiveTab] = useState<'new' | 'accepted' | 'in_progress' | 'completed'>('new');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [completionNotes, setCompletionNotes] = useState<Record<string, string>>({});
+  const [followUpDates, setFollowUpDates] = useState<Record<string, string>>({});
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
   const [message, setMessage] = useState<{ type: 'good' | 'error'; text: string } | null>(null);
 
@@ -122,8 +127,9 @@ export default function ProviderDashboardPage() {
   };
 
   const newRequests = requests.filter(r => r.status === 'requested');
-  const activeJobs = requests.filter(r => r.status === 'accepted' || r.status === 'in_progress');
-  const completedJobs = requests.filter(r => r.status === 'completed' || r.status === 'restaurant_confirmed' || r.status === 'declined');
+  const acceptedRequests = requests.filter(r => r.status === 'accepted');
+  const inProgressRequests = requests.filter(r => r.status === 'in_progress');
+  const completedRequests = requests.filter(r => r.status === 'completed' || r.status === 'restaurant_confirmed' || r.status === 'declined');
 
   const switchProvider = (id: string, name: string) => {
     const p = {
@@ -294,97 +300,55 @@ export default function ProviderDashboardPage() {
           </div>
         )}
 
-        {/* Tabs */}
+        {/* 4 Clean Tabs */}
         <div style={{
           display: 'flex',
           gap: 12,
           borderBottom: '1px solid #e2e8f0',
           marginBottom: 24,
-          paddingBottom: 4
+          paddingBottom: 4,
+          overflowX: 'auto'
         }}>
-          <button
-            onClick={() => setActiveTab('new')}
-            style={{
-              padding: '8px 16px',
-              border: 'none',
-              background: 'none',
-              fontSize: 14,
-              fontWeight: 600,
-              color: activeTab === 'new' ? '#059669' : '#64748b',
-              borderBottom: activeTab === 'new' ? '2px solid #059669' : '2px solid transparent',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8
-            }}
-          >
-            New Requests
-            <span style={{
-              background: activeTab === 'new' ? '#ecfdf5' : '#f1f5f9',
-              color: activeTab === 'new' ? '#059669' : '#64748b',
-              fontSize: 11,
-              padding: '2px 8px',
-              borderRadius: 12
-            }}>
-              {newRequests.length}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('active')}
-            style={{
-              padding: '8px 16px',
-              border: 'none',
-              background: 'none',
-              fontSize: 14,
-              fontWeight: 600,
-              color: activeTab === 'active' ? '#059669' : '#64748b',
-              borderBottom: activeTab === 'active' ? '2px solid #059669' : '2px solid transparent',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8
-            }}
-          >
-            Active Jobs
-            <span style={{
-              background: activeTab === 'active' ? '#ecfdf5' : '#f1f5f9',
-              color: activeTab === 'active' ? '#059669' : '#64748b',
-              fontSize: 11,
-              padding: '2px 8px',
-              borderRadius: 12
-            }}>
-              {activeJobs.length}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('completed')}
-            style={{
-              padding: '8px 16px',
-              border: 'none',
-              background: 'none',
-              fontSize: 14,
-              fontWeight: 600,
-              color: activeTab === 'completed' ? '#059669' : '#64748b',
-              borderBottom: activeTab === 'completed' ? '2px solid #059669' : '2px solid transparent',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8
-            }}
-          >
-            Completed & History
-            <span style={{
-              background: activeTab === 'completed' ? '#ecfdf5' : '#f1f5f9',
-              color: activeTab === 'completed' ? '#059669' : '#64748b',
-              fontSize: 11,
-              padding: '2px 8px',
-              borderRadius: 12
-            }}>
-              {completedJobs.length}
-            </span>
-          </button>
+          {[
+            { id: 'new', label: 'New Requests', count: newRequests.length },
+            { id: 'accepted', label: 'Accepted', count: acceptedRequests.length },
+            { id: 'in_progress', label: 'In Progress', count: inProgressRequests.length },
+            { id: 'completed', label: 'Completed', count: completedRequests.length }
+          ].map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                style={{
+                  padding: '10px 16px',
+                  border: 'none',
+                  background: 'none',
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: isActive ? '#059669' : '#64748b',
+                  borderBottom: isActive ? '3px solid #059669' : '3px solid transparent',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {tab.label}
+                <span style={{
+                  background: isActive ? '#ecfdf5' : '#f1f5f9',
+                  color: isActive ? '#059669' : '#64748b',
+                  fontSize: 12,
+                  fontWeight: 800,
+                  padding: '2px 8px',
+                  borderRadius: 12
+                }}>
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Content Section */}
@@ -394,106 +358,244 @@ export default function ProviderDashboardPage() {
           </div>
         ) : (
           <div>
-            {/* TAB 1: NEW REQUESTS */}
-            {activeTab === 'new' && (
-              <div>
-                {newRequests.length === 0 ? (
+            {/* HELPER CARD RENDERER */}
+            {(() => {
+              const currentList =
+                activeTab === 'new'
+                  ? newRequests
+                  : activeTab === 'accepted'
+                  ? acceptedRequests
+                  : activeTab === 'in_progress'
+                  ? inProgressRequests
+                  : completedRequests;
+
+              const getPriorityBadge = (p?: string) => {
+                const norm = (p || 'medium').toLowerCase();
+                if (norm === 'urgent' || norm === 'critical') {
+                  return { bg: '#fef2f2', color: '#b91c1c', border: '#fecaca', label: 'Urgent' };
+                }
+                if (norm === 'high') {
+                  return { bg: '#fff7ed', color: '#c2410c', border: '#fed7aa', label: 'High' };
+                }
+                if (norm === 'medium') {
+                  return { bg: '#fefce8', color: '#a16207', border: '#fef08a', label: 'Medium' };
+                }
+                return { bg: '#f0fdf4', color: '#15803d', border: '#bbf7d0', label: 'Low' };
+              };
+
+              const getStatusBadge = (s: string) => {
+                switch (s) {
+                  case 'requested':
+                    return { bg: '#fef3c7', color: '#b45309', label: 'Requested' };
+                  case 'accepted':
+                    return { bg: '#e0f2fe', color: '#0369a1', label: 'Accepted' };
+                  case 'in_progress':
+                    return { bg: '#ffedd5', color: '#c2410c', label: 'In Progress' };
+                  case 'completed':
+                    return { bg: '#eff6ff', color: '#1d4ed8', label: 'Completed (Verification Pending)' };
+                  case 'restaurant_confirmed':
+                    return { bg: '#ecfdf5', color: '#065f46', label: 'Verified & Closed' };
+                  case 'declined':
+                    return { bg: '#fef2f2', color: '#b91c1c', label: 'Declined' };
+                  default:
+                    return { bg: '#f1f5f9', color: '#475569', label: s.toUpperCase() };
+                }
+              };
+
+              if (currentList.length === 0) {
+                return (
                   <div style={{
                     background: '#ffffff',
-                    borderRadius: 12,
+                    borderRadius: 14,
                     border: '1px dashed #cbd5e1',
-                    padding: '40px 20px',
+                    padding: '48px 24px',
                     textAlign: 'center',
                     color: '#64748b'
                   }}>
-                    <Building2 size={36} color="#94a3b8" style={{ marginBottom: 12 }} />
-                    <h3 style={{ fontSize: 16, fontWeight: 600, margin: '0 0 6px', color: '#1e293b' }}>
-                      No Pending Requests
+                    <Building2 size={40} color="#94a3b8" style={{ marginBottom: 12 }} />
+                    <h3 style={{ fontSize: 16.5, fontWeight: 700, margin: '0 0 6px', color: '#1e293b' }}>
+                      No {activeTab.replace('_', ' ')} requests
                     </h3>
-                    <p style={{ margin: 0, fontSize: 13 }}>
-                      When a restaurant identifies a corrective action needing your specialization, new requests will appear here.
+                    <p style={{ margin: 0, fontSize: 13.5 }}>
+                      {activeTab === 'new' && 'When a food business requires specialized external service, new requests will appear here.'}
+                      {activeTab === 'accepted' && 'Requests you have accepted will appear here until you start on-site service.'}
+                      {activeTab === 'in_progress' && 'Work currently underway appears here. Once work is done, mark completed with notes.'}
+                      {activeTab === 'completed' && 'Completed requests and restaurant-verified history will appear here.'}
                     </p>
                   </div>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    {newRequests.map(req => (
+                );
+              }
+
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {currentList.map(req => {
+                    const prio = getPriorityBadge(req.priority);
+                    const stat = getStatusBadge(req.status);
+                    const noteKey = req.id;
+
+                    return (
                       <div
                         key={req.id}
                         style={{
                           background: '#ffffff',
                           borderRadius: 14,
-                          border: '1px solid #e2e8f0',
+                          border: '1.5px solid #e2e8f0',
                           padding: '20px 24px',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                          cursor: 'pointer',
+                          transition: 'border-color 0.15s ease'
                         }}
+                        onClick={() => setSelectedRequest(req)}
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 12 }}>
                           <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
                               <span style={{
-                                background: '#fef3c7',
-                                color: '#b45309',
+                                background: stat.bg,
+                                color: stat.color,
                                 fontSize: 11,
-                                fontWeight: 700,
+                                fontWeight: 800,
                                 padding: '2px 8px',
                                 borderRadius: 4,
                                 textTransform: 'uppercase'
                               }}>
-                                REQUESTED
+                                {stat.label}
                               </span>
-                              <span style={{ fontSize: 12, color: '#64748b' }}>
-                                Reference: {req.id}
+
+                              <span style={{
+                                background: prio.bg,
+                                color: prio.color,
+                                border: `1px solid ${prio.border}`,
+                                fontSize: 11,
+                                fontWeight: 700,
+                                padding: '1px 7px',
+                                borderRadius: 4
+                              }}>
+                                {prio.label} Priority
+                              </span>
+
+                              <span style={{
+                                background: '#f1f5f9',
+                                color: '#475569',
+                                fontSize: 11,
+                                fontWeight: 700,
+                                padding: '2px 7px',
+                                borderRadius: 4
+                              }}>
+                                {req.serviceCategory.replace(/_/g, ' ').toUpperCase()}
+                              </span>
+
+                              <span style={{ fontSize: 11.5, color: '#94a3b8' }}>
+                                Ref #{req.id}
                               </span>
                             </div>
-                            <h3 style={{ fontSize: 17, fontWeight: 700, margin: '0 0 4px', color: '#0F172A' }}>
+
+                            <h3 style={{ fontSize: 17, fontWeight: 800, margin: '0 0 6px', color: '#0F172A' }}>
                               {req.correctiveActionTitle}
                             </h3>
-                            <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#64748b', alignItems: 'center' }}>
-                              <span><strong>Restaurant:</strong> {req.outletName}</span>
-                              <span><MapPin size={13} style={{ display: 'inline', marginRight: 3 }} />{req.outletCity}</span>
-                              <span><Clock size={13} style={{ display: 'inline', marginRight: 3 }} />{new Date(req.requestedAt).toLocaleDateString()}</span>
+
+                            <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#64748b', alignItems: 'center', flexWrap: 'wrap' }}>
+                              <span><strong>Business:</strong> {req.outletName}</span>
+                              <span><MapPin size={13} style={{ display: 'inline', marginRight: 3 }} />{req.outletAddress || req.outletCity || 'Mumbai'}</span>
+                              <span><Clock size={13} style={{ display: 'inline', marginRight: 3 }} />Requested: {new Date(req.requestedAt).toLocaleDateString()}</span>
+                              {req.scheduledAt && <span><Calendar size={13} style={{ display: 'inline', marginRight: 3 }} />Preferred: {req.scheduledAt}</span>}
                             </div>
                           </div>
 
-                          <div style={{ display: 'flex', gap: 10 }}>
-                            <button
-                              onClick={() => handleStatusUpdate(req.id, 'accepted')}
-                              disabled={actionLoading === req.id}
-                              style={{
-                                padding: '8px 16px',
-                                borderRadius: 8,
-                                background: '#059669',
-                                color: '#ffffff',
-                                border: 'none',
-                                fontSize: 13,
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: 6
-                              }}
-                            >
-                              <CheckCircle2 size={15} /> Accept Job
-                            </button>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }} onClick={e => e.stopPropagation()}>
+                            {req.status === 'requested' && (
+                              <>
+                                <button
+                                  onClick={() => handleStatusUpdate(req.id, 'accepted')}
+                                  disabled={actionLoading === req.id}
+                                  style={{
+                                    padding: '8px 16px',
+                                    borderRadius: 8,
+                                    background: '#059669',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    fontSize: 13,
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 6
+                                  }}
+                                >
+                                  <CheckCircle2 size={15} /> ACCEPT REQUEST
+                                </button>
+                                <button
+                                  onClick={() => handleStatusUpdate(req.id, 'declined')}
+                                  disabled={actionLoading === req.id}
+                                  style={{
+                                    padding: '8px 14px',
+                                    borderRadius: 8,
+                                    background: '#ffffff',
+                                    color: '#dc2626',
+                                    border: '1px solid #fecaca',
+                                    fontSize: 13,
+                                    fontWeight: 700,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  DECLINE
+                                </button>
+                              </>
+                            )}
+
+                            {req.status === 'accepted' && (
+                              <button
+                                onClick={() => handleStatusUpdate(req.id, 'in_progress')}
+                                disabled={actionLoading === req.id}
+                                style={{
+                                  padding: '8px 16px',
+                                  borderRadius: 8,
+                                  background: '#0284c7',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  fontSize: 13,
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: 6
+                                }}
+                              >
+                                <Play size={15} /> START SERVICE
+                              </button>
+                            )}
+
+                            {req.status === 'in_progress' && (
+                              <button
+                                onClick={() => setSelectedRequest(req)}
+                                style={{
+                                  padding: '8px 16px',
+                                  borderRadius: 8,
+                                  background: '#059669',
+                                  color: '#ffffff',
+                                  border: 'none',
+                                  fontSize: 13,
+                                  fontWeight: 700,
+                                  cursor: 'pointer'
+                                }}
+                              >
+                                Complete Service →
+                              </button>
+                            )}
 
                             <button
-                              onClick={() => handleStatusUpdate(req.id, 'declined')}
-                              disabled={actionLoading === req.id}
+                              onClick={() => setSelectedRequest(req)}
                               style={{
-                                padding: '8px 14px',
+                                padding: '8px 12px',
+                                background: '#f8fafc',
+                                border: '1px solid #cbd5e1',
                                 borderRadius: 8,
-                                background: '#ffffff',
-                                color: '#dc2626',
-                                border: '1px solid #fecaca',
                                 fontSize: 13,
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: 6
+                                color: '#334155',
+                                cursor: 'pointer'
                               }}
                             >
-                              <XCircle size={15} /> Decline
+                              View Details
                             </button>
                           </div>
                         </div>
@@ -506,245 +608,284 @@ export default function ProviderDashboardPage() {
                           color: '#334155',
                           border: '1px solid #f1f5f9'
                         }}>
-                          <p style={{ margin: '0 0 6px', fontWeight: 600 }}>Food-Safety Requirement Details:</p>
+                          <p style={{ margin: '0 0 4px', fontWeight: 600 }}>Problem Summary:</p>
                           <p style={{ margin: 0, lineHeight: 1.5 }}>{req.problemDescription}</p>
                           {req.notes && (
-                            <p style={{ margin: '8px 0 0', color: '#64748b', fontSize: 12 }}>
-                              <strong>Restaurant Notes:</strong> {req.notes}
+                            <p style={{ margin: '6px 0 0', color: '#64748b', fontSize: 12.5 }}>
+                              <strong>Outlet Notes:</strong> {req.notes}
+                            </p>
+                          )}
+                          {req.rejectionNotes && (
+                            <div style={{ marginTop: 6, padding: '6px 10px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, color: '#b91c1c', fontSize: 12.5 }}>
+                              <strong>Returned for further action:</strong> {req.rejectionNotes}
+                            </div>
+                          )}
+                          {req.completionNotes && (
+                            <p style={{ margin: '6px 0 0', color: '#166534', fontSize: 12.5 }}>
+                              <strong>Technician Completion Notes:</strong> {req.completionNotes}
                             </p>
                           )}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+                    );
+                  })}
+                </div>
+              );
+            })()}
 
-            {/* TAB 2: ACTIVE JOBS */}
-            {activeTab === 'active' && (
-              <div>
-                {activeJobs.length === 0 ? (
-                  <div style={{
+            {/* DETAILS MODAL WHEN REQUEST IS SELECTED */}
+            {selectedRequest && (
+              <div
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'rgba(15, 23, 42, 0.65)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 9999,
+                  padding: 20
+                }}
+                onClick={() => setSelectedRequest(null)}
+              >
+                <div
+                  style={{
                     background: '#ffffff',
-                    borderRadius: 12,
-                    border: '1px dashed #cbd5e1',
-                    padding: '40px 20px',
-                    textAlign: 'center',
-                    color: '#64748b'
-                  }}>
-                    <Clock size={36} color="#94a3b8" style={{ marginBottom: 12 }} />
-                    <h3 style={{ fontSize: 16, fontWeight: 600, margin: '0 0 6px', color: '#1e293b' }}>
-                      No Active Jobs
-                    </h3>
-                    <p style={{ margin: 0, fontSize: 13 }}>
-                      Jobs you accept from the "New Requests" tab will appear here for progress updates.
-                    </p>
+                    borderRadius: 16,
+                    maxWidth: 620,
+                    width: '100%',
+                    maxHeight: '90vh',
+                    overflowY: 'auto',
+                    padding: '24px 28px',
+                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)'
+                  }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                        <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 4, background: '#e0f2fe', color: '#0369a1', textTransform: 'uppercase' }}>
+                          {selectedRequest.status.replace(/_/g, ' ')}
+                        </span>
+                        <span style={{ fontSize: 12, color: '#64748b' }}>#{selectedRequest.id}</span>
+                      </div>
+                      <h2 style={{ fontSize: 20, fontWeight: 800, margin: 0, color: '#0F172A' }}>
+                        {selectedRequest.outletName}
+                      </h2>
+                    </div>
+                    <button
+                      onClick={() => setSelectedRequest(null)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                    >
+                      <X size={20} />
+                    </button>
                   </div>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    {activeJobs.map(req => (
-                      <div
-                        key={req.id}
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
+                    {/* SECTION 1: ISSUE */}
+                    <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: 2 }}>
+                        ISSUE
+                      </span>
+                      <strong style={{ fontSize: 15, color: '#0F172A' }}>{selectedRequest.correctiveActionTitle}</strong>
+                    </div>
+
+                    {/* SECTION 2: WHAT IS NEEDED */}
+                    <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: 2 }}>
+                        WHAT IS NEEDED
+                      </span>
+                      <p style={{ margin: '0 0 6px', fontSize: 13.5, color: '#334155', lineHeight: 1.5 }}>
+                        {selectedRequest.problemDescription}
+                      </p>
+                      {selectedRequest.notes && (
+                        <div style={{ fontSize: 12.5, color: '#64748b', paddingTop: 6, borderTop: '1px solid #e2e8f0' }}>
+                          <strong>Outlet notes:</strong> {selectedRequest.notes}
+                        </div>
+                      )}
+                      {selectedRequest.rejectionNotes && (
+                        <div style={{ marginTop: 6, padding: '6px 10px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, color: '#b91c1c', fontSize: 12.5 }}>
+                          <strong>Returned for further action:</strong> {selectedRequest.rejectionNotes}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* SECTION 3: WHERE */}
+                    <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: 2 }}>
+                        WHERE
+                      </span>
+                      <p style={{ margin: 0, fontSize: 13.5, color: '#334155' }}>
+                        {selectedRequest.outletName} — {selectedRequest.outletAddress || selectedRequest.outletCity || 'Mumbai'}
+                      </p>
+                    </div>
+
+                    {/* SECTION 4: WHEN */}
+                    <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: 2 }}>
+                        WHEN
+                      </span>
+                      <div style={{ fontSize: 13, color: '#334155' }}>
+                        <div>Requested: {new Date(selectedRequest.requestedAt).toLocaleString()}</div>
+                        {selectedRequest.scheduledAt && (
+                          <div>Preferred Service Date: <strong>{selectedRequest.scheduledAt}</strong></div>
+                        )}
+                        {selectedRequest.completedAt && (
+                          <div>Completed: {new Date(selectedRequest.completedAt).toLocaleString()}</div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* SECTION 5: CONTACT PERSON */}
+                    <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', display: 'block', marginBottom: 2 }}>
+                        CONTACT PERSON
+                      </span>
+                      <div style={{ fontSize: 13, color: '#334155' }}>
+                        <div>👤 <strong>{selectedRequest.contactPerson || 'Store Manager'}</strong></div>
+                        <div>📞 {selectedRequest.contactPhone || '+91 98200 12345'}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ACTIONS INSIDE MODAL */}
+                  <div style={{ paddingTop: 14, borderTop: '1px solid #e2e8f0' }}>
+                    {selectedRequest.status === 'requested' && (
+                      <div style={{ display: 'flex', gap: 10 }}>
+                        <button
+                          onClick={async () => {
+                            await handleStatusUpdate(selectedRequest.id, 'accepted');
+                            setSelectedRequest(null);
+                          }}
+                          disabled={actionLoading === selectedRequest.id}
+                          style={{
+                            flex: 1,
+                            padding: '10px 16px',
+                            background: '#059669',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: 8,
+                            fontSize: 13.5,
+                            fontWeight: 800,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          ACCEPT REQUEST
+                        </button>
+                        <button
+                          onClick={async () => {
+                            await handleStatusUpdate(selectedRequest.id, 'declined');
+                            setSelectedRequest(null);
+                          }}
+                          disabled={actionLoading === selectedRequest.id}
+                          style={{
+                            padding: '10px 16px',
+                            background: '#ffffff',
+                            color: '#dc2626',
+                            border: '1.5px solid #fca5a5',
+                            borderRadius: 8,
+                            fontSize: 13.5,
+                            fontWeight: 700,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          DECLINE
+                        </button>
+                      </div>
+                    )}
+
+                    {selectedRequest.status === 'accepted' && (
+                      <button
+                        onClick={async () => {
+                          await handleStatusUpdate(selectedRequest.id, 'in_progress');
+                          setSelectedRequest(null);
+                        }}
+                        disabled={actionLoading === selectedRequest.id}
                         style={{
-                          background: '#ffffff',
-                          borderRadius: 14,
-                          border: '1px solid #e2e8f0',
-                          padding: '20px 24px',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                          width: '100%',
+                          padding: '10px 16px',
+                          background: '#0284c7',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: 8,
+                          fontSize: 13.5,
+                          fontWeight: 800,
+                          cursor: 'pointer'
                         }}
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                          <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                              <span style={{
-                                background: req.status === 'in_progress' ? '#fed7aa' : '#e0f2fe',
-                                color: req.status === 'in_progress' ? '#c2410c' : '#0369a1',
-                                fontSize: 11,
-                                fontWeight: 700,
-                                padding: '2px 8px',
-                                borderRadius: 4,
-                                textTransform: 'uppercase'
-                              }}>
-                                {req.status === 'in_progress' ? 'IN PROGRESS' : 'ACCEPTED'}
-                              </span>
-                              <span style={{ fontSize: 12, color: '#64748b' }}>
-                                {req.id}
-                              </span>
-                            </div>
-                            <h3 style={{ fontSize: 17, fontWeight: 700, margin: '0 0 4px', color: '#0F172A' }}>
-                              {req.correctiveActionTitle}
-                            </h3>
-                            <div style={{ display: 'flex', gap: 16, fontSize: 13, color: '#64748b', alignItems: 'center' }}>
-                              <span><strong>Restaurant:</strong> {req.outletName}</span>
-                              <span><MapPin size={13} style={{ display: 'inline', marginRight: 3 }} />{req.outletCity}</span>
-                            </div>
-                          </div>
+                        START SERVICE (IN PROGRESS)
+                      </button>
+                    )}
 
-                          <div style={{ display: 'flex', gap: 10 }}>
-                            {req.status === 'accepted' && (
-                              <button
-                                onClick={() => handleStatusUpdate(req.id, 'in_progress')}
-                                disabled={actionLoading === req.id}
-                                style={{
-                                  padding: '8px 16px',
-                                  borderRadius: 8,
-                                  background: '#0284c7',
-                                  color: '#ffffff',
-                                  border: 'none',
-                                  fontSize: 13,
-                                  fontWeight: 600,
-                                  cursor: 'pointer',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: 6
-                                }}
-                              >
-                                <Play size={15} /> Start Service
-                              </button>
-                            )}
-
-                            <button
-                              onClick={() => {
-                                const note = completionNotes[req.id] || 'Work completed per food safety guidelines.';
-                                handleStatusUpdate(req.id, 'completed', note);
-                              }}
-                              disabled={actionLoading === req.id}
-                              style={{
-                                padding: '8px 16px',
-                                borderRadius: 8,
-                                background: '#059669',
-                                color: '#ffffff',
-                                border: 'none',
-                                fontSize: 13,
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: 6
-                              }}
-                            >
-                              <CheckCircle2 size={15} /> Mark Service Completed
-                            </button>
-                          </div>
-                        </div>
-
-                        <div style={{
-                          background: '#f8fafc',
-                          borderRadius: 8,
-                          padding: '12px 16px',
-                          fontSize: 13,
-                          color: '#334155',
-                          marginBottom: 12
-                        }}>
-                          <p style={{ margin: '0 0 4px', fontWeight: 600 }}>Problem Description:</p>
-                          <p style={{ margin: 0 }}>{req.problemDescription}</p>
-                        </div>
-
-                        {/* Completion Note Input */}
+                    {selectedRequest.status === 'in_progress' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                         <div>
-                          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#475569', marginBottom: 4 }}>
-                            Completion Summary / Technician Notes for Restaurant:
+                          <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                            Work Completed Summary / Notes (Mandatory) *
                           </label>
-                          <input
-                            type="text"
-                            placeholder="e.g. Conducted fogging & baiting. Traps replaced. Pest certificate #PC-442 issued."
-                            value={completionNotes[req.id] || ''}
-                            onChange={e => setCompletionNotes({ ...completionNotes, [req.id]: e.target.value })}
-                            style={{
-                              width: '100%',
-                              padding: '8px 12px',
-                              borderRadius: 6,
-                              border: '1px solid #cbd5e1',
-                              fontSize: 13,
-                              boxSizing: 'border-box'
-                            }}
+                          <textarea
+                            rows={2}
+                            placeholder="e.g. Cleared grease trap, sanitized baffles, chemical certificate #CT-808 issued."
+                            value={completionNotes[selectedRequest.id] || ''}
+                            onChange={e => setCompletionNotes({ ...completionNotes, [selectedRequest.id]: e.target.value })}
+                            style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: 13, boxSizing: 'border-box' }}
                           />
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
 
-            {/* TAB 3: COMPLETED JOBS */}
-            {activeTab === 'completed' && (
-              <div>
-                {completedJobs.length === 0 ? (
-                  <div style={{
-                    background: '#ffffff',
-                    borderRadius: 12,
-                    border: '1px dashed #cbd5e1',
-                    padding: '40px 20px',
-                    textAlign: 'center',
-                    color: '#64748b'
-                  }}>
-                    <UserCheck size={36} color="#94a3b8" style={{ marginBottom: 12 }} />
-                    <h3 style={{ fontSize: 16, fontWeight: 600, margin: '0 0 6px', color: '#1e293b' }}>
-                      No Completed History
-                    </h3>
-                    <p style={{ margin: 0, fontSize: 13 }}>
-                      Service requests completed or confirmed by restaurant managers will be archived here.
-                    </p>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    {completedJobs.map(req => (
-                      <div
-                        key={req.id}
-                        style={{
-                          background: '#ffffff',
-                          borderRadius: 14,
-                          border: '1px solid #e2e8f0',
-                          padding: '18px 22px'
-                        }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                          <div>
-                            <span style={{
-                              background: req.status === 'restaurant_confirmed' ? '#ecfdf5' : req.status === 'completed' ? '#eff6ff' : '#f1f5f9',
-                              color: req.status === 'restaurant_confirmed' ? '#065f46' : req.status === 'completed' ? '#1d4ed8' : '#64748b',
-                              fontSize: 11,
-                              fontWeight: 700,
-                              padding: '2px 8px',
-                              borderRadius: 4,
-                              textTransform: 'uppercase',
-                              display: 'inline-block',
-                              marginBottom: 4
-                            }}>
-                              {req.status === 'restaurant_confirmed'
-                                ? 'RESTAURANT CONFIRMED'
-                                : req.status === 'completed'
-                                ? 'SERVICE COMPLETED (AWAITING RESTAURANT CONFIRMATION)'
-                                : req.status.toUpperCase()}
-                            </span>
-                            <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: '#0F172A' }}>
-                              {req.correctiveActionTitle}
-                            </h3>
-                          </div>
-
-                          <div style={{ textAlign: 'right', fontSize: 12, color: '#64748b' }}>
-                            {req.completedAt && (
-                              <div>Completed: {new Date(req.completedAt).toLocaleDateString()}</div>
-                            )}
-                            {req.confirmedAt && (
-                              <div style={{ color: '#059669', fontWeight: 600 }}>
-                                Verified by Restaurant: {new Date(req.confirmedAt).toLocaleDateString()}
-                              </div>
-                            )}
-                          </div>
+                        <div>
+                          <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
+                            Recommended Follow-up Date (Optional)
+                          </label>
+                          <input
+                            type="date"
+                            value={followUpDates[selectedRequest.id] || ''}
+                            onChange={e => setFollowUpDates({ ...followUpDates, [selectedRequest.id]: e.target.value })}
+                            style={{ width: '100%', padding: '8px 12px', borderRadius: 6, border: '1px solid #cbd5e1', fontSize: 13, boxSizing: 'border-box' }}
+                          />
                         </div>
 
-                        <div style={{ fontSize: 13, color: '#475569', lineHeight: 1.5 }}>
-                          <div><strong>Location:</strong> {req.outletName} ({req.outletCity})</div>
-                          <div><strong>Service:</strong> {req.problemDescription}</div>
-                          {req.notes && <div style={{ marginTop: 4, color: '#64748b' }}><strong>Notes:</strong> {req.notes}</div>}
-                        </div>
+                        <button
+                          onClick={async () => {
+                            const note = completionNotes[selectedRequest.id]?.trim();
+                            if (!note) {
+                              alert('Please enter a work completed summary before marking service completed.');
+                              return;
+                            }
+                            const followUp = followUpDates[selectedRequest.id];
+                            const fullNote = followUp ? `${note} [Recommended Follow-up: ${followUp}]` : note;
+                            await handleStatusUpdate(selectedRequest.id, 'completed', fullNote);
+                            setSelectedRequest(null);
+                          }}
+                          disabled={actionLoading === selectedRequest.id}
+                          style={{
+                            width: '100%',
+                            padding: '10px 16px',
+                            background: '#059669',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: 8,
+                            fontSize: 13.5,
+                            fontWeight: 800,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          MARK SERVICE COMPLETED
+                        </button>
                       </div>
-                    ))}
+                    )}
+
+                    {(selectedRequest.status === 'completed' || selectedRequest.status === 'restaurant_confirmed') && (
+                      <div style={{ textAlign: 'center', fontSize: 13, color: '#059669', fontWeight: 700 }}>
+                        {selectedRequest.status === 'restaurant_confirmed'
+                          ? '✅ Verified on-site and closed by restaurant manager.'
+                          : '🔵 Service marked completed. Awaiting restaurant manager on-site verification.'}
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             )}
           </div>
