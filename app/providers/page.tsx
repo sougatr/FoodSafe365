@@ -348,7 +348,7 @@ const SERVICES: ServiceItem[] = [
     rating: '4.8',
     reviewCount: '510',
     tat: 'Quarterly comprehensive servicing visits',
-    badge: 'Zero Spoilage Guarantee',
+    badge: 'Cold Chain Protection',
     description: 'Preventive maintenance contract for commercial chillers, freezers, ice machines, and cold storage to avert unexpected compressor burnout.',
     inclusions: [
       'Chemical cleaning of condenser coils and evaporator fin combs',

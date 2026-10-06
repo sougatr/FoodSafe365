@@ -58,7 +58,7 @@ export default function LearnStoragePage() {
             STORE FOOD SAFELY
           </h1>
           <p style={{ margin: 0, fontSize: 15.5, color: '#e0f2fe', maxWidth: 640, lineHeight: 1.5 }}>
-            Proper storage protects your products, stops cross-contamination, and guarantees customers receive safe, fresh food.
+            Proper storage protects your products, helps prevent cross-contamination, and helps keep food safe and fresh for customers.
           </p>
         </div>
 

@@ -205,7 +205,7 @@ export default function TableQrPage() {
             <div>
               <span className="pill good" style={{ fontSize: 11, padding: '2px 8px' }}>
                 <QrCode size={11} style={{ display: 'inline', marginRight: 4 }} />
-                TABLETOP VERIFIED AUDIT
+                TABLETOP CUSTOMER FEEDBACK
               </span>
               <h1 style={{ fontSize: 22, margin: '8px 0 2px', color: '#0f172a' }}>{displayName}</h1>
               <p className="muted" style={{ fontSize: 13, margin: 0 }}>{displayLocation} · {displayTable}</p>
@@ -218,7 +218,7 @@ export default function TableQrPage() {
               textAlign: 'center'
             }}>
               <span style={{ fontSize: 18, fontWeight: 800, color: '#047857', display: 'block' }}>FOODSAFE</span>
-              <span style={{ fontSize: 10, fontWeight: 700, color: '#065f46', textTransform: 'uppercase' }}>TODAY VERIFIED</span>
+              <span style={{ fontSize: 10, fontWeight: 700, color: '#065f46', textTransform: 'uppercase' }}>CUSTOMER OBSERVATION</span>
             </div>
           </div>
 

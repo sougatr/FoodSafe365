@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, History, Home, ShieldCheck, Wrench, Star, QrCode, Info, RefreshCw, Database, Server } from 'lucide-react';
+import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck, History, Home, ShieldCheck, Wrench, Star, QrCode, Info, RefreshCw } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import {
   FOODSAFE28,
@@ -606,19 +606,6 @@ export default function ManagerPage() {
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#ecfdf5', color: '#047857', border: '1px solid #a7f3d0', padding: '3px 10px', borderRadius: 999, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                     <Star size={12} fill="#059669" color="#059669" /> CUSTOMER VOICE
                   </div>
-                  {storageBackend === 'postgresql' ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0', padding: '3px 8px', borderRadius: 999, fontSize: 11, fontWeight: 700 }}>
-                      <Database size={11} /> PostgreSQL Live DB
-                    </span>
-                  ) : storageBackend === 'server_file' ? (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#eff6ff', color: '#1e40af', border: '1px solid #bfdbfe', padding: '3px 8px', borderRadius: 999, fontSize: 11, fontWeight: 700 }}>
-                      <Server size={11} /> Server Store (.data)
-                    </span>
-                  ) : (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#fefce8', color: '#854d0e', border: '1px solid #fef08a', padding: '3px 8px', borderRadius: 999, fontSize: 11, fontWeight: 700 }}>
-                      Local Cache
-                    </span>
-                  )}
                 </div>
                 <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', margin: '4px 0 2px' }}>
                   Customer Food-Safety Feedback

@@ -159,19 +159,19 @@ export default function DinerDashboard() {
                   className="btn primary"
                   style={{ fontSize: 12, padding: '6px 12px', background: '#059669', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                 >
-                  Open Table Audit <ArrowRight size={13} />
+                  Open Table Feedback <ArrowRight size={13} />
                 </Link>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Directory of FoodSafe Certified Outlets */}
+        {/* Directory of FoodSafe Registered Outlets */}
         <section style={{ marginBottom: 32 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <div>
               <h2 style={{ fontSize: 20, margin: '0 0 2px', color: '#0f172a' }}>
-                FoodSafe Certified Restaurants in {dinerUser.city || 'Mumbai'}
+                FoodSafe Registered Restaurants in {dinerUser.city || 'Mumbai'}
               </h2>
               <p className="muted" style={{ fontSize: 13, margin: 0 }}>
                 Every restaurant below maintains daily kitchen safeguards, medical clearances, and transparent customer ratings.
@@ -228,14 +228,14 @@ export default function DinerDashboard() {
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                     <span style={{ fontWeight: 800, color: '#059669', fontSize: 14 }}>{r.score}★</span>
-                    <span className="muted" style={{ fontSize: 11 }}>({r.reviews} audits)</span>
+                    <span className="muted" style={{ fontSize: 11 }}>({r.reviews} reviews)</span>
                   </div>
                   <Link
                     href={`/qr/${r.id}`}
                     className="btn secondary"
                     style={{ fontSize: 12, padding: '5px 10px' }}
                   >
-                    Table Audit →
+                    Rate Table →
                   </Link>
                 </div>
               </div>
@@ -246,7 +246,7 @@ export default function DinerDashboard() {
         {/* My Activity: Recent Ratings & Grievances */}
         <section>
           <h2 style={{ fontSize: 18, margin: '0 0 12px', color: '#0f172a' }}>
-            My Food Safety Audits &amp; Incident History
+            My Food Safety Ratings &amp; Incident History
           </h2>
 
           {ratings.length === 0 && incidents.length === 0 ? (
@@ -257,7 +257,7 @@ export default function DinerDashboard() {
                 When you dine out, scan the tabletop QR code at the restaurant to rate kitchen cleanliness, fresh food temperature, or report a concern.
               </p>
               <Link href="/qr/abc-restaurant" className="btn primary" style={{ fontSize: 13, padding: '8px 16px', background: '#059669' }}>
-                Test Tabletop Audit QR Now
+                Test Tabletop QR Now
               </Link>
             </div>
           ) : (

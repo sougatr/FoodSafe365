@@ -466,7 +466,7 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     code: 'FS28-21',
     category: 'Temperature Control',
     title: 'Is hot food reaching at least 75°C in the center?',
-    target: 'Verify cooking or reheating temperatures with a calibrated probe to guarantee pathogens are killed.',
+    target: 'Verify cooking or reheating temperatures with a calibrated probe to ensure pathogens are effectively killed.',
     severity: 'Critical',
     frequency: 'Process',
     shift: 'active',

@@ -92,20 +92,20 @@ export default function ShowcasePage() {
     let msg = '';
 
     if (lang === 'hi') {
-      msg = `🌟 *${restaurantName} को आज FoodSafetyGreen™ प्रमाणन मिला है!* 🌟\n\n` +
+      msg = `🌟 *${restaurantName} को आज FoodSafetyGreen™ सत्यापन मिला है!* 🌟\n\n` +
         `✅ आज सभी 29 आवश्यक हाइजीन और तापमान नियंत्रण (कोल्ड स्टोरेज <5°C, कुकिंग ≥75°C, पेस्ट कंट्रोल) की जांच पूरी हुई।\n\n` +
-        `🛡️ हमारा लाइव खाद्य सुरक्षा ऑडिट देखें:\n${auditUrl}\n\n` +
-        `_FoodSafe365 स्वायत्त सुरक्षा प्रणाली द्वारा प्रमाणित_`;
+        `🛡️ हमारा लाइव खाद्य सुरक्षा फ़ीडबैक देखें:\n${auditUrl}\n\n` +
+        `_FoodSafe365 स्वायत्त सुरक्षा प्रणाली द्वारा सत्यापित_`;
     } else if (lang === 'mr') {
-      msg = `🌟 *${restaurantName} आज FoodSafetyGreen™ प्रमाणित आहे!* 🌟\n\n` +
+      msg = `🌟 *${restaurantName} आज FoodSafetyGreen™ सत्यापित आहे!* 🌟\n\n` +
         `✅ आज सर्व 29 महत्त्वपूर्ण स्वच्छता व तापमान तपासण्या (कोल्ड स्टोरेज <५°C, कुकिंग ≥७५°C, पेस्ट कंट्रोल) यशस्वीरित्या पूर्ण झाल्या.\n\n` +
-        `🛡️ आमचे थेट अन्न सुरक्षा ऑडिट येथे तपासा:\n${auditUrl}\n\n` +
-        `_FoodSafe365 स्वायत्त सुरक्षा प्रणालीद्वारे प्रमाणित_`;
+        `🛡️ आमचा थेट अन्न सुरक्षा अभिप्राय येथे तपासा:\n${auditUrl}\n\n` +
+        `_FoodSafe365 स्वायत्त सुरक्षा प्रणालीद्वारे सत्यापित_`;
     } else {
-      msg = `🌟 *${restaurantName} is FoodSafetyGreen™ Verified Today!* 🌟\n\n` +
+      msg = `🌟 *${restaurantName} is FoodSafetyGreen™ Verified!* 🌟\n\n` +
         `✅ All 29 critical kitchen hygiene, cold storage (<5°C), cooking core (≥75°C), and pest control checks have been inspected and verified.\n\n` +
-        `🛡️ View our live diner food safety audit:\n${auditUrl}\n\n` +
-        `_Certified by FoodSafe365 Kitchen Intelligence_`;
+        `🛡️ View our live diner food safety feedback:\n${auditUrl}\n\n` +
+        `_Verified by FoodSafe365 Kitchen Intelligence_`;
     }
 
     const encoded = encodeURIComponent(msg);
@@ -676,12 +676,12 @@ export default function ShowcasePage() {
               { icon: '🚪', title: '1. Restaurant Entrance', desc: 'Mount an A4 vinyl decal or window plaque near your main entrance or host desk so arriving diners know before entering.' },
               { icon: '📋', title: '2. Dine-In Menu', desc: 'Print the QR passport code on the front cover or footer corner of printed menus so guests verify cleanliness while ordering.' },
               { icon: '🪑', title: '3. Table Tent Standee', desc: 'Slide an A5 print into clear acrylic table tents on every dining table. Diners scan to view temperatures and rate safety.' },
-              { icon: '🥡', title: '4. Takeaway Packaging', desc: 'Stamp or sticker the FoodSafe365 Passport QR onto paper takeout bags, guaranteeing sanitary handling to go.' },
+              { icon: '🥡', title: '4. Takeaway Packaging', desc: 'Stamp or sticker the FoodSafe365 Passport QR onto paper takeout bags, demonstrating verified sanitary handling to go.' },
               { icon: '🛵', title: '5. Delivery Bags', desc: 'Apply a tamper-evident seal for Zomato & Swiggy riders so online order customers know packaging was not opened in transit.' },
               { icon: '📦', title: '6. Food Containers', desc: 'Affix tamper closure tape across curry bowls and meal boxes confirming sealed, uncontaminated kitchen prep.' },
               { icon: '🧾', title: '7. Bills & Receipts', desc: 'Configure your POS billing thermal printer to print the FoodSafe365 Passport QR at the bottom of the bill receipt.' },
               { icon: '🌐', title: '8. Restaurant Website', desc: 'Embed the FoodSafe365 digital live trust badge on your online ordering and catering booking website.' },
-              { icon: '📱', title: '9. Social Media', desc: 'Post daily audit passes on Instagram & WhatsApp status to build loyal community following and brand trust.' },
+              { icon: '📱', title: '9. Social Media', desc: 'Post daily food-safety check updates on Instagram & WhatsApp status to build loyal community following and brand trust.' },
             ].map((tp, idx) => (
               <div key={idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px 14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>

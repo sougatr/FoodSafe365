@@ -76,7 +76,7 @@ export const GROCERY_OPERATIONAL_CHECKS: GroceryOperationalCheckDef[] = [
     number: 8,
     title: 'Approved Suppliers & Source Verification',
     category: 'Receiving & Sourcing',
-    why: 'Sourcing only from authorized, FSSAI-licensed distributors guarantees traceability and baseline safety of incoming goods.',
+    why: 'Sourcing only from authorized, FSSAI-licensed distributors helps ensure traceability and baseline safety of incoming goods.',
     what: 'Check supplier delivery challans / invoices for FSSAI license numbers and valid vendor authorization status.',
     standard: '100% of delivered inventory originates from pre-approved, licensed suppliers with verifiable delivery documentation.',
     action: 'Hold shipments from unverified or blacklisted suppliers; do not stock shelves until verified FSSAI documentation is provided.'

@@ -374,7 +374,7 @@ export default function Landing() {
       tableCode: newRestTable.trim() || 'Table QR #01',
       cuisine: newRestCuisine.trim() || 'Dine-In & Delivery',
       category: 'swiggy_popular',
-      badge: 'FOODSAFE TODAY VERIFIED',
+      badge: 'FOODSAFE CUSTOMER OBSERVATION',
       score: '5.0',
       reviews: 1,
       lastCheck: 'Just Now',
@@ -1434,7 +1434,7 @@ export default function Landing() {
                       boxShadow: '0 4px 14px rgba(5, 150, 105, 0.25)'
                     }}
                   >
-                    <Star size={16} fill="#ffffff" /> ➕ Add &ldquo;{searchQuery}&rdquo; &amp; Submit Audit Now →
+                    <Star size={16} fill="#ffffff" /> ➕ Add &ldquo;{searchQuery}&rdquo; &amp; Submit Rating Now →
                   </button>
                 )}
               </div>
@@ -1457,7 +1457,7 @@ export default function Landing() {
                 <div>
                   <strong style={{ color: '#0F2922', fontSize: 14 }}>Looking for a different branch of &ldquo;{searchQuery}&rdquo;?</strong>
                   <p style={{ margin: 0, fontSize: 13, color: '#475569' }}>
-                    Add any branch or outlet in 30 seconds and submit its food safety audit.
+                    Add any branch or outlet in 30 seconds and share your food-safety feedback.
                   </p>
                 </div>
                 <button
@@ -2756,7 +2756,7 @@ export default function Landing() {
                 </div>
 
                 <div style={{ background: '#131b26', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 12, padding: '12px 14px' }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase' }}>Pest Audit</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase' }}>Pest Control</div>
                   <div style={{ fontSize: 16, fontWeight: 900, color: '#c084fc', marginTop: 2 }}>{passportModalRestaurant.signals.pest.title}</div>
                   <div style={{ fontSize: 11, color: '#cbd5e1' }}>{passportModalRestaurant.signals.pest.subtitle}</div>
                 </div>
