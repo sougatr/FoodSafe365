@@ -1,6 +1,7 @@
 import { getAuthContext } from '@/lib/auth';
 import { 
   listServiceRequests, 
+  listServiceProviders,
   createServiceRequest, 
   getServiceProviderById 
 } from '@/lib/service-provider-store';
@@ -125,9 +126,8 @@ export async function POST(req: Request) {
       return fail('VALIDATION_ERROR', 'Corrective action ID reference is required', 400);
     }
 
-    if (!providerId || typeof providerId !== 'string') {
-      return fail('VALIDATION_ERROR', 'Service provider ID is required', 400);
-    }
+    let assignedProviderId = typeof providerId === 'string' ? providerId.trim() : '';
+    let resolvedProviderName = typeof providerName === 'string' ? providerName.trim() : '';
 
     if (!serviceCategory || typeof serviceCategory !== 'string') {
       return fail('VALIDATION_ERROR', 'Service category is required', 400);
@@ -137,9 +137,26 @@ export async function POST(req: Request) {
       return fail('VALIDATION_ERROR', 'A clear food-safety issue/problem description is required', 400);
     }
 
+    if (!assignedProviderId) {
+      const matching = await listServiceProviders({ category: serviceCategory });
+      if (matching.length > 0) {
+        assignedProviderId = matching[0].id;
+        resolvedProviderName = matching[0].businessName;
+      } else {
+        const allProviders = await listServiceProviders();
+        if (allProviders.length > 0) {
+          assignedProviderId = allProviders[0].id;
+          resolvedProviderName = allProviders[0].businessName;
+        }
+      }
+    }
+
+    if (!assignedProviderId) {
+      return fail('VALIDATION_ERROR', 'Service provider ID is required', 400);
+    }
+
     // Verify provider exists if possible
-    let resolvedProviderName = providerName;
-    const provider = await getServiceProviderById(providerId);
+    const provider = await getServiceProviderById(assignedProviderId);
     if (provider) {
       resolvedProviderName = provider.businessName;
     }
@@ -152,7 +169,7 @@ export async function POST(req: Request) {
       outletAddress: (outletAddress || '').trim(),
       correctiveActionId: correctiveActionId.trim(),
       correctiveActionTitle: (correctiveActionTitle || 'Food-Safety Corrective Action').trim(),
-      providerId: providerId.trim(),
+      providerId: assignedProviderId,
       providerName: (resolvedProviderName || 'FoodSafe Service Partner').trim(),
       serviceCategory: serviceCategory.trim(),
       problemDescription: problemDescription.trim(),
