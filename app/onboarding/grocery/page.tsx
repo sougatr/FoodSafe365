@@ -109,12 +109,7 @@ export default function GroceryOnboardingPage() {
   const [city, setCity] = useState('Mumbai');
 
   // Step 2: What do you sell?
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([
-    'dairy_milk',
-    'fresh_produce',
-    'bakery_packaged',
-    'dry_groceries'
-  ]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   // Step 3: Daily check person
   const [dailyCheckPerson, setDailyCheckPerson] = useState('');
@@ -334,7 +329,7 @@ export default function GroceryOnboardingPage() {
                       padding: '12px 14px',
                       borderRadius: 10,
                       border: '1.5px solid #CBD5E1',
-                      fontSize: 15,
+                      fontSize: 16,
                       boxSizing: 'border-box',
                       color: '#0F172A',
                       outline: 'none',
@@ -360,7 +355,7 @@ export default function GroceryOnboardingPage() {
                       padding: '12px 14px',
                       borderRadius: 10,
                       border: '1.5px solid #CBD5E1',
-                      fontSize: 15,
+                      fontSize: 16,
                       boxSizing: 'border-box',
                       color: '#0F172A',
                       outline: 'none',
@@ -470,7 +465,8 @@ export default function GroceryOnboardingPage() {
                         justifyContent: 'space-between',
                         gap: 12,
                         minHeight: 56,
-                        boxSizing: 'border-box'
+                        boxSizing: 'border-box',
+                        userSelect: 'none'
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
@@ -646,7 +642,7 @@ export default function GroceryOnboardingPage() {
                     padding: '12px 14px',
                     borderRadius: 10,
                     border: '1.5px solid #CBD5E1',
-                    fontSize: 15,
+                    fontSize: 16,
                     boxSizing: 'border-box',
                     color: '#0F172A',
                     outline: 'none',
