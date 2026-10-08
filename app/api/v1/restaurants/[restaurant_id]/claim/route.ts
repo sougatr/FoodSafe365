@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { verifyClaimToken, markClaimTokenUsed, updateRestaurantStatus, getRestaurantEntry } from '@/lib/unclaimed-restaurant-store';
 import { fail, ok } from '@/lib/response';
+import { createSessionToken, SESSION_COOKIE_NAME, getSessionCookieOptions } from '@/lib/session';
+import { checkRateLimit, getClientIp, createRateLimitHeaders } from '@/lib/rate-limiter';
+import { parseBoundedJson } from '@/lib/body-guard';
 
 const ClaimSchema = z.object({
   token: z.string().min(8, 'Valid claim token is required'),
@@ -16,17 +19,32 @@ export async function POST(
   { params }: { params: { restaurant_id: string } }
 ) {
   try {
+    const clientIp = getClientIp(req);
     const restaurantId = params.restaurant_id?.trim();
     if (!restaurantId) {
       return fail('VALIDATION_ERROR', 'Restaurant ID is required', 400);
     }
 
-    let body: any;
-    try {
-      body = await req.json();
-    } catch {
-      return fail('VALIDATION_ERROR', 'Invalid JSON payload', 400);
+    // Rate limit: 5 claim attempts per 15 minutes per IP
+    const rlResult = await checkRateLimit({
+      key: `rl:claim:${clientIp}:${restaurantId}`,
+      limit: 5,
+      windowSeconds: 15 * 60
+    });
+
+    if (!rlResult.allowed) {
+      return NextResponse.json(
+        { data: null, error: { code: 'RATE_LIMITED', message: 'Too many claim attempts. Please try again later.' } },
+        { status: 429, headers: createRateLimitHeaders(rlResult) }
+      );
     }
+
+    // Body limit: 1 MB
+    const parseRes = await parseBoundedJson<any>(req);
+    if (!parseRes.ok) {
+      return fail(parseRes.code, parseRes.message, parseRes.status);
+    }
+    const body = parseRes.data;
 
     const parseResult = ClaimSchema.safeParse(body);
     if (!parseResult.success) {
@@ -65,21 +83,19 @@ export async function POST(
       error: null
     }, { status: 200 });
 
-    // Set auth cookies for this restaurant tenant
-    const cookiesToSet: Record<string, string> = {
-      'fs_user_id': `usr-${Date.now()}`,
-      'fs_org_id': `org-${restaurantId}`,
-      'fs_outlet_id': restaurantId,
-      'fs_role': 'outlet_manager'
-    };
+    // Mint cryptographically signed session token for claimed restaurant manager
+    const sessionToken = createSessionToken({
+      userId: `usr-${Date.now()}`,
+      organisationId: `org-${restaurantId}`,
+      outletId: restaurantId,
+      role: 'outlet_manager'
+    });
 
-    for (const [k, v] of Object.entries(cookiesToSet)) {
-      res.cookies.set(k, v, {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        path: '/'
-      });
+    res.cookies.set(SESSION_COOKIE_NAME, sessionToken, getSessionCookieOptions());
+
+    // Clean up legacy cookies
+    for (const k of ['fs_user_id', 'fs_org_id', 'fs_outlet_id', 'fs_role']) {
+      res.cookies.set(k, '', { httpOnly: true, maxAge: 0, path: '/' });
     }
 
     return res;

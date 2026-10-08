@@ -1,21 +1,47 @@
 import { NextResponse } from 'next/server';
-import { sendContactEmail, checkRateLimit } from '@/lib/email-service';
+import { sendContactEmail } from '../../../lib/email-service';
+import { checkRateLimit as checkDistributedRateLimit, getClientIp, createRateLimitHeaders } from '../../../lib/rate-limiter';
+import { parseBoundedJson } from '../../../lib/body-guard';
 
 export async function POST(req: Request) {
   try {
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';
+    const ip = getClientIp(req);
 
-    if (!checkRateLimit(ip)) {
+    // 1. Distributed Rate Limiter check (5 attempts per 10 minutes)
+    const rlResult = await checkDistributedRateLimit({
+      key: `rl:contact:${ip}`,
+      limit: 5,
+      windowSeconds: 10 * 60
+    });
+
+    if (!rlResult.allowed) {
       return NextResponse.json(
         {
           success: false,
+          code: 'RATE_LIMITED',
           message: 'Too many submissions. Please wait a few moments before trying again.'
         },
-        { status: 429 }
+        {
+          status: 429,
+          headers: createRateLimitHeaders(rlResult)
+        }
       );
     }
 
-    const body = await req.json();
+    // 2. Strict 1 MB request body size limit and safe JSON parsing
+    const parseRes = await parseBoundedJson<any>(req);
+    if (!parseRes.ok) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: parseRes.code,
+          message: parseRes.message
+        },
+        { status: parseRes.status }
+      );
+    }
+
+    const body = parseRes.data;
 
     const result = await sendContactEmail({
       name: body.name,

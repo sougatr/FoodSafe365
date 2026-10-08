@@ -142,33 +142,34 @@ export default function FoodSafetyWhy() {
   }
 
   return (
-    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#2b0e04' }}>
+    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F8FAF7' }}>
       <GlobalHeader />
 
       {/* Hero Header */}
       <section style={{
-        background: 'linear-gradient(180deg, #240b03 0%, #3e1507 50%, #2b0e04 100%)',
-        borderBottom: '1px solid rgba(251, 146, 60, 0.22)',
-        paddingTop: 36,
-        paddingBottom: 40
+        background: 'linear-gradient(180deg, #FFFFFF 0%, #F4F7F2 100%)',
+        borderBottom: '1px solid #E2E8F0',
+        paddingTop: 40,
+        paddingBottom: 48
       }}>
         <div className="container" style={{ maxWidth: 1180 }}>
           {/* Breadcrumb Navigation */}
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 18 }}>
+          <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 20 }}>
             <Link
               href="/"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 5,
-                color: '#fed7aa',
+                color: '#065F46',
                 textDecoration: 'none',
                 fontSize: 13,
                 fontWeight: 600,
-                background: 'rgba(251, 146, 60, 0.12)',
-                padding: '4px 10px',
+                background: 'rgba(5, 150, 105, 0.08)',
+                padding: '5px 12px',
                 borderRadius: 8,
-                border: '1px solid rgba(251, 146, 60, 0.2)'
+                border: '1px solid rgba(5, 150, 105, 0.2)',
+                transition: 'all 0.15s ease'
               }}
             >
               <ChevronLeft size={15} /> Back to Home
@@ -179,7 +180,7 @@ export default function FoodSafetyWhy() {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 5,
-                color: '#fed7aa',
+                color: '#475569',
                 textDecoration: 'none',
                 fontSize: 13,
                 fontWeight: 600
@@ -190,14 +191,14 @@ export default function FoodSafetyWhy() {
           </div>
 
           <div style={{ textAlign: 'center', maxWidth: 880, margin: '0 auto' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
               <span style={{
-                background: 'rgba(16, 185, 129, 0.2)',
-                color: '#34d399',
-                border: '1px solid rgba(52, 211, 153, 0.4)',
+                background: 'rgba(5, 150, 105, 0.1)',
+                color: '#047857',
+                border: '1px solid rgba(5, 150, 105, 0.25)',
                 fontSize: 11,
                 fontWeight: 800,
-                padding: '4px 12px',
+                padding: '5px 14px',
                 borderRadius: 9999,
                 letterSpacing: '0.06em',
                 textTransform: 'uppercase'
@@ -207,136 +208,274 @@ export default function FoodSafetyWhy() {
             </div>
 
             <h1 style={{
-              fontSize: 'clamp(32px, 4.5vw, 48px)',
-              lineHeight: 1.15,
+              fontSize: 'clamp(32px, 4.5vw, 46px)',
+              lineHeight: 1.18,
               fontWeight: 900,
-              color: '#ffffff',
-              margin: '0 0 14px',
-              letterSpacing: '-0.02em'
+              color: '#0F2922',
+              margin: '0 0 16px',
+              letterSpacing: '-0.025em'
             }}>
-              Why Food Safety Matters: The Science of Clean Kitchens
+              Why Food Safety Matters:<br />The Science of Clean Kitchens
             </h1>
 
             <p style={{
               fontSize: 'clamp(15.5px, 2vw, 17.5px)',
-              color: '#fed7aa',
+              color: '#475569',
               margin: '0 auto 24px',
               maxWidth: 780,
               lineHeight: 1.6,
               fontWeight: 500
             }}>
-              From acute <strong style={{ color: '#ffffff' }}>food poisoning &amp; amoebiasis</strong> to chronic <strong style={{ color: '#ffffff' }}>carcinogens in reheated oils &amp; illegal dyes</strong> — understanding why food contaminates and how 5-star commercial kitchens eliminate risks.
+              Understanding how biological, chemical and physical hazards enter food operations — and how good food-safety systems control and reduce risk.
             </p>
           </div>
         </div>
       </section>
 
       {/* Main Content Body */}
-      <div className="container" style={{ maxWidth: 1180, paddingTop: 36, paddingBottom: 60 }}>
+      <div className="container" style={{ maxWidth: 1180, paddingTop: 40, paddingBottom: 64 }}>
 
         {/* ========================================================================= */}
         {/* SECTION 1: THE CAUSES OF FOOD CONTAMINATION & HEALTH HAZARDS */}
         {/* ========================================================================= */}
-        <section style={{ marginBottom: 48 }}>
-          <div style={{ marginBottom: 24 }}>
-            <span style={{ fontSize: 12, fontWeight: 800, color: '#fb923c', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              CRITICAL HEALTH HAZARDS
+        <section style={{ marginBottom: 52 }}>
+          <div style={{ marginBottom: 28, maxWidth: 840 }}>
+            <span style={{
+              fontSize: 11,
+              fontWeight: 800,
+              color: '#059669',
+              background: 'rgba(5, 150, 105, 0.08)',
+              padding: '4px 10px',
+              borderRadius: 6,
+              border: '1px solid rgba(5, 150, 105, 0.2)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              display: 'inline-block',
+              marginBottom: 8
+            }}>
+              Core Contamination Vectors
             </span>
-            <h2 style={{ fontSize: 26, fontWeight: 900, color: '#ffffff', margin: '4px 0 8px' }}>
+            <h2 style={{ fontSize: 28, fontWeight: 900, color: '#0F2922', margin: '4px 0 10px', letterSpacing: '-0.02em' }}>
               Causes of Food Contamination &amp; Their Impact
             </h2>
-            <p style={{ color: '#fed7aa', fontSize: 14.5, margin: 0, maxWidth: 840, lineHeight: 1.5 }}>
-              Food contamination is not an accident—it happens through specific biological, chemical, and operational failures. Contaminants pose two distinct danger levels:
+            <p style={{ color: '#475569', fontSize: 15, margin: 0, lineHeight: 1.6 }}>
+              Food contamination is not an accident—it stems from identifiable biological, chemical, and physical breakdowns in daily food preparation and handling.
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 20 }}>
-            {/* 1. Short-Term Acute Infections */}
-            <div className="card" style={{
-              background: '#3a1306',
-              border: '1.5px solid rgba(239, 68, 68, 0.4)',
-              borderTop: '5px solid #ef4444',
-              borderRadius: 18,
-              padding: '24px 26px',
-              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4)'
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 22 }}>
+            {/* 1. BIOLOGICAL HAZARDS */}
+            <div style={{
+              background: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderTop: '4px solid #059669',
+              borderRadius: 16,
+              padding: '24px 22px',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
+              display: 'flex',
+              flexDirection: 'column'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                <div style={{ width: 42, height: 42, borderRadius: 10, background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <AlertTriangle size={24} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <div style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 10,
+                  background: 'rgba(5, 150, 105, 0.1)',
+                  color: '#059669',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <Bug size={22} />
                 </div>
                 <div>
-                  <span style={{ fontSize: 10.5, fontWeight: 800, color: '#fca5a5', textTransform: 'uppercase' }}>IMMEDIATE IMPACT (Hours to Days)</span>
-                  <h3 style={{ fontSize: 20, fontWeight: 900, color: '#ffffff', margin: 0 }}>
-                    Acute Infections &amp; Food Poisoning
+                  <span style={{ fontSize: 10.5, fontWeight: 800, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    1. MICROBIAL &amp; PARASITIC
+                  </span>
+                  <h3 style={{ fontSize: 19, fontWeight: 800, color: '#0F2922', margin: 0 }}>
+                    Biological Hazards
                   </h3>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, color: '#ffedd5', fontSize: 13.5, lineHeight: 1.55 }}>
-                <div style={{ background: '#260c03', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(251, 146, 60, 0.15)' }}>
-                  <strong style={{ color: '#f87171', display: 'block', fontSize: 14, marginBottom: 3 }}>
-                    🤮 Bacterial Food Poisoning (Salmonella, Staph, E. coli)
+              <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.5 }}>
+                Living microorganisms and heat-stable toxins that proliferate rapidly under improper temperatures or hygiene failures.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: 13, lineHeight: 1.55 }}>
+                <div style={{ background: '#F8FAF7', padding: '12px 14px', borderRadius: 10, border: '1px solid #E2E8F0' }}>
+                  <strong style={{ color: '#0F2922', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, marginBottom: 4 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#DC2626' }}></span>
+                    Bacterial Pathogens (Salmonella, Staph, E. coli)
                   </strong>
-                  Strikes within 30 minutes to 8 hours. Caused by temperature abuse, contaminated chicken/eggs, and unwashed staff hands. Bacteria multiply exponentially, releasing toxins that trigger projectile vomiting, explosive diarrhea, fever, and extreme dehydration.
+                  <span style={{ color: '#475569' }}>
+                    Multiplies exponentially in the Danger Zone (5°C–60°C). Toxin synthesis causes projectile vomiting, fever, and acute gastroenteritis within 30m–8h.
+                  </span>
                 </div>
 
-                <div style={{ background: '#260c03', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(251, 146, 60, 0.15)' }}>
-                  <strong style={{ color: '#fb923c', display: 'block', fontSize: 14, marginBottom: 3 }}>
-                    🦠 Amoebiasis &amp; Amoebic Dysentery (Entamoeba histolytica)
+                <div style={{ background: '#F8FAF7', padding: '12px 14px', borderRadius: 10, border: '1px solid #E2E8F0' }}>
+                  <strong style={{ color: '#0F2922', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, marginBottom: 4 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#D97706' }}></span>
+                    Amoebiasis &amp; Parasites (E. histolytica)
                   </strong>
-                  Enters when staff carrying protozoan cysts handle food without proper hand sanitization, or when raw salads and chutneys are washed in contaminated non-potable water. Causes severe bloody mucosal colitis, painful cramps, and life-threatening amoebic liver abscesses.
+                  <span style={{ color: '#475569' }}>
+                    Transmitted via unchlorinated water or unwashed food-handler hands into salads and garnishes, leading to amoebic dysentery and liver abscesses.
+                  </span>
                 </div>
 
-                <div style={{ background: '#260c03', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(251, 146, 60, 0.15)' }}>
-                  <strong style={{ color: '#fde68a', display: 'block', fontSize: 14, marginBottom: 3 }}>
-                    🍚 Fried Rice Bacillus cereus Syndrome
+                <div style={{ background: '#F8FAF7', padding: '12px 14px', borderRadius: 10, border: '1px solid #E2E8F0' }}>
+                  <strong style={{ color: '#0F2922', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, marginBottom: 4 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#059669' }}></span>
+                    Spore-Formers (Bacillus cereus)
                   </strong>
-                  Leaving cooked rice or boiled noodles cooling slowly at room temperature triggers dormant Bacillus cereus spores to germinate. They produce heat-stable enterotoxins that resist subsequent wok heating.
+                  <span style={{ color: '#475569' }}>
+                    Slow ambient cooling of rice and starch dishes activates heat-resistant spores, producing enterotoxins that survive subsequent reheating.
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* 2. Long-Term Chronic & Carcinogenic Hazards */}
-            <div className="card" style={{
-              background: '#3a1306',
-              border: '1.5px solid rgba(245, 158, 11, 0.4)',
-              borderTop: '5px solid #f59e0b',
-              borderRadius: 18,
-              padding: '24px 26px',
-              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.4)'
+            {/* 2. CHEMICAL HAZARDS */}
+            <div style={{
+              background: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderTop: '4px solid #0284C7',
+              borderRadius: 16,
+              padding: '24px 22px',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
+              display: 'flex',
+              flexDirection: 'column'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                <div style={{ width: 42, height: 42, borderRadius: 10, background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <AlertOctagon size={24} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <div style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 10,
+                  background: 'rgba(2, 132, 199, 0.1)',
+                  color: '#0284C7',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <Droplets size={22} />
                 </div>
                 <div>
-                  <span style={{ fontSize: 10.5, fontWeight: 800, color: '#fde68a', textTransform: 'uppercase' }}>CHRONIC IMPACT (Months to Years)</span>
-                  <h3 style={{ fontSize: 20, fontWeight: 900, color: '#ffffff', margin: 0 }}>
-                    Carcinogens, Dyes &amp; Chemical Toxins
+                  <span style={{ fontSize: 10.5, fontWeight: 800, color: '#0369A1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    2. TOXINS &amp; DEGRADATION
+                  </span>
+                  <h3 style={{ fontSize: 19, fontWeight: 800, color: '#0F2922', margin: 0 }}>
+                    Chemical Hazards
                   </h3>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, color: '#ffedd5', fontSize: 13.5, lineHeight: 1.55 }}>
-                <div style={{ background: '#260c03', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(251, 146, 60, 0.15)' }}>
-                  <strong style={{ color: '#f87171', display: 'block', fontSize: 14, marginBottom: 3 }}>
-                    🧪 Toxic Artificial Colors (Rhodamine B &amp; Metanil Yellow)
+              <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.5 }}>
+                Harmful chemical compounds arising from reused thermal mediums, unapproved industrial colorants, or sanitizing agents.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: 13, lineHeight: 1.55 }}>
+                <div style={{ background: '#F8FAF7', padding: '12px 14px', borderRadius: 10, border: '1px solid #E2E8F0' }}>
+                  <strong style={{ color: '#0F2922', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, marginBottom: 4 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#DC2626' }}></span>
+                    Repeatedly Reheated Frying Oil (TPC &gt; 25%)
                   </strong>
-                  Non-permitted industrial textile dyes used to impart neon red/yellow in chicken tandoori, Gobi Manchurian, and sweets. Severely toxic to the liver and kidneys; proven to damage cellular DNA and cause gastrointestinal and urinary tract cancers.
+                  <span style={{ color: '#475569' }}>
+                    High-heat breakdown produces Total Polar Compounds, acrylamides, and lipid peroxides associated with vascular endothelial inflammation and cellular damage.
+                  </span>
                 </div>
 
-                <div style={{ background: '#260c03', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(251, 146, 60, 0.15)' }}>
-                  <strong style={{ color: '#fb923c', display: 'block', fontSize: 14, marginBottom: 3 }}>
-                    🔥 Repeatedly Reheated Oil (Total Polar Compounds &gt; 25%)
+                <div style={{ background: '#F8FAF7', padding: '12px 14px', borderRadius: 10, border: '1px solid #E2E8F0' }}>
+                  <strong style={{ color: '#0F2922', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, marginBottom: 4 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#D97706' }}></span>
+                    Prohibited Textile Dyes (Rhodamine B)
                   </strong>
-                  Commercial deep fryers reused across multiple days accumulate Total Polar Compounds (TPC), acrylamide, and carcinogenic polycyclic aromatic hydrocarbons (PAHs). Directly linked to atherosclerosis, severe hypertension, and colorectal carcinoma.
+                  <span style={{ color: '#475569' }}>
+                    Industrial dyes illegally used to produce fluorescent red in street gravies. Cytotoxic, non-permitted compounds with documented hepatic toxicity.
+                  </span>
                 </div>
 
-                <div style={{ background: '#260c03', padding: '12px 14px', borderRadius: 12, border: '1px solid rgba(251, 146, 60, 0.15)' }}>
-                  <strong style={{ color: '#fde68a', display: 'block', fontSize: 14, marginBottom: 3 }}>
-                    🍲 Old Fermenting Curry Pastes &amp; Ajinomoto Abuse
+                <div style={{ background: '#F8FAF7', padding: '12px 14px', borderRadius: 10, border: '1px solid #E2E8F0' }}>
+                  <strong style={{ color: '#0F2922', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, marginBottom: 4 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#0284C7' }}></span>
+                    Sanitizer Residues &amp; Excessive Additives
                   </strong>
-                  Reusing multi-day onion-tomato gravies that sat in warm conditions breeds anaerobic bacteria. Heavy doses of non-food grade MSG (Ajinomoto) and artificial preservatives used to mask sour, spoiled gravies cause severe mucosal erosion and gut dysbiosis.
+                  <span style={{ color: '#475569' }}>
+                    Improperly rinsed chemical degreasers or chlorine solutions exceeding 200 PPM, leading to acute mucosal irritation and chemical contamination.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. PHYSICAL HAZARDS */}
+            <div style={{
+              background: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderTop: '4px solid #D97706',
+              borderRadius: 16,
+              padding: '24px 22px',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <div style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 10,
+                  background: 'rgba(217, 119, 6, 0.1)',
+                  color: '#D97706',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <AlertOctagon size={22} />
+                </div>
+                <div>
+                  <span style={{ fontSize: 10.5, fontWeight: 800, color: '#B45309', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    3. FOREIGN MATERIALS
+                  </span>
+                  <h3 style={{ fontSize: 19, fontWeight: 800, color: '#0F2922', margin: 0 }}>
+                    Physical Hazards
+                  </h3>
+                </div>
+              </div>
+
+              <p style={{ fontSize: 13, color: '#64748B', margin: '0 0 16px', lineHeight: 1.5 }}>
+                Inorganic and extraneous matter introduced via damaged prep utensils, raw produce, or structural kitchen wear.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: 13, lineHeight: 1.55 }}>
+                <div style={{ background: '#F8FAF7', padding: '12px 14px', borderRadius: 10, border: '1px solid #E2E8F0' }}>
+                  <strong style={{ color: '#0F2922', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, marginBottom: 4 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#DC2626' }}></span>
+                    Glass Shards &amp; Brittle Plastics
+                  </strong>
+                  <span style={{ color: '#475569' }}>
+                    Shattered service ware or unprotected overhead light bulbs over open prep lines pose severe choking, laceration, and puncture risks.
+                  </span>
+                </div>
+
+                <div style={{ background: '#F8FAF7', padding: '12px 14px', borderRadius: 10, border: '1px solid #E2E8F0' }}>
+                  <strong style={{ color: '#0F2922', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, marginBottom: 4 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#D97706' }}></span>
+                    Metal Shavings &amp; Wire Scrubbers
+                  </strong>
+                  <span style={{ color: '#475569' }}>
+                    Loose bristles from cheap metal scourers dislodged into cooking vats, or metal fragments from worn commercial can openers.
+                  </span>
+                </div>
+
+                <div style={{ background: '#F8FAF7', padding: '12px 14px', borderRadius: 10, border: '1px solid #E2E8F0' }}>
+                  <strong style={{ color: '#0F2922', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, marginBottom: 4 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#059669' }}></span>
+                    Pest Frass &amp; Extraneous Debris
+                  </strong>
+                  <span style={{ color: '#475569' }}>
+                    Stones and chaff in uncleaned grain sacks, or insect fragments indicating compromised dry-storage integrity and inadequate screening.
+                  </span>
                 </div>
               </div>
             </div>
@@ -346,130 +485,131 @@ export default function FoodSafetyWhy() {
         {/* ========================================================================= */}
         {/* SECTION 1.5: FLOWCHARTS & TABLES: HOW & WHY ACUTE INFECTIONS OCCUR */}
         {/* ========================================================================= */}
-        <section style={{ marginBottom: 48 }}>
+        <section style={{ marginBottom: 52 }}>
           <div style={{
-            background: 'linear-gradient(135deg, #351206 0%, #290d04 100%)',
-            border: '2px solid rgba(239, 68, 68, 0.4)',
-            borderRadius: 20,
+            background: '#FFFFFF',
+            border: '1px solid #E2E8F0',
+            borderTop: '4px solid #059669',
+            borderRadius: 18,
             padding: '28px 24px',
-            boxShadow: '0 12px 30px rgba(0, 0, 0, 0.45)'
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)'
           }}>
             {/* Header Badge */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
               <div style={{
-                width: 38,
-                height: 38,
+                width: 40,
+                height: 40,
                 borderRadius: 10,
-                background: 'rgba(239, 68, 68, 0.2)',
-                color: '#f87171',
+                background: 'rgba(5, 150, 105, 0.1)',
+                color: '#059669',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '1px solid rgba(239, 68, 68, 0.35)'
+                border: '1px solid rgba(5, 150, 105, 0.2)'
               }}>
                 <Microscope size={22} />
               </div>
               <div>
-                <span style={{ fontSize: 11, fontWeight: 800, color: '#f87171', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   RAPID DIAGNOSTIC FLOW
                 </span>
-                <h3 style={{ fontSize: 22, fontWeight: 900, color: '#ffffff', margin: 0 }}>
+                <h3 style={{ fontSize: 22, fontWeight: 900, color: '#0F2922', margin: 0 }}>
                   Acute Short-Term Infections: How &amp; Why
                 </h3>
               </div>
             </div>
 
             {/* FLOWCHART 1: THE "HOW" (Biological Mechanisms) */}
-            <div style={{ marginBottom: 28 }}>
-              <h4 style={{ fontSize: 14, fontWeight: 800, color: '#fb923c', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Zap size={16} /> Flowchart 1: How Pathogens Attack the Human Body
+            <div style={{ marginBottom: 30 }}>
+              <h4 style={{ fontSize: 13.5, fontWeight: 800, color: '#0F2922', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Zap size={16} color="#059669" /> Flowchart 1: How Pathogens Attack the Human Body
               </h4>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {/* Flow 1: Intoxication */}
                 <div style={{
-                  background: '#220b03',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  background: '#F8FAF7',
+                  border: '1px solid #E2E8F0',
                   borderRadius: 12,
                   padding: '12px 16px',
                   display: 'flex',
                   alignItems: 'center',
                   flexWrap: 'wrap',
-                  gap: 8,
+                  gap: 10,
                   fontSize: 12.5
                 }}>
-                  <span style={{ background: '#ef4444', color: '#ffffff', fontWeight: 800, padding: '3px 8px', borderRadius: 6, fontSize: 11 }}>
+                  <span style={{ background: 'rgba(220, 38, 38, 0.12)', color: '#B91C1C', fontWeight: 800, padding: '3px 9px', borderRadius: 6, fontSize: 11, border: '1px solid rgba(220, 38, 38, 0.2)' }}>
                     INTOXICATION (30m–6h)
                   </span>
-                  <span style={{ color: '#fed7aa' }}>Food left at room temp</span>
-                  <span style={{ color: '#f87171', fontWeight: 800 }}>➔</span>
-                  <span style={{ color: '#fed7aa' }}>Staph / B. cereus secretes heat-stable toxins</span>
-                  <span style={{ color: '#f87171', fontWeight: 800 }}>➔</span>
-                  <span style={{ color: '#fed7aa' }}>Vagus nerve stimulation</span>
-                  <span style={{ color: '#f87171', fontWeight: 800 }}>➔</span>
-                  <span style={{ color: '#fca5a5', fontWeight: 700, background: 'rgba(239, 68, 68, 0.2)', padding: '2px 8px', borderRadius: 6 }}>
-                    Severe Projectile Vomiting
+                  <span style={{ color: '#334155' }}>Food left in Danger Zone</span>
+                  <span style={{ color: '#94A3B8', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#334155' }}>Staph / B. cereus synthesizes heat-stable toxins</span>
+                  <span style={{ color: '#94A3B8', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#334155' }}>Vagus nerve stimulation</span>
+                  <span style={{ color: '#94A3B8', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#991B1B', fontWeight: 700, background: 'rgba(220, 38, 38, 0.08)', padding: '2px 8px', borderRadius: 6 }}>
+                    Severe Acute Vomiting
                   </span>
                 </div>
 
                 {/* Flow 2: Infection */}
                 <div style={{
-                  background: '#220b03',
-                  border: '1px solid rgba(249, 115, 22, 0.3)',
+                  background: '#F8FAF7',
+                  border: '1px solid #E2E8F0',
                   borderRadius: 12,
                   padding: '12px 16px',
                   display: 'flex',
                   alignItems: 'center',
                   flexWrap: 'wrap',
-                  gap: 8,
+                  gap: 10,
                   fontSize: 12.5
                 }}>
-                  <span style={{ background: '#f97316', color: '#ffffff', fontWeight: 800, padding: '3px 8px', borderRadius: 6, fontSize: 11 }}>
+                  <span style={{ background: 'rgba(217, 119, 6, 0.12)', color: '#B45309', fontWeight: 800, padding: '3px 9px', borderRadius: 6, fontSize: 11, border: '1px solid rgba(217, 119, 6, 0.2)' }}>
                     INFECTION (6h–48h)
                   </span>
-                  <span style={{ color: '#fed7aa' }}>Undercooked poultry / cross-contamination</span>
-                  <span style={{ color: '#fb923c', fontWeight: 800 }}>➔</span>
-                  <span style={{ color: '#fed7aa' }}>Live Salmonella/E. coli survives stomach acid</span>
-                  <span style={{ color: '#fb923c', fontWeight: 800 }}>➔</span>
-                  <span style={{ color: '#fed7aa' }}>Intestinal mucosal invasion &amp; IL-8 storm</span>
-                  <span style={{ color: '#fb923c', fontWeight: 800 }}>➔</span>
-                  <span style={{ color: '#fed7aa', fontWeight: 700, background: 'rgba(249, 115, 22, 0.2)', padding: '2px 8px', borderRadius: 6 }}>
-                    High Fever &amp; Cramping Diarrhea
+                  <span style={{ color: '#334155' }}>Undercooked poultry / cross-contamination</span>
+                  <span style={{ color: '#94A3B8', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#334155' }}>Live Salmonella/E. coli survives gastric barrier</span>
+                  <span style={{ color: '#94A3B8', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#334155' }}>Intestinal mucosal inflammation &amp; cytokine cascade</span>
+                  <span style={{ color: '#94A3B8', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#92400E', fontWeight: 700, background: 'rgba(217, 119, 6, 0.08)', padding: '2px 8px', borderRadius: 6 }}>
+                    Fever &amp; Severe Enteritis
                   </span>
                 </div>
 
                 {/* Flow 3: Amoebiasis */}
                 <div style={{
-                  background: '#220b03',
-                  border: '1px solid rgba(234, 179, 8, 0.3)',
+                  background: '#F8FAF7',
+                  border: '1px solid #E2E8F0',
                   borderRadius: 12,
                   padding: '12px 16px',
                   display: 'flex',
                   alignItems: 'center',
                   flexWrap: 'wrap',
-                  gap: 8,
+                  gap: 10,
                   fontSize: 12.5
                 }}>
-                  <span style={{ background: '#eab308', color: '#1f2937', fontWeight: 800, padding: '3px 8px', borderRadius: 6, fontSize: 11 }}>
+                  <span style={{ background: 'rgba(5, 150, 105, 0.12)', color: '#047857', fontWeight: 800, padding: '3px 9px', borderRadius: 6, fontSize: 11, border: '1px solid rgba(5, 150, 105, 0.2)' }}>
                     AMOEBIASIS (Days–Weeks)
                   </span>
-                  <span style={{ color: '#fed7aa' }}>Unwashed salad / raw water / unwashed hands</span>
-                  <span style={{ color: '#facc15', fontWeight: 800 }}>➔</span>
-                  <span style={{ color: '#fed7aa' }}>Ingest E. histolytica cysts</span>
-                  <span style={{ color: '#facc15', fontWeight: 800 }}>➔</span>
-                  <span style={{ color: '#fed7aa' }}>Excysts in ileum; trophozoites lyse mucosa</span>
-                  <span style={{ color: '#facc15', fontWeight: 800 }}>➔</span>
-                  <span style={{ color: '#fef08a', fontWeight: 700, background: 'rgba(234, 179, 8, 0.2)', padding: '2px 8px', borderRadius: 6 }}>
-                    Amoebic Dysentery &amp; Liver Abscess
+                  <span style={{ color: '#334155' }}>Unwashed salad / raw water / unwashed hands</span>
+                  <span style={{ color: '#94A3B8', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#334155' }}>Ingested E. histolytica cysts</span>
+                  <span style={{ color: '#94A3B8', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#334155' }}>Excystation in colon; trophozoites erode mucosa</span>
+                  <span style={{ color: '#94A3B8', fontWeight: 800 }}>➔</span>
+                  <span style={{ color: '#065F46', fontWeight: 700, background: 'rgba(5, 150, 105, 0.08)', padding: '2px 8px', borderRadius: 6 }}>
+                    Amoebic Dysentery &amp; Complications
                   </span>
                 </div>
               </div>
             </div>
 
             {/* FLOWCHART 2: THE "WHY" (Kitchen Vectors) */}
-            <div style={{ marginBottom: 28 }}>
-              <h4 style={{ fontSize: 14, fontWeight: 800, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <UtensilsCrossed size={16} /> Flowchart 2: Why Infections Occur in Commercial Kitchens
+            <div style={{ marginBottom: 30 }}>
+              <h4 style={{ fontSize: 13.5, fontWeight: 800, color: '#0F2922', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <UtensilsCrossed size={16} color="#059669" /> Flowchart 2: Why Contamination Occurs in Commercial Kitchens
               </h4>
 
               <div style={{
@@ -477,38 +617,38 @@ export default function FoodSafetyWhy() {
                 gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
                 gap: 12
               }}>
-                <div style={{ background: '#1e0902', border: '1px solid rgba(251, 146, 60, 0.2)', borderRadius: 10, padding: '12px 14px' }}>
-                  <div style={{ color: '#f87171', fontWeight: 800, fontSize: 12, marginBottom: 4 }}>1. DANGER ZONE ABUSE</div>
-                  <div style={{ color: '#fed7aa', fontSize: 12, lineHeight: 1.4 }}>
-                    Cooked food held between 5°C–60°C ➔ <strong>Bacteria doubles every 20 mins</strong> ➔ Microbial bloom
+                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 10, padding: '14px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+                  <div style={{ color: '#DC2626', fontWeight: 800, fontSize: 12, marginBottom: 5 }}>1. DANGER ZONE ABUSE</div>
+                  <div style={{ color: '#475569', fontSize: 12.5, lineHeight: 1.45 }}>
+                    Food held between 5°C–60°C ➔ <strong>Bacteria doubles every 20 mins</strong> ➔ Exponential bacterial load
                   </div>
                 </div>
 
-                <div style={{ background: '#1e0902', border: '1px solid rgba(251, 146, 60, 0.2)', borderRadius: 10, padding: '12px 14px' }}>
-                  <div style={{ color: '#fb923c', fontWeight: 800, fontSize: 12, marginBottom: 4 }}>2. CROSS-CONTAMINATION</div>
-                  <div style={{ color: '#fed7aa', fontSize: 12, lineHeight: 1.4 }}>
-                    Raw poultry knife used on salad ➔ <strong>No cooking step</strong> ➔ Live pathogens directly ingested
+                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 10, padding: '14px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+                  <div style={{ color: '#D97706', fontWeight: 800, fontSize: 12, marginBottom: 5 }}>2. CROSS-CONTAMINATION</div>
+                  <div style={{ color: '#475569', fontSize: 12.5, lineHeight: 1.45 }}>
+                    Raw meat knife used on salads ➔ <strong>Zero kill step</strong> ➔ Live pathogens transferred to ready food
                   </div>
                 </div>
 
-                <div style={{ background: '#1e0902', border: '1px solid rgba(251, 146, 60, 0.2)', borderRadius: 10, padding: '12px 14px' }}>
-                  <div style={{ color: '#facc15', fontWeight: 800, fontSize: 12, marginBottom: 4 }}>3. FECAL-ORAL VECTOR</div>
-                  <div style={{ color: '#fed7aa', fontSize: 12, lineHeight: 1.4 }}>
-                    Restroom visit without 20s soap scrub ➔ <strong>Microscopic cysts under nails</strong> ➔ Transferred to food
+                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 10, padding: '14px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+                  <div style={{ color: '#0284C7', fontWeight: 800, fontSize: 12, marginBottom: 5 }}>3. FECAL-ORAL VECTOR</div>
+                  <div style={{ color: '#475569', fontSize: 12.5, lineHeight: 1.45 }}>
+                    Post-restroom hand breakdown ➔ <strong>Microscopic cysts under nails</strong> ➔ Direct plating contamination
                   </div>
                 </div>
 
-                <div style={{ background: '#1e0902', border: '1px solid rgba(251, 146, 60, 0.2)', borderRadius: 10, padding: '12px 14px' }}>
-                  <div style={{ color: '#34d399', fontWeight: 800, fontSize: 12, marginBottom: 4 }}>4. SLOW AMBIENT COOLING</div>
-                  <div style={{ color: '#fed7aa', fontSize: 12, lineHeight: 1.4 }}>
-                    Large pot cooled slowly on floor ➔ <strong>Heat shock awakens spores</strong> ➔ Toxins generated
+                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 10, padding: '14px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+                  <div style={{ color: '#059669', fontWeight: 800, fontSize: 12, marginBottom: 5 }}>4. SLOW AMBIENT COOLING</div>
+                  <div style={{ color: '#475569', fontSize: 12.5, lineHeight: 1.45 }}>
+                    Large bulk gravy cooled at room temp ➔ <strong>Heat activates spores</strong> ➔ Toxin synthesis
                   </div>
                 </div>
 
-                <div style={{ background: '#1e0902', border: '1px solid rgba(251, 146, 60, 0.2)', borderRadius: 10, padding: '12px 14px' }}>
-                  <div style={{ color: '#38bdf8', fontWeight: 800, fontSize: 12, marginBottom: 4 }}>5. UNTREATED WATER / ICE</div>
-                  <div style={{ color: '#fed7aa', fontSize: 12, lineHeight: 1.4 }}>
-                    Unfiltered tap water for mint chutney &amp; bar ice ➔ <strong>Cysts &amp; coliforms</strong> ➔ Direct infection
+                <div style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 10, padding: '14px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.02)' }}>
+                  <div style={{ color: '#475569', fontWeight: 800, fontSize: 12, marginBottom: 5 }}>5. UNTREATED WATER / ICE</div>
+                  <div style={{ color: '#475569', fontSize: 12.5, lineHeight: 1.45 }}>
+                    Unfiltered tap water in dips &amp; bar ice ➔ <strong>Coliforms &amp; cysts</strong> ➔ Ingestion risk
                   </div>
                 </div>
               </div>
@@ -516,50 +656,51 @@ export default function FoodSafetyWhy() {
 
             {/* TABLE 2: KITCHEN FAILURE VS FOODSAFE365 CONTROL */}
             <div style={{ overflowX: 'auto' }}>
-              <h4 style={{ fontSize: 14, fontWeight: 800, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
-                Table 2: Kitchen Failure Point vs. FoodSafe365 Preventive Rule
+              <h4 style={{ fontSize: 13.5, fontWeight: 800, color: '#0F2922', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
+                Table 2: Kitchen Breakdown Point vs. FoodSafe365 Preventive Control
               </h4>
               <table style={{
                 width: '100%',
                 borderCollapse: 'collapse',
-                fontSize: 12.5,
-                color: '#fed7aa',
-                background: '#220b03',
+                fontSize: 13,
+                color: '#334155',
+                background: '#FFFFFF',
                 borderRadius: 12,
-                overflow: 'hidden'
+                overflow: 'hidden',
+                border: '1px solid #E2E8F0'
               }}>
                 <thead>
-                  <tr style={{ background: '#1a0701', borderBottom: '1.5px solid rgba(251, 146, 60, 0.25)', textAlign: 'left' }}>
-                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>Failure Point</th>
-                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>Biological Risk</th>
-                    <th style={{ padding: '10px 14px', color: '#ffffff' }}>FoodSafe365 Control</th>
+                  <tr style={{ background: '#F8FAF7', borderBottom: '1.5px solid #E2E8F0', textAlign: 'left' }}>
+                    <th style={{ padding: '12px 16px', color: '#0F2922', fontWeight: 800 }}>Failure Point</th>
+                    <th style={{ padding: '12px 16px', color: '#0F2922', fontWeight: 800 }}>Identified Risk</th>
+                    <th style={{ padding: '12px 16px', color: '#0F2922', fontWeight: 800 }}>FoodSafe365 Control Mechanism</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
-                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#ffffff' }}>Holding gravies at room temperature</td>
-                    <td style={{ padding: '10px 14px' }}>Danger Zone bacterial doubling (5°C–60°C)</td>
-                    <td style={{ padding: '10px 14px', color: '#34d399', fontWeight: 600 }}>Strict 2-hour discard rule &amp; &lt;5°C refrigeration check</td>
+                  <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
+                    <td style={{ padding: '12px 16px', fontWeight: 700, color: '#0F2922' }}>Holding gravies at ambient room temp</td>
+                    <td style={{ padding: '12px 16px', color: '#DC2626' }}>Danger Zone bacterial proliferation (5°C–60°C)</td>
+                    <td style={{ padding: '12px 16px', color: '#047857', fontWeight: 600 }}>Strict 2-hour discard rule &amp; chilled storage monitoring (&lt;5°C)</td>
                   </tr>
-                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
-                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#ffffff' }}>Shared knives &amp; chopping boards</td>
-                    <td style={{ padding: '10px 14px' }}>Cross-contamination to raw ready-to-eat salads</td>
-                    <td style={{ padding: '10px 14px', color: '#34d399', fontWeight: 600 }}>6-Color board matrix (Yellow = Poultry, Green = Veg)</td>
+                  <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
+                    <td style={{ padding: '12px 16px', fontWeight: 700, color: '#0F2922' }}>Shared prep knives &amp; chopping surfaces</td>
+                    <td style={{ padding: '12px 16px', color: '#DC2626' }}>Cross-contamination to ready-to-eat foods</td>
+                    <td style={{ padding: '12px 16px', color: '#047857', fontWeight: 600 }}>6-Color board matrix (Yellow = Poultry, Green = Washed Veg)</td>
                   </tr>
-                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
-                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#ffffff' }}>Slow ambient cooling of deep pots</td>
-                    <td style={{ padding: '10px 14px' }}>Dormant spore germination (B. cereus / C. perfringens)</td>
-                    <td style={{ padding: '10px 14px', color: '#34d399', fontWeight: 600 }}>Blast chilling &lt;90 mins or shallow pans in ice-baths</td>
+                  <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
+                    <td style={{ padding: '12px 16px', fontWeight: 700, color: '#0F2922' }}>Slow passive cooling of deep pots</td>
+                    <td style={{ padding: '12px 16px', color: '#D97706' }}>Spore germination (B. cereus / C. perfringens)</td>
+                    <td style={{ padding: '12px 16px', color: '#047857', fontWeight: 600 }}>Rapid cooling protocol: blast chiller or shallow pans in ice-baths</td>
                   </tr>
-                  <tr style={{ borderBottom: '1px solid rgba(251, 146, 60, 0.12)' }}>
-                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#ffffff' }}>Poor hand hygiene post-restroom</td>
-                    <td style={{ padding: '10px 14px' }}>Fecal-oral transmission of Amoebiasis &amp; E. coli</td>
-                    <td style={{ padding: '10px 14px', color: '#34d399', fontWeight: 600 }}>Stocked sink check + Form 1A semi-annual stool test</td>
+                  <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
+                    <td style={{ padding: '12px 16px', fontWeight: 700, color: '#0F2922' }}>Inadequate hand hygiene post-restroom</td>
+                    <td style={{ padding: '12px 16px', color: '#DC2626' }}>Fecal-oral transmission of parasites &amp; pathogens</td>
+                    <td style={{ padding: '12px 16px', color: '#047857', fontWeight: 600 }}>Dedicated handwash stations + Form 1A medical fitness checks</td>
                   </tr>
                   <tr>
-                    <td style={{ padding: '10px 14px', fontWeight: 700, color: '#ffffff' }}>Untreated tap water for ice/chutneys</td>
-                    <td style={{ padding: '10px 14px' }}>Protozoan cyst &amp; coliform ingestion</td>
-                    <td style={{ padding: '10px 14px', color: '#34d399', fontWeight: 600 }}>Certified RO filtration &amp; sanitized ice machines</td>
+                    <td style={{ padding: '12px 16px', fontWeight: 700, color: '#0F2922' }}>Untreated tap water for ice/chutneys</td>
+                    <td style={{ padding: '12px 16px', color: '#D97706' }}>Protozoan cyst &amp; coliform ingestion</td>
+                    <td style={{ padding: '12px 16px', color: '#047857', fontWeight: 600 }}>Verified water filtration &amp; sanitized ice machine maintenance</td>
                   </tr>
                 </tbody>
               </table>
@@ -572,134 +713,140 @@ export default function FoodSafetyWhy() {
         {/* ========================================================================= */}
         <section style={{ marginBottom: 48 }}>
           <div style={{ marginBottom: 24 }}>
-            <span style={{ fontSize: 12, fontWeight: 800, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <span style={{ fontSize: 12, fontWeight: 800, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               LUXURY HOSPITALITY BENCHMARKS
             </span>
-            <h2 style={{ fontSize: 26, fontWeight: 900, color: '#ffffff', margin: '4px 0 8px' }}>
+            <h2 style={{ fontSize: 26, fontWeight: 900, color: '#0F2922', margin: '4px 0 8px' }}>
               Best Practices Followed in 5-Star Kitchens
             </h2>
-            <p style={{ color: '#fed7aa', fontSize: 14.5, margin: 0, maxWidth: 840, lineHeight: 1.5 }}>
-              How luxury properties like Taj, Oberoi, Marriott, and Michelin-rated restaurants ensure that hundreds of meals are prepared daily with zero risk of foodborne contamination:
+            <p style={{ color: '#475569', fontSize: 14.5, margin: 0, maxWidth: 840, lineHeight: 1.5 }}>
+              How premier hospitality kitchens and high-compliance food operations establish rigorous controls to minimize contamination risks:
             </p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 18 }}>
             {/* 1. Blast Chilling */}
             <div className="card" style={{
-              background: '#3a1306',
-              border: '1.5px solid rgba(251, 146, 60, 0.25)',
+              background: '#FFFFFF',
+              border: '1.5px solid #E2E8F0',
               borderRadius: 16,
-              padding: '20px 22px'
+              padding: '20px 22px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(5, 150, 105, 0.08)', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Clock size={20} />
                 </div>
-                <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#ffffff' }}>
+                <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0F2922' }}>
                   1. Blast Chilling (&lt;90 Min Rule)
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
                 Crashes hot core temperature from 70°C to &lt;3°C within 90 minutes, completely bypassing the bacterial danger zone.
               </p>
             </div>
 
             {/* 2. Color-Coded Board Matrix */}
             <div className="card" style={{
-              background: '#3a1306',
-              border: '1.5px solid rgba(251, 146, 60, 0.25)',
+              background: '#FFFFFF',
+              border: '1.5px solid #E2E8F0',
               borderRadius: 16,
-              padding: '20px 22px'
+              padding: '20px 22px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(2, 132, 199, 0.08)', color: '#0284C7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Layers size={20} />
                 </div>
-                <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#ffffff' }}>
+                <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0F2922' }}>
                   2. 6-Color Chopping Matrix
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
                 Strict color segregation: Red (Meat), Yellow (Poultry), Blue (Fish), Green (Produce), White (Dairy), Brown (Cooked).
               </p>
             </div>
 
             {/* 3. FIFO & Day-Dot Expiry */}
             <div className="card" style={{
-              background: '#3a1306',
-              border: '1.5px solid rgba(251, 146, 60, 0.25)',
+              background: '#FFFFFF',
+              border: '1.5px solid #E2E8F0',
               borderRadius: 16,
-              padding: '20px 22px'
+              padding: '20px 22px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(217, 119, 6, 0.08)', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Award size={20} />
                 </div>
-                <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#ffffff' }}>
+                <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0F2922' }}>
                   3. FIFO &amp; Day-Dot System
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
                 Color-coded weekday dot stickers stamped with prep time, chef initials, and strict 48-hour discard deadlines.
               </p>
             </div>
 
             {/* 4. Digital Core Temp Probes */}
             <div className="card" style={{
-              background: '#3a1306',
-              border: '1.5px solid rgba(251, 146, 60, 0.25)',
+              background: '#FFFFFF',
+              border: '1.5px solid #E2E8F0',
               borderRadius: 16,
-              padding: '20px 22px'
+              padding: '20px 22px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(220, 38, 38, 0.08)', color: '#DC2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Thermometer size={20} />
                 </div>
-                <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#ffffff' }}>
+                <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0F2922' }}>
                   4. Core Temperature Probing
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
                 Calibrated needle probes log internal cooking core (≥75°C), hot holding (≥63°C), and cold storage (&lt;4°C).
               </p>
             </div>
 
             {/* 5. Cooking Oil TPC Testing */}
             <div className="card" style={{
-              background: '#3a1306',
-              border: '1.5px solid rgba(251, 146, 60, 0.25)',
+              background: '#FFFFFF',
+              border: '1.5px solid #E2E8F0',
               borderRadius: 16,
-              padding: '20px 22px'
+              padding: '20px 22px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(249, 115, 22, 0.2)', color: '#fb923c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(13, 148, 136, 0.08)', color: '#0D9488', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Droplets size={20} />
                 </div>
-                <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#ffffff' }}>
+                <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0F2922' }}>
                   5. Digital Oil TPC Meters
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
                 Twice-daily digital testing (Testo 270); discarded for biodiesel recycling the moment Total Polar Compounds hit 24%.
               </p>
             </div>
 
             {/* 6. Medical Fitness & PPM Sanitizers */}
             <div className="card" style={{
-              background: '#3a1306',
-              border: '1.5px solid rgba(251, 146, 60, 0.25)',
+              background: '#FFFFFF',
+              border: '1.5px solid #E2E8F0',
               borderRadius: 16,
-              padding: '20px 22px'
+              padding: '20px 22px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(168, 85, 247, 0.2)', color: '#c084fc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(99, 102, 241, 0.08)', color: '#6366F1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <HeartPulse size={20} />
                 </div>
-                <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#ffffff' }}>
+                <h4 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#0F2922' }}>
                   6. Medical Clearance (Form 1A)
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
                 Mandatory 6-monthly stool cultures &amp; typhoid vaccines, plus chlorine test strips (100–200 PPM) for salad sinks.
               </p>
             </div>
@@ -711,30 +858,30 @@ export default function FoodSafetyWhy() {
         {/* ========================================================================= */}
         <section style={{ marginBottom: 40 }}>
           <div style={{ textAlign: 'center', maxWidth: 780, margin: '0 auto 24px' }}>
-            <span style={{ fontSize: 12, fontWeight: 800, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <span style={{ fontSize: 12, fontWeight: 800, color: '#047857', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               FREQUENTLY ASKED QUESTIONS
             </span>
-            <h2 style={{ fontSize: 28, fontWeight: 900, color: '#ffffff', margin: '6px 0 8px' }}>
+            <h2 style={{ fontSize: 28, fontWeight: 900, color: '#0F2922', margin: '6px 0 8px' }}>
               Common Questions on Food Safety, Toxins &amp; Hygiene
             </h2>
-            <p style={{ color: '#fed7aa', fontSize: 14.5, margin: '0 0 20px', lineHeight: 1.5 }}>
+            <p style={{ color: '#475569', fontSize: 14.5, margin: '0 0 20px', lineHeight: 1.5 }}>
               Search any food safety topic, chemical risk, or kitchen practice to see verified guidelines:
             </p>
 
             {/* Search Input Filter Box */}
             <div style={{
-              background: '#361205',
-              border: '2px solid #ea580c',
+              background: '#FFFFFF',
+              border: '1.5px solid #CBD5E1',
               borderRadius: 16,
-              padding: '6px 14px',
+              padding: '8px 16px',
               display: 'flex',
               alignItems: 'center',
               gap: 10,
-              boxShadow: '0 8px 20px rgba(0,0,0,0.4)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
               maxWidth: 620,
               margin: '0 auto 16px'
             }}>
-              <Search size={20} color="#fb923c" style={{ flexShrink: 0 }} />
+              <Search size={20} color="#059669" style={{ flexShrink: 0 }} />
               <input
                 type="text"
                 placeholder="Search FAQs (e.g. used oil, curry paste, amoebiasis, 5 star, ajinomoto)..."
@@ -746,14 +893,14 @@ export default function FoodSafetyWhy() {
                   border: 'none',
                   outline: 'none',
                   fontSize: 14.5,
-                  color: '#ffffff'
+                  color: '#0F2922'
                 }}
               />
               {faqSearch && (
                 <button
                   type="button"
                   onClick={() => setFaqSearch('')}
-                  style={{ background: 'none', border: 'none', color: '#fed7aa', cursor: 'pointer', fontSize: 13 }}
+                  style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: 13 }}
                 >
                   ✕
                 </button>
@@ -768,10 +915,10 @@ export default function FoodSafetyWhy() {
                   type="button"
                   onClick={() => setActiveCategory(cat)}
                   style={{
-                    background: activeCategory === cat ? '#059669' : '#361205',
-                    border: activeCategory === cat ? '1.5px solid #34d399' : '1.5px solid rgba(251, 146, 60, 0.25)',
-                    color: activeCategory === cat ? '#ffffff' : '#fed7aa',
-                    padding: '4px 12px',
+                    background: activeCategory === cat ? '#059669' : '#FFFFFF',
+                    border: activeCategory === cat ? '1.5px solid #047857' : '1.5px solid #E2E8F0',
+                    color: activeCategory === cat ? '#ffffff' : '#475569',
+                    padding: '6px 14px',
                     borderRadius: 9999,
                     fontSize: 12,
                     fontWeight: 700,
@@ -793,12 +940,12 @@ export default function FoodSafetyWhy() {
                 <div
                   key={faq.id}
                   style={{
-                    background: isExpanded ? '#381306' : '#321005',
-                    border: isExpanded ? '1.5px solid #fb923c' : '1px solid rgba(251, 146, 60, 0.2)',
+                    background: '#FFFFFF',
+                    border: isExpanded ? '1.5px solid #059669' : '1.5px solid #E2E8F0',
                     borderRadius: 14,
                     overflow: 'hidden',
                     transition: 'all 0.2s ease',
-                    boxShadow: isExpanded ? '0 8px 24px rgba(0,0,0,0.35)' : 'none'
+                    boxShadow: isExpanded ? '0 4px 16px rgba(5, 150, 105, 0.08)' : '0 1px 3px rgba(0,0,0,0.02)'
                   }}
                 >
                   <button
@@ -821,7 +968,7 @@ export default function FoodSafetyWhy() {
                       <span style={{
                         fontSize: 10.5,
                         fontWeight: 800,
-                        color: '#fb923c',
+                        color: '#047857',
                         textTransform: 'uppercase',
                         letterSpacing: '0.04em',
                         display: 'block',
@@ -829,7 +976,7 @@ export default function FoodSafetyWhy() {
                       }}>
                         {faq.category}
                       </span>
-                      <strong style={{ fontSize: 16, color: '#ffffff', lineHeight: 1.4, display: 'block' }}>
+                      <strong style={{ fontSize: 16, color: '#0F2922', lineHeight: 1.4, display: 'block' }}>
                         {faq.question}
                       </strong>
                     </div>
@@ -837,8 +984,8 @@ export default function FoodSafetyWhy() {
                       width: 32,
                       height: 32,
                       borderRadius: '50%',
-                      background: isExpanded ? '#ea580c' : 'rgba(251, 146, 60, 0.15)',
-                      color: '#ffffff',
+                      background: isExpanded ? 'rgba(5, 150, 105, 0.12)' : '#F1F5F9',
+                      color: isExpanded ? '#059669' : '#64748B',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -851,10 +998,10 @@ export default function FoodSafetyWhy() {
                   {isExpanded && (
                     <div style={{
                       padding: '0 20px 20px',
-                      color: '#ffedd5',
+                      color: '#334155',
                       fontSize: 14,
                       lineHeight: 1.65,
-                      borderTop: '1px solid rgba(251, 146, 60, 0.15)',
+                      borderTop: '1px solid #F1F5F9',
                       paddingTop: 14
                     }}>
                       <p style={{ margin: '0 0 12px 0' }}>{faq.answer}</p>
@@ -863,8 +1010,8 @@ export default function FoodSafetyWhy() {
                           <span
                             key={tag}
                             style={{
-                              background: '#220b03',
-                              color: '#fed7aa',
+                              background: '#F1F5F9',
+                              color: '#475569',
                               padding: '2px 8px',
                               borderRadius: 6,
                               fontSize: 11,
@@ -885,11 +1032,11 @@ export default function FoodSafetyWhy() {
               <div style={{
                 textAlign: 'center',
                 padding: '36px 20px',
-                background: '#321005',
-                border: '1.5px dashed rgba(251, 146, 60, 0.3)',
+                background: '#FFFFFF',
+                border: '1.5px dashed #CBD5E1',
                 borderRadius: 14
               }}>
-                <p style={{ color: '#fed7aa', fontSize: 14, margin: 0 }}>
+                <p style={{ color: '#64748B', fontSize: 14, margin: 0 }}>
                   No FAQs match your search &ldquo;<strong>{faqSearch}</strong>&rdquo;. Try searching for <em>used oil, curry paste, blast chiller,</em> or <em>amoebiasis</em>.
                 </p>
               </div>
@@ -901,8 +1048,8 @@ export default function FoodSafetyWhy() {
         {/* BOTTOM ACTION CTA BAR */}
         {/* ========================================================================= */}
         <div style={{
-          background: 'linear-gradient(135deg, #381306 0%, #4a1908 100%)',
-          border: '1.5px solid rgba(251, 146, 60, 0.3)',
+          background: 'linear-gradient(135deg, #064E3B 0%, #065F46 100%)',
+          border: '1.5px solid #047857',
           borderRadius: 20,
           padding: '28px 32px',
           display: 'flex',
@@ -910,13 +1057,13 @@ export default function FoodSafetyWhy() {
           alignItems: 'center',
           flexWrap: 'wrap',
           gap: 20,
-          boxShadow: '0 10px 30px rgba(0,0,0,0.4)'
+          boxShadow: '0 8px 24px rgba(6, 78, 59, 0.16)'
         }}>
           <div>
             <h3 style={{ margin: '0 0 6px', fontSize: 20, fontWeight: 900, color: '#ffffff' }}>
               Ready to Upgrade Your Kitchen to 5-Star Compliance?
             </h3>
-            <p style={{ margin: 0, fontSize: 13.5, color: '#fed7aa' }}>
+            <p style={{ margin: 0, fontSize: 13.5, color: '#A7F3D0' }}>
               Run time-phased daily checklists, monitor cold-chain temperatures, and generate your live FoodSafe365 Tabletop Passport.
             </p>
           </div>
@@ -925,13 +1072,16 @@ export default function FoodSafetyWhy() {
               href="/onboarding"
               className="btn primary"
               style={{
-                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                borderColor: '#047857',
-                color: '#ffffff',
+                background: '#FFFFFF',
+                borderColor: '#FFFFFF',
+                color: '#065F46',
                 fontWeight: 700,
                 fontSize: 13.5,
                 padding: '10px 18px',
-                textDecoration: 'none'
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6
               }}
             >
               Onboard Your Restaurant <ArrowRight size={15} />
@@ -940,9 +1090,9 @@ export default function FoodSafetyWhy() {
               href="/haccp"
               className="btn secondary"
               style={{
-                background: '#2b0e04',
-                borderColor: 'rgba(251, 146, 60, 0.3)',
-                color: '#fed7aa',
+                background: 'rgba(255, 255, 255, 0.12)',
+                borderColor: 'rgba(255, 255, 255, 0.25)',
+                color: '#FFFFFF',
                 fontWeight: 600,
                 fontSize: 13.5,
                 padding: '10px 18px',
@@ -957,8 +1107,8 @@ export default function FoodSafetyWhy() {
 
       {/* Persistent Global Footer */}
       <footer style={{
-        borderTop: '1px solid rgba(251, 146, 60, 0.2)',
-        background: '#1d0903',
+        borderTop: '1px solid #E2E8F0',
+        background: '#FFFFFF',
         padding: '24px 0',
         marginTop: 'auto'
       }}>
@@ -971,13 +1121,13 @@ export default function FoodSafetyWhy() {
           gap: 16
         }}>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 13 }}>
-            <Link href="/about" style={{ color: '#fed7aa', textDecoration: 'none', fontWeight: 600 }}>About Us</Link>
-            <Link href="/food-safety-why" style={{ color: '#fed7aa', textDecoration: 'none', fontWeight: 600 }}>Food Safety — Why?</Link>
-            <Link href="/haccp" style={{ color: '#fed7aa', textDecoration: 'none', fontWeight: 600 }}>HACCP Principles</Link>
-            <Link href="/contact" style={{ color: '#fed7aa', textDecoration: 'none', fontWeight: 600 }}>Contact Us</Link>
-            <Link href="/privacy" style={{ color: '#fed7aa', textDecoration: 'none', fontWeight: 600 }}>Privacy Policy</Link>
+            <Link href="/about" style={{ color: '#475569', textDecoration: 'none', fontWeight: 600 }}>About Us</Link>
+            <Link href="/food-safety-why" style={{ color: '#047857', textDecoration: 'none', fontWeight: 600 }}>Food Safety — Why?</Link>
+            <Link href="/haccp" style={{ color: '#475569', textDecoration: 'none', fontWeight: 600 }}>HACCP Principles</Link>
+            <Link href="/contact" style={{ color: '#475569', textDecoration: 'none', fontWeight: 600 }}>Contact Us</Link>
+            <Link href="/privacy" style={{ color: '#475569', textDecoration: 'none', fontWeight: 600 }}>Privacy Policy</Link>
           </div>
-          <div style={{ fontSize: 12.5, color: '#fb923c' }}>
+          <div style={{ fontSize: 12.5, color: '#64748B' }}>
             © {new Date().getFullYear()} FoodSafe365 · Digital Food-Safety Operating System
           </div>
         </div>

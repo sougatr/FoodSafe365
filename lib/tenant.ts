@@ -7,7 +7,7 @@ export async function requireOutletAccess(outletId: string, req?: Request) {
   if (!auth) return { ok: false as const, status: 401, message: 'Authentication required' };
 
   // Platform admin can access any outlet
-  if (auth.role === 'platform_admin') return { ok: true as const, auth };
+  if (auth.role === 'platform_admin' || auth.role === 'admin' || auth.role === 'superadmin') return { ok: true as const, auth };
 
   // Org admin / owner can access outlets within their organisation
   if (auth.role === 'org_admin' || auth.role === 'owner') {
@@ -50,7 +50,7 @@ export async function authorizeFeedbackAccess(
     const restEntry = getRestaurantEntry(requested);
     if (restEntry && (restEntry.status === 'UNCLAIMED' || restEntry.status === 'DISCOVERED' || restEntry.status === 'INVITED')) {
       const authCheck = await getAuthContext(req);
-      if (!authCheck || authCheck.role !== 'platform_admin') {
+      if (!authCheck || (authCheck.role !== 'platform_admin' && authCheck.role !== 'admin' && authCheck.role !== 'superadmin')) {
         return {
           ok: false,
           status: 403,
@@ -83,7 +83,7 @@ export async function authorizeFeedbackAccess(
   }
 
   // 1. Platform administrator: unrestricted access
-  if (auth.role === 'platform_admin') {
+  if (auth.role === 'platform_admin' || auth.role === 'admin' || auth.role === 'superadmin') {
     return { ok: true, auth, targetOutletId: requested };
   }
 

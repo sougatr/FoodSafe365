@@ -56,6 +56,11 @@ export default function ProviderDashboardPage() {
         verificationStatus: 'unverified'
       };
       localStorage.setItem('foodsafe365_provider', JSON.stringify(currentProvider));
+      fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: `${currentProvider.id}@partner.example.com`, role: 'provider' })
+      }).catch(() => {});
       document.cookie = `fs_user_id=${currentProvider.id}; path=/; max-age=2592000`;
       document.cookie = `fs_role=vendor; path=/; max-age=2592000`;
       document.cookie = `fs_provider_id=${currentProvider.id}; path=/; max-age=2592000`;
@@ -141,6 +146,11 @@ export default function ProviderDashboardPage() {
     };
     setProvider(p);
     localStorage.setItem('foodsafe365_provider', JSON.stringify(p));
+    fetch('/api/v1/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: `${id}@partner.example.com`, role: 'provider' })
+    }).catch(() => {});
     document.cookie = `fs_user_id=${id}; path=/; credentials=same-origin; max-age=2592000`;
     document.cookie = `fs_role=vendor; path=/; credentials=same-origin; max-age=2592000`;
     document.cookie = `fs_provider_id=${id}; path=/; credentials=same-origin; max-age=2592000`;

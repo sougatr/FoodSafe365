@@ -1,5 +1,9 @@
+import { NextResponse } from 'next/server';
 import { registerServiceProvider, CONTROLLED_SERVICE_CATEGORIES } from '@/lib/service-provider-store';
 import { ok, fail } from '@/lib/response';
+import { createSessionToken, SESSION_COOKIE_NAME, getSessionCookieOptions } from '@/lib/session';
+import { checkRateLimit, getClientIp, createRateLimitHeaders } from '@/lib/rate-limiter';
+import { parseBoundedJson } from '@/lib/body-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,12 +11,28 @@ const VALID_CATEGORY_IDS = new Set(CONTROLLED_SERVICE_CATEGORIES.map(c => c.id))
 
 export async function POST(req: Request) {
   try {
-    let body: any;
-    try {
-      body = await req.json();
-    } catch {
-      return fail('INVALID_JSON', 'Request body must be valid JSON', 400);
+    const clientIp = getClientIp(req);
+
+    // Rate limit: 10 provider registrations per 15 minutes per IP
+    const rlResult = await checkRateLimit({
+      key: `rl:onboard:provider:${clientIp}`,
+      limit: 10,
+      windowSeconds: 15 * 60
+    });
+
+    if (!rlResult.allowed) {
+      return NextResponse.json(
+        { data: null, error: { code: 'RATE_LIMITED', message: 'Too many registration requests. Please try again later.' } },
+        { status: 429, headers: createRateLimitHeaders(rlResult) }
+      );
     }
+
+    // Body limit: 1 MB
+    const parseRes = await parseBoundedJson<any>(req);
+    if (!parseRes.ok) {
+      return fail(parseRes.code, parseRes.message, parseRes.status);
+    }
+    const body = parseRes.data;
 
     const {
       businessName,
@@ -80,7 +100,17 @@ export async function POST(req: Request) {
       description: description.trim()
     });
 
-    return ok(provider, 201);
+    const sessionToken = createSessionToken({
+      userId: provider.id,
+      organisationId: `org-${provider.id}`,
+      outletId: 'none',
+      role: 'vendor',
+      providerId: provider.id
+    });
+
+    const response = NextResponse.json({ data: provider, error: null }, { status: 201 });
+    response.cookies.set(SESSION_COOKIE_NAME, sessionToken, getSessionCookieOptions());
+    return response;
   } catch (error: any) {
     console.error('[API /providers/register] Registration failed:', error);
     return fail('INTERNAL_SERVER_ERROR', 'Failed to register service provider', 500);

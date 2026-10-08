@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { recordDailyCheck, getDailyCheckHistory } from '@/lib/grocery-store';
+import { recordDailyCheckAsync, getDailyCheckHistoryAsync } from '@/lib/grocery-store';
 import { GROCERY_OPERATIONAL_CHECKS } from '@/lib/grocery-checklist-data';
 import { authorizeGroceryAccess } from '@/lib/grocery-tenant';
 
@@ -17,7 +17,7 @@ export async function GET(req: Request) {
       }, { status: auth.status });
     }
 
-    const history = getDailyCheckHistory(auth.outletId);
+    const history = await getDailyCheckHistoryAsync(auth.outletId);
 
     return NextResponse.json({
       success: true,
@@ -31,10 +31,11 @@ export async function GET(req: Request) {
     }, { status: 200 });
   } catch (err: any) {
     console.error('[API GET /api/v1/grocery/daily-check] Error:', err);
+    const code = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR') ? 'DATABASE_ERROR' : 'SERVER_ERROR';
     return NextResponse.json({
       success: false,
-      error: { code: 'SERVER_ERROR', message: 'Unable to retrieve daily check history.' },
-      message: 'Unable to retrieve daily check history.'
+      error: { code, message: err.message || 'Unable to retrieve daily check history.' },
+      message: err.message || 'Unable to retrieve daily check history.'
     }, { status: 500 });
   }
 }
@@ -61,7 +62,7 @@ export async function POST(req: Request) {
       }, { status: 400 });
     }
 
-    const result = recordDailyCheck({
+    const result = await recordDailyCheckAsync({
       outletId: auth.outletId,
       supervisorName: body.supervisorName || 'Duty Supervisor',
       responses: body.responses
@@ -74,10 +75,11 @@ export async function POST(req: Request) {
     }, { status: 201 });
   } catch (err: any) {
     console.error('[API POST /api/v1/grocery/daily-check] Error:', err);
+    const code = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR') ? 'DATABASE_ERROR' : 'SERVER_ERROR';
     return NextResponse.json({
       success: false,
-      error: { code: 'SERVER_ERROR', message: err.message || 'Failed to record daily check' },
-      message: 'Unable to record daily check. Please try again.'
+      error: { code, message: err.message || 'Failed to record daily check' },
+      message: err.message || 'Unable to record daily check. Please try again.'
     }, { status: 500 });
   }
 }

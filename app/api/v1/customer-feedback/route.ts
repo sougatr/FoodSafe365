@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
-import { ok, fail } from '@/lib/response';
-import { getCustomerFeedback, saveCustomerFeedback } from '@/lib/customer-feedback-store';
-import { authorizeFeedbackAccess } from '@/lib/tenant';
-import { DinerSafetyRating } from '@/lib/foodsafety28';
-import { getRestaurantEntry, processCustomerFeedbackForUnclaimedRestaurant } from '@/lib/unclaimed-restaurant-store';
+import { ok, fail } from '../../../../lib/response';
+import { getCustomerFeedback, saveCustomerFeedback } from '../../../../lib/customer-feedback-store';
+import { authorizeFeedbackAccess } from '../../../../lib/tenant';
+import { DinerSafetyRating } from '../../../../lib/foodsafety28';
+import { getRestaurantEntry, processCustomerFeedbackForUnclaimedRestaurant } from '../../../../lib/unclaimed-restaurant-store';
+import { checkRateLimit as checkDistributedRateLimit, getClientIp, createRateLimitHeaders } from '../../../../lib/rate-limiter';
+import { parseBoundedJson } from '../../../../lib/body-guard';
 
 // Validation schema for incoming Customer Food-Safety Ratings
 const FeedbackSchema = z.object({
@@ -126,12 +128,37 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
-    let body: any;
-    try {
-      body = await req.json();
-    } catch {
-      return fail('VALIDATION_ERROR', 'Invalid JSON payload in request body', 400);
+    const clientIp = getClientIp(req);
+
+    // 1. Distributed Rate Limiter: 10 submissions per 5 minutes per IP
+    const rlResult = await checkDistributedRateLimit({
+      key: `rl:feedback:${clientIp}`,
+      limit: 10,
+      windowSeconds: 5 * 60
+    });
+
+    if (!rlResult.allowed) {
+      return NextResponse.json(
+        {
+          data: null,
+          error: {
+            code: 'RATE_LIMITED',
+            message: 'Too many feedback submissions. Please wait a few moments before trying again.'
+          }
+        },
+        {
+          status: 429,
+          headers: createRateLimitHeaders(rlResult)
+        }
+      );
     }
+
+    // 2. Strict 1 MB request body limit and bounded JSON parse
+    const parseRes = await parseBoundedJson<any>(req);
+    if (!parseRes.ok) {
+      return fail(parseRes.code, parseRes.message, parseRes.status);
+    }
+    const body = parseRes.data;
 
     // Validate payload against schema
     const parseResult = FeedbackSchema.safeParse(body);
@@ -143,10 +170,7 @@ export async function POST(req: NextRequest) {
     const validated = parseResult.data;
     cleanupRecentSubmissions();
 
-    // Derive client identifier for idempotency & rate-limiting
-    const forwardedFor = req.headers.get('x-forwarded-for')?.split(',')[0].trim();
-    const realIp = req.headers.get('x-real-ip');
-    const clientIp = forwardedFor || realIp || 'client';
+    // Context key for diner-level flood guard & idempotency
     const contextKey = `${clientIp}::${validated.outletId}::${validated.tableNumber || 'notable'}::${validated.dinerMobile || 'nomobile'}`;
     const contentSignature = `${validated.scores.cleanliness}_${validated.scores.staffHygiene}_${validated.scores.foodFreshness}_${validated.scores.safeWater}_${validated.scores.washroom}_${validated.overallScore}::${(validated.feedback || '').toLowerCase().trim()}`;
 

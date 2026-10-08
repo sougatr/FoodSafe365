@@ -54,7 +54,7 @@ export default function Login() {
           const res = await fetch('/api/v1/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email, password, role: 'restaurant' })
           });
           const body = await res.json();
           if (!res.ok) throw new Error(body?.error?.message || 'Login failed');
@@ -63,22 +63,38 @@ export default function Login() {
         }
         router.push('/home');
       } else if (role === 'grocery') {
+        try {
+          await fetch('/api/v1/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, role: 'grocery', outletId: 'store-nature-basket-bandra' })
+          });
+        } catch {}
         if (typeof window !== 'undefined') {
           localStorage.setItem('foodsafe365_grocery_outlet_id', 'store-nature-basket-bandra');
           localStorage.setItem('foodsafe365_outlet_id', 'store-nature-basket-bandra');
-          document.cookie = 'fs_outlet_id=store-nature-basket-bandra; path=/; max-age=86400';
-          document.cookie = 'fs_role=outlet_manager; path=/; max-age=86400';
-          document.cookie = 'fs_user_id=mgr-store-nature-basket-bandra; path=/; max-age=86400';
         }
         router.push('/grocery');
       } else if (role === 'client') {
-        // Diner login directs to diner portal
+        try {
+          await fetch('/api/v1/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, role: 'client' })
+          });
+        } catch {}
         if (typeof window !== 'undefined') {
           localStorage.setItem('foodsafe365_diner_user', JSON.stringify({ email, name: 'Customer' }));
         }
         router.push('/diner');
       } else if (role === 'provider') {
-        // Service provider directs to marketplace
+        try {
+          await fetch('/api/v1/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, role: 'provider' })
+          });
+        } catch {}
         if (typeof window !== 'undefined') {
           localStorage.setItem('foodsafe365_provider_user', JSON.stringify({ email, org: 'Certified Compliance Partner' }));
         }

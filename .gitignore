@@ -51,3 +51,10 @@ temp/
 *.db
 .data/
 
+# Database dumps and backup archives (prevent accidental commit of database snapshots)
+*.dump
+*.dump.enc
+*.sql.gz
+*.bak
+backups/
+

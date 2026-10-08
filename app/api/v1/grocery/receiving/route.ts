@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { getReceivingLogs, recordReceivingItem } from '@/lib/grocery-store';
+import { getReceivingLogsAsync, recordReceivingItemAsync } from '@/lib/grocery-store';
 import { authorizeGroceryAccess } from '@/lib/grocery-tenant';
+import { GROCERY_PRODUCT_CATEGORIES } from '@/lib/grocery-types';
 
 export async function GET(req: Request) {
   try {
@@ -16,17 +17,18 @@ export async function GET(req: Request) {
       }, { status: auth.status });
     }
 
-    const logs = getReceivingLogs(auth.outletId);
+    const logs = await getReceivingLogsAsync(auth.outletId);
     return NextResponse.json({
       success: true,
       data: { logs, count: logs.length }
     }, { status: 200 });
   } catch (err: any) {
     console.error('[API GET /api/v1/grocery/receiving] Error:', err);
+    const code = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR') ? 'DATABASE_ERROR' : 'SERVER_ERROR';
     return NextResponse.json({
       success: false,
-      error: { code: 'SERVER_ERROR', message: 'Unable to retrieve receiving records.' },
-      message: 'Unable to retrieve receiving records.'
+      error: { code, message: err.message || 'Unable to retrieve receiving records.' },
+      message: err.message || 'Unable to retrieve receiving records.'
     }, { status: 500 });
   }
 }
@@ -54,12 +56,22 @@ export async function POST(req: Request) {
       }, { status: 400 });
     }
 
-    const result = recordReceivingItem({
+    // Resolve productCategory to valid code whether sent as code or human-readable name
+    let resolvedCategory = 'other_packaged';
+    if (body.productCategory) {
+      const catInput = String(body.productCategory).trim().toLowerCase();
+      const matched = GROCERY_PRODUCT_CATEGORIES.find(
+        c => c.code.toLowerCase() === catInput || c.name.toLowerCase() === catInput
+      );
+      resolvedCategory = matched ? matched.code : String(body.productCategory).trim();
+    }
+
+    const result = await recordReceivingItemAsync({
       outletId: auth.outletId,
       dateTime: body.dateTime,
       supplier: String(body.supplier).trim(),
       product: String(body.product).trim(),
-      productCategory: String(body.productCategory || 'other_packaged'),
+      productCategory: resolvedCategory,
       quantity: String(body.quantity || '1 unit'),
       batchNumber: body.batchNumber,
       useByDate: body.useByDate,
@@ -90,10 +102,11 @@ export async function POST(req: Request) {
     }, { status: 201 });
   } catch (err: any) {
     console.error('[API POST /api/v1/grocery/receiving] Server Error:', err);
+    const code = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR') ? 'DATABASE_ERROR' : 'SERVER_ERROR';
     return NextResponse.json({
       success: false,
-      error: { code: 'SERVER_ERROR', message: err.message || 'Unable to record receiving entry. Please try again.' },
-      message: 'Unable to record receiving entry. Please try again.'
+      error: { code, message: err.message || 'Unable to record receiving entry. Please try again.' },
+      message: err.message || 'Unable to record receiving entry. Please try again.'
     }, { status: 500 });
   }
 }

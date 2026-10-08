@@ -1,3 +1,78 @@
-import {z} from 'zod'; import {transaction} from '@/lib/db'; import {fail,ok} from '@/lib/response'; import {NextResponse} from 'next/server';
-const S=z.object({user:z.object({name:z.string().min(1),mobile:z.string().min(6),email:z.string().email().optional()}),organisation:z.object({name:z.string().min(1)}),outlet:z.object({name:z.string().min(1),city:z.string().min(1),restaurantTypeId:z.string()}),processCodes:z.array(z.string()).default([]),equipmentCodes:z.array(z.string()).default([])});
-export async function POST(req:Request){try{const rawBody=await req.json(); const b=S.parse(rawBody); const outletSlug=b.outlet?.name ? b.outlet.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'demo-outlet'; if(!process.env.DATABASE_URL){ const res=NextResponse.json({data:{organisationId:'demo-org',outletId:outletSlug,userId:'demo-user'},error:null},{status:201}); for(const [k,v] of Object.entries({'fs_user_id':'demo-user','fs_org_id':'demo-org','fs_outlet_id':outletSlug,'fs_role':'owner'})) res.cookies.set(k,v,{httpOnly:true,sameSite:'lax',secure:process.env.NODE_ENV==='production',path:'/'}); return res; } const result=await transaction(async c=>{const u=(await c.query(`INSERT INTO users(id,name,mobile,email,status,created_at,updated_at) VALUES(gen_random_uuid(),$1,$2,$3,'active',now(),now()) RETURNING id`,[b.user.name,b.user.mobile,b.user.email||null])).rows[0]; const role=(await c.query(`SELECT id FROM roles WHERE code='org_admin'`)).rows[0]; const org=(await c.query(`INSERT INTO organisations(id,name,organisation_type,owner_user_id,subscription_plan,status,created_at,updated_at) VALUES(gen_random_uuid(),$1,'single_outlet',$2,'free','active',now(),now()) RETURNING id`,[b.organisation.name,u.id])).rows[0]; const rt=(await c.query(`SELECT id FROM restaurant_types WHERE id=$1 OR code=$1`,[b.outlet.restaurantTypeId])).rows[0]; const outlet=(await c.query(`INSERT INTO outlets(id,organisation_id,name,city,restaurant_type_id,status,created_at,updated_at) VALUES(gen_random_uuid(),$1,$2,$3,$4,'active',now(),now()) RETURNING id`,[org.id,b.outlet.name,b.outlet.city,rt?.id||null])).rows[0]; await c.query(`INSERT INTO memberships(id,user_id,organisation_id,outlet_id,role_id,status,created_at) VALUES(gen_random_uuid(),$1,$2,$3,$4,'active',now())`,[u.id,org.id,outlet.id,role.id]); for(const code of (b.processCodes||[])) await c.query(`INSERT INTO outlet_processes(id,outlet_id,process_id,active) SELECT gen_random_uuid(),$1,id,true FROM food_processes WHERE code=$2 ON CONFLICT DO NOTHING`,[outlet.id,code]); for(const code of (b.equipmentCodes||[])) await c.query(`INSERT INTO equipment(id,outlet_id,equipment_type_id,name,calibration_required,status) SELECT gen_random_uuid(),$1,id,name,false,'active' FROM equipment_types WHERE code=$2`,[outlet.id,code]); return {organisationId:org.id,outletId:outlet.id,userId:u.id};}); return ok(result,201);}catch(e:any){return fail('VALIDATION_OR_DATABASE_ERROR',e?.message||'Unable to create organisation',400)}}
+import { z } from 'zod';
+import { transaction } from '@/lib/db';
+import { fail, ok } from '@/lib/response';
+import { NextResponse } from 'next/server';
+import { createSessionToken, SESSION_COOKIE_NAME, getSessionCookieOptions } from '@/lib/session';
+import { checkRateLimit, getClientIp, createRateLimitHeaders } from '@/lib/rate-limiter';
+import { parseBoundedJson } from '@/lib/body-guard';
+
+const S = z.object({
+  user: z.object({ name: z.string().min(1), mobile: z.string().min(6), email: z.string().email().optional() }),
+  organisation: z.object({ name: z.string().min(1) }),
+  outlet: z.object({ name: z.string().min(1), city: z.string().min(1), restaurantTypeId: z.string() }),
+  processCodes: z.array(z.string()).default([]),
+  equipmentCodes: z.array(z.string()).default([])
+});
+
+export async function POST(req: Request) {
+  try {
+    const clientIp = getClientIp(req);
+
+    // Rate limit: 10 onboarding requests per 15 minutes per IP
+    const rlResult = await checkRateLimit({
+      key: `rl:onboard:org:${clientIp}`,
+      limit: 10,
+      windowSeconds: 15 * 60
+    });
+
+    if (!rlResult.allowed) {
+      return NextResponse.json(
+        { data: null, error: { code: 'RATE_LIMITED', message: 'Too many onboarding requests. Please try again later.' } },
+        { status: 429, headers: createRateLimitHeaders(rlResult) }
+      );
+    }
+
+    // Body limit: 1 MB
+    const parseRes = await parseBoundedJson<any>(req);
+    if (!parseRes.ok) {
+      return fail(parseRes.code, parseRes.message, parseRes.status);
+    }
+
+    const b = S.parse(parseRes.data);
+    const outletSlug = b.outlet?.name ? b.outlet.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'demo-outlet';
+
+    if (!process.env.DATABASE_URL) {
+      const res = NextResponse.json({
+        data: { organisationId: 'demo-org', outletId: outletSlug, userId: 'demo-user' },
+        error: null
+      }, { status: 201 });
+
+      const token = createSessionToken({ userId: 'demo-user', organisationId: 'demo-org', outletId: outletSlug, role: 'owner' });
+      res.cookies.set(SESSION_COOKIE_NAME, token, getSessionCookieOptions());
+      for (const [k, v] of Object.entries({ 'fs_user_id': 'demo-user', 'fs_org_id': 'demo-org', 'fs_outlet_id': outletSlug, 'fs_role': 'owner' })) {
+        res.cookies.set(k, v, { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/' });
+      }
+      return res;
+    }
+
+    const result = await transaction(async c => {
+      const u = (await c.query(`INSERT INTO users(id,name,mobile,email,status,created_at,updated_at) VALUES(gen_random_uuid(),$1,$2,$3,'active',now(),now()) RETURNING id`, [b.user.name, b.user.mobile, b.user.email || null])).rows[0];
+      const role = (await c.query(`SELECT id FROM roles WHERE code='org_admin'`)).rows[0];
+      const org = (await c.query(`INSERT INTO organisations(id,name,organisation_type,owner_user_id,subscription_plan,status,created_at,updated_at) VALUES(gen_random_uuid(),$1,'single_outlet',$2,'free','active',now(),now()) RETURNING id`, [b.organisation.name, u.id])).rows[0];
+      const rt = (await c.query(`SELECT id FROM restaurant_types WHERE id=$1 OR code=$1`, [b.outlet.restaurantTypeId])).rows[0];
+      const outlet = (await c.query(`INSERT INTO outlets(id,organisation_id,name,city,restaurant_type_id,status,created_at,updated_at) VALUES(gen_random_uuid(),$1,$2,$3,$4,'active',now(),now()) RETURNING id`, [org.id, b.outlet.name, b.outlet.city, rt?.id || null])).rows[0];
+      await c.query(`INSERT INTO memberships(id,user_id,organisation_id,outlet_id,role_id,status,created_at) VALUES(gen_random_uuid(),$1,$2,$3,$4,'active',now())`, [u.id, org.id, outlet.id, role.id]);
+      for (const code of (b.processCodes || [])) {
+        await c.query(`INSERT INTO outlet_processes(id,outlet_id,process_id,active) SELECT gen_random_uuid(),$1,id,true FROM food_processes WHERE code=$2 ON CONFLICT DO NOTHING`, [outlet.id, code]);
+      }
+      for (const code of (b.equipmentCodes || [])) {
+        await c.query(`INSERT INTO equipment(id,outlet_id,equipment_type_id,name,calibration_required,status) SELECT gen_random_uuid(),$1,id,name,false,'active' FROM equipment_types WHERE code=$2`, [outlet.id, code]);
+      }
+      return { organisationId: org.id, outletId: outlet.id, userId: u.id };
+    });
+
+    return ok(result, 201);
+  } catch (e: any) {
+    return fail('VALIDATION_OR_DATABASE_ERROR', e?.message || 'Unable to create organisation', 400);
+  }
+}

@@ -162,6 +162,13 @@ async function ensurePgTables(): Promise<boolean> {
   if (pgInitialized) return true;
   const pool = getPool();
   if (!pool) return false;
+
+  // In production, runtime code strictly assumes required schema has already been migrated.
+  if (process.env.NODE_ENV === 'production') {
+    pgInitialized = true;
+    return true;
+  }
+
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS service_providers (
@@ -219,12 +226,19 @@ async function ensurePgTables(): Promise<boolean> {
   }
 }
 
+function assertNotProductionFileFallback(operation: string): void {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(`DATABASE_ERROR: Production requires configured PostgreSQL DATABASE_URL. Refusing file fallback for "${operation}".`);
+  }
+}
+
 // -------------------------------------------------------------
 // PROVIDERS API METHODS
 // -------------------------------------------------------------
 
 export async function listServiceProviders(filter?: { category?: string; city?: string }): Promise<ServiceProvider[]> {
   if (!process.env.DATABASE_URL) {
+    assertNotProductionFileFallback('listServiceProviders');
     const list = readFileStore(getProvidersFilePath(), DEFAULT_SEED_PROVIDERS);
     return list.filter(p => {
       if (p.status !== 'active') return false;
@@ -268,6 +282,7 @@ export async function listServiceProviders(filter?: { category?: string; city?: 
 
 export async function getServiceProviderById(id: string): Promise<ServiceProvider | null> {
   if (!process.env.DATABASE_URL) {
+    assertNotProductionFileFallback('getServiceProviderById');
     const list = readFileStore(getProvidersFilePath(), DEFAULT_SEED_PROVIDERS);
     return list.find(p => p.id === id) || null;
   }
@@ -306,6 +321,7 @@ export async function registerServiceProvider(data: Partial<ServiceProvider>): P
   };
 
   if (!process.env.DATABASE_URL) {
+    assertNotProductionFileFallback('registerServiceProvider');
     const list = readFileStore(getProvidersFilePath(), DEFAULT_SEED_PROVIDERS);
     list.unshift(provider);
     writeFileStore(getProvidersFilePath(), list);
@@ -338,6 +354,7 @@ export async function listServiceRequests(filter: {
   correctiveActionId?: string;
 }): Promise<ServiceRequest[]> {
   if (!process.env.DATABASE_URL) {
+    assertNotProductionFileFallback('listServiceRequests');
     const list = readFileStore(getRequestsFilePath(), DEFAULT_SEED_REQUESTS);
     return list.filter(r => {
       if (filter.outletId && r.outletId !== filter.outletId) return false;
@@ -388,6 +405,7 @@ export async function listServiceRequests(filter: {
 
 export async function getServiceRequestById(id: string): Promise<ServiceRequest | null> {
   if (!process.env.DATABASE_URL) {
+    assertNotProductionFileFallback('getServiceRequestById');
     const list = readFileStore(getRequestsFilePath(), DEFAULT_SEED_REQUESTS);
     return list.find(r => r.id === id) || null;
   }
@@ -470,6 +488,7 @@ export async function createServiceRequest(data: {
   };
 
   if (!process.env.DATABASE_URL) {
+    assertNotProductionFileFallback('createServiceRequest');
     const list = readFileStore(getRequestsFilePath(), DEFAULT_SEED_REQUESTS);
     list.unshift(request);
     writeFileStore(getRequestsFilePath(), list);
@@ -528,6 +547,7 @@ export async function updateServiceRequestStatus(
   };
 
   if (!process.env.DATABASE_URL) {
+    assertNotProductionFileFallback('updateServiceRequestStatus');
     const list = readFileStore(getRequestsFilePath(), DEFAULT_SEED_REQUESTS);
     const item = list.find(r => r.id === id);
     if (!item) return null;

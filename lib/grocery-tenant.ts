@@ -31,7 +31,7 @@ export async function authorizeGroceryAccess(
   }
 
   if (auth) {
-    if (auth.role === 'platform_admin') {
+    if (auth.role === 'platform_admin' || auth.role === 'admin' || auth.role === 'superadmin') {
       return { ok: true, auth, outletId: targetOutlet };
     }
 

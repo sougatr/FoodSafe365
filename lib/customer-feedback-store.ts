@@ -149,6 +149,13 @@ async function ensurePgTable(): Promise<boolean> {
   if (pgInitialized) return true;
   const pool = getPool();
   if (!pool) return false;
+
+  // In production, runtime code strictly assumes required schema has already been migrated.
+  if (process.env.NODE_ENV === 'production') {
+    pgInitialized = true;
+    return true;
+  }
+
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS customer_feedback (
@@ -232,7 +239,10 @@ export async function getCustomerFeedback(outletId?: string | null): Promise<Fee
     }
   }
 
-  // 2. DEVELOPMENT / DEMO MODE (DATABASE_URL unset only)
+  // 2. DEVELOPMENT / DEMO MODE (DATABASE_URL unset only and NODE_ENV !== 'production')
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('DATABASE_ERROR: Production requires configured PostgreSQL DATABASE_URL. Refusing to access file store.');
+  }
   const allRatings = readFileStore();
   const filtered = targetOutlet
     ? allRatings.filter(r => r.outletId === targetOutlet)
@@ -290,7 +300,10 @@ export async function saveCustomerFeedback(rating: DinerSafetyRating): Promise<{
     }
   }
 
-  // 2. DEVELOPMENT / DEMO MODE (DATABASE_URL unset only)
+  // 2. DEVELOPMENT / DEMO MODE (DATABASE_URL unset only and NODE_ENV !== 'production')
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('DATABASE_ERROR: Production requires configured PostgreSQL DATABASE_URL. Refusing to write to file store.');
+  }
   const existing = readFileStore();
   const next = [rating, ...existing.filter(r => r.id !== rating.id)];
   writeFileStore(next);
