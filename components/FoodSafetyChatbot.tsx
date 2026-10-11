@@ -32,6 +32,14 @@ export default function FoodSafetyChatbot() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    function handleOpenEvent() {
+      setIsOpen(true);
+    }
+    window.addEventListener('open-foodsafe-chatbot', handleOpenEvent);
+    return () => window.removeEventListener('open-foodsafe-chatbot', handleOpenEvent);
+  }, []);
+
+  useEffect(() => {
     // Initial greeting based on role and language
     let greetingText = '';
     if (lang === 'hi') {

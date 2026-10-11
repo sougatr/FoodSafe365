@@ -13,7 +13,8 @@ import {
   HelpCircle,
   FileText,
   Mail,
-  Bot
+  Bot,
+  BookOpen
 } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
 import ThemeToggle from './ThemeToggle';
@@ -85,6 +86,7 @@ export default function GlobalHeader() {
   function handleTriggerChatbot() {
     if (typeof window !== 'undefined') {
       setMobileMenuOpen(false);
+      window.dispatchEvent(new CustomEvent('open-foodsafe-chatbot'));
       const trigger = document.getElementById('foodsafe-chatbot-trigger');
       if (trigger) trigger.click();
     }
@@ -92,7 +94,7 @@ export default function GlobalHeader() {
 
   const NAV_ITEMS = [
     { href: '/about', label: 'About Us', icon: Info },
-    { href: '/food-safety-why', label: 'Food Safety — Why?', icon: HelpCircle },
+    { href: '/food-safety-why', label: 'FoSTaC Learning Hub', icon: BookOpen },
     { href: '/haccp', label: 'HACCP Principles', icon: FileText },
     { href: '/contact', label: 'Contact Us', icon: Mail }
   ];
@@ -151,6 +153,7 @@ export default function GlobalHeader() {
         <nav
           className="desktop-nav"
           style={{
+            display: 'flex',
             alignItems: 'center',
             gap: 4
           }}
@@ -183,8 +186,10 @@ export default function GlobalHeader() {
         <div
           className="desktop-controls"
           style={{
+            display: 'flex',
             alignItems: 'center',
-            gap: 8
+            gap: 8,
+            flexShrink: 0
           }}
         >
           {/* Account Popover Menu */}
@@ -273,7 +278,7 @@ export default function GlobalHeader() {
                 alignItems: 'center',
                 gap: 5,
                 fontSize: 12.5,
-                padding: '6px 13px',
+                padding: '6px 12px',
                 borderRadius: 8,
                 background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
                 border: 'none',
@@ -285,11 +290,11 @@ export default function GlobalHeader() {
               }}
               title="Customer Login with Mobile OTP"
             >
-              <span>📱 Customer Login</span>
+              <span>Customer Login</span>
             </button>
           )}
 
-          <LanguageSelector />
+          <LanguageSelector compact={true} />
           <ThemeToggle />
 
           <button
@@ -299,14 +304,14 @@ export default function GlobalHeader() {
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 6,
-              fontSize: 13,
-              padding: '6px 12px',
+              gap: 5,
+              fontSize: 12.5,
+              padding: '6px 11px',
               borderRadius: 8,
               border: '1px solid rgba(16, 185, 129, 0.3)',
               background: 'rgba(16, 185, 129, 0.08)',
               color: '#059669',
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: 'pointer',
               whiteSpace: 'nowrap'
             }}
@@ -322,7 +327,8 @@ export default function GlobalHeader() {
           className="mobile-controls"
           style={{
             alignItems: 'center',
-            gap: 8
+            gap: 8,
+            flexShrink: 0
           }}
         >
           {customerPhone ? (

@@ -14,10 +14,11 @@ const principles = [
 ];
 
 export default function HaccpControls(){
- return <main>
-   <GlobalHeader />
+ return (
+  <main style={{ minHeight: '100vh', background: 'var(--bg, #F7F8F5)' }}>
+    <GlobalHeader />
 
-   <div className="container" style={{ paddingTop: 20 }}>
+    <div className="container" style={{ maxWidth: 1040, margin: '0 auto', paddingTop: 28, paddingBottom: 64 }}>
     <div className="breadcrumb"><Link href="/home">Home</Link> › HACCP Controls</div>
     <p className="eyebrow">FOOD SAFETY FRAMEWORK</p>
     <h1>HACCP Controls</h1>
@@ -38,5 +39,7 @@ export default function HaccpControls(){
      <Link href="/temperature-controls" className="card link-card"><BookOpen/><h3>Temperature Controls</h3><p className="muted">Six priority temperature controls.</p></Link>
      <Link href="/records" className="card link-card"><FileText/><h3>Records</h3><p className="muted">Traceable checks, actions and verification.</p></Link>
     </div>
-  </div></main>
+  </div>
+  </main>
+ );
 }

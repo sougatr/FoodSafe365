@@ -31,7 +31,7 @@ export default function GroceryHeader({
 
   const PRIMARY_NAV = [
     { href: '/grocery', label: 'HOME', icon: Home, exact: true },
-    { href: '/grocery/learn', label: 'LEARN', icon: BookOpen, startsWith: true },
+    { href: '/food-safety-why', label: 'LEARN', icon: BookOpen, startsWith: true, isLearn: true },
     { href: '/grocery/daily-check', label: 'DAILY CHECK', icon: ClipboardCheck },
     { href: '/grocery/actions', label: 'ACTIONS', icon: AlertTriangle }
   ];
@@ -174,7 +174,9 @@ export default function GroceryHeader({
       {/* Simplified Primary Navigation: HOME | LEARN | DAILY CHECK | ACTIONS */}
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px', display: 'flex', gap: 4, overflowX: 'auto' }}>
         {PRIMARY_NAV.map(item => {
-          const isActive = item.exact
+          const isActive = (item as any).isLearn
+            ? (pathname === '/food-safety-why' || pathname.startsWith('/grocery/learn'))
+            : item.exact
             ? pathname === item.href
             : item.startsWith
             ? pathname.startsWith(item.href)

@@ -308,7 +308,7 @@ button, input, select, textarea {
 
 .container {
   max-width: 1140px;
-  margin: auto;
+  margin: 0 auto;
   padding: 32px 24px;
   width: 100%;
   box-sizing: border-box;
@@ -368,6 +368,37 @@ main,
 .nav-link:hover {
   color: var(--text);
   background: var(--surface-subtle);
+}
+
+/* Topbar Desktop Navigation & Controls */
+.desktop-nav {
+  display: flex !important;
+  align-items: center;
+}
+
+.desktop-controls {
+  display: flex !important;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.mobile-controls {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .desktop-nav {
+    display: none !important;
+  }
+  .desktop-controls {
+    display: none !important;
+  }
+  .mobile-controls {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
 }
 
 /* ==========================================================================

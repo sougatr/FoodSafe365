@@ -15,30 +15,28 @@ import {
   Check
 } from 'lucide-react';
 import GlobalHeader from '@/components/GlobalHeader';
-import GroceryHeader from '@/components/GroceryHeader';
 
 export default function LearnTemperaturePage() {
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg, #f8fafc)', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg, #F7F8F5)', display: 'flex', flexDirection: 'column' }}>
       <GlobalHeader />
-      <GroceryHeader />
 
-      <main style={{ flex: 1, maxWidth: 920, margin: '0 auto', padding: '24px 20px 48px', width: '100%' }}>
+      <main className="container" style={{ maxWidth: 960, paddingTop: 32, paddingBottom: 64 }}>
         {/* Navigation Breadcrumb */}
         <Link
-          href="/grocery/learn"
+          href="/food-safety-why"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: 6,
             fontSize: 13,
             fontWeight: 700,
-            color: '#64748B',
+            color: 'var(--muted, #64748B)',
             textDecoration: 'none',
-            marginBottom: 16
+            marginBottom: 20
           }}
         >
-          <ChevronLeft size={16} /> Back to Learning Overview
+          <ChevronLeft size={16} /> FoSTaC Learning Hub
         </Link>
 
         {/* Hero Header */}

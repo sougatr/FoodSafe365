@@ -8,7 +8,7 @@ export default function AboutPage() {
     <main>
       <GlobalHeader />
 
-      <div className="container" style={{ maxWidth: 840, paddingTop: 40, paddingBottom: 60 }}>
+      <div className="container" style={{ maxWidth: 840, margin: '0 auto', paddingTop: 40, paddingBottom: 60 }}>
         {/* Page Introduction */}
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <span className="pill good" style={{ marginBottom: 12 }}>MISSION &amp; PURPOSE</span>
