@@ -67,6 +67,60 @@ export function getEffectiveDatabaseUrl(options?: DatabaseUrlOptions): string | 
 }
 
 /**
+ * Checks whether database is configured for the active environment.
+ * Handles Vercel Preview (PREVIEW_DB_DATABASE_URL) and Production/Development (DATABASE_URL).
+ */
+export function isDatabaseConfigured(customEnv?: NodeJS.ProcessEnv): boolean {
+  try {
+    const url = getEffectiveDatabaseUrl({ customEnv });
+    return Boolean(url && url.length > 0);
+  } catch {
+    return false;
+  }
+}
+
+export type DatabaseConfigAssertion =
+  | { ok: true; url: string }
+  | { ok: false; code: 'CONFIGURATION_ERROR'; error: string };
+
+/**
+ * Validates database configuration according to environment:
+ * - In Vercel Preview (VERCEL_ENV === 'preview'): Requires PREVIEW_DB_DATABASE_URL. Fails closed if missing.
+ * - In Production (NODE_ENV === 'production' && VERCEL_ENV !== 'preview'): Requires DATABASE_URL. Fails closed if missing.
+ * - In Development/Test: Returns ok: false if no database configured, allowing demo fallbacks.
+ */
+export function assertDatabaseConfigured(customEnv?: NodeJS.ProcessEnv): DatabaseConfigAssertion {
+  const env = customEnv || process.env;
+  const isPreview = env.VERCEL_ENV === 'preview';
+  const isProd = env.NODE_ENV === 'production' && !isPreview;
+
+  try {
+    const url = getEffectiveDatabaseUrl({ customEnv: env });
+    if (!url) {
+      if (isProd) {
+        return {
+          ok: false,
+          code: 'CONFIGURATION_ERROR',
+          error: 'Production configuration error: DATABASE_URL is required.'
+        };
+      }
+      return {
+        ok: false,
+        code: 'CONFIGURATION_ERROR',
+        error: 'Database is not configured.'
+      };
+    }
+    return { ok: true, url };
+  } catch (err: any) {
+    return {
+      ok: false,
+      code: 'CONFIGURATION_ERROR',
+      error: err.message || 'Database configuration error'
+    };
+  }
+}
+
+/**
  * Resolves and validates the database target URL for schema migrations.
  * - Enforces explicit target specification (target === 'preview' or target === 'production').
  * - Validates and rejects conflicting target definitions between CLI argument and TARGET_DB.

@@ -3,7 +3,9 @@ import {
   getEffectiveDatabaseUrl,
   getMigrationDatabaseUrl,
   sanitizeDbUrl,
-  getSanitizedTargetIdentity
+  getSanitizedTargetIdentity,
+  isDatabaseConfigured,
+  assertDatabaseConfigured
 } from '../lib/db-config';
 import { validateEnvironment, assertProductionBoot } from '../lib/env-validator';
 
@@ -190,6 +192,91 @@ async function runPreviewDbWiringTests() {
       /PREVIEW_CONFIGURATION_ERROR/,
       'assertProductionBoot must fail fast'
     );
+  });
+
+  // 10. Preview succeeds with PREVIEW_DB_DATABASE_URL and no DATABASE_URL
+  runTest('10. Preview succeeds with PREVIEW_DB_DATABASE_URL and no DATABASE_URL', () => {
+    const previewDbUrl = 'postgresql://preview_user:secret_preview_pw@ep-preview-456.eu-central-1.aws.neon.tech/foodsafe_preview?sslmode=require';
+    const env: NodeJS.ProcessEnv = {
+      NODE_ENV: 'production',
+      VERCEL_ENV: 'preview',
+      PREVIEW_DB_DATABASE_URL: previewDbUrl
+      // DATABASE_URL intentionally undefined
+    };
+
+    const isConfigured = isDatabaseConfigured(env);
+    assert.strictEqual(isConfigured, true, 'isDatabaseConfigured must return true when PREVIEW_DB_DATABASE_URL is present in Preview');
+
+    const result = assertDatabaseConfigured(env);
+    assert.strictEqual(result.ok, true, 'assertDatabaseConfigured must succeed in Preview');
+    if (result.ok) {
+      assert.strictEqual(result.url, previewDbUrl, 'Resolved URL must match PREVIEW_DB_DATABASE_URL');
+    }
+  });
+
+  // 11. Preview fails closed when its database URL is missing
+  runTest('11. Preview fails closed when its database URL is missing', () => {
+    const env: NodeJS.ProcessEnv = {
+      NODE_ENV: 'production',
+      VERCEL_ENV: 'preview'
+      // No PREVIEW_DB_DATABASE_URL, no DATABASE_URL
+    };
+
+    const isConfigured = isDatabaseConfigured(env);
+    assert.strictEqual(isConfigured, false, 'isDatabaseConfigured must return false when PREVIEW_DB_DATABASE_URL is missing in Preview');
+
+    const result = assertDatabaseConfigured(env);
+    assert.strictEqual(result.ok, false, 'assertDatabaseConfigured must fail closed when PREVIEW_DB_DATABASE_URL is missing in Preview');
+    if (!result.ok) {
+      assert.strictEqual(result.code, 'CONFIGURATION_ERROR');
+      assert.ok(
+        result.error.includes('PREVIEW_CONFIGURATION_ERROR'),
+        'Error message must indicate PREVIEW_CONFIGURATION_ERROR'
+      );
+    }
+  });
+
+  // 12. Non-Preview production fails closed when DATABASE_URL is missing
+  runTest('12. Non-Preview production fails closed when DATABASE_URL is missing', () => {
+    const env: NodeJS.ProcessEnv = {
+      NODE_ENV: 'production',
+      VERCEL_ENV: 'production'
+      // Missing DATABASE_URL
+    };
+
+    const isConfigured = isDatabaseConfigured(env);
+    assert.strictEqual(isConfigured, false, 'isDatabaseConfigured must return false when DATABASE_URL is missing in production');
+
+    const result = assertDatabaseConfigured(env);
+    assert.strictEqual(result.ok, false, 'assertDatabaseConfigured must fail closed when DATABASE_URL is missing in production');
+    if (!result.ok) {
+      assert.strictEqual(result.code, 'CONFIGURATION_ERROR');
+      assert.strictEqual(
+        result.error,
+        'Production configuration error: DATABASE_URL is required.',
+        'Must return production configuration error message'
+      );
+    }
+  });
+
+  // 13. Onboarding and provider registration use Preview DB configuration without error
+  runTest('13. Onboarding and provider registration validation check uses Preview DB without DATABASE_URL error', () => {
+    const previewDbUrl = 'postgresql://preview_user:secret_preview_pw@ep-preview-456.eu-central-1.aws.neon.tech/foodsafe_preview?sslmode=require';
+    const env: NodeJS.ProcessEnv = {
+      NODE_ENV: 'production',
+      VERCEL_ENV: 'preview',
+      PREVIEW_DB_DATABASE_URL: previewDbUrl
+      // DATABASE_URL is intentionally absent
+    };
+
+    // Simulate the pre-flight check executed by /api/v1/organisations, /api/v1/providers/register, /api/v1/grocery/onboarding:
+    const dbConfig = assertDatabaseConfigured(env);
+
+    // It must NOT fail with 'Production configuration error: DATABASE_URL is required.'
+    assert.strictEqual(dbConfig.ok, true, 'Pre-flight check must succeed in Preview with PREVIEW_DB_DATABASE_URL');
+    if (dbConfig.ok) {
+      assert.strictEqual(dbConfig.url, previewDbUrl, 'Pre-flight check must resolve to the preview database URL');
+    }
   });
 
   console.log('================================================================');

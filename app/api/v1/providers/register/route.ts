@@ -5,6 +5,7 @@ import { createSessionToken, SESSION_COOKIE_NAME, getSessionCookieOptions } from
 import { checkRateLimit, getClientIp, createRateLimitHeaders } from '../../../../../lib/rate-limiter';
 import { parseBoundedJson } from '../../../../../lib/body-guard';
 import { hashPassword } from '../../../../../lib/passwords';
+import { assertDatabaseConfigured } from '../../../../../lib/db-config';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,8 +29,9 @@ export async function POST(req: Request) {
       );
     }
 
-    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-      return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
+    const dbConfig = assertDatabaseConfigured();
+    if (!dbConfig.ok && (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview')) {
+      return fail('CONFIGURATION_ERROR', dbConfig.error, 500);
     }
 
     // Body limit: 1 MB

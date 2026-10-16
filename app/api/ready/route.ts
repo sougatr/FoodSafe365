@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getPool } from '../../../lib/db';
+import { getPool, isDatabaseConfigured } from '../../../lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,12 +11,13 @@ export const dynamic = 'force-dynamic';
  * Does NOT expose database credentials, SQL error details, or internal architecture.
  */
 export async function GET() {
-  const isProd = process.env.NODE_ENV === 'production';
-  const hasDbUrl = Boolean(process.env.DATABASE_URL);
+  const isPreview = process.env.VERCEL_ENV === 'preview';
+  const isProd = process.env.NODE_ENV === 'production' && !isPreview;
+  const hasDbUrl = isDatabaseConfigured();
 
-  // In production, database configuration is mandatory
+  // In production or preview, database configuration is mandatory
   if (!hasDbUrl) {
-    if (isProd) {
+    if (isProd || isPreview) {
       return NextResponse.json(
         {
           status: 'not_ready',

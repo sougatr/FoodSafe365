@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { getPool, query } from './db';
+import { getPool, query, isDatabaseConfigured } from './db';
 import type {
   ServiceCategoryDef,
   ProviderVerificationStatus,
@@ -162,8 +162,13 @@ async function ensurePgTables(): Promise<boolean> {
 }
 
 function assertNotProductionFileFallback(operation: string): void {
-  if (process.env.NODE_ENV === 'production') {
+  const isPreview = process.env.VERCEL_ENV === 'preview';
+  const isProd = process.env.NODE_ENV === 'production' && !isPreview;
+  if (isProd) {
     throw new Error(`DATABASE_ERROR: Production requires configured PostgreSQL DATABASE_URL. Refusing file fallback for "${operation}".`);
+  }
+  if (isPreview) {
+    throw new Error(`DATABASE_ERROR: Preview requires configured PostgreSQL PREVIEW_DB_DATABASE_URL. Refusing file fallback for "${operation}".`);
   }
 }
 
@@ -172,7 +177,7 @@ function assertNotProductionFileFallback(operation: string): void {
 // -------------------------------------------------------------
 
 export async function listServiceProviders(filter?: { category?: string; city?: string }): Promise<ServiceProvider[]> {
-  if (!process.env.DATABASE_URL) {
+  if (!isDatabaseConfigured()) {
     assertNotProductionFileFallback('listServiceProviders');
     const list = readFileStore(getProvidersFilePath(), DEFAULT_SEED_PROVIDERS);
     return list.filter(p => {
@@ -216,7 +221,7 @@ export async function listServiceProviders(filter?: { category?: string; city?: 
 }
 
 export async function getServiceProviderById(id: string): Promise<ServiceProvider | null> {
-  if (!process.env.DATABASE_URL) {
+  if (!isDatabaseConfigured()) {
     assertNotProductionFileFallback('getServiceProviderById');
     const list = readFileStore(getProvidersFilePath(), DEFAULT_SEED_PROVIDERS);
     return list.find(p => p.id === id) || null;
@@ -257,7 +262,7 @@ export async function registerServiceProvider(
     createdAt: now
   };
 
-  if (!process.env.DATABASE_URL) {
+  if (!isDatabaseConfigured()) {
     assertNotProductionFileFallback('registerServiceProvider');
     const list = readFileStore(getProvidersFilePath(), DEFAULT_SEED_PROVIDERS);
     list.unshift(provider);
@@ -297,7 +302,7 @@ export async function listServiceRequests(filter: {
   providerId?: string;
   correctiveActionId?: string;
 }): Promise<ServiceRequest[]> {
-  if (!process.env.DATABASE_URL) {
+  if (!isDatabaseConfigured()) {
     assertNotProductionFileFallback('listServiceRequests');
     const list = readFileStore(getRequestsFilePath(), DEFAULT_SEED_REQUESTS);
     return list.filter(r => {
@@ -348,7 +353,7 @@ export async function listServiceRequests(filter: {
 }
 
 export async function getServiceRequestById(id: string): Promise<ServiceRequest | null> {
-  if (!process.env.DATABASE_URL) {
+  if (!isDatabaseConfigured()) {
     assertNotProductionFileFallback('getServiceRequestById');
     const list = readFileStore(getRequestsFilePath(), DEFAULT_SEED_REQUESTS);
     return list.find(r => r.id === id) || null;
@@ -431,7 +436,7 @@ export async function createServiceRequest(data: {
     auditTrail: initialAudit
   };
 
-  if (!process.env.DATABASE_URL) {
+  if (!isDatabaseConfigured()) {
     assertNotProductionFileFallback('createServiceRequest');
     const list = readFileStore(getRequestsFilePath(), DEFAULT_SEED_REQUESTS);
     list.unshift(request);
@@ -490,7 +495,7 @@ export async function updateServiceRequestStatus(
     notes: notes || undefined
   };
 
-  if (!process.env.DATABASE_URL) {
+  if (!isDatabaseConfigured()) {
     assertNotProductionFileFallback('updateServiceRequestStatus');
     const list = readFileStore(getRequestsFilePath(), DEFAULT_SEED_REQUESTS);
     const item = list.find(r => r.id === id);

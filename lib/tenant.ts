@@ -1,4 +1,4 @@
-import { query } from './db';
+import { query, isDatabaseConfigured, assertDatabaseConfigured } from './db';
 import { getAuthContext, AuthContext } from './auth';
 import { getRestaurantEntry, getRestaurantEntryAsync } from './unclaimed-restaurant-store';
 
@@ -17,8 +17,9 @@ export async function requireOutletAccess(outletId: string, req?: Request) {
     return { ok: false as const, status: 403, message: 'Outlet access denied: account is not authorized for restaurant operations' };
   }
 
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return { ok: false as const, status: 500, code: 'CONFIGURATION_ERROR', message: 'Production configuration error: DATABASE_URL is required.' };
+  const dbConfig = assertDatabaseConfigured();
+  if (!dbConfig.ok && (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview')) {
+    return { ok: false as const, status: 500, code: 'CONFIGURATION_ERROR', message: dbConfig.error };
   }
 
   // Platform admin can access any outlet
@@ -26,7 +27,7 @@ export async function requireOutletAccess(outletId: string, req?: Request) {
 
   // Org admin / owner can access outlets within their organisation
   if (auth.role === 'org_admin' || auth.role === 'owner') {
-    if (process.env.DATABASE_URL) {
+    if (isDatabaseConfigured()) {
       try {
         const rows = await query<any>(`SELECT id FROM outlets WHERE id = $1 AND organisation_id = $2 AND status = 'active'`, [outletId, auth.organisationId]);
         if (!rows[0]) return { ok: false as const, status: 403, code: 'FORBIDDEN', message: 'Outlet access denied for organisation' };
@@ -39,7 +40,7 @@ export async function requireOutletAccess(outletId: string, req?: Request) {
 
   // Manager or Supervisor is restricted to their specific outlet
   if (auth.outletId !== outletId) return { ok: false as const, status: 403, code: 'FORBIDDEN', message: 'Outlet access denied' };
-  if (process.env.DATABASE_URL) {
+  if (isDatabaseConfigured()) {
     try {
       const rows = await query<any>(`SELECT id FROM outlets WHERE id = $1 AND organisation_id = $2 AND status = 'active'`, [outletId, auth.organisationId]);
       if (!rows[0]) return { ok: false as const, status: 404, code: 'NOT_FOUND', message: 'Outlet not found' };
@@ -86,9 +87,9 @@ export async function authorizeFeedbackAccess(
 
   const auth = await getAuthContext(req);
 
-  // If unauthenticated, allow only if explicitly in local demo mode (DATABASE_URL unset and non-production)
+  // If unauthenticated, allow only if explicitly in local demo mode (database unset and non-production)
   if (!auth) {
-    if (allowExplicitDemo && !process.env.DATABASE_URL && process.env.NODE_ENV !== 'production') {
+    if (allowExplicitDemo && !isDatabaseConfigured() && process.env.NODE_ENV !== 'production' && process.env.VERCEL_ENV !== 'preview') {
       const demoAuth: AuthContext = {
         userId: 'demo-manager',
         organisationId: 'demo-org',
@@ -121,12 +122,13 @@ export async function authorizeFeedbackAccess(
     };
   }
 
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+  const dbConfig = assertDatabaseConfigured();
+  if (!dbConfig.ok && (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview')) {
     return {
       ok: false,
       status: 500,
       code: 'CONFIGURATION_ERROR',
-      message: 'Production configuration error: DATABASE_URL is required.'
+      message: dbConfig.error
     };
   }
 
@@ -137,7 +139,7 @@ export async function authorizeFeedbackAccess(
 
   // 2. Organisation administrator / Owner: access all or specific outlets in their organisation
   if (auth.role === 'org_admin' || auth.role === 'owner') {
-    if (process.env.DATABASE_URL && requested) {
+    if (isDatabaseConfigured() && requested) {
       try {
         const rows = await query<any>(
           `SELECT id FROM outlets WHERE id = $1 AND organisation_id = $2`,

@@ -1,4 +1,4 @@
-import { getPool, query, transaction } from './db';
+import { getPool, query, transaction, isDatabaseConfigured, assertDatabaseConfigured } from './db';
 import {
   GroceryOutlet,
   GroceryStorageZone,
@@ -414,11 +414,21 @@ export const SEED_RECEIVINGS: GroceryReceiving[] = [
  * PostgreSQL is the SOLE AUTHORITATIVE store.
  */
 export function isGroceryPostgresMode(): boolean {
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+  const isPreview = process.env.VERCEL_ENV === 'preview';
+  const isProd = process.env.NODE_ENV === 'production' && !isPreview;
+  const configured = isDatabaseConfigured();
+
+  if (isProd && !configured) {
     console.error('[CRITICAL PRODUCTION CONFIGURATION ERROR] DATABASE_URL is required in production environment.');
     throw new Error('DATABASE_ERROR: Production requires configured PostgreSQL DATABASE_URL. Refusing memory fallback.');
   }
-  return Boolean(process.env.DATABASE_URL);
+
+  if (isPreview && !configured) {
+    console.error('[CRITICAL PREVIEW CONFIGURATION ERROR] PREVIEW_DB_DATABASE_URL is required in preview environment.');
+    throw new Error('DATABASE_ERROR: Preview requires configured PostgreSQL PREVIEW_DB_DATABASE_URL. Refusing memory fallback.');
+  }
+
+  return configured;
 }
 
 // Global flag to simulate database failure for audit testing

@@ -1,7 +1,15 @@
 import type { PoolClient, QueryResultRow } from 'pg';
 import pg from 'pg';
 import fs from 'fs';
-import { getEffectiveDatabaseUrl, sanitizeDbUrl } from './db-config';
+import { getEffectiveDatabaseUrl, sanitizeDbUrl, isDatabaseConfigured, assertDatabaseConfigured } from './db-config';
+
+// In Vercel Preview runtime, ensure DATABASE_URL mirrors PREVIEW_DB_DATABASE_URL if unset,
+// so any internal dependencies or legacy checks seamlessly bind to the Preview DB without falling back to Production.
+if (typeof process !== 'undefined' && process.env?.VERCEL_ENV === 'preview') {
+  if (!process.env.DATABASE_URL && process.env.PREVIEW_DB_DATABASE_URL) {
+    process.env.DATABASE_URL = process.env.PREVIEW_DB_DATABASE_URL;
+  }
+}
 
 let pool: any = null;
 export type { PoolClient, QueryResultRow };
@@ -21,7 +29,7 @@ export function resetPool() {
   pool = null;
 }
 
-export { sanitizeDbUrl, getEffectiveDatabaseUrl };
+export { sanitizeDbUrl, getEffectiveDatabaseUrl, isDatabaseConfigured, assertDatabaseConfigured };
 
 /**
  * Resolves SSL configuration for PostgreSQL connections.

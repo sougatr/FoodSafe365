@@ -1,4 +1,5 @@
 import { getAuthContext, AuthContext } from './auth';
+import { isDatabaseConfigured, assertDatabaseConfigured } from './db';
 
 export type GroceryAuthResult =
   | { ok: true; auth: AuthContext | null; outletId: string }
@@ -33,8 +34,9 @@ export async function authorizeGroceryAccess(
     ? Boolean(optionsOrStrict?.allowExplicitDemo)
     : !isStrict;
 
-  const isProduction = process.env.NODE_ENV === 'production';
-  const hasDatabase = Boolean(process.env.DATABASE_URL);
+  const isPreview = process.env.VERCEL_ENV === 'preview';
+  const isProduction = process.env.NODE_ENV === 'production' && !isPreview;
+  const hasDatabase = isDatabaseConfigured();
 
   const auth = await getAuthContext(req);
 
@@ -73,12 +75,13 @@ export async function authorizeGroceryAccess(
     };
   }
 
-  if (isProduction && !hasDatabase) {
+  if ((isProduction || isPreview) && !hasDatabase) {
+    const dbCheck = assertDatabaseConfigured();
     return {
       ok: false,
       status: 500,
       code: 'CONFIGURATION_ERROR',
-      message: 'Production configuration error: DATABASE_URL is required.'
+      message: dbCheck.ok ? 'Database configuration error' : dbCheck.error
     };
   }
 
