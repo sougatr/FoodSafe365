@@ -18,8 +18,10 @@ export async function requireOutletAccess(outletId: string, req?: Request) {
   }
 
   const dbConfig = assertDatabaseConfigured();
-  if (!dbConfig.ok && (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview')) {
-    return { ok: false as const, status: 500, code: 'CONFIGURATION_ERROR', message: dbConfig.error };
+  if (!dbConfig.ok) {
+    if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
+      return { ok: false as const, status: 500, code: 'CONFIGURATION_ERROR', message: dbConfig.error };
+    }
   }
 
   // Platform admin can access any outlet
@@ -123,13 +125,15 @@ export async function authorizeFeedbackAccess(
   }
 
   const dbConfig = assertDatabaseConfigured();
-  if (!dbConfig.ok && (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview')) {
-    return {
-      ok: false,
-      status: 500,
-      code: 'CONFIGURATION_ERROR',
-      message: dbConfig.error
-    };
+  if (!dbConfig.ok) {
+    if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
+      return {
+        ok: false,
+        status: 500,
+        code: 'CONFIGURATION_ERROR',
+        message: dbConfig.error
+      };
+    }
   }
 
   // 1. Platform administrator: unrestricted access

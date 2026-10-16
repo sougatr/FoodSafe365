@@ -711,7 +711,7 @@ export async function saveGroceryOutletAsync(
       await ensureGroceryPgSchema();
       const rows = await query<any>(
         `INSERT INTO grocery_outlets (id, name, branch_name, address, city, manager_name, contact_number, contact_email, fssai_number, store_type, selected_categories, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, now(), now())
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, now(), now())
          ON CONFLICT (id) DO UPDATE SET
            name = EXCLUDED.name,
            branch_name = EXCLUDED.branch_name,
@@ -1563,7 +1563,7 @@ export async function recordReceivingItemAsync(input: {
       await ensureGroceryPgSchema();
       await query(
         `INSERT INTO grocery_receiving_records (id, outlet_id, date_time, supplier, product, product_category, quantity, batch_number, use_by_date, packaging_condition, product_condition, temperature, is_temp_sensitive, receiving_person, decision, rejection_reason, evidence_url, inspection_checklist, corrective_action_id, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`,
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18::jsonb, $19, $20)`,
         [
           id, input.outletId, record.dateTime, input.supplier, input.product, input.productCategory,
           input.quantity, input.batchNumber || null, normalizedPgUseByDate, input.packagingCondition,
@@ -1575,7 +1575,7 @@ export async function recordReceivingItemAsync(input: {
       if (stockCreated) {
         await query(
           `INSERT INTO grocery_inventory_batches (id, outlet_id, product, category, batch, quantity, unit, date_received, expiry_date, storage_zone_id, storage_zone_name, status, audit_trail, created_at, updated_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::jsonb, $14, $15)`,
           [
             stockCreated.id, stockCreated.outletId, stockCreated.product, stockCreated.category, stockCreated.batch,
             stockCreated.quantity, stockCreated.unit, stockCreated.dateReceived, stockCreated.expiryDate,

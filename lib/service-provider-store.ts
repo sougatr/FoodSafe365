@@ -276,7 +276,7 @@ export async function registerServiceProvider(
       id, business_name, contact_name, mobile, email, address, city, state,
       categories, description, verification_status, status, created_at
     )
-    VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now())
+    VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9::text[], $10, $11, $12, now())
   `, [
     provider.id, provider.businessName, provider.contactName, provider.mobile, provider.email,
     provider.address, provider.city, provider.state, provider.categories, provider.description,
@@ -452,7 +452,7 @@ export async function createServiceRequest(data: {
       service_category, problem_description, priority, contact_person, contact_phone,
       notes, status, requested_at, scheduled_at, audit_trail
     )
-    VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, 'requested', now(), $17, $18)
+    VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, 'requested', now(), $17, $18::jsonb)
   `, [
     request.id, request.organisationId, request.outletId, request.outletName, request.outletCity,
     request.outletAddress, request.correctiveActionId, request.correctiveActionTitle, request.providerId,

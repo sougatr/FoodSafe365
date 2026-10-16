@@ -7,13 +7,17 @@ import {
 import { query } from '../../../../../lib/db';
 import { updateDemoAction } from '../../../../../lib/demo-store';
 import { ok, fail } from '../../../../../lib/response';
+import { assertDatabaseConfigured } from '../../../../../lib/db-config';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
-    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-      return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
+    const dbConfig = assertDatabaseConfigured();
+    if (!dbConfig.ok) {
+      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
+        return fail('CONFIGURATION_ERROR', dbConfig.error, 500);
+      }
     }
 
     const auth = await getAuthContext(req);
@@ -78,8 +82,11 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
-    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-      return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
+    const dbConfig = assertDatabaseConfigured();
+    if (!dbConfig.ok) {
+      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
+        return fail('CONFIGURATION_ERROR', dbConfig.error, 500);
+      }
     }
 
     const auth = await getAuthContext(req);

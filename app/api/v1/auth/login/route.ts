@@ -5,6 +5,7 @@ import { createSessionToken, SESSION_COOKIE_NAME, getSessionCookieOptions, Sessi
 import { checkRateLimit, getClientIp, createRateLimitHeaders } from '../../../../../lib/rate-limiter';
 import { parseBoundedJson } from '../../../../../lib/body-guard';
 import { verifyPassword } from '../../../../../lib/passwords';
+import { assertDatabaseConfigured } from '../../../../../lib/db-config';
 
 export async function POST(req: Request) {
   try {
@@ -48,13 +49,16 @@ export async function POST(req: Request) {
     if (!email) return fail('VALIDATION_ERROR', 'Email is required', 400);
     if (!password) return fail('VALIDATION_ERROR', 'Password is required', 400);
 
-    // In production, database authentication is strictly mandatory
-    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-      return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
+    // In production and Preview, database authentication is strictly mandatory
+    const dbConfig = assertDatabaseConfigured();
+    if (!dbConfig.ok) {
+      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
+        return fail('CONFIGURATION_ERROR', dbConfig.error, 500);
+      }
     }
 
-    // Development / Demo Mode (permitted ONLY when DATABASE_URL is not configured and NODE_ENV !== 'production')
-    if (!process.env.DATABASE_URL) {
+    // Development / Demo Mode (permitted ONLY when database is not configured and NODE_ENV !== 'production')
+    if (!dbConfig.ok) {
       let userId = 'demo-user';
       let organisationId = 'demo-org';
       let outletId = requestedOutletId || 'demo-outlet';

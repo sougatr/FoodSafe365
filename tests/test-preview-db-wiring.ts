@@ -279,6 +279,70 @@ async function runPreviewDbWiringTests() {
     }
   });
 
+  // 14. Service provider registration query includes explicit $9::text[] cast
+  runTest('14. Service provider registration query contains verified $9::text[] array cast for PostgreSQL', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const spStoreSrc = fs.readFileSync(path.join(process.cwd(), 'lib', 'service-provider-store.ts'), 'utf8');
+
+    assert.ok(
+      spStoreSrc.includes('$9::text[]'),
+      'registerServiceProvider INSERT query must explicitly cast $9 to ::text[] for PostgreSQL compatibility'
+    );
+
+    assert.ok(
+      spStoreSrc.includes('$18::jsonb'),
+      'createServiceRequest INSERT query must explicitly cast $18 to ::jsonb for PostgreSQL compatibility'
+    );
+  });
+
+  // 15. Grocery onboarding query includes explicit $11::jsonb cast
+  runTest('15. Grocery onboarding query contains verified $11::jsonb JSONB cast for PostgreSQL', () => {
+    const fs = require('fs');
+    const path = require('path');
+    const groceryStoreSrc = fs.readFileSync(path.join(process.cwd(), 'lib', 'grocery-store.ts'), 'utf8');
+
+    assert.ok(
+      groceryStoreSrc.includes('$11::jsonb'),
+      'saveGroceryOutletAsync INSERT query must explicitly cast $11 to ::jsonb for PostgreSQL compatibility'
+    );
+
+    assert.ok(
+      groceryStoreSrc.includes('$18::jsonb'),
+      'recordReceivingItemAsync INSERT query must explicitly cast $18 to ::jsonb for PostgreSQL compatibility'
+    );
+
+    assert.ok(
+      groceryStoreSrc.includes('$13::jsonb'),
+      'recordReceivingItemAsync inventory batch INSERT query must explicitly cast $13 to ::jsonb for PostgreSQL compatibility'
+    );
+  });
+
+  // 16. Service requests and auth login endpoints validate Preview DB configuration without DATABASE_URL
+  runTest('16. Service requests and auth login endpoints validate Preview DB configuration without DATABASE_URL', () => {
+    const previewDbUrl = 'postgresql://preview_user:secret_preview_pw@ep-preview-456.eu-central-1.aws.neon.tech/foodsafe_preview?sslmode=require';
+    const env: NodeJS.ProcessEnv = {
+      NODE_ENV: 'production',
+      VERCEL_ENV: 'preview',
+      PREVIEW_DB_DATABASE_URL: previewDbUrl
+      // DATABASE_URL is intentionally absent
+    };
+
+    const dbConfig = assertDatabaseConfigured(env);
+    assert.strictEqual(dbConfig.ok, true, 'assertDatabaseConfigured must return true for Preview');
+
+    // Confirm that fail-closed behavior is strictly maintained when PREVIEW_DB_DATABASE_URL is missing
+    const missingEnv: NodeJS.ProcessEnv = {
+      NODE_ENV: 'production',
+      VERCEL_ENV: 'preview'
+    };
+    const missingDbConfig = assertDatabaseConfigured(missingEnv);
+    assert.strictEqual(missingDbConfig.ok, false, 'assertDatabaseConfigured must return false when Preview DB is missing');
+    if (!missingDbConfig.ok) {
+      assert.ok(missingDbConfig.error.includes('PREVIEW_CONFIGURATION_ERROR'), 'Must contain PREVIEW_CONFIGURATION_ERROR');
+    }
+  });
+
   console.log('================================================================');
   console.log(`TOTAL: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
   console.log('================================================================');

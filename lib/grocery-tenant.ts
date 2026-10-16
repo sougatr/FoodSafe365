@@ -81,7 +81,7 @@ export async function authorizeGroceryAccess(
       ok: false,
       status: 500,
       code: 'CONFIGURATION_ERROR',
-      message: dbCheck.ok ? 'Database configuration error' : dbCheck.error
+      message: !dbCheck.ok ? dbCheck.error : 'Database configuration error'
     };
   }
 

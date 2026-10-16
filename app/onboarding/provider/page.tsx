@@ -87,9 +87,9 @@ export default function ProviderOnboardingPage() {
         })
       });
 
-      const json = await res.json();
+      const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(json?.error?.message || 'Registration failed');
+        throw new Error(json?.error?.message || json?.message || 'Registration failed');
       }
 
       const provider = json.data;

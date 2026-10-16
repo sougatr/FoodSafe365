@@ -163,9 +163,9 @@ export default function GroceryOnboardingPage() {
         })
       });
 
-      const json = await res.json();
+      const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.success) {
-        throw new Error(json.message || 'Onboarding failed');
+        throw new Error(json?.error?.message || json?.message || 'Onboarding failed');
       }
 
       const savedOutlet = json.data;

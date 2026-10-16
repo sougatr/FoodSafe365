@@ -26,8 +26,10 @@ export async function POST(req: Request) {
     }
 
     const dbConfig = assertDatabaseConfigured();
-    if (!dbConfig.ok && (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview')) {
-      return fail('CONFIGURATION_ERROR', dbConfig.error, 500);
+    if (!dbConfig.ok) {
+      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
+        return fail('CONFIGURATION_ERROR', dbConfig.error, 500);
+      }
     }
 
     // Body limit: 1 MB
@@ -102,7 +104,9 @@ export async function POST(req: Request) {
 
     return response;
   } catch (err: any) {
-    const isDb = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR');
-    return fail(isDb ? 'DATABASE_ERROR' : 'SERVER_ERROR', isDb ? 'Database error occurred while onboarding grocery store.' : 'Failed to onboard grocery store.', 500);
+    const isDb = err?.code === 'DATABASE_ERROR' || err?.message?.includes('DATABASE_ERROR');
+    const defaultMsg = isDb ? 'Database error occurred while onboarding grocery store.' : 'Failed to onboard grocery store.';
+    const message = err?.message || defaultMsg;
+    return fail(isDb ? 'DATABASE_ERROR' : 'SERVER_ERROR', message, 500);
   }
 }

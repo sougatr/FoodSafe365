@@ -80,7 +80,7 @@ export function isDatabaseConfigured(customEnv?: NodeJS.ProcessEnv): boolean {
 }
 
 export type DatabaseConfigAssertion =
-  | { ok: true; url: string }
+  | { ok: true; url: string; error?: undefined }
   | { ok: false; code: 'CONFIGURATION_ERROR'; error: string };
 
 /**

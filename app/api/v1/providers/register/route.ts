@@ -30,8 +30,10 @@ export async function POST(req: Request) {
     }
 
     const dbConfig = assertDatabaseConfigured();
-    if (!dbConfig.ok && (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview')) {
-      return fail('CONFIGURATION_ERROR', dbConfig.error, 500);
+    if (!dbConfig.ok) {
+      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
+        return fail('CONFIGURATION_ERROR', dbConfig.error, 500);
+      }
     }
 
     // Body limit: 1 MB
@@ -138,6 +140,7 @@ export async function POST(req: Request) {
     return response;
   } catch (error: any) {
     console.error('[API /providers/register] Registration failed:', error);
-    return fail('INTERNAL_SERVER_ERROR', 'Failed to register service provider', 500);
+    const msg = error?.message || 'Failed to register service provider';
+    return fail('INTERNAL_SERVER_ERROR', msg, 500);
   }
 }
