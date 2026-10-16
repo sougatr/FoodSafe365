@@ -39,6 +39,10 @@ export default function ManagerPage() {
   const [serverRatings, setServerRatings] = useState<DinerSafetyRating[]>([]);
   const [isLoadingFeedback, setIsLoadingFeedback] = useState<boolean>(true);
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [isLoadingDashboard, setIsLoadingDashboard] = useState<boolean>(true);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
+  const [serverActionCounts, setServerActionCounts] = useState<any>(null);
   const [storageBackend, setStorageBackend] = useState<'postgresql' | 'server_file' | 'local'>('server_file');
   const [selectedOutletId, setSelectedOutletId] = useState<string>('all');
   const [activeRestaurantName, setActiveRestaurantName] = useState<string>('Leopold Cafe & Bar');
@@ -62,6 +66,36 @@ export default function ManagerPage() {
     return outletId === 'all' ? 'All Outlets' : 'Restaurant';
   }
 
+  async function loadDashboardData(outletId: string = selectedOutletId) {
+    setIsLoadingDashboard(true);
+    setDashboardError(null);
+    try {
+      const q = outletId && outletId !== 'all' ? `?outlet_id=${encodeURIComponent(outletId)}` : '';
+      const [dashRes, actionsRes] = await Promise.all([
+        fetch(`/api/v1/dashboard/today${q}`, { cache: 'no-store' }),
+        fetch(`/api/v1/actions${outletId && outletId !== 'all' ? `?outletId=${encodeURIComponent(outletId)}` : ''}`, { cache: 'no-store' })
+      ]);
+
+      if (dashRes.ok) {
+        const json = await dashRes.json();
+        setDashboardData(json.data);
+      } else {
+        const errJson = await dashRes.json().catch(() => ({}));
+        throw new Error(errJson.error?.message || errJson.message || `Dashboard error ${dashRes.status}`);
+      }
+
+      if (actionsRes.ok) {
+        const json = await actionsRes.json();
+        setServerActionCounts(json.data?.counts);
+      }
+    } catch (err: any) {
+      console.warn('[Manager] Unable to load dashboard metrics:', err);
+      setDashboardError(err?.message || 'Error loading dashboard metrics');
+    } finally {
+      setIsLoadingDashboard(false);
+    }
+  }
+
   async function loadServerFeedback(outletId: string = selectedOutletId) {
     setIsLoadingFeedback(true);
     setFeedbackError(null);
@@ -70,93 +104,46 @@ export default function ManagerPage() {
       let receivedRatings: DinerSafetyRating[] = [];
       let backendStorage: 'postgresql' | 'server_file' | 'local' = 'server_file';
 
-      const res = await fetch(`/api/v1/customer-feedback${q}`, {
-        cache: 'no-store'
-      });
+      const res = await fetch(`/api/v1/customer-feedback${q}`, { cache: 'no-store' });
       if (!res.ok) {
-        if (res.status === 401) {
-          // If unauthenticated, retry with demo mode for preview
-          const retryRes = await fetch(`/api/v1/customer-feedback${q ? q + '&demo=true' : '?demo=true'}`, { cache: 'no-store' });
-          if (retryRes.ok) {
-            const retryJson = await retryRes.json();
-            if (retryJson.data?.ratings) {
-              receivedRatings = retryJson.data.ratings;
-              if (retryJson.data.storage) backendStorage = retryJson.data.storage;
-            }
-          }
-        } else {
-          throw new Error(`Server returned status ${res.status}`);
-        }
-      } else {
-        const json = await res.json();
-        if (json.data?.ratings) {
-          receivedRatings = json.data.ratings;
-          if (json.data.storage) backendStorage = json.data.storage;
-        }
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error?.message || errJson.message || `Feedback API returned ${res.status}`);
       }
 
-      // SAFELY MERGE with local cache so newly submitted client ratings are NEVER wiped out
-      const local = loadState();
-      const localRatings: DinerSafetyRating[] = local.dinerRatings || [];
-      const mergedMap = new Map<string, DinerSafetyRating>();
-
-      // 1. Add server ratings
-      for (const r of receivedRatings) {
-        mergedMap.set(r.id, r);
-      }
-      // 2. Preserve any local ratings not in server ratings
-      for (const r of localRatings) {
-        if (!mergedMap.has(r.id)) {
-          mergedMap.set(r.id, r);
-        }
+      const json = await res.json();
+      if (json.data?.ratings) {
+        receivedRatings = json.data.ratings;
+        if (json.data.storage) backendStorage = json.data.storage;
       }
 
-      const mergedList = Array.from(mergedMap.values()).sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-
-      setServerRatings(mergedList);
+      setServerRatings(receivedRatings);
       setStorageBackend(backendStorage);
-
-      // Sync local cache with merged list
-      try {
-        local.dinerRatings = mergedList;
-        localStorage.setItem(PHASE1_STORAGE_KEY, JSON.stringify(local));
-      } catch {}
     } catch (err: any) {
       console.warn('[Manager] Unable to load server feedback:', err);
       setFeedbackError(err?.message || 'Server connection error');
-      const local = loadState();
-      if (local.dinerRatings) {
-        setServerRatings(local.dinerRatings);
-        setStorageBackend('local');
-      }
     } finally {
       setIsLoadingFeedback(false);
     }
   }
 
   useEffect(() => {
-    const refresh = () => setData(loadState());
-    refresh();
-
+    let targetOutlet = 'all';
     if (typeof window !== 'undefined') {
       const savedOutlet = localStorage.getItem('foodsafe365_outlet_id');
-      const targetOutlet = savedOutlet && savedOutlet !== 'all' ? savedOutlet : 'leopold-cafe';
-      setSelectedOutletId(targetOutlet);
-      setActiveRestaurantName(resolveRestaurantName(targetOutlet));
-      loadServerFeedback(targetOutlet);
-    } else {
-      loadServerFeedback(selectedOutletId);
+      if (savedOutlet && savedOutlet !== 'all') {
+        targetOutlet = savedOutlet;
+      }
     }
-
-    window.addEventListener('foodsaf365:update', refresh);
-    return () => window.removeEventListener('foodsaf365:update', refresh);
+    setSelectedOutletId(targetOutlet);
+    setActiveRestaurantName(resolveRestaurantName(targetOutlet));
+    loadDashboardData(targetOutlet);
+    loadServerFeedback(targetOutlet);
   }, []);
 
   // Reload when outlet selection changes
   useEffect(() => {
     setActiveRestaurantName(resolveRestaurantName(selectedOutletId));
+    loadDashboardData(selectedOutletId);
     loadServerFeedback(selectedOutletId);
   }, [selectedOutletId]);
 
@@ -164,7 +151,7 @@ export default function ManagerPage() {
   const issues: Issue[] = data.issues || [];
   const actions: CorrectiveAction[] = data.actions || [];
   const timeline: AuditTrailEvent[] = data.timeline || [];
-  const dinerRatings: DinerSafetyRating[] = serverRatings.length > 0 ? serverRatings : (data.dinerRatings || []);
+  const dinerRatings: DinerSafetyRating[] = serverRatings;
 
   const activeRatings = useMemo(() => {
     if (selectedOutletId === 'all') return dinerRatings;
@@ -180,9 +167,8 @@ export default function ManagerPage() {
   const unresolved = issues.filter(x => x.status !== 'closed');
   const badge = useMemo(() => calculateDailyBadge(checks, issues, scheduled), [checks, issues, scheduled]);
 
-  function review(code: string, decision: 'approved' | 'alerted') {
+  async function review(code: string, decision: 'approved' | 'alerted') {
     const c = checks[code];
-    if (!c) return;
     const control = FOODSAFE28.find(x => x.code === code);
     if (!control) return;
 
@@ -192,44 +178,63 @@ export default function ManagerPage() {
     let actionId = '';
 
     if (decision === 'alerted') {
-      const existing = issues.find(i => i.checkCode === code && i.status !== 'closed');
-      if (!existing) {
-        const issueId = `issue-${control.id}-${Date.now()}`;
-        actionId = `action-${control.id}-${Date.now()}`;
-        const severity = severityForCheck(code);
+      const severity = severityForCheck(code);
+      const actionTitle = `Correct: ${control.title}`;
+      const actionDesc = control.action;
 
-        const newIssue: Issue = {
-          id: issueId,
-          checkId: control.id,
-          checkCode: control.code,
-          title: control.title,
-          severity,
-          createdAt: now,
-          status: 'open',
-          alertedAt: now,
-          actionId
-        };
+      try {
+        const res = await fetch('/api/v1/actions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: actionTitle,
+            description: actionDesc,
+            severity: severity === 'critical' ? 'critical' : 'high',
+            priority: severity === 'critical' ? 'critical' : 'high',
+            outletId: selectedOutletId !== 'all' ? selectedOutletId : undefined,
+            sourceCheckCode: control.code,
+            checkCode: control.code,
+            sourceType: 'operational_check'
+          })
+        });
 
-        const newAction: CorrectiveAction = {
-          id: actionId,
-          issueId,
-          checkCode: control.code,
-          title: `Correct: ${control.title}`,
-          description: control.action,
-          severity,
-          status: 'open',
-          createdAt: now,
-          immediateAction: '',
-          correctiveAction: '',
-          rootCause: '',
-          completedAt: null,
-          verificationNote: '',
-          verificationStatus: null
-        };
-
-        nextIssues.push(newIssue);
-        nextActions.push(newAction);
+        const json = await res.json().catch(() => ({}));
+        if (res.ok && json.data) {
+          actionId = json.data.id || json.data.action?.id || `action-${control.id}-${Date.now()}`;
+        }
+      } catch (err) {
+        console.warn('[Manager] Alert creation error:', err);
       }
+
+      const issueId = `issue-${control.id}-${Date.now()}`;
+      nextIssues.push({
+        id: issueId,
+        checkId: control.id,
+        checkCode: control.code,
+        title: control.title,
+        severity,
+        createdAt: now,
+        status: 'open',
+        alertedAt: now,
+        actionId
+      });
+
+      nextActions.push({
+        id: actionId || `action-${control.id}-${Date.now()}`,
+        issueId,
+        checkCode: control.code,
+        title: actionTitle,
+        description: actionDesc,
+        severity,
+        status: 'open',
+        createdAt: now,
+        immediateAction: '',
+        correctiveAction: '',
+        rootCause: '',
+        completedAt: null,
+        verificationNote: '',
+        verificationStatus: null
+      });
     }
 
     const auditEvent: AuditTrailEvent = {
@@ -240,24 +245,23 @@ export default function ManagerPage() {
       status: decision === 'approved' ? 'approved' : 'alerted'
     };
 
-    const nextState: AppPhase1State = {
+    const nextChecks = {
+      ...checks,
+      [code]: {
+        ...(c || { value: 'Inspected', time: now, status: 'good' }),
+        reviewStatus: decision,
+        managerNote: note || undefined,
+        reviewedAt: now
+      }
+    };
+
+    setData({
       ...data,
-      checks: {
-        ...checks,
-        [code]: {
-          ...c,
-          reviewStatus: decision,
-          managerNote: note || undefined,
-          reviewedAt: now
-        }
-      },
+      checks: nextChecks,
       issues: nextIssues,
       actions: nextActions,
       timeline: [auditEvent, ...timeline]
-    };
-
-    saveState(nextState);
-    setData(nextState);
+    });
     setNote('');
   }
 
@@ -313,6 +317,12 @@ export default function ManagerPage() {
           </Link>
         </div>
 
+        {dashboardError && (
+          <div className="notice error" style={{ marginBottom: 20 }}>
+            {dashboardError}
+          </div>
+        )}
+
         {/* DAILY BADGE */}
         <div className={`card daily-badge ${badge.tone === 'good' ? 'badge-good' : badge.tone === 'danger' ? 'badge-action' : 'badge-attention'}`}>
           <div className="badge-icon">
@@ -322,8 +332,8 @@ export default function ManagerPage() {
             <p className="eyebrow" style={{ color: badge.tone === 'good' ? '#047857' : badge.tone === 'danger' ? '#b91c1c' : '#b45309' }}>
               TODAY’S FOODSAFE365 BADGE
             </p>
-            <h2>{badge.status}</h2>
-            <p className="muted" style={{ color: '#334155' }}>{badge.explanation}</p>
+            <h2>{dashboardData?.status?.label || badge.status}</h2>
+            <p className="muted" style={{ color: '#334155' }}>{dashboardData?.insight || badge.explanation}</p>
           </div>
         </div>
 
@@ -336,7 +346,9 @@ export default function ManagerPage() {
               </div>
               <span className="pill neutral" style={{ fontSize: 11, padding: '2px 8px' }}>SCHEDULED</span>
             </div>
-            <strong style={{ fontSize: 30, margin: '8px 0 2px' }}>{badge.counts.submitted}/{badge.counts.scheduled}</strong>
+            <strong style={{ fontSize: 30, margin: '8px 0 2px' }}>
+              {dashboardData?.checks ? `${dashboardData.checks.completed}/${dashboardData.checks.total}` : `${badge.counts.submitted}/${badge.counts.scheduled}`}
+            </strong>
             <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Supervisor Submitted</span>
             <small style={{ color: 'var(--muted)', fontSize: 12 }}>Today’s scheduled controls</small>
           </div>
@@ -350,23 +362,27 @@ export default function ManagerPage() {
                 {pending.length > 0 ? `${pending.length} PENDING` : 'UP TO DATE'}
               </span>
             </div>
-            <strong style={{ fontSize: 30, margin: '8px 0 2px' }}>{badge.counts.approved}/{badge.counts.scheduled}</strong>
-            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Manager Approved</span>
+            <strong style={{ fontSize: 30, margin: '8px 0 2px' }}>
+              {dashboardData?.checks ? `${dashboardData.checks.completed}` : `${badge.counts.approved}`}
+            </strong>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Manager Verified / Completed</span>
             <small style={{ color: 'var(--muted)', fontSize: 12 }}>{pending.length} pending review</small>
           </div>
 
           <div className="card metric-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: unresolved.length > 0 ? '#fef2f2' : '#ecfdf5', color: unresolved.length > 0 ? '#ef4444' : '#059669', display: 'grid', placeItems: 'center' }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: (serverActionCounts?.open || unresolved.length) > 0 ? '#fef2f2' : '#ecfdf5', color: (serverActionCounts?.open || unresolved.length) > 0 ? '#ef4444' : '#059669', display: 'grid', placeItems: 'center' }}>
                 <AlertTriangle size={20} />
               </div>
-              <span className={`pill ${unresolved.length > 0 ? 'danger' : 'good'}`} style={{ fontSize: 11, padding: '2px 8px' }}>
-                {unresolved.length > 0 ? `${badge.counts.criticalAlerts} CRITICAL` : 'ZERO ALERTS'}
+              <span className={`pill ${(serverActionCounts?.open || unresolved.length) > 0 ? 'danger' : 'good'}`} style={{ fontSize: 11, padding: '2px 8px' }}>
+                {(serverActionCounts?.open || unresolved.length) > 0 ? `${serverActionCounts?.open || badge.counts.criticalAlerts} OPEN` : 'ZERO ALERTS'}
               </span>
             </div>
-            <strong style={{ fontSize: 30, margin: '8px 0 2px' }}>{unresolved.length}</strong>
-            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Open Alerts</span>
-            <small style={{ color: 'var(--muted)', fontSize: 12 }}>{badge.counts.criticalAlerts} critical alerts</small>
+            <strong style={{ fontSize: 30, margin: '8px 0 2px' }}>
+              {serverActionCounts?.open !== undefined ? serverActionCounts.open : (dashboardData?.actions?.open !== undefined ? dashboardData.actions.open : unresolved.length)}
+            </strong>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Open Actions</span>
+            <small style={{ color: 'var(--muted)', fontSize: 12 }}>{serverActionCounts?.overdue || 0} overdue</small>
           </div>
         </div>
 

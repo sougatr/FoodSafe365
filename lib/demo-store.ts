@@ -3,11 +3,16 @@ export type DemoAction = {
   dueDate?:string; status:string; rootCause?:string|null; immediateAction?:string|null;
   correctiveAction?:string|null; preventiveAction?:string|null; createdAt:string; closedAt?:string|null;
   sourceType?:string; sourceId?:string; observationId?:string;
-  outletId?:string; sourceCheckCode?:string; requiresExternalService?:boolean; serviceCategory?:string|null;
+  outletId?:string; organisationId?:string; sourceCheckCode?:string; requiresExternalService?:boolean; serviceCategory?:string|null;
   responsiblePerson?:string; verificationNote?:string|null;
+  verifications?: any[];
 };
 
 const store = new Map<string, DemoAction>();
+
+export function resetDemoStore(): void {
+  store.clear();
+}
 
 function seed(userId:string) {
   if (store.size > 0) return;
@@ -21,7 +26,7 @@ function seed(userId:string) {
       severity:'high', priority:'high', assignedTo:userId, dueDate:today, status:'open',
       rootCause:null, immediateAction:null, correctiveAction:null, preventiveAction:null,
       createdAt:new Date().toISOString(), closedAt:null, sourceType:'check_response', sourceId:'demo-response-refrigeration', observationId:'demo-observation-refrigeration',
-      outletId:'the-table', sourceCheckCode:'FS28-19', requiresExternalService:true, serviceCategory:'refrigeration'
+      outletId:'the-table', organisationId:'demo-org', sourceCheckCode:'FS28-19', requiresExternalService:true, serviceCategory:'refrigeration'
     },
     {
       id:'demo-action-drain',
@@ -30,7 +35,7 @@ function seed(userId:string) {
       severity:'medium', priority:'medium', assignedTo:userId, dueDate:yesterday, status:'overdue',
       rootCause:null, immediateAction:null, correctiveAction:null, preventiveAction:null,
       createdAt:new Date().toISOString(), closedAt:null, sourceType:'manual', sourceId:'demo-drain', observationId:'demo-observation-drain',
-      outletId:'the-table', sourceCheckCode:'FS28-03', requiresExternalService:false
+      outletId:'the-table', organisationId:'demo-org', sourceCheckCode:'FS28-03', requiresExternalService:false
     },
     {
       id:'demo-action-opening-hygiene',
@@ -39,7 +44,7 @@ function seed(userId:string) {
       severity:'medium', priority:'medium', assignedTo:userId, dueDate:today, status:'open',
       rootCause:null, immediateAction:null, correctiveAction:null, preventiveAction:null,
       createdAt:new Date().toISOString(), closedAt:null, sourceType:'manual', sourceId:'demo-opening-hygiene', observationId:'demo-observation-hygiene',
-      outletId:'the-table', sourceCheckCode:'FS28-05', requiresExternalService:false
+      outletId:'the-table', organisationId:'demo-org', sourceCheckCode:'FS28-05', requiresExternalService:false
     }
   ];
   seedActions.forEach(a=>store.set(a.id,a));
@@ -73,6 +78,7 @@ export function createDemoAction(input: Partial<DemoAction>, userId:string): Dem
     sourceId: input.sourceId,
     observationId: input.observationId,
     outletId: input.outletId,
+    organisationId: input.organisationId || 'demo-org',
     sourceCheckCode: input.sourceCheckCode,
     requiresExternalService: input.requiresExternalService || false,
     serviceCategory: input.serviceCategory ?? null,

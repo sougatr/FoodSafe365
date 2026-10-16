@@ -19,6 +19,10 @@ import {
   getDailyCheckHistoryAsync,
   getActiveGroceryAlertsAsync,
   getGroceryDashboardSummaryAsync,
+  quarantineBatchAsync,
+  releaseBatchAsync,
+  searchStockItemsAsync,
+  getActiveStockItemsAsync,
   _setSimulatePgFailureForTesting,
   _resetMockAdapterForTesting
 } from '../lib/grocery-store';
@@ -30,6 +34,7 @@ import { createSessionToken, SESSION_COOKIE_NAME } from '../lib/session';
 // ----------------------------------------------------
 class MockPgDatabase {
   tables: Map<string, any[]> = new Map();
+  failOnBatchItemUpdateId: string | null = null;
 
   constructor() {
     this.reset();
@@ -356,10 +361,13 @@ class MockPgDatabase {
       return { rows: [record] };
     }
 
-    // SELECT FROM grocery_inventory_batches (by outlet)
     if (/SELECT .* FROM grocery_inventory_batches WHERE outlet_id = \$1/i.test(cleaned)) {
       const list = this.tables.get('grocery_inventory_batches')!;
-      const rows = list.filter(r => r.outlet_id === params[0]).map(r => ({
+      let filtered = list.filter(r => r.outlet_id === params[0]);
+      if (/AND batch = \$2/i.test(cleaned)) {
+        filtered = filtered.filter(r => r.batch === params[1]);
+      }
+      const rows = filtered.map(r => ({
         id: r.id,
         outletId: r.outlet_id,
         product: r.product,
@@ -388,6 +396,10 @@ class MockPgDatabase {
       const trail = typeof params[3] === 'string' ? JSON.parse(params[3]) : params[3];
       const itemId = params[4];
       const outletId = params[5];
+
+      if (this.failOnBatchItemUpdateId && itemId === this.failOnBatchItemUpdateId) {
+        throw new Error(`Simulated database failure during batch transaction for item ${itemId}`);
+      }
 
       const idx = list.findIndex(r => r.id === itemId && r.outlet_id === outletId);
       if (idx < 0) return { rows: [] };
@@ -455,6 +467,35 @@ class MockPgDatabase {
 
     // Default fallback
     return { rows: [] };
+  }
+
+  async connect() {
+    let snapshot: Map<string, any[]> | null = null;
+    return {
+      query: async (text: string, params: any[] = []) => {
+        const cleaned = text.trim().replace(/\s+/g, ' ');
+        if (cleaned.startsWith('BEGIN')) {
+          snapshot = new Map();
+          this.tables.forEach((v, k) => {
+            snapshot!.set(k, JSON.parse(JSON.stringify(v)));
+          });
+          return { rows: [] };
+        }
+        if (cleaned.startsWith('COMMIT')) {
+          snapshot = null;
+          return { rows: [] };
+        }
+        if (cleaned.startsWith('ROLLBACK')) {
+          if (snapshot) {
+            this.tables = snapshot;
+          }
+          snapshot = null;
+          return { rows: [] };
+        }
+        return this.query(text, params);
+      },
+      release: () => {}
+    };
   }
 }
 
@@ -785,8 +826,361 @@ async function runPostgresPersistenceSuite() {
   assert.ok(dashboard.recentTemperatureLogs.length >= 2, 'Dashboard must aggregate temperature logs');
   console.log('✅ TEST M PASSED: Multi-entity verification and dashboard aggregation verified');
 
+  // ---------------------------------------------------------------------------
+  // TEST N: RECALL & BATCH QUARANTINE POSTGRESQL PERSISTENCE (PHASE 2A)
+  // ---------------------------------------------------------------------------
+  console.log('\n--- TEST N: RECALL & BATCH QUARANTINE POSTGRESQL PERSISTENCE (PHASE 2A) ---');
+
+  const pgRecallBatch = 'LOT-PG-RECALL-88';
+  
+  // 1. Inward two receiving items sharing this batch into PostgreSQL
+  const inwardRec1 = await recordReceivingItemAsync({
+    outletId: testOutletId,
+    supplier: 'Organic Harvest Ltd',
+    product: 'Cold Pressed Sesame Oil 500ml',
+    productCategory: 'dry_groceries',
+    quantity: '24 bottles',
+    batchNumber: pgRecallBatch,
+    packagingCondition: 'intact',
+    productCondition: 'acceptable',
+    isTempSensitive: false,
+    receivingPerson: 'Arjun Somnath',
+    decision: 'ACCEPT',
+    inspectionChecklist: {
+      approvedSupplier: true,
+      acceptableCondition: true,
+      packagingIntact: true,
+      noLeakageOrDamage: true,
+      dateMarkingAcceptable: true,
+      temperatureAppropriate: true,
+      suitableForStorage: true,
+      withinCapacity: true
+    }
+  });
+
+  const inwardRec2 = await recordReceivingItemAsync({
+    outletId: testOutletId,
+    supplier: 'Organic Harvest Ltd',
+    product: 'Cold Pressed Sesame Oil 1L',
+    productCategory: 'dry_groceries',
+    quantity: '12 bottles',
+    batchNumber: pgRecallBatch,
+    packagingCondition: 'intact',
+    productCondition: 'acceptable',
+    isTempSensitive: false,
+    receivingPerson: 'Arjun Somnath',
+    decision: 'ACCEPT',
+    inspectionChecklist: {
+      approvedSupplier: true,
+      acceptableCondition: true,
+      packagingIntact: true,
+      noLeakageOrDamage: true,
+      dateMarkingAcceptable: true,
+      temperatureAppropriate: true,
+      suitableForStorage: true,
+      withinCapacity: true
+    }
+  });
+
+  assert.ok(inwardRec1.stockCreated, 'Stock 1 must be created in PostgreSQL');
+  assert.ok(inwardRec2.stockCreated, 'Stock 2 must be created in PostgreSQL');
+
+  // 2. Search stock items in PostgreSQL
+  const searchResults = await searchStockItemsAsync(testOutletId, 'PG-RECALL-88');
+  assert.strictEqual(searchResults.length, 2, 'Search by batch must return 2 matching PostgreSQL records');
+
+  // 3. Quarantine batch in PostgreSQL
+  const qPgResult = await quarantineBatchAsync(
+    testOutletId,
+    pgRecallBatch,
+    'MANUFACTURER_RECALL',
+    'Voluntary recall by Organic Harvest: Plastic cap sealant variance',
+    'Store Manager (PG)'
+  );
+
+  assert.strictEqual(qPgResult.batch, pgRecallBatch);
+  assert.strictEqual(qPgResult.affectedCount, 2, 'Must quarantine both records in PostgreSQL');
+  assert.strictEqual(qPgResult.totalQuantity, 36, 'Preserved total quantity: 24 + 12 = 36');
+
+  // 4. Verify in DB rows that status is QUARANTINED and zone updated
+  const stockAfterQ = await getStockItemsAsync(testOutletId);
+  const qItem1 = stockAfterQ.find(s => s.id === inwardRec1.stockCreated!.id)!;
+  const qItem2 = stockAfterQ.find(s => s.id === inwardRec2.stockCreated!.id)!;
+  assert.strictEqual(qItem1.status, 'QUARANTINED');
+  assert.strictEqual(qItem2.status, 'QUARANTINED');
+  assert(qItem1.storageZoneName.toLowerCase().includes('quarantine'), 'Must be relocated to quarantine zone');
+  assert.strictEqual(Number(qItem1.quantity), 24, 'Quantities must remain intact');
+  assert.strictEqual(Number(qItem2.quantity), 12, 'Quantities must remain intact');
+
+  // 5. Active stock safety lock in PostgreSQL
+  const activePgStock = await getActiveStockItemsAsync(testOutletId);
+  const activePgIds = activePgStock.map(s => s.id);
+  assert(!activePgIds.includes(qItem1.id), 'Active stock query must strictly exclude quarantined item 1');
+  assert(!activePgIds.includes(qItem2.id), 'Active stock query must strictly exclude quarantined item 2');
+
+  // 6. Active alert generation in PostgreSQL
+  const pgAlerts = await getActiveGroceryAlertsAsync(testOutletId);
+  const pgRecallAlert = pgAlerts.find(a => a.type === 'RECALL_QUARANTINE');
+  assert.ok(pgRecallAlert, 'Must generate persisted RECALL_QUARANTINE alert');
+  assert.strictEqual(pgRecallAlert.severity, 'RED');
+
+  // 7. Error handling
+  let errorCaught = false;
+  try {
+    await releaseBatchAsync(testOutletId, pgRecallBatch, '', 'Manager');
+  } catch (err: any) {
+    errorCaught = true;
+    assert(err.message.includes('Mandatory release justification reason'));
+  }
+  assert.ok(errorCaught, 'Must reject release with empty reason');
+
+  // 8. Controlled release in PostgreSQL
+  const relPgResult = await releaseBatchAsync(
+    testOutletId,
+    pgRecallBatch,
+    'Quality advisory cancelled after batch testing cleared all units',
+    'Store Manager (PG)'
+  );
+
+  assert.strictEqual(relPgResult.releasedCount, 2, 'Both items must be released in PostgreSQL');
+  assert.strictEqual(relPgResult.totalQuantity, 36);
+
+  const stockAfterRel = await getStockItemsAsync(testOutletId);
+  const relItem1 = stockAfterRel.find(s => s.id === inwardRec1.stockCreated!.id)!;
+  assert.strictEqual(relItem1.status, 'ACTIVE', 'Item must be restored to ACTIVE status in PostgreSQL');
+  assert(!relItem1.storageZoneName.toLowerCase().includes('quarantine'), 'Item must be relocated out of quarantine');
+
+  const activePgStockAfterRel = await getActiveStockItemsAsync(testOutletId);
+  const activePgIdsAfterRel = activePgStockAfterRel.map(s => s.id);
+  assert(activePgIdsAfterRel.includes(relItem1.id), 'Active stock must now include released item');
+
+  // 9. Cross-tenant rejection
+  const foreignToken = createSessionToken({
+    userId: 'user-foreign',
+    organisationId: 'org-foreign',
+    outletId: 'store-foreign-outlet',
+    role: 'manager'
+  });
+  const mockForeignReq = {
+    headers: new Map([['cookie', `${SESSION_COOKIE_NAME}=${foreignToken}`]])
+  } as any;
+  const foreignAuth = await authorizeGroceryAccess(testOutletId, mockForeignReq, true);
+  assert.strictEqual(foreignAuth.ok, false);
+  assert.strictEqual((foreignAuth as any).status, 403, 'Cross-tenant request must return 403 FORBIDDEN');
+
+  // 10. PostgreSQL Duplicate Quarantine Idempotency
+  // Re-quarantine batch to verify idempotency:
+  const qPgAgain = await quarantineBatchAsync(
+    testOutletId,
+    pgRecallBatch,
+    'OTHER_SAFETY_CONCERN',
+    'Secondary verification hold',
+    'Store Manager (PG)'
+  );
+  assert.strictEqual(qPgAgain.affectedCount, 2, 'Active items re-quarantined');
+
+  const stockBeforeDup = await getStockItemsAsync(testOutletId);
+  const qItemBefore = stockBeforeDup.find(s => s.id === inwardRec1.stockCreated!.id)!;
+  const auditLengthBefore = qItemBefore.auditTrail.length;
+
+  const qPgDup = await quarantineBatchAsync(
+    testOutletId,
+    pgRecallBatch,
+    'OTHER_SAFETY_CONCERN',
+    'Redundant call on already quarantined batch',
+    'Store Manager (PG)'
+  );
+  assert.strictEqual(qPgDup.alreadyQuarantinedCount, 2, 'PostgreSQL duplicate quarantine must return alreadyQuarantinedCount');
+  assert.strictEqual(qPgDup.affectedCount, 0, 'Zero new records modified');
+
+  const stockAfterDup = await getStockItemsAsync(testOutletId);
+  const qItemAfter = stockAfterDup.find(s => s.id === inwardRec1.stockCreated!.id)!;
+  assert.strictEqual(qItemAfter.auditTrail.length, auditLengthBefore, 'Repeating quarantine must NOT append redundant audit entries in PostgreSQL');
+
+  // Release the items back to active
+  await releaseBatchAsync(testOutletId, pgRecallBatch, 'AUTHORISED_SAFETY_CLEARANCE', 'Clearance test', 'Store Manager');
+
+  // 11. Transaction Rollback Protection (Midway Failure)
+  const rollbackBatchNo = `PG-ROLLBACK-${Date.now()}`;
+  const rbRec1 = await recordReceivingItemAsync({
+    outletId: testOutletId,
+    supplier: 'Dairy Farms Ltd',
+    product: 'Butter 500g (Item 1)',
+    productCategory: 'dairy_chilled',
+    quantity: '10 blocks',
+    batchNumber: rollbackBatchNo,
+    packagingCondition: 'intact',
+    productCondition: 'acceptable',
+    isTempSensitive: true,
+    receivingPerson: 'Vikas Sharma',
+    decision: 'ACCEPT',
+    inspectionChecklist: {
+      approvedSupplier: true,
+      acceptableCondition: true,
+      packagingIntact: true,
+      noLeakageOrDamage: true,
+      dateMarkingAcceptable: true,
+      temperatureAppropriate: true,
+      suitableForStorage: true,
+      withinCapacity: true
+    }
+  });
+
+  const rbRec2 = await recordReceivingItemAsync({
+    outletId: testOutletId,
+    supplier: 'Dairy Farms Ltd',
+    product: 'Butter 500g (Item 2)',
+    productCategory: 'dairy_chilled',
+    quantity: '15 blocks',
+    batchNumber: rollbackBatchNo,
+    packagingCondition: 'intact',
+    productCondition: 'acceptable',
+    isTempSensitive: true,
+    receivingPerson: 'Vikas Sharma',
+    decision: 'ACCEPT',
+    inspectionChecklist: {
+      approvedSupplier: true,
+      acceptableCondition: true,
+      packagingIntact: true,
+      noLeakageOrDamage: true,
+      dateMarkingAcceptable: true,
+      temperatureAppropriate: true,
+      suitableForStorage: true,
+      withinCapacity: true
+    }
+  });
+
+  const rbItem1Id = rbRec1.stockCreated!.id;
+  const rbItem2Id = rbRec2.stockCreated!.id;
+
+  // Configure failure on item 2 update during multi-item transaction
+  mockDb.failOnBatchItemUpdateId = rbItem2Id;
+  let txFailed = false;
+
+  try {
+    await quarantineBatchAsync(
+      testOutletId,
+      rollbackBatchNo,
+      'MANUFACTURER_RECALL',
+      'Recall circular: Testing atomic rollback midway',
+      'Store Manager (PG)'
+    );
+  } catch (err: any) {
+    txFailed = true;
+    assert(err.message.includes('DATABASE_ERROR') && err.message.includes('quarantineBatch'));
+  }
+  assert.ok(txFailed, 'Multi-item quarantine must fail when midway query errors');
+  mockDb.failOnBatchItemUpdateId = null; // Clear hook
+
+  // Crucial transactional assertion: item 1 was updated BEFORE item 2 failed.
+  // Because the entire operation ran inside a database transaction, ROLLBACK must restore item 1 to ACTIVE!
+  const stockPostRollback = await getStockItemsAsync(testOutletId);
+  const rolledBackItem1 = stockPostRollback.find(s => s.id === rbItem1Id)!;
+  const rolledBackItem2 = stockPostRollback.find(s => s.id === rbItem2Id)!;
+
+  assert.strictEqual(rolledBackItem1.status, 'ACTIVE', 'Item 1 must be rolled back to ACTIVE — zero partial updates');
+  assert.strictEqual(rolledBackItem2.status, 'ACTIVE', 'Item 2 must remain ACTIVE');
+
+  // 12. PostgreSQL Expiry-Safe Release: Batch with Mixed Eligible and Expired Items
+  const pgMixedBatchNo = `PG-MIXED-EXP-${Date.now()}`;
+  const pgExpiredDate = '2026-01-01'; // Expired in past
+  const pgFutureDate = new Date(Date.now() + 86400000 * 30).toISOString().slice(0, 10);
+
+  const mixedRecExpired = await recordReceivingItemAsync({
+    outletId: testOutletId,
+    supplier: 'Artisan Bakery',
+    product: 'Whole Wheat Loaf (Past Expiry)',
+    productCategory: 'dry_groceries',
+    quantity: '10 loaves',
+    batchNumber: pgMixedBatchNo,
+    useByDate: pgExpiredDate,
+    packagingCondition: 'intact',
+    productCondition: 'acceptable',
+    isTempSensitive: false,
+    receivingPerson: 'Vikas Sharma',
+    decision: 'ACCEPT',
+    inspectionChecklist: {
+      approvedSupplier: true,
+      acceptableCondition: true,
+      packagingIntact: true,
+      noLeakageOrDamage: true,
+      dateMarkingAcceptable: true,
+      temperatureAppropriate: true,
+      suitableForStorage: true,
+      withinCapacity: true
+    }
+  });
+
+  const mixedRecFresh = await recordReceivingItemAsync({
+    outletId: testOutletId,
+    supplier: 'Artisan Bakery',
+    product: 'Whole Wheat Loaf (Fresh)',
+    productCategory: 'dry_groceries',
+    quantity: '20 loaves',
+    batchNumber: pgMixedBatchNo,
+    useByDate: pgFutureDate,
+    packagingCondition: 'intact',
+    productCondition: 'acceptable',
+    isTempSensitive: false,
+    receivingPerson: 'Vikas Sharma',
+    decision: 'ACCEPT',
+    inspectionChecklist: {
+      approvedSupplier: true,
+      acceptableCondition: true,
+      packagingIntact: true,
+      noLeakageOrDamage: true,
+      dateMarkingAcceptable: true,
+      temperatureAppropriate: true,
+      suitableForStorage: true,
+      withinCapacity: true
+    }
+  });
+
+  // Quarantine the mixed batch in PostgreSQL
+  const qPgMixed = await quarantineBatchAsync(
+    testOutletId,
+    pgMixedBatchNo,
+    'SUPPLIER_ALERT',
+    'Supplier alert hold',
+    'Store Manager (PG)'
+  );
+  assert.strictEqual(qPgMixed.affectedCount, 2, 'Both mixed items quarantined in PostgreSQL');
+
+  // Release the mixed batch with structured category
+  const relPgMixed = await releaseBatchAsync(
+    testOutletId,
+    pgMixedBatchNo,
+    'LAB_CLEARANCE_CERTIFICATE',
+    'Batch laboratory testing COA-PG-882 confirms safety clearance',
+    'Store Manager (PG)'
+  );
+
+  assert.strictEqual(relPgMixed.releasedCount, 2, 'Both items processed in release');
+  assert.strictEqual(relPgMixed.activeCount, 1, 'Only the unexpired fresh item restored to ACTIVE');
+  assert.strictEqual(relPgMixed.expiredCount, 1, 'The item that expired while in quarantine transitions to EXPIRED');
+
+  // Verify in PostgreSQL rows
+  const stockPostMixedRel = await getStockItemsAsync(testOutletId);
+  const dbExpiredItem = stockPostMixedRel.find(s => s.id === mixedRecExpired.stockCreated!.id)!;
+  const dbFreshItem = stockPostMixedRel.find(s => s.id === mixedRecFresh.stockCreated!.id)!;
+
+  assert.strictEqual(dbExpiredItem.status, 'EXPIRED', 'Expired item must be EXPIRED in PostgreSQL');
+  assert(dbExpiredItem.storageZoneName.toLowerCase().includes('quarantine'), 'Expired item must remain in holding/quarantine zone');
+  assert.strictEqual(dbFreshItem.status, 'ACTIVE', 'Fresh item must be ACTIVE in PostgreSQL');
+
+  const dbExpAudit = dbExpiredItem.auditTrail[dbExpiredItem.auditTrail.length - 1];
+  assert.strictEqual(dbExpAudit.action, 'RECALL_BATCH_RELEASED_EXPIRED');
+
+  // Strict server-side safety lock verification in PostgreSQL
+  const activePgAfterMixed = await getActiveStockItemsAsync(testOutletId);
+  const activePgMixedIds = activePgAfterMixed.map(s => s.id);
+  assert(activePgMixedIds.includes(dbFreshItem.id), 'Fresh item must be in PostgreSQL active saleable stock');
+  assert(!activePgMixedIds.includes(dbExpiredItem.id), 'Expired item must NEVER be in PostgreSQL active saleable stock');
+
+  console.log('✅ TEST N PASSED: Batch recall quarantine, safety lock, alert, controlled release, duplicate idempotency, atomic transaction rollback, expiry-safe mixed release, and tenant isolation persisted in PostgreSQL');
+
   console.log('\n================================================================');
-  console.log('🎯 ALL 13 PERSISTENCE TESTS (TEST A THROUGH TEST M) PASSED (13/13)');
+  console.log('🎯 ALL 14 PERSISTENCE TESTS (TEST A THROUGH TEST N) PASSED (14/14)');
   console.log('================================================================\n');
 }
 

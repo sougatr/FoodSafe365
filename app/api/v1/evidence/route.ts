@@ -6,7 +6,7 @@ import { ok, fail } from '@/lib/response';
 const MAX_BYTES=10*1024*1024;
 const ALLOWED=['image/jpeg','image/png','application/pdf'];
 export async function POST(req:Request){
- const auth=await getAuthContext(); if(!auth)return fail('UNAUTHENTICATED','Authentication required',401);
+ const auth=await getAuthContext(req); if(!auth)return fail('UNAUTHENTICATED','Authentication required',401);
  if(!can(auth.role,'checks:write')&&!can(auth.role,'records:write'))return fail('FORBIDDEN','You do not have permission to add evidence',403);
 
  let b:any;
@@ -35,20 +35,27 @@ export async function POST(req:Request){
  if(!ALLOWED.includes(b.file_type))return fail('VALIDATION_ERROR','Unsupported file type. Use JPG, PNG or PDF',400);
  if(Number(b.file_size)>MAX_BYTES)return fail('VALIDATION_ERROR','Evidence file exceeds 10 MB limit',400);
 
+  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
+  }
  if(!process.env.DATABASE_URL){ return ok({id:`demo-evidence-${Date.now()}`,outlet_id:b.outlet_id,entity_type:b.entity_type,entity_id:b.entity_id,file_url:b.file_url,file_name:b.file_name||null,file_type:b.file_type,file_size:Number(b.file_size),captured_by:auth.userId,captured_at:new Date().toISOString(),description:b.description||null,demo:true},201); }
- const outlet=(await query<any>(`SELECT id FROM outlets WHERE id=$1 AND organisation_id=$2 AND status='active'`,[b.outlet_id,auth.organisationId]))[0]; if(!outlet)return fail('FORBIDDEN','Outlet access denied',403);
- const allowedEntity=['check_response','observation','corrective_action','document','service','haccp_monitoring']; if(!allowedEntity.includes(b.entity_type))return fail('VALIDATION_ERROR','Invalid evidence entity type',400);
- const entityQueries:any={
-  check_response:`SELECT cr.id FROM check_responses cr JOIN check_instances ci ON ci.id=cr.check_instance_id WHERE cr.id=$1 AND ci.outlet_id=$2`,
-  observation:`SELECT id FROM observations WHERE id=$1 AND outlet_id=$2`,
-  corrective_action:`SELECT id FROM corrective_actions WHERE id=$1 AND outlet_id=$2`,
-  document:`SELECT id FROM documents WHERE id=$1 AND outlet_id=$2`,
-  service:`SELECT id FROM service_requests WHERE id=$1 AND outlet_id=$2`,
-  haccp_monitoring:`SELECT mr.id FROM monitoring_records mr JOIN ccps c ON c.id=mr.ccp_id WHERE mr.id=$1 AND mr.outlet_id=$2`
- };
- const entity=(await query<any>(entityQueries[b.entity_type],[b.entity_id,b.outlet_id]))[0]; if(!entity)return fail('FORBIDDEN','Evidence entity does not belong to the outlet',403);
- // Production storage must issue a presigned upload URL and persist the resulting object reference.
- // This MVP records the validated upload metadata; binary storage is the next storage-integration step.
- const row=(await query<any>(`INSERT INTO evidence(id,outlet_id,entity_type,entity_id,file_url,file_type,file_size,hash,captured_by,captured_at,description) VALUES(gen_random_uuid(),$1,$2,$3,$4,$5,$6,$7,$8,now(),$9) RETURNING *`,[b.outlet_id,b.entity_type,b.entity_id,b.file_url,b.file_type,Number(b.file_size),b.hash||null,auth.userId,b.description||null]))[0];
- return ok(row,201);
+  try {
+    const outlet=(await query<any>(`SELECT id FROM outlets WHERE id=$1 AND organisation_id=$2 AND status='active'`,[b.outlet_id,auth.organisationId]))[0]; if(!outlet)return fail('FORBIDDEN','Outlet access denied',403);
+    const allowedEntity=['check_response','observation','corrective_action','document','service','haccp_monitoring']; if(!allowedEntity.includes(b.entity_type))return fail('VALIDATION_ERROR','Invalid evidence entity type',400);
+    const entityQueries:any={
+     check_response:`SELECT cr.id FROM check_responses cr JOIN check_instances ci ON ci.id=cr.check_instance_id WHERE cr.id=$1 AND ci.outlet_id=$2`,
+     observation:`SELECT id FROM observations WHERE id=$1 AND outlet_id=$2`,
+     corrective_action:`SELECT id FROM corrective_actions WHERE id=$1 AND outlet_id=$2`,
+     document:`SELECT id FROM documents WHERE id=$1 AND outlet_id=$2`,
+     service:`SELECT id FROM service_requests WHERE id=$1 AND outlet_id=$2`,
+     haccp_monitoring:`SELECT mr.id FROM monitoring_records mr JOIN ccps c ON c.id=mr.ccp_id WHERE mr.id=$1 AND mr.outlet_id=$2`
+    };
+    const entity=(await query<any>(entityQueries[b.entity_type],[b.entity_id,b.outlet_id]))[0]; if(!entity)return fail('FORBIDDEN','Evidence entity does not belong to the outlet',403);
+    // Production storage must issue a presigned upload URL and persist the resulting object reference.
+    // This MVP records the validated upload metadata; binary storage is the next storage-integration step.
+    const row=(await query<any>(`INSERT INTO evidence(id,outlet_id,entity_type,entity_id,file_url,file_type,file_size,hash,captured_by,captured_at,description) VALUES(gen_random_uuid(),$1,$2,$3,$4,$5,$6,$7,$8,now(),$9) RETURNING *`,[b.outlet_id,b.entity_type,b.entity_id,b.file_url,b.file_type,Number(b.file_size),b.hash||null,auth.userId,b.description||null]))[0];
+    return ok(row,201);
+  } catch (err: any) {
+    return fail('DATABASE_ERROR', 'Unable to record evidence.', 500);
+  }
 }

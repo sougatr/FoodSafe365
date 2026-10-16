@@ -94,10 +94,7 @@ export default function ProviderOnboardingPage() {
 
       const provider = json.data;
 
-      // Persist provider session cookies and localStorage
-      document.cookie = `fs_user_id=${provider.id}; path=/; max-age=2592000`;
-      document.cookie = `fs_role=vendor; path=/; max-age=2592000`;
-      document.cookie = `fs_provider_id=${provider.id}; path=/; max-age=2592000`;
+      // Persist provider profile in localStorage for UI presentation (session authentication is handled via HttpOnly fs_session cookie)
       localStorage.setItem('foodsafe365_provider', JSON.stringify(provider));
 
       router.push('/providers/dashboard');

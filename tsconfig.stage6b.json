@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es2022",
+    "outDir": ".data/test_s6b_dist",
+    "skipLibCheck": true,
+    "isolatedModules": false
+  },
+  "include": [
+    "tests/test-stage6-evidence-flow.ts"
+  ]
+}

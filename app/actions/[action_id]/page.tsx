@@ -43,11 +43,6 @@ function loadState(): AppPhase1State {
   }
 }
 
-function saveState(v: AppPhase1State) {
-  localStorage.setItem(PHASE1_STORAGE_KEY, JSON.stringify(v));
-  window.dispatchEvent(new Event('foodsaf365:update'));
-}
-
 function label(s: string) {
   switch (s) {
     case 'awaiting_verification':
@@ -64,8 +59,10 @@ function label(s: string) {
 
 export default function ActionDetail() {
   const params = useParams<{ action_id: string }>();
-  const [data, setData] = useState<AppPhase1State>({});
   const [action, setAction] = useState<CorrectiveAction | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [immediate, setImmediate] = useState('');
   const [corrective, setCorrective] = useState('');
   const [root, setRoot] = useState('');
@@ -93,12 +90,6 @@ export default function ActionDetail() {
   const fetchServiceRequest = useCallback(async () => {
     try {
       const res = await fetch(`/api/v1/service-requests?correctiveActionId=${params.action_id}`, {
-        headers: {
-          'x-foodsafe-user-id': 'demo-user',
-          'x-foodsafe-org-id': 'demo-org',
-          'x-foodsafe-outlet-id': 'the-table',
-          'x-foodsafe-role': 'manager'
-        },
         cache: 'no-store'
       });
       const json = await res.json();
@@ -110,180 +101,221 @@ export default function ActionDetail() {
     }
   }, [params.action_id]);
 
-  useEffect(() => {
-    const refresh = () => {
-      const state = loadState();
-      setData(state);
-      const found = (state.actions || []).find((a: CorrectiveAction) => a.id === params.action_id) || null;
-      setAction(found);
-      if (found) {
-        setImmediate(found.immediateAction || '');
-        setCorrective(found.correctiveAction || '');
-        setRoot(found.rootCause || '');
-        setNote(found.verificationNote || '');
+  const fetchAction = useCallback(async () => {
+    setLoading(true);
+    setAuthError(false);
+    setErrorMessage(null);
+    try {
+      const res = await fetch(`/api/v1/actions/${params.action_id}`, {
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json?.data) {
+          const act = json.data;
+          setAction(act);
+          setImmediate(act.immediateAction || '');
+          setCorrective(act.correctiveAction || '');
+          setRoot(act.rootCause || '');
+          if (act.verifications && act.verifications.length > 0) {
+            setNote(act.verifications[0].notes || '');
+          } else if (act.verificationNote) {
+            setNote(act.verificationNote);
+          }
+          setLoading(false);
+          return;
+        }
+      } else if (res.status === 401) {
+        setAuthError(true);
+        setLoading(false);
+        return;
+      } else if (res.status === 404) {
+        setErrorMessage('Action not found.');
+        setLoading(false);
+        return;
       } else {
-        fetch(`/api/v1/actions/${params.action_id}`, { cache: 'no-store' })
-          .then(res => res.ok ? res.json() : null)
-          .then(json => {
-            if (json?.data) {
-              const act = json.data;
-              setAction(act);
-              setImmediate(act.immediateAction || '');
-              setCorrective(act.correctiveAction || '');
-              setRoot(act.rootCause || '');
-            }
-          })
-          .catch(() => {});
+        const json = await res.json().catch(() => null);
+        setErrorMessage(json?.error?.message || 'Failed to load corrective action');
+        setLoading(false);
+        return;
       }
-    };
-    refresh();
-    fetchServiceRequest();
-    window.addEventListener('foodsaf365:update', refresh);
-    return () => window.removeEventListener('foodsaf365:update', refresh);
-  }, [params.action_id, fetchServiceRequest]);
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Network error fetching action');
+      setLoading(false);
+      return;
+    }
+    setLoading(false);
+  }, [params.action_id]);
 
-  if (!action) {
+  useEffect(() => {
+    fetchAction();
+    fetchServiceRequest();
+  }, [fetchAction, fetchServiceRequest]);
+
+  if (loading) {
     return (
       <main>
-        <div className="container" style={{ paddingTop: 40 }}>
-          <p className="muted">Action not found.</p>
-          <Link href="/actions" className="btn secondary">
-            Back to Restaurant Actions
-          </Link>
+        <div className="container" style={{ paddingTop: 60, textAlign: 'center' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: '#64748b', fontSize: 15 }}>
+            <RefreshCw className="animate-spin" size={18} />
+            <span>Loading corrective action details...</span>
+          </div>
         </div>
       </main>
     );
   }
 
-  function submitAction() {
+  if (authError) {
+    return (
+      <main>
+        <div className="container" style={{ paddingTop: 40, maxWidth: 620, margin: '0 auto' }}>
+          <div style={{
+            background: 'var(--surface, #ffffff)',
+            border: '1px solid #fed7aa',
+            borderRadius: 12,
+            padding: '24px 28px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#ea580c', marginBottom: 12 }}>
+              <ShieldCheck size={24} />
+              <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Authentication Required</h2>
+            </div>
+            <p style={{ color: 'var(--text, #334155)', fontSize: 14, lineHeight: 1.5, marginBottom: 20 }}>
+              You must be signed in with an authorized restaurant account to view and manage this corrective action.
+            </p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <Link
+                href={`/login?redirect=/actions/${params.action_id}`}
+                className="btn primary"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '8px 16px',
+                  borderRadius: 8,
+                  textDecoration: 'none'
+                }}
+              >
+                <span>Sign In to FoodSafe365</span>
+                <ArrowRight size={14} />
+              </Link>
+              <button
+                type="button"
+                onClick={() => fetchAction()}
+                className="btn secondary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+              >
+                <RefreshCw size={14} />
+                <span>Retry</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!action) {
+    return (
+      <main>
+        <div className="container" style={{ paddingTop: 40 }}>
+          <p className="muted">{errorMessage || 'Action not found.'}</p>
+          <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+            <Link href="/actions" className="btn secondary">
+              Back to Restaurant Actions
+            </Link>
+            <button
+              type="button"
+              onClick={() => fetchAction()}
+              className="btn secondary"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+            >
+              <RefreshCw size={14} />
+              <span>Retry</span>
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  async function submitAction() {
     if (!action) return;
     if (!immediate.trim() && !corrective.trim()) {
       alert('Please enter at least an immediate action or corrective action.');
       return;
     }
 
-    const now = new Date().toISOString();
-    const auditEvent: AuditTrailEvent = {
-      id: `evt-action-sub-${Date.now()}`,
-      at: now,
-      type: 'Restaurant submitted action',
-      detail: `${action.title} submitted for verification. Immediate: "${immediate}". Corrective: "${corrective}".`,
-      status: 'awaiting_verification'
-    };
+    try {
+      const res = await fetch(`/api/v1/actions/${params.action_id}/submit-verification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          immediate_action: immediate,
+          corrective_action: corrective,
+          root_cause: root
+        })
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json?.error?.message || json?.error || 'Failed to submit action for verification');
+      }
 
-    const nextActions = (data.actions || []).map(a =>
-      a.id === action.id
-        ? {
-            ...a,
-            immediateAction: immediate,
-            correctiveAction: corrective,
-            rootCause: root,
-            status: 'awaiting_verification' as const,
-            completedAt: now
-          }
-        : a
-    );
-
-    const nextIssues = (data.issues || []).map(i =>
-      i.actionId === action.id || i.id === action.issueId
-        ? { ...i, status: 'awaiting_verification' as const }
-        : i
-    );
-
-    const nextState: AppPhase1State = {
-      ...data,
-      actions: nextActions,
-      issues: nextIssues,
-      timeline: [auditEvent, ...(data.timeline || [])]
-    };
-
-    saveState(nextState);
-    setData(nextState);
-    setAction(nextActions.find(a => a.id === action.id) || null);
-    setMessage('Action successfully submitted for manager verification.');
-  }
-
-  function verify(result: 'pass' | 'fail') {
-    if (!action) return;
-    const now = new Date().toISOString();
-
-    if (result === 'pass') {
-      const auditEvent: AuditTrailEvent = {
-        id: `evt-verify-pass-${Date.now()}`,
-        at: now,
-        type: 'Manager verified correction',
-        detail: `Verified and closed: ${action.title}.${note ? ` Verification note: "${note}".` : ''}`,
-        status: 'closed'
-      };
-
-      const nextActions = (data.actions || []).map(a =>
-        a.id === action.id
-          ? {
-              ...a,
-              status: 'closed' as const,
-              verificationStatus: 'pass' as const,
-              verificationNote: note,
-              closedAt: now
-            }
-          : a
-      );
-
-      const nextIssues = (data.issues || []).map(i =>
-        i.actionId === action.id || i.id === action.issueId
-          ? { ...i, status: 'closed' as const, verifiedAt: now }
-          : i
-      );
-
-      const nextState: AppPhase1State = {
-        ...data,
-        actions: nextActions,
-        issues: nextIssues,
-        timeline: [auditEvent, ...(data.timeline || [])]
-      };
-
-      saveState(nextState);
-      setData(nextState);
-      setAction(nextActions.find(a => a.id === action.id) || null);
-      setMessage('Correction verified by manager. Alert and Action are now closed.');
-    } else {
-      const auditEvent: AuditTrailEvent = {
-        id: `evt-verify-fail-${Date.now()}`,
-        at: now,
-        type: 'Manager rejected verification',
-        detail: `Verification failed for ${action.title}. Action reopened for further correction.${note ? ` Manager note: "${note}".` : ''}`,
-        status: 'in_progress'
-      };
-
-      const nextActions = (data.actions || []).map(a =>
-        a.id === action.id
-          ? {
-              ...a,
-              status: 'in_progress' as const,
-              verificationStatus: 'fail' as const,
-              verificationNote: note
-            }
-          : a
-      );
-
-      const nextIssues = (data.issues || []).map(i =>
-        i.actionId === action.id || i.id === action.issueId
-          ? { ...i, status: 'action_in_progress' as const }
-          : i
-      );
-
-      const nextState: AppPhase1State = {
-        ...data,
-        actions: nextActions,
-        issues: nextIssues,
-        timeline: [auditEvent, ...(data.timeline || [])]
-      };
-
-      saveState(nextState);
-      setData(nextState);
-      setAction(nextActions.find(a => a.id === action.id) || null);
-      setMessage('Verification failed. Action has been reopened for the restaurant team to complete further correction.');
+      setAction(prev => prev ? {
+        ...prev,
+        status: json.data?.status || 'awaiting_verification',
+        immediateAction: immediate,
+        correctiveAction: corrective,
+        rootCause: root
+      } : null);
+      setMessage('Action successfully submitted for manager verification.');
+    } catch (err: any) {
+      alert(err.message || 'Error submitting action for verification');
     }
   }
+
+  async function verify(result: 'pass' | 'fail') {
+    if (!action) return;
+    try {
+      const res = await fetch(`/api/v1/actions/${params.action_id}/verify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          result,
+          verification_method: 'physical_inspection',
+          notes: note
+        })
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json?.error?.message || json?.error || 'Verification failed on server');
+      }
+
+      const serverStatus = json.data?.status || (result === 'pass' ? 'closed' : 'open');
+      const closedAt = json.data?.closed_at || json.data?.closedAt || (serverStatus === 'closed' ? new Date().toISOString() : null);
+
+      setAction(prev => prev ? {
+        ...prev,
+        status: serverStatus,
+        closedAt,
+        verificationNote: note,
+        verificationStatus: result
+      } : null);
+
+      if (result === 'pass') {
+        setMessage('Correction verified by manager. Alert and Action are now closed.');
+      } else {
+        setMessage('Verification failed. Action has been reopened for the restaurant team to complete further correction.');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Error verifying action');
+    }
+  }
+
 
   const editable = ['open', 'in_progress'].includes(action.status);
 
@@ -582,10 +614,7 @@ export default function ActionDetail() {
                                 const res = await fetch(`/api/v1/service-requests/${serviceRequest.id}`, {
                                   method: 'PATCH',
                                   headers: {
-                                    'Content-Type': 'application/json',
-                                    'x-foodsafe-user-id': 'demo-user',
-                                    'x-foodsafe-role': 'manager',
-                                    'x-foodsafe-outlet-id': 'the-table'
+                                    'Content-Type': 'application/json'
                                   },
                                   body: JSON.stringify({ status: 'restaurant_confirmed' })
                                 });
@@ -593,40 +622,8 @@ export default function ActionDetail() {
                                 if (!res.ok) throw new Error(json?.error?.message || 'Confirmation failed');
                                 
                                 setServiceRequest(json.data);
-                                
-                                const now = new Date().toISOString();
-                                const auditEvent: AuditTrailEvent = {
-                                  id: `evt-srv-verify-${Date.now()}`,
-                                  at: now,
-                                  type: 'External service verified',
-                                  detail: `External service completed by ${serviceRequest.providerName} verified and closed by Manager.`,
-                                  status: 'closed'
-                                };
-
-                                const nextActions = (data.actions || []).map(a =>
-                                  a.id === action.id ? {
-                                    ...a,
-                                    status: 'closed' as const,
-                                    closedAt: now,
-                                    verificationStatus: 'pass' as const,
-                                    verificationNote: `Verified completion of service by ${serviceRequest.providerName}`
-                                  } : a
-                                );
-                                const nextState = {
-                                  ...data,
-                                  actions: nextActions,
-                                  timeline: [auditEvent, ...(data.timeline || [])]
-                                };
-                                saveState(nextState);
-                                setData(nextState);
-                                setAction(prev => prev ? {
-                                  ...prev,
-                                  status: 'closed',
-                                  closedAt: now,
-                                  verificationStatus: 'pass',
-                                  verificationNote: `Verified completion of service by ${serviceRequest.providerName}`
-                                } : null);
-                                setMessage('✓ Service verified by restaurant manager. Food-safety corrective action closed.');
+                                await fetchAction();
+                                setMessage('✓ External service completion confirmed. Corrective action is now awaiting manager verification in Step 2.');
                               } catch (err: any) {
                                 alert(err.message || 'Error verifying service');
                               } finally {
@@ -707,10 +704,7 @@ export default function ActionDetail() {
                                     const res = await fetch(`/api/v1/service-requests/${serviceRequest.id}`, {
                                       method: 'PATCH',
                                       headers: {
-                                        'Content-Type': 'application/json',
-                                        'x-foodsafe-user-id': 'demo-user',
-                                        'x-foodsafe-role': 'manager',
-                                        'x-foodsafe-outlet-id': 'the-table'
+                                        'Content-Type': 'application/json'
                                       },
                                       body: JSON.stringify({
                                         status: 'in_progress',
@@ -721,26 +715,7 @@ export default function ActionDetail() {
                                     if (!res.ok) throw new Error(json?.error?.message || 'Failed to update request');
 
                                     setServiceRequest(json.data);
-                                    const now = new Date().toISOString();
-                                    const auditEvent: AuditTrailEvent = {
-                                      id: `evt-srv-reopen-${Date.now()}`,
-                                      at: now,
-                                      type: 'Restaurant requested further action',
-                                      detail: `External service returned for further action by Manager: "${rejectionReason}". Request returned to in-progress.`,
-                                      status: 'in_progress'
-                                    };
-
-                                    const nextActions = (data.actions || []).map(a =>
-                                      a.id === action.id ? { ...a, status: 'in_progress' as const } : a
-                                    );
-                                    const nextState = {
-                                      ...data,
-                                      actions: nextActions,
-                                      timeline: [auditEvent, ...(data.timeline || [])]
-                                    };
-                                    saveState(nextState);
-                                    setData(nextState);
-                                    setAction(prev => prev ? { ...prev, status: 'in_progress' } : null);
+                                    await fetchAction();
                                     setShowNeedsFurtherAction(false);
                                     setMessage('Request returned to In Progress. Provider notified with your notes.');
                                   } catch (err: any) {
@@ -1076,10 +1051,7 @@ export default function ActionDetail() {
                             const res = await fetch('/api/v1/service-requests', {
                               method: 'POST',
                               headers: {
-                                'Content-Type': 'application/json',
-                                'x-foodsafe-user-id': 'demo-user',
-                                'x-foodsafe-role': 'manager',
-                                'x-foodsafe-outlet-id': 'the-table'
+                                'Content-Type': 'application/json'
                               },
                               body: JSON.stringify({
                                 correctiveActionId: action.id,

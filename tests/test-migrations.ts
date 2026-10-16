@@ -295,6 +295,19 @@ async function runMigrationTestSuite() {
   // ---------------------------------------------------------------------------
   console.log('\n--- TEST B: FRESH DATABASE -> CORRECT FINAL SCHEMA ---');
   const expectedTables = [
+    'organisations',
+    'outlets',
+    'users',
+    'roles',
+    'memberships',
+    'rules',
+    'check_instances',
+    'check_responses',
+    'observations',
+    'corrective_actions',
+    'action_verifications',
+    'haccp_plans',
+    'audit_logs',
     'grocery_outlets',
     'grocery_product_categories',
     'grocery_storage_zones',
@@ -424,8 +437,18 @@ async function runMigrationTestSuite() {
   assert.strictEqual(logs[0].reading, 2.8);
   console.log('✅ TEST G PASSED: Grocery store records and temperature logs functional over migrated schema');
 
+  // ---------------------------------------------------------------------------
+  // TEST H: ZERO RUNTIME DDL IN ROUTE HANDLERS
+  // ---------------------------------------------------------------------------
+  console.log('\n--- TEST H: ZERO RUNTIME DDL IN ROUTE HANDLERS ---');
+  const actionsRoutePath = path.resolve(process.cwd(), 'app/api/v1/actions/route.ts');
+  const actionsRouteCode = fs.readFileSync(actionsRoutePath, 'utf8');
+  assert.ok(!actionsRouteCode.includes('ALTER TABLE'), 'app/api/v1/actions/route.ts must not contain runtime ALTER TABLE DDL');
+  assert.ok(!actionsRouteCode.includes('ensureColumns'), 'app/api/v1/actions/route.ts must not call ensureColumns runtime DDL helper');
+  console.log('✅ TEST H PASSED: Verified zero runtime DDL in actions route handler');
+
   console.log('\n================================================================');
-  console.log('🎯 ALL 7 MIGRATION TESTS (TEST A THROUGH TEST G) PASSED (7/7)');
+  console.log('🎯 ALL 8 MIGRATION TESTS (TEST A THROUGH TEST H) PASSED (8/8)');
   console.log('================================================================\n');
 }
 

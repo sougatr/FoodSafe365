@@ -3,6 +3,8 @@
  * P0-5 Hardening: Enforces strict cryptographic secrets validation and fail-fast startup behavior.
  */
 
+import { getEffectiveDatabaseUrl } from './db-config';
+
 export const MIN_SESSION_SECRET_LENGTH = 32;
 
 // Hard-coded development/test fallback secret — strictly forbidden in production
@@ -40,7 +42,7 @@ const INSECURE_SECRET_SUBSTRINGS = [
 ];
 
 export interface ValidationIssue {
-  variable: 'DATABASE_URL' | 'SESSION_SECRET';
+  variable: 'DATABASE_URL' | 'SESSION_SECRET' | 'STORAGE_CONFIG';
   message: string;
 }
 
@@ -178,18 +180,78 @@ export function validateSessionSecret(secret?: string, isProduction = false): Va
 }
 
 /**
+ * Validates S3-compatible storage configuration for production.
+ * Ensures required S3 credentials, bucket, and endpoint are present, and forbids memory driver in production.
+ * NEVER echoes credentials, secrets, or keys into returned messages.
+ */
+export function validateStorageConfig(customEnv?: NodeJS.ProcessEnv, isProduction = false): ValidationIssue | null {
+  const env = customEnv || process.env;
+  if (!isProduction) return null;
+
+  const rawDriver = (env.STORAGE_DRIVER || '').trim().toLowerCase();
+  if (rawDriver === 'memory') {
+    return {
+      variable: 'STORAGE_CONFIG',
+      message: 'Production configuration error: STORAGE_DRIVER=memory is forbidden in production. S3-compatible storage is required.'
+    };
+  }
+
+  const missing: string[] = [];
+  if (!env.STORAGE_BUCKET || env.STORAGE_BUCKET.trim() === '') missing.push('STORAGE_BUCKET');
+  if (!env.STORAGE_ACCESS_KEY_ID || env.STORAGE_ACCESS_KEY_ID.trim() === '') missing.push('STORAGE_ACCESS_KEY_ID');
+  if (!env.STORAGE_SECRET_ACCESS_KEY || env.STORAGE_SECRET_ACCESS_KEY.trim() === '') missing.push('STORAGE_SECRET_ACCESS_KEY');
+  if (!env.STORAGE_ENDPOINT || env.STORAGE_ENDPOINT.trim() === '') missing.push('STORAGE_ENDPOINT');
+
+  if (missing.length > 0) {
+    return {
+      variable: 'STORAGE_CONFIG',
+      message: `Production configuration error: Required S3 storage configuration missing (${missing.join(', ')}).`
+    };
+  }
+
+  return null;
+}
+
+export interface ValidateEnvironmentOptions {
+  requireStorage?: boolean;
+}
+
+/**
  * Validates the full server environment.
  */
-export function validateEnvironment(customEnv?: NodeJS.ProcessEnv): ValidationResult {
+export function validateEnvironment(
+  customEnv?: NodeJS.ProcessEnv,
+  options?: ValidateEnvironmentOptions
+): ValidationResult {
   const env = customEnv || process.env;
   const isProduction = env.NODE_ENV === 'production';
   const issues: ValidationIssue[] = [];
 
-  const dbIssue = validateDatabaseUrl(env.DATABASE_URL, isProduction);
-  if (dbIssue) issues.push(dbIssue);
+  let activeDbUrl: string | undefined;
+  try {
+    activeDbUrl = getEffectiveDatabaseUrl({ customEnv: env });
+  } catch (err: any) {
+    issues.push({
+      variable: 'DATABASE_URL',
+      message: err?.message || 'Database configuration error: Failed to resolve database URL.'
+    });
+  }
+
+  if (activeDbUrl !== undefined) {
+    const dbIssue = validateDatabaseUrl(activeDbUrl, isProduction);
+    if (dbIssue) issues.push(dbIssue);
+  }
 
   const secretIssue = validateSessionSecret(env.SESSION_SECRET || env.JWT_SECRET, isProduction);
   if (secretIssue) issues.push(secretIssue);
+
+  const shouldCheckStorage =
+    options?.requireStorage ||
+    Boolean(env.STORAGE_DRIVER || env.STORAGE_BUCKET || env.STORAGE_ENDPOINT || env.REQUIRE_STORAGE_VALIDATION === 'true');
+  if (shouldCheckStorage) {
+    const storageIssue = validateStorageConfig(env, isProduction);
+    if (storageIssue) issues.push(storageIssue);
+  }
 
   return {
     valid: issues.length === 0,
@@ -200,12 +262,16 @@ export function validateEnvironment(customEnv?: NodeJS.ProcessEnv): ValidationRe
 
 /**
  * Asserts production environment validity.
- * If in production and any validation fails, FAILS FAST by throwing an Error immediately.
+ * If in production or Vercel preview and any validation fails, FAILS FAST by throwing an Error immediately.
  * In development or test, returns silently if defaults are acceptable.
  */
-export function assertProductionBoot(customEnv?: NodeJS.ProcessEnv): void {
-  const res = validateEnvironment(customEnv);
-  if (!res.valid && res.isProduction) {
+export function assertProductionBoot(
+  customEnv?: NodeJS.ProcessEnv,
+  options?: ValidateEnvironmentOptions
+): void {
+  const env = customEnv || process.env;
+  const res = validateEnvironment(env, options);
+  if (!res.valid && (res.isProduction || env.VERCEL_ENV === 'preview')) {
     const errorMessages = res.issues.map(i => i.message).join('\n');
     const combinedError = new Error(
       `[FATAL BOOT CONFIGURATION ERROR]\n${errorMessages}\nApplication startup halted to prevent insecure operation.`
@@ -213,3 +279,5 @@ export function assertProductionBoot(customEnv?: NodeJS.ProcessEnv): void {
     throw combinedError;
   }
 }
+
+

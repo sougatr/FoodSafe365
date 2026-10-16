@@ -118,15 +118,36 @@ export default function GroceryActionsPage() {
   const handleUpdateStatus = async (actionId: string, newStatus: string) => {
     setUpdatingId(actionId);
     try {
-      const res = await fetch(`/api/v1/actions/${actionId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
+      let res: Response;
+      if (newStatus === 'in_progress') {
+        res = await fetch(`/api/v1/actions/${actionId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'in_progress' })
+        });
+      } else if (newStatus === 'awaiting_verification') {
+        res = await fetch(`/api/v1/actions/${actionId}/submit-verification`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } else if (newStatus === 'closed') {
+        res = await fetch(`/api/v1/actions/${actionId}/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ result: 'pass', notes: 'Verified and approved by manager' })
+        });
+      } else {
+        res = await fetch(`/api/v1/actions/${actionId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+      }
       if (res.ok) {
         fetchActions();
       } else {
-        alert('Failed to update action status');
+        const errJson = await res.json().catch(() => ({}));
+        alert(errJson?.error?.message || 'Failed to update action status');
       }
     } catch (e) {
       alert('Error updating action');

@@ -43,42 +43,37 @@ export default function ActionsPage() {
   const [tab, setTab] = useState('all');
   const [serverActions, setServerActions] = useState<CorrectiveAction[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
 
   async function syncServerActions() {
     setIsSyncing(true);
+    setSyncError(null);
     try {
       const res = await fetch('/api/v1/actions', { cache: 'no-store' });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.data?.actions && Array.isArray(json.data.actions)) {
-          setServerActions(json.data.actions);
-        }
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error?.message || errJson.message || `Server returned ${res.status}`);
       }
-    } catch (err) {
+      const json = await res.json();
+      if (json.data?.actions && Array.isArray(json.data.actions)) {
+        setServerActions(json.data.actions);
+      }
+    } catch (err: any) {
       console.warn('[ActionsPage] Could not sync server actions:', err);
+      setSyncError(err?.message || 'Could not load actions from server.');
     } finally {
       setIsSyncing(false);
     }
   }
 
   useEffect(() => {
-    const refresh = () => setData(loadState());
-    refresh();
     syncServerActions();
-    window.addEventListener('foodsaf365:update', refresh);
-    return () => window.removeEventListener('foodsaf365:update', refresh);
   }, []);
 
-  // Merge server actions with local state actions without duplicate ids
+  // Server is the single source of truth for corrective actions
   const actions: CorrectiveAction[] = useMemo(() => {
-    const local = data.actions || [];
-    const map = new Map<string, CorrectiveAction>();
-    // Start with server actions
-    serverActions.forEach(a => map.set(a.id, a));
-    // Overlay local actions
-    local.forEach(a => map.set(a.id, a));
-    return Array.from(map.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [data.actions, serverActions]);
+    return serverActions.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [serverActions]);
 
   const shown = useMemo(() => {
     if (tab === 'all') return actions;
@@ -92,60 +87,38 @@ export default function ActionsPage() {
   const closedCount = actions.filter(a => a.status === 'closed').length;
 
   async function updateActionStatus(actionId: string, newStatus: 'in_progress' | 'awaiting_verification' | 'closed') {
-    const now = new Date().toISOString();
     const existing = actions.find(a => a.id === actionId);
     if (!existing) return;
 
-    const updatedActions = actions.map(a => {
-      if (a.id === actionId) {
-        return {
-          ...a,
-          status: newStatus,
-          completedAt: newStatus === 'awaiting_verification' ? now : a.completedAt,
-          closedAt: newStatus === 'closed' ? now : a.closedAt,
-          verifiedAt: newStatus === 'closed' ? now : a.verifiedAt,
-          verificationStatus: newStatus === 'closed' ? ('pass' as const) : a.verificationStatus
-        };
-      }
-      return a;
-    });
-
-    const event: AuditTrailEvent = {
-      id: `evt-action-status-${Date.now()}`,
-      at: now,
-      type: `Action status updated: ${newStatus}`,
-      detail: `${existing.title} updated to ${newStatus.replace(/_/g, ' ')}.`,
-      status: newStatus
-    };
-
-    const nextState: AppPhase1State = {
-      ...data,
-      actions: updatedActions,
-      timeline: [event, ...(data.timeline || [])]
-    };
-
-    saveState(nextState);
-    setData(nextState);
-
-    // Call server API for persistence
+    setSyncError(null);
     try {
+      let res: Response;
       if (newStatus === 'in_progress') {
-        await fetch(`/api/v1/actions/${actionId}`, {
+        res = await fetch(`/api/v1/actions/${actionId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: 'in_progress' })
         });
       } else if (newStatus === 'awaiting_verification') {
-        await fetch(`/api/v1/actions/${actionId}/submit-verification`, { method: 'POST' });
+        res = await fetch(`/api/v1/actions/${actionId}/submit-verification`, { method: 'POST' });
       } else if (newStatus === 'closed') {
-        await fetch(`/api/v1/actions/${actionId}/verify`, {
+        res = await fetch(`/api/v1/actions/${actionId}/verify`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ result: 'pass', notes: 'Verified and approved by manager' })
         });
+      } else {
+        return;
       }
-    } catch (err) {
-      console.warn('[ActionsPage] Non-fatal status update sync warning:', err);
+
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || json.error) {
+        throw new Error(json.error?.message || json.message || `Failed to update status to ${newStatus}`);
+      }
+
+      await syncServerActions();
+    } catch (err: any) {
+      setSyncError(err?.message || 'Unable to update action on server.');
     }
   }
 
@@ -262,6 +235,12 @@ export default function ActionsPage() {
             </div>
           </div>
         </div>
+
+        {syncError && (
+          <div className="notice error" style={{ marginBottom: 20 }}>
+            {syncError}
+          </div>
+        )}
 
         {/* STATUS TABS */}
         <div className="tabs" style={{ marginBottom: 20 }}>

@@ -72,10 +72,70 @@ export default function Checks() {
   const [actionServiceCategory, setActionServiceCategory] = useState('cleaning');
   const [actionCreatedId, setActionCreatedId] = useState<string | null>(null);
   const [isSavingAction, setIsSavingAction] = useState(false);
+  const [serverCheckInstanceId, setServerCheckInstanceId] = useState<string | null>(null);
+  const [serverItems, setServerItems] = useState<any[]>([]);
+  const [isSubmittingCheck, setIsSubmittingCheck] = useState(false);
+  const [checkSubmitError, setCheckSubmitError] = useState<string | null>(null);
+  const [activeOutletId, setActiveOutletId] = useState<string | null>(null);
+  const [isLoadingServerChecks, setIsLoadingServerChecks] = useState(true);
+
+  async function loadServerChecks() {
+    setIsLoadingServerChecks(true);
+    setCheckSubmitError(null);
+    try {
+      const dashRes = await fetch('/api/v1/dashboard/today', { cache: 'no-store' });
+      if (!dashRes.ok) {
+        if (dashRes.status === 401) {
+          setCheckSubmitError('Please log in to record and synchronize daily checks.');
+          return;
+        }
+      }
+      const dashJson = await dashRes.json();
+      const outletId = dashJson.data?.outlet?.id || 'demo-outlet';
+      setActiveOutletId(outletId);
+
+      const checksRes = await fetch(`/api/v1/outlets/${outletId}/checks/today`, { cache: 'no-store' });
+      if (checksRes.ok) {
+        const checksJson = await checksRes.json();
+        const instance = checksJson.data?.checks?.[0];
+        if (instance?.id) {
+          setServerCheckInstanceId(instance.id);
+          const detailRes = await fetch(`/api/v1/checks/${instance.id}`, { cache: 'no-store' });
+          if (detailRes.ok) {
+            const detailJson = await detailRes.json();
+            if (detailJson.data?.items) {
+              setServerItems(detailJson.data.items);
+              const serverSavedChecks: Record<string, CheckRecord> = {};
+              for (const it of detailJson.data.items) {
+                if (it.response_status || it.response_value !== null) {
+                  const checkCode = it.rule_code || it.code;
+                  serverSavedChecks[checkCode] = {
+                    status: it.response_status === 'na' ? 'na' : it.response_status === 'pass' ? 'good' : 'attention',
+                    value: typeof it.response_value === 'string' ? it.response_value : JSON.stringify(it.response_value || ''),
+                    time: new Date().toISOString(),
+                    reviewStatus: 'pending_manager'
+                  };
+                }
+              }
+              if (Object.keys(serverSavedChecks).length > 0) {
+                setData(prev => ({
+                  ...prev,
+                  checks: { ...(prev.checks || {}), ...serverSavedChecks }
+                }));
+              }
+            }
+          }
+        }
+      }
+    } catch (err: any) {
+      console.warn('[Checks] Failed to load server checks:', err);
+    } finally {
+      setIsLoadingServerChecks(false);
+    }
+  }
 
   useEffect(() => {
-    const refresh = () => setData(loadState());
-    refresh();
+    loadServerChecks();
 
     const q = new URLSearchParams(window.location.search);
     const id = Number(q.get('check'));
@@ -147,8 +207,8 @@ export default function Checks() {
       }
     }
 
-    window.addEventListener('foodsaf365:update', refresh);
-    return () => window.removeEventListener('foodsaf365:update', refresh);
+    window.addEventListener('foodsaf365:update', loadServerChecks);
+    return () => window.removeEventListener('foodsaf365:update', loadServerChecks);
   }, []);
 
   const today = useMemo(() => FOODSAFE28.filter(isScheduledCheck), []);
@@ -302,16 +362,20 @@ export default function Checks() {
     return { hasInput: has, isAcceptable: has && Number.isFinite(n), message: has ? 'Reading recorded.' : 'Enter measurement or mark as Not Applicable.' };
   }, [selected, value, rating, obsNote, storageType, processMode, foodType, cookMethod, cookTime, coolFirstTemp, coolFirstTime, coolFinalTemp, coolFinalTime, holdingType, reheatMethodOK]);
 
-  function submit() {
+  async function submit() {
     if (!selected || !currentEvaluation.hasInput) return;
 
-    let good = currentEvaluation.isAcceptable;
+    setIsSubmittingCheck(true);
+    setCheckSubmitError(null);
+
     let recordedValue = '';
+    let numericVal: number | undefined;
 
     if (rating === 'na') {
       recordedValue = `N/A — Not Applicable${obsNote.trim() ? ` · Reason: "${obsNote.trim()}"` : ''}`;
-      good = true;
     } else if (selected.input === 'temperature') {
+      const n = Number(value);
+      if (Number.isFinite(n)) numericVal = n;
       if (selected.code === 'FS28-19') {
         recordedValue = `Cool storage: ${value}°C`;
       } else if (selected.code === 'FS28-20') {
@@ -334,103 +398,93 @@ export default function Checks() {
       }
     }
 
-    const now = new Date().toISOString();
-    const event: AuditTrailEvent = {
-      id: `evt-check-${selected.id}-${Date.now()}`,
-      at: now,
-      type: 'Supervisor check submitted',
-      detail: `${selected.code} (${selected.title}): ${recordedValue} → ${rating === 'na' ? 'Not Applicable' : good ? 'Acceptable' : 'Needs attention'} (Awaiting manager review)`,
-      status: 'pending_manager'
-    };
+    const checkId = serverCheckInstanceId || 'demo-check';
+    const matchedItem = serverItems.find(it => it.rule_code === selected.code || it.code === selected.code);
+    const itemId = matchedItem?.id || selected.code;
 
-    const nextState: AppPhase1State = {
-      ...data,
-      checks: {
-        ...saved,
+    try {
+      const res = await fetch(`/api/v1/checks/${checkId}/responses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          item_id: itemId,
+          response_value: rating === 'na' ? 'na' : selected.input === 'temperature' ? (numericVal ?? value) : (rating !== null ? (rating >= 3 ? 'pass' : 'fail') : value),
+          numeric_value: numericVal,
+          temperature_value: numericVal,
+          notes: obsNote.trim() || undefined
+        })
+      });
+
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok || json.error) {
+        const errMsg = json.error?.message || json.message || 'Unable to submit check response to server.';
+        setCheckSubmitError(errMsg);
+        setIsSubmittingCheck(false);
+        return;
+      }
+
+      const evalData = json.data;
+      const isGood = evalData?.outcome === 'GOOD' || evalData?.responseStatus === 'pass' || rating === 'na';
+
+      const now = new Date().toISOString();
+      const event: AuditTrailEvent = {
+        id: `evt-check-${selected.id}-${Date.now()}`,
+        at: now,
+        type: 'Supervisor check submitted',
+        detail: `${selected.code} (${selected.title}): ${recordedValue} → ${evalData?.outcome || (isGood ? 'Acceptable' : 'Needs attention')}`,
+        status: isGood ? 'good' : 'attention'
+      };
+
+      const nextSaved: Record<string, CheckRecord> = {
+        ...(data.checks || {}),
         [selected.code]: {
-          status: rating === 'na' ? 'na' : good ? 'good' : 'attention',
+          status: rating === 'na' ? 'na' : isGood ? 'good' : 'attention',
           value: recordedValue,
           time: now,
           reviewStatus: 'pending_manager',
           processMode: selected.code === 'FS28-21' ? processMode : undefined
         }
-      },
-      timeline: [event, ...(data.timeline || [])]
-    };
+      };
 
-    saveState(nextState);
-    setData(nextState);
-    setResult(good ? 'good' : 'attention');
+      setData(prev => ({
+        ...prev,
+        checks: nextSaved,
+        timeline: [event, ...(prev.timeline || [])]
+      }));
 
-    if (!good) {
-      const defNote = obsNote.trim() || `Recorded value (${recordedValue}) did not satisfy FoodSafe365 standard: ${selected.standard}`;
-      setActionTitle(`[${selected.code}] Deviation: ${selected.title}`);
-      setActionIssue(defNote);
-      setActionImmediate(selected.action || 'Halt process, isolate non-conforming items, and sanitize area immediately.');
-      setActionCorrective(`Verify root cause for ${selected.code}, adjust process controls, and conduct station team refresher.`);
-      setActionPriority(selected.severity === 'Critical' ? 'critical' : 'high');
-      setActionDueDate(new Date(Date.now() + 86400000).toISOString().slice(0, 10));
-      setActionAssignedTo('Duty Supervisor');
-      setActionExternalService(false);
-      setActionServiceCategory(['FS28-19', 'FS28-20'].includes(selected.code) ? 'refrigeration' : ['FS28-26', 'FS28-27'].includes(selected.code) ? 'pest_control' : 'deep_cleaning');
-      setActionCreatedId(null);
+      setResult(isGood ? 'good' : 'attention');
+
+      if (!isGood) {
+        const defNote = obsNote.trim() || evalData?.explanation || `Recorded value (${recordedValue}) did not satisfy FoodSafe365 standard: ${selected.standard}`;
+        setActionTitle(`[${selected.code}] Deviation: ${selected.title}`);
+        setActionIssue(defNote);
+        setActionImmediate(evalData?.nextStep || selected.action || 'Halt process, isolate non-conforming items, and sanitize area immediately.');
+        setActionCorrective(`Verify root cause for ${selected.code}, adjust process controls, and conduct station team refresher.`);
+        setActionPriority(selected.severity === 'Critical' ? 'critical' : 'high');
+        setActionDueDate(new Date(Date.now() + 86400000).toISOString().slice(0, 10));
+        setActionAssignedTo('Duty Supervisor');
+        setActionExternalService(false);
+        setActionServiceCategory(['FS28-19', 'FS28-20'].includes(selected.code) ? 'refrigeration' : ['FS28-26', 'FS28-27'].includes(selected.code) ? 'pest_control' : 'deep_cleaning');
+        setActionCreatedId(evalData?.correctiveActionId || null);
+      }
+    } catch (err: any) {
+      setCheckSubmitError(err?.message || 'Network error submitting check response.');
+    } finally {
+      setIsSubmittingCheck(false);
     }
   }
 
   async function handleCreateAction() {
     if (!selected) return;
     setIsSavingAction(true);
+    setCheckSubmitError(null);
+
     const now = new Date().toISOString();
-    const actionId = `action-${selected.id}-${Date.now()}`;
-    const issueId = `issue-${selected.id}-${Date.now()}`;
-
-    const newIssue: Issue = {
-      id: issueId,
-      checkId: selected.id,
-      checkCode: selected.code,
-      title: actionTitle,
-      severity: actionPriority === 'critical' ? 'critical' : 'attention',
-      createdAt: now,
-      status: 'open',
-      alertedAt: now,
-      actionId
-    };
-
-    const newAction: CorrectiveAction = {
-      id: actionId,
-      issueId,
-      outletId: 'the-table',
-      checkCode: selected.code,
-      sourceCheckCode: selected.code,
-      title: actionTitle,
-      description: actionIssue,
-      severity: actionPriority === 'critical' ? 'critical' : 'attention',
-      priority: actionPriority,
-      status: 'open',
-      createdAt: now,
-      dueDate: actionDueDate,
-      assignedTo: actionAssignedTo,
-      responsiblePerson: actionAssignedTo,
-      immediateAction: actionImmediate,
-      correctiveAction: actionCorrective,
-      rootCause: null,
-      requiresExternalService: actionExternalService,
-      serviceCategory: actionExternalService ? actionServiceCategory : null,
-      sourceType: feedbackSource ? 'customer_feedback_trigger' : 'operational_check'
-    };
-
-    const nextState: AppPhase1State = {
-      ...data,
-      issues: [newIssue, ...(data.issues || [])],
-      actions: [newAction, ...(data.actions || [])]
-    };
-
-    saveState(nextState);
-    setData(nextState);
-    setActionCreatedId(actionId);
+    const targetOutlet = activeOutletId || 'demo-outlet';
 
     try {
-      await fetch('/api/v1/actions', {
+      const res = await fetch('/api/v1/actions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -443,16 +497,55 @@ export default function Checks() {
           dueDate: actionDueDate,
           assignedTo: actionAssignedTo,
           responsiblePerson: actionAssignedTo,
-          outletId: 'the-table',
+          outletId: targetOutlet,
           sourceCheckCode: selected.code,
           checkCode: selected.code,
-          sourceType: newAction.sourceType,
+          sourceType: feedbackSource ? 'customer_feedback_trigger' : 'operational_check',
           requiresExternalService: actionExternalService,
           serviceCategory: actionExternalService ? actionServiceCategory : null
         })
       });
-    } catch (err) {
-      console.warn('[Checks] Action API sync error:', err);
+
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok || json.error) {
+        throw new Error(json.error?.message || json.message || 'Server error creating corrective action');
+      }
+
+      const createdAction = json.data?.action || json.data;
+      const createdId = createdAction?.id || `action-${selected.id}-${Date.now()}`;
+      setActionCreatedId(createdId);
+
+      setData(prev => ({
+        ...prev,
+        actions: [
+          {
+            id: createdId,
+            issueId: `issue-${createdId}`,
+            outletId: targetOutlet,
+            checkCode: selected.code,
+            sourceCheckCode: selected.code,
+            title: actionTitle,
+            description: actionIssue,
+            severity: actionPriority === 'critical' ? 'critical' : 'attention',
+            priority: actionPriority,
+            status: 'open',
+            createdAt: now,
+            dueDate: actionDueDate,
+            assignedTo: actionAssignedTo,
+            responsiblePerson: actionAssignedTo,
+            immediateAction: actionImmediate,
+            correctiveAction: actionCorrective,
+            rootCause: null,
+            requiresExternalService: actionExternalService,
+            serviceCategory: actionExternalService ? actionServiceCategory : null,
+            sourceType: feedbackSource ? 'customer_feedback_trigger' : 'operational_check'
+          },
+          ...(prev.actions || [])
+        ]
+      }));
+    } catch (err: any) {
+      setCheckSubmitError(err?.message || 'Failed to persist corrective action.');
     } finally {
       setIsSavingAction(false);
     }
@@ -1210,13 +1303,21 @@ export default function Checks() {
                 </div>
               )}
 
+              {checkSubmitError && (
+                <div className="notice error" style={{ marginTop: 16 }}>
+                  {checkSubmitError}
+                </div>
+              )}
+
               <div style={{ marginTop: 24 }}>
                 <button
                   className="btn primary full-choice"
-                  disabled={!currentEvaluation.hasInput}
+                  disabled={!currentEvaluation.hasInput || isSubmittingCheck}
                   onClick={submit}
                 >
-                  {lang === 'hi'
+                  {isSubmittingCheck
+                    ? 'Submitting to server…'
+                    : lang === 'hi'
                     ? 'प्रबंधक समीक्षा के लिए जमा करें'
                     : lang === 'mr'
                     ? 'व्यवस्थापक पुनरावलोकनासाठी सादर करा'

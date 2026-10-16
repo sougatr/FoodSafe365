@@ -4,7 +4,8 @@ import {
   verifySessionToken,
   createSessionToken,
   SESSION_COOKIE_NAME,
-  SessionInput
+  SessionInput,
+  SessionJourney
 } from './session';
 
 export type AuthContext = {
@@ -13,6 +14,7 @@ export type AuthContext = {
   outletId: string;
   role: string;
   providerId?: string;
+  journey?: SessionJourney;
   sessionId?: string;
 };
 
@@ -90,6 +92,7 @@ export async function getAuthContext(req?: Request): Promise<AuthContext | null>
       outletId: session.outletId || 'none',
       role: session.role,
       providerId: session.providerId,
+      journey: session.journey,
       sessionId: session.sessionId
     };
   }

@@ -1,6 +1,7 @@
 import type { PoolClient, QueryResultRow } from 'pg';
 import pg from 'pg';
 import fs from 'fs';
+import { getEffectiveDatabaseUrl, sanitizeDbUrl } from './db-config';
 
 let pool: any = null;
 export type { PoolClient, QueryResultRow };
@@ -20,18 +21,7 @@ export function resetPool() {
   pool = null;
 }
 
-/**
- * Sanitize database connection string for safe logging and error reporting.
- * Strips out user credentials (password/secret) to prevent accidental credential leakage.
- */
-export function sanitizeDbUrl(url?: string): string {
-  if (!url) return 'UNCONFIGURED';
-  try {
-    return url.replace(/(postgres(?:ql)?:\/\/[^:]+:)([^@]+)(@)/, '$1***$3');
-  } catch {
-    return 'REDACTED_URL';
-  }
-}
+export { sanitizeDbUrl, getEffectiveDatabaseUrl };
 
 /**
  * Resolves SSL configuration for PostgreSQL connections.
@@ -42,12 +32,26 @@ export function sanitizeDbUrl(url?: string): string {
  * - In production without custom CA, standard trusted root CAs are used with rejectUnauthorized: true.
  * - In local development (localhost / 127.0.0.1) when SSL is not required, TLS is omitted cleanly.
  */
-export function getDatabaseSslConfig(customEnv?: NodeJS.ProcessEnv): pg.PoolConfig['ssl'] {
-  const env = customEnv || process.env;
+export function getDatabaseSslConfig(
+  targetUrlOrEnv?: string | NodeJS.ProcessEnv,
+  customEnv?: NodeJS.ProcessEnv
+): pg.PoolConfig['ssl'] {
+  let targetUrl: string | undefined;
+  let env: NodeJS.ProcessEnv;
+
+  if (typeof targetUrlOrEnv === 'string') {
+    targetUrl = targetUrlOrEnv;
+    env = customEnv || process.env;
+  } else {
+    targetUrl = undefined;
+    env = targetUrlOrEnv || customEnv || process.env;
+  }
+
   const isProd = env.NODE_ENV === 'production';
-  const dbUrl = env.DATABASE_URL || '';
+  const dbUrl = targetUrl || getEffectiveDatabaseUrl({ customEnv: env }) || '';
   const requireCa = env.DATABASE_SSL_REQUIRE_CA === 'true';
   const sslRequired = env.DATABASE_SSL_REQUIRED === 'true';
+
 
   // 1. Guard against insecure overrides in production
   if (isProd) {
@@ -124,26 +128,38 @@ export function getPool(customEnv?: NodeJS.ProcessEnv) {
   if (pool) return pool;
   const env = customEnv || process.env;
   const isProd = env.NODE_ENV === 'production';
+  const dbUrl = getEffectiveDatabaseUrl({ customEnv: env });
 
   if (isProd) {
-    const issue = validateDatabaseUrl(env.DATABASE_URL, true);
+    const issue = validateDatabaseUrl(dbUrl, true);
     if (issue) {
       throw new Error(issue.message);
     }
-  } else if (!env.DATABASE_URL) {
+  } else if (!dbUrl) {
     return null;
   }
 
   if (!pool) {
-    const ssl = getDatabaseSslConfig(env);
+    const ssl = getDatabaseSslConfig(dbUrl, env);
     pool = new pg.Pool({
-      connectionString: env.DATABASE_URL,
+      connectionString: dbUrl,
       max: 10,
       ssl
     });
   }
   return pool;
 }
+
+export function createDedicatedPool(connectionString: string, customEnv?: NodeJS.ProcessEnv): pg.Pool {
+  const env = customEnv || process.env;
+  const ssl = getDatabaseSslConfig(connectionString, env);
+  return new pg.Pool({
+    connectionString,
+    max: 5,
+    ssl
+  });
+}
+
 
 export async function query<T extends QueryResultRow = QueryResultRow>(text: string, params: any[] = []): Promise<T[]> {
   const p = getPool();

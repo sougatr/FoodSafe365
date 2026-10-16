@@ -1,4 +1,4 @@
-import { getPool, query } from './db';
+import { getPool, query, transaction } from './db';
 import {
   GroceryOutlet,
   GroceryStorageZone,
@@ -11,7 +11,11 @@ import {
   TemperatureStatus,
   StockStatus,
   GROCERY_PRODUCT_CATEGORIES,
-  SegregationRuleCheck
+  SegregationRuleCheck,
+  RecallReasonCategory,
+  ReleaseReasonCategory,
+  BatchQuarantineResult,
+  BatchReleaseResult
 } from './grocery-types';
 import { GROCERY_OPERATIONAL_CHECKS } from './grocery-checklist-data';
 import { createDemoAction, updateDemoAction } from './demo-store';
@@ -412,6 +416,7 @@ export const SEED_RECEIVINGS: GroceryReceiving[] = [
 export function isGroceryPostgresMode(): boolean {
   if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
     console.error('[CRITICAL PRODUCTION CONFIGURATION ERROR] DATABASE_URL is required in production environment.');
+    throw new Error('DATABASE_ERROR: Production requires configured PostgreSQL DATABASE_URL. Refusing memory fallback.');
   }
   return Boolean(process.env.DATABASE_URL);
 }
@@ -436,249 +441,9 @@ function handleDatabaseError(operation: string, err: any): never {
 // ----------------------------------------------------
 // POSTGRESQL SCHEMA INITIALIZATION
 // ----------------------------------------------------
-let pgSchemaInitialized = false;
-
 export async function ensureGroceryPgSchema(): Promise<boolean> {
-  if (pgSchemaInitialized) return true;
-  const pool = getPool();
-  if (!pool) return false;
-
-  // In production, runtime code strictly assumes required schema has already been migrated.
-  // Dynamic DDL (CREATE TABLE IF NOT EXISTS) is forbidden during production request handling.
-  if (process.env.NODE_ENV === 'production') {
-    pgSchemaInitialized = true;
-    return true;
-  }
-
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS grocery_outlets (
-        id text PRIMARY KEY,
-        name text NOT NULL,
-        branch_name text NOT NULL,
-        address text NOT NULL,
-        city text NOT NULL,
-        manager_name text NOT NULL,
-        contact_number text NOT NULL,
-        contact_email text NOT NULL,
-        fssai_number text,
-        store_type text NOT NULL DEFAULT 'supermarket',
-        selected_categories jsonb DEFAULT '[]'::jsonb,
-        created_at timestamptz DEFAULT now(),
-        updated_at timestamptz DEFAULT now()
-      );
-
-      CREATE TABLE IF NOT EXISTS grocery_product_categories (
-        id text PRIMARY KEY,
-        name text NOT NULL,
-        code text NOT NULL UNIQUE,
-        icon text,
-        min_temp numeric(5,2),
-        max_temp numeric(5,2),
-        is_temp_sensitive boolean DEFAULT false,
-        target_unit text,
-        storage_guidelines text,
-        segregation_rules text,
-        created_at timestamptz DEFAULT now()
-      );
-
-      CREATE TABLE IF NOT EXISTS grocery_storage_zones (
-        id text PRIMARY KEY,
-        outlet_id text NOT NULL REFERENCES grocery_outlets(id) ON DELETE CASCADE,
-        name text NOT NULL,
-        zone_type text NOT NULL,
-        target_temp numeric(5,2),
-        min_temp numeric(5,2),
-        max_temp numeric(5,2),
-        description text,
-        created_at timestamptz DEFAULT now()
-      );
-
-      CREATE TABLE IF NOT EXISTS grocery_equipment (
-        id text PRIMARY KEY,
-        outlet_id text NOT NULL REFERENCES grocery_outlets(id) ON DELETE CASCADE,
-        name text NOT NULL,
-        equipment_type text NOT NULL,
-        location text NOT NULL,
-        target_temp numeric(5,2) NOT NULL,
-        min_temp numeric(5,2) NOT NULL,
-        max_temp numeric(5,2) NOT NULL,
-        responsible_person text NOT NULL,
-        active boolean DEFAULT true,
-        created_at timestamptz DEFAULT now()
-      );
-
-      CREATE TABLE IF NOT EXISTS grocery_receiving_records (
-        id text PRIMARY KEY,
-        outlet_id text NOT NULL REFERENCES grocery_outlets(id) ON DELETE CASCADE,
-        date_time timestamptz DEFAULT now(),
-        supplier text NOT NULL,
-        product text NOT NULL,
-        product_category text NOT NULL,
-        quantity text NOT NULL,
-        batch_number text,
-        use_by_date date,
-        packaging_condition text NOT NULL,
-        product_condition text NOT NULL,
-        temperature numeric(5,2),
-        is_temp_sensitive boolean DEFAULT false,
-        receiving_person text NOT NULL,
-        decision text NOT NULL CHECK (decision IN ('ACCEPT', 'REJECT', 'HOLD')),
-        rejection_reason text,
-        evidence_url text,
-        inspection_checklist jsonb NOT NULL,
-        corrective_action_id text,
-        created_at timestamptz DEFAULT now()
-      );
-
-      CREATE TABLE IF NOT EXISTS grocery_receiving_inspections (
-        id text PRIMARY KEY,
-        receiving_id text NOT NULL REFERENCES grocery_receiving_records(id) ON DELETE CASCADE,
-        check_name text NOT NULL,
-        passed boolean NOT NULL,
-        notes text,
-        created_at timestamptz DEFAULT now()
-      );
-
-      CREATE TABLE IF NOT EXISTS grocery_inventory_batches (
-        id text PRIMARY KEY,
-        outlet_id text NOT NULL REFERENCES grocery_outlets(id) ON DELETE CASCADE,
-        product text NOT NULL,
-        category text NOT NULL,
-        batch text NOT NULL,
-        quantity numeric(10,2) NOT NULL,
-        unit text NOT NULL,
-        date_received date NOT NULL,
-        expiry_date date NOT NULL,
-        storage_zone_id text REFERENCES grocery_storage_zones(id) ON DELETE SET NULL,
-        storage_zone_name text NOT NULL,
-        status text NOT NULL CHECK (status IN ('ACTIVE', 'NEAR_EXPIRY', 'EXPIRED', 'QUARANTINED', 'DISPOSED')),
-        audit_trail jsonb DEFAULT '[]'::jsonb,
-        created_at timestamptz DEFAULT now(),
-        updated_at timestamptz DEFAULT now()
-      );
-
-      CREATE TABLE IF NOT EXISTS grocery_temperature_logs (
-        id text PRIMARY KEY,
-        outlet_id text NOT NULL REFERENCES grocery_outlets(id) ON DELETE CASCADE,
-        equipment_id text NOT NULL REFERENCES grocery_equipment(id) ON DELETE CASCADE,
-        equipment_name text NOT NULL,
-        reading numeric(5,2) NOT NULL,
-        status text NOT NULL CHECK (status IN ('GREEN', 'AMBER', 'RED')),
-        method text DEFAULT 'probe',
-        notes text,
-        corrective_action_id text,
-        recorded_by text NOT NULL,
-        recorded_at timestamptz DEFAULT now()
-      );
-
-      CREATE TABLE IF NOT EXISTS grocery_daily_checks (
-        id text PRIMARY KEY,
-        outlet_id text NOT NULL REFERENCES grocery_outlets(id) ON DELETE CASCADE,
-        check_date date NOT NULL,
-        shift text NOT NULL DEFAULT 'morning',
-        completed_by text NOT NULL,
-        verified_by text,
-        overall_status text NOT NULL CHECK (overall_status IN ('COMPLIANT', 'ATTENTION_REQUIRED', 'ACTION_REQUIRED')),
-        passed_count integer NOT NULL,
-        flagged_count integer NOT NULL,
-        created_at timestamptz DEFAULT now()
-      );
-
-      CREATE TABLE IF NOT EXISTS grocery_daily_check_items (
-        id text PRIMARY KEY,
-        check_id text NOT NULL REFERENCES grocery_daily_checks(id) ON DELETE CASCADE,
-        check_code text NOT NULL,
-        category text NOT NULL,
-        question text NOT NULL,
-        status text NOT NULL CHECK (status IN ('YES', 'NO', 'NA')),
-        notes text,
-        photo_url text,
-        corrective_action_required boolean DEFAULT false,
-        corrective_action_id text,
-        created_at timestamptz DEFAULT now()
-      );
-
-      CREATE TABLE IF NOT EXISTS grocery_corrective_actions (
-        id text PRIMARY KEY,
-        outlet_id text NOT NULL REFERENCES grocery_outlets(id) ON DELETE CASCADE,
-        title text NOT NULL,
-        description text NOT NULL,
-        severity text NOT NULL,
-        priority text NOT NULL,
-        status text NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'awaiting_verification', 'closed')),
-        assigned_to text,
-        source_type text NOT NULL,
-        source_id text,
-        source_check_code text,
-        requires_external_service boolean DEFAULT false,
-        service_category text,
-        created_at timestamptz DEFAULT now(),
-        closed_at timestamptz
-      );
-
-      CREATE TABLE IF NOT EXISTS grocery_verification_records (
-        id text PRIMARY KEY,
-        corrective_action_id text NOT NULL REFERENCES grocery_corrective_actions(id) ON DELETE CASCADE,
-        result text NOT NULL CHECK (result IN ('verified_effective', 'rejected', 'partially_effective')),
-        notes text NOT NULL,
-        verified_by text NOT NULL,
-        verification_method text NOT NULL,
-        verified_at timestamptz DEFAULT now()
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_grocery_zones_outlet ON grocery_storage_zones(outlet_id);
-      CREATE INDEX IF NOT EXISTS idx_grocery_equipment_outlet ON grocery_equipment(outlet_id);
-      CREATE INDEX IF NOT EXISTS idx_grocery_temp_logs_outlet ON grocery_temperature_logs(outlet_id, recorded_at DESC);
-      CREATE INDEX IF NOT EXISTS idx_grocery_receivings_outlet ON grocery_receiving_records(outlet_id, created_at DESC);
-      CREATE INDEX IF NOT EXISTS idx_grocery_inventory_outlet ON grocery_inventory_batches(outlet_id, expiry_date ASC);
-      CREATE INDEX IF NOT EXISTS idx_grocery_daily_checks_outlet ON grocery_daily_checks(outlet_id, check_date DESC);
-      CREATE INDEX IF NOT EXISTS idx_grocery_actions_outlet ON grocery_corrective_actions(outlet_id, status);
-    `);
-
-    // Ensure baseline seed outlets exist in PostgreSQL
-    const outletCountRows = await pool.query('SELECT count(*)::int as count FROM grocery_outlets');
-    if (outletCountRows.rows[0].count === 0) {
-      for (const o of SEED_GROCERY_OUTLETS) {
-        await pool.query(
-          `INSERT INTO grocery_outlets (id, name, branch_name, address, city, manager_name, contact_number, contact_email, fssai_number, store_type, selected_categories, created_at, updated_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-           ON CONFLICT (id) DO NOTHING`,
-          [o.id, o.name, o.branchName, o.address, o.city, o.managerName, o.contactNumber, o.contactEmail, o.fssaiNumber, o.storeType, JSON.stringify(o.selectedCategories), o.createdAt, o.updatedAt]
-        );
-      }
-      for (const z of SEED_STORAGE_ZONES) {
-        await pool.query(
-          `INSERT INTO grocery_storage_zones (id, outlet_id, name, zone_type, target_temp, min_temp, max_temp, description)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-           ON CONFLICT (id) DO NOTHING`,
-          [z.id, z.outletId, z.name, z.type, z.targetTemp, z.minTemp, z.maxTemp, z.description]
-        );
-      }
-      for (const eq of SEED_EQUIPMENT) {
-        await pool.query(
-          `INSERT INTO grocery_equipment (id, outlet_id, name, equipment_type, location, target_temp, min_temp, max_temp, responsible_person, active, created_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-           ON CONFLICT (id) DO NOTHING`,
-          [eq.id, eq.outletId, eq.name, eq.type, eq.location, eq.targetTemp, eq.minTemp, eq.maxTemp, eq.responsiblePerson, eq.active, eq.createdAt]
-        );
-      }
-      for (const s of SEED_STOCK_ITEMS) {
-        await pool.query(
-          `INSERT INTO grocery_inventory_batches (id, outlet_id, product, category, batch, quantity, unit, date_received, expiry_date, storage_zone_id, storage_zone_name, status, audit_trail, created_at, updated_at)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-           ON CONFLICT (id) DO NOTHING`,
-          [s.id, s.outletId, s.product, s.category, s.batch, s.quantity, s.unit, s.dateReceived, s.expiryDate, s.storageZoneId, s.storageZoneName, s.status, JSON.stringify(s.auditTrail), s.createdAt, s.updatedAt]
-        );
-      }
-    }
-
-    pgSchemaInitialized = true;
-    return true;
-  } catch (err) {
-    console.error('[grocery-store] PostgreSQL schema initialization failed:', err);
-    throw err;
-  }
+  // Schema is managed exclusively by tracked migrations (001-008). Dynamic runtime DDL is eliminated.
+  return true;
 }
 
 // ----------------------------------------------------
@@ -926,7 +691,9 @@ export function getAllGroceryOutlets(): GroceryOutlet[] {
   return Array.from(getMockOutlets().values()).map(o => ({ ...o }));
 }
 
-export async function saveGroceryOutletAsync(outletData: Omit<GroceryOutlet, 'createdAt' | 'updatedAt'>): Promise<GroceryOutlet> {
+export async function saveGroceryOutletAsync(
+  outletData: Omit<GroceryOutlet, 'createdAt' | 'updatedAt'> & { passwordHash?: string }
+): Promise<GroceryOutlet> {
   if (_simulatePgFailure) handleDatabaseError('saveGroceryOutlet', new Error('Simulated database disconnect'));
 
   if (isGroceryPostgresMode()) {
@@ -966,6 +733,13 @@ export async function saveGroceryOutletAsync(outletData: Omit<GroceryOutlet, 'cr
         ]
       );
       const saved = rows[0];
+
+      if (outletData.passwordHash) {
+        await query(
+          `UPDATE grocery_outlets SET password_hash = $2, updated_at = now() WHERE id = $1`,
+          [outletData.id, outletData.passwordHash]
+        );
+      }
 
       // Ensure default zones if none exist in PostgreSQL
       const existingZones = await query<{ count: string }>(
@@ -1073,13 +847,14 @@ export async function saveGroceryOutletAsync(outletData: Omit<GroceryOutlet, 'cr
   const map = getMockOutlets();
   const now = new Date().toISOString();
   const existing = map.get(outletData.id);
+  const { passwordHash: _ignoredHash, ...cleanOutletData } = outletData;
   const updated: GroceryOutlet = {
-    ...outletData,
+    ...cleanOutletData,
     createdAt: existing ? existing.createdAt : now,
     updatedAt: now
   };
   map.set(outletData.id, updated);
-  initializeMockDefaultZonesAndEquipment(outletData, now);
+  initializeMockDefaultZonesAndEquipment(cleanOutletData, now);
   return { ...updated };
 }
 
@@ -1845,6 +1620,7 @@ export function recordReceivingItem(input: {
     temperatureAppropriate: boolean;
     suitableForStorage: boolean;
     withinCapacity: boolean;
+    vehicleCleanAndFoodOnly?: boolean;
   };
 }): { receiving: GroceryReceiving; stockCreated?: GroceryStockItem; actionCreated?: any } {
 
@@ -2180,6 +1956,621 @@ export function updateStockStatus(
 }
 
 // ----------------------------------------------------
+// BATCH RECALL & QUARANTINE SERVICES (PHASE 2A)
+// ----------------------------------------------------
+
+export async function quarantineBatchAsync(
+  outletId: string,
+  batchNumber: string,
+  reasonCategory: RecallReasonCategory,
+  reasonDetails: string,
+  user: string
+): Promise<BatchQuarantineResult> {
+  if (!outletId || !batchNumber) {
+    throw new Error('outletId and batchNumber are required for batch quarantine');
+  }
+  if (!reasonCategory) {
+    throw new Error('Mandatory recall reason category is required');
+  }
+
+  if (_simulatePgFailure) handleDatabaseError('quarantineBatch', new Error('Simulated database disconnect'));
+
+  const now = new Date().toISOString();
+
+  if (isGroceryPostgresMode()) {
+    try {
+      await ensureGroceryPgSchema();
+      return await transaction(async (client) => {
+        const { rows } = await client.query(
+          `SELECT id, outlet_id as "outletId", product, category, batch, quantity, unit,
+                  date_received as "dateReceived", expiry_date as "expiryDate",
+                  storage_zone_id as "storageZoneId", storage_zone_name as "storageZoneName",
+                  status, audit_trail as "auditTrail", created_at as "createdAt", updated_at as "updatedAt"
+           FROM grocery_inventory_batches
+           WHERE outlet_id = $1 AND batch = $2
+           FOR UPDATE`,
+          [outletId, batchNumber]
+        );
+
+        if (rows.length === 0) {
+          throw new Error(`No items found matching batch "${batchNumber}" for outlet ${outletId}`);
+        }
+
+        const zones = await getStorageZonesAsync(outletId);
+        const qZone = zones.find(z => z.type === 'waste_quarantine') || zones[0];
+
+        const affectedItems: GroceryStockItem[] = [];
+        let alreadyQuarantinedCount = 0;
+
+        for (const r of rows) {
+          if (r.status === 'DISPOSED') continue; // Do not alter already disposed stock
+          const auditTrail: any[] = Array.isArray(r.auditTrail) ? r.auditTrail : JSON.parse(r.auditTrail || '[]');
+
+          // Idempotency: Repeating quarantine on already quarantined item does not duplicate audit log
+          if (r.status === 'QUARANTINED') {
+            alreadyQuarantinedCount++;
+            affectedItems.push({
+              ...r,
+              auditTrail
+            });
+            continue;
+          }
+
+          const prevZoneName = r.storageZoneName;
+          const prevZoneId = r.storageZoneId;
+
+          const auditEntry = {
+            timestamp: now,
+            action: 'RECALL_BATCH_QUARANTINED',
+            user,
+            details: `Recall: ${reasonCategory} - ${reasonDetails || 'Manufacturer recall hold'} (Previous zone: ${prevZoneName} [${prevZoneId}])`
+          };
+          auditTrail.push(auditEntry);
+
+          await client.query(
+            `UPDATE grocery_inventory_batches
+             SET status = $1,
+                 storage_zone_id = $2,
+                 storage_zone_name = $3,
+                 audit_trail = $4::jsonb,
+                 updated_at = now()
+             WHERE id = $5 AND outlet_id = $6`,
+            ['QUARANTINED', qZone.id, qZone.name, JSON.stringify(auditTrail), r.id, outletId]
+          );
+
+          affectedItems.push({
+            ...r,
+            status: 'QUARANTINED',
+            storageZoneId: qZone.id,
+            storageZoneName: qZone.name,
+            auditTrail,
+            updatedAt: now
+          });
+        }
+
+        const totalQuantity = affectedItems.reduce((acc, curr) => acc + Number(curr.quantity), 0);
+        return {
+          batch: batchNumber,
+          affectedCount: affectedItems.length - alreadyQuarantinedCount,
+          alreadyQuarantinedCount,
+          totalQuantity,
+          items: affectedItems
+        };
+      });
+    } catch (err: any) {
+      handleDatabaseError('quarantineBatch', err);
+    }
+  }
+
+  const map = getMockStock();
+  const list = map.get(outletId) || [];
+  const matching = list.filter(s => s.batch === batchNumber);
+
+  if (matching.length === 0) {
+    throw new Error(`No items found matching batch "${batchNumber}" for outlet ${outletId}`);
+  }
+
+  const zones = getStorageZones(outletId);
+  const qZone = zones.find((z: any) => z.type === 'waste_quarantine') || zones[0];
+  const affectedItems: GroceryStockItem[] = [];
+  let alreadyQuarantinedCount = 0;
+
+  // In-memory atomic snapshot for complete rollback protection
+  const snapshot = list.map(item => ({ ...item, auditTrail: [...item.auditTrail] }));
+  try {
+    for (const item of matching) {
+      if (item.status === 'DISPOSED') continue;
+      if (item.status === 'QUARANTINED') {
+        alreadyQuarantinedCount++;
+        affectedItems.push({ ...item });
+        continue;
+      }
+
+      const prevZoneName = item.storageZoneName;
+      const prevZoneId = item.storageZoneId;
+
+      item.status = 'QUARANTINED';
+      item.storageZoneId = qZone.id;
+      item.storageZoneName = qZone.name;
+      item.updatedAt = now;
+      item.auditTrail.push({
+        timestamp: now,
+        action: 'RECALL_BATCH_QUARANTINED',
+        user,
+        details: `Recall: ${reasonCategory} - ${reasonDetails || 'Manufacturer recall hold'} (Previous zone: ${prevZoneName} [${prevZoneId}])`
+      });
+      affectedItems.push({ ...item });
+    }
+
+    const totalQuantity = affectedItems.reduce((acc, curr) => acc + Number(curr.quantity), 0);
+    return {
+      batch: batchNumber,
+      affectedCount: affectedItems.length - alreadyQuarantinedCount,
+      alreadyQuarantinedCount,
+      totalQuantity,
+      items: affectedItems
+    };
+  } catch (err) {
+    map.set(outletId, snapshot);
+    throw err;
+  }
+}
+
+export function quarantineBatch(
+  outletId: string,
+  batchNumber: string,
+  reasonCategory: RecallReasonCategory,
+  reasonDetails: string,
+  user: string
+): BatchQuarantineResult {
+  if (!outletId || !batchNumber) {
+    throw new Error('outletId and batchNumber are required for batch quarantine');
+  }
+  if (!reasonCategory) {
+    throw new Error('Mandatory recall reason category is required');
+  }
+
+  const map = getMockStock();
+  const list = map.get(outletId) || [];
+  const matching = list.filter(s => s.batch === batchNumber);
+
+  if (matching.length === 0) {
+    throw new Error(`No items found matching batch "${batchNumber}" for outlet ${outletId}`);
+  }
+
+  const now = new Date().toISOString();
+  const zones = getStorageZones(outletId);
+  const qZone = zones.find((z: any) => z.type === 'waste_quarantine') || zones[0];
+  const affectedItems: GroceryStockItem[] = [];
+  let alreadyQuarantinedCount = 0;
+
+  // In-memory atomic snapshot for complete rollback protection
+  const snapshot = list.map(item => ({ ...item, auditTrail: [...item.auditTrail] }));
+  try {
+    for (const item of matching) {
+      if (item.status === 'DISPOSED') continue;
+      if (item.status === 'QUARANTINED') {
+        alreadyQuarantinedCount++;
+        affectedItems.push({ ...item });
+        continue;
+      }
+
+      const prevZoneName = item.storageZoneName;
+      const prevZoneId = item.storageZoneId;
+
+      item.status = 'QUARANTINED';
+      item.storageZoneId = qZone.id;
+      item.storageZoneName = qZone.name;
+      item.updatedAt = now;
+      item.auditTrail.push({
+        timestamp: now,
+        action: 'RECALL_BATCH_QUARANTINED',
+        user,
+        details: `Recall: ${reasonCategory} - ${reasonDetails || 'Manufacturer recall hold'} (Previous zone: ${prevZoneName} [${prevZoneId}])`
+      });
+      affectedItems.push({ ...item });
+    }
+
+    const totalQuantity = affectedItems.reduce((acc, curr) => acc + Number(curr.quantity), 0);
+    return {
+      batch: batchNumber,
+      affectedCount: affectedItems.length - alreadyQuarantinedCount,
+      alreadyQuarantinedCount,
+      totalQuantity,
+      items: affectedItems
+    };
+  } catch (err) {
+    map.set(outletId, snapshot);
+    throw err;
+  }
+}
+
+const VALID_RELEASE_CATEGORIES: ReleaseReasonCategory[] = [
+  'FORMAL_RECALL_WITHDRAWAL',
+  'LAB_CLEARANCE_CERTIFICATE',
+  'SUPPLIER_ADVISORY_REVOKED',
+  'PRECAUTIONARY_HOLD_CLEARED',
+  'AUTHORISED_SAFETY_CLEARANCE'
+];
+
+function resolveReleaseArgs(
+  categoryOrNotes: ReleaseReasonCategory | string,
+  notesOrUser?: string,
+  userOrDestZone?: string,
+  destZoneIdArg?: string
+): { category: ReleaseReasonCategory; notes: string; user: string; destinationZoneId?: string } {
+  if (VALID_RELEASE_CATEGORIES.includes(categoryOrNotes as any)) {
+    return {
+      category: categoryOrNotes as ReleaseReasonCategory,
+      notes: (notesOrUser || '').trim(),
+      user: userOrDestZone || 'Store Stock Manager',
+      destinationZoneId: destZoneIdArg
+    };
+  }
+  return {
+    category: 'AUTHORISED_SAFETY_CLEARANCE',
+    notes: (categoryOrNotes || '').trim(),
+    user: notesOrUser || 'Store Stock Manager',
+    destinationZoneId: userOrDestZone
+  };
+}
+
+export async function releaseBatchAsync(
+  outletId: string,
+  batchNumber: string,
+  releaseCategoryOrNotes: ReleaseReasonCategory | string,
+  notesOrUser?: string,
+  userArg?: string,
+  destinationZoneIdArg?: string
+): Promise<BatchReleaseResult> {
+  if (!outletId || !batchNumber) {
+    throw new Error('outletId and batchNumber are required for batch release');
+  }
+
+  const { category, notes, user, destinationZoneId } = resolveReleaseArgs(
+    releaseCategoryOrNotes,
+    notesOrUser,
+    userArg,
+    destinationZoneIdArg
+  );
+
+  if (!notes) {
+    throw new Error('Mandatory release justification reason is required');
+  }
+
+  if (_simulatePgFailure) handleDatabaseError('releaseBatch', new Error('Simulated database disconnect'));
+
+  const now = new Date().toISOString();
+  const todayStr = now.slice(0, 10);
+
+  if (isGroceryPostgresMode()) {
+    try {
+      await ensureGroceryPgSchema();
+      return await transaction(async (client) => {
+        const { rows } = await client.query(
+          `SELECT id, outlet_id as "outletId", product, category, batch, quantity, unit,
+                  date_received as "dateReceived", expiry_date as "expiryDate",
+                  storage_zone_id as "storageZoneId", storage_zone_name as "storageZoneName",
+                  status, audit_trail as "auditTrail", created_at as "createdAt", updated_at as "updatedAt"
+           FROM grocery_inventory_batches
+           WHERE outlet_id = $1 AND batch = $2
+           FOR UPDATE`,
+          [outletId, batchNumber]
+        );
+
+        if (rows.length === 0) {
+          throw new Error(`No items found matching batch "${batchNumber}" for outlet ${outletId}`);
+        }
+
+        const quarantined = rows.filter(r => r.status === 'QUARANTINED');
+        if (quarantined.length === 0) {
+          throw new Error(`Batch "${batchNumber}" has no quarantined items to release.`);
+        }
+
+        const zones = await getStorageZonesAsync(outletId);
+        const qZone = zones.find(z => z.type === 'waste_quarantine') || zones[0];
+        let destZone = destinationZoneId ? zones.find(z => z.id === destinationZoneId) : undefined;
+        if (!destZone) {
+          destZone = zones.find(z => z.type !== 'waste_quarantine' && z.type !== 'chemical_storage') || zones[0];
+        }
+
+        const processedItems: GroceryStockItem[] = [];
+        let activeCount = 0;
+        let expiredCount = 0;
+
+        for (const r of quarantined) {
+          const auditTrail: any[] = Array.isArray(r.auditTrail) ? r.auditTrail : JSON.parse(r.auditTrail || '[]');
+
+          // Strict Food Safety Lock: Evaluate expiry date against today
+          const expDateStr = typeof r.expiryDate === 'string'
+            ? r.expiryDate.slice(0, 10)
+            : r.expiryDate instanceof Date
+            ? r.expiryDate.toISOString().slice(0, 10)
+            : String(r.expiryDate).slice(0, 10);
+
+          const isPastExpiry = expDateStr < todayStr;
+
+          let targetStatus: StockStatus;
+          let targetZone: GroceryStorageZone;
+          let actionName: string;
+          let detailMsg: string;
+
+          if (isPastExpiry) {
+            // Expired items must NEVER become saleable! Retain in quarantine/expired holding zone.
+            targetStatus = 'EXPIRED';
+            targetZone = qZone;
+            actionName = 'RECALL_BATCH_RELEASED_EXPIRED';
+            detailMsg = `Released from recall hold but retained under expiry safety lock as EXPIRED (Use-by/Expiry date ${expDateStr} passed). Resolution: [${category}] ${notes}`;
+            expiredCount++;
+          } else {
+            targetStatus = 'ACTIVE';
+            targetZone = destZone;
+            actionName = 'RECALL_BATCH_RELEASED';
+            detailMsg = `Released from quarantine: [${category}] ${notes} (Restored to ${destZone.name} [${destZone.id}])`;
+            activeCount++;
+          }
+
+          auditTrail.push({
+            timestamp: now,
+            action: actionName,
+            user,
+            details: detailMsg
+          });
+
+          await client.query(
+            `UPDATE grocery_inventory_batches
+             SET status = $1,
+                 storage_zone_id = $2,
+                 storage_zone_name = $3,
+                 audit_trail = $4::jsonb,
+                 updated_at = now()
+             WHERE id = $5 AND outlet_id = $6`,
+            [targetStatus, targetZone.id, targetZone.name, JSON.stringify(auditTrail), r.id, outletId]
+          );
+
+          processedItems.push({
+            ...r,
+            status: targetStatus,
+            storageZoneId: targetZone.id,
+            storageZoneName: targetZone.name,
+            auditTrail,
+            updatedAt: now
+          });
+        }
+
+        const totalQuantity = processedItems.reduce((acc, curr) => acc + Number(curr.quantity), 0);
+        return {
+          batch: batchNumber,
+          releasedCount: processedItems.length,
+          activeCount,
+          expiredCount,
+          totalQuantity,
+          items: processedItems
+        };
+      });
+    } catch (err: any) {
+      handleDatabaseError('releaseBatch', err);
+    }
+  }
+
+  // In-memory mock adapter
+  const map = getMockStock();
+  const list = map.get(outletId) || [];
+  const matching = list.filter(s => s.batch === batchNumber);
+
+  if (matching.length === 0) {
+    throw new Error(`No items found matching batch "${batchNumber}" for outlet ${outletId}`);
+  }
+
+  const quarantined = matching.filter(s => s.status === 'QUARANTINED');
+  if (quarantined.length === 0) {
+    throw new Error(`Batch "${batchNumber}" has no quarantined items to release.`);
+  }
+
+  const zones = getStorageZones(outletId);
+  const qZone = zones.find((z: any) => z.type === 'waste_quarantine') || zones[0];
+  let destZone = destinationZoneId ? zones.find((z: any) => z.id === destinationZoneId) : undefined;
+  if (!destZone) {
+    destZone = zones.find((z: any) => z.type !== 'waste_quarantine' && z.type !== 'chemical_storage') || zones[0];
+  }
+
+  const processedItems: GroceryStockItem[] = [];
+  let activeCount = 0;
+  let expiredCount = 0;
+
+  // In-memory atomic snapshot for complete rollback protection
+  const snapshot = list.map(item => ({ ...item, auditTrail: [...item.auditTrail] }));
+  try {
+    for (const item of quarantined) {
+      const expDateStr = item.expiryDate.slice(0, 10);
+      const isPastExpiry = expDateStr < todayStr;
+
+      let targetStatus: StockStatus;
+      let targetZone: GroceryStorageZone;
+      let actionName: string;
+      let detailMsg: string;
+
+      if (isPastExpiry) {
+        targetStatus = 'EXPIRED';
+        targetZone = qZone;
+        actionName = 'RECALL_BATCH_RELEASED_EXPIRED';
+        detailMsg = `Released from recall hold but retained under expiry safety lock as EXPIRED (Use-by/Expiry date ${expDateStr} passed). Resolution: [${category}] ${notes}`;
+        expiredCount++;
+      } else {
+        targetStatus = 'ACTIVE';
+        targetZone = destZone;
+        actionName = 'RECALL_BATCH_RELEASED';
+        detailMsg = `Released from quarantine: [${category}] ${notes} (Restored to ${destZone.name} [${destZone.id}])`;
+        activeCount++;
+      }
+
+      item.status = targetStatus;
+      item.storageZoneId = targetZone.id;
+      item.storageZoneName = targetZone.name;
+      item.updatedAt = now;
+      item.auditTrail.push({
+        timestamp: now,
+        action: actionName,
+        user,
+        details: detailMsg
+      });
+      processedItems.push({ ...item });
+    }
+
+    const totalQuantity = processedItems.reduce((acc, curr) => acc + Number(curr.quantity), 0);
+    return {
+      batch: batchNumber,
+      releasedCount: processedItems.length,
+      activeCount,
+      expiredCount,
+      totalQuantity,
+      items: processedItems
+    };
+  } catch (err) {
+    map.set(outletId, snapshot);
+    throw err;
+  }
+}
+
+export function releaseBatch(
+  outletId: string,
+  batchNumber: string,
+  releaseCategoryOrNotes: ReleaseReasonCategory | string,
+  notesOrUser?: string,
+  userArg?: string,
+  destinationZoneIdArg?: string
+): BatchReleaseResult {
+  if (!outletId || !batchNumber) {
+    throw new Error('outletId and batchNumber are required for batch release');
+  }
+
+  const { category, notes, user, destinationZoneId } = resolveReleaseArgs(
+    releaseCategoryOrNotes,
+    notesOrUser,
+    userArg,
+    destinationZoneIdArg
+  );
+
+  if (!notes) {
+    throw new Error('Mandatory release justification reason is required');
+  }
+
+  const map = getMockStock();
+  const list = map.get(outletId) || [];
+  const matching = list.filter(s => s.batch === batchNumber);
+
+  if (matching.length === 0) {
+    throw new Error(`No items found matching batch "${batchNumber}" for outlet ${outletId}`);
+  }
+
+  const quarantined = matching.filter(s => s.status === 'QUARANTINED');
+  if (quarantined.length === 0) {
+    throw new Error(`Batch "${batchNumber}" has no quarantined items to release.`);
+  }
+
+  const now = new Date().toISOString();
+  const todayStr = now.slice(0, 10);
+  const zones = getStorageZones(outletId);
+  const qZone = zones.find((z: any) => z.type === 'waste_quarantine') || zones[0];
+  let destZone = destinationZoneId ? zones.find((z: any) => z.id === destinationZoneId) : undefined;
+  if (!destZone) {
+    destZone = zones.find((z: any) => z.type !== 'waste_quarantine' && z.type !== 'chemical_storage') || zones[0];
+  }
+
+  const processedItems: GroceryStockItem[] = [];
+  let activeCount = 0;
+  let expiredCount = 0;
+
+  // In-memory atomic snapshot for complete rollback protection
+  const snapshot = list.map(item => ({ ...item, auditTrail: [...item.auditTrail] }));
+  try {
+    for (const item of quarantined) {
+      const expDateStr = item.expiryDate.slice(0, 10);
+      const isPastExpiry = expDateStr < todayStr;
+
+      let targetStatus: StockStatus;
+      let targetZone: GroceryStorageZone;
+      let actionName: string;
+      let detailMsg: string;
+
+      if (isPastExpiry) {
+        targetStatus = 'EXPIRED';
+        targetZone = qZone;
+        actionName = 'RECALL_BATCH_RELEASED_EXPIRED';
+        detailMsg = `Released from recall hold but retained under expiry safety lock as EXPIRED (Use-by/Expiry date ${expDateStr} passed). Resolution: [${category}] ${notes}`;
+        expiredCount++;
+      } else {
+        targetStatus = 'ACTIVE';
+        targetZone = destZone;
+        actionName = 'RECALL_BATCH_RELEASED';
+        detailMsg = `Released from quarantine: [${category}] ${notes} (Restored to ${destZone.name} [${destZone.id}])`;
+        activeCount++;
+      }
+
+      item.status = targetStatus;
+      item.storageZoneId = targetZone.id;
+      item.storageZoneName = targetZone.name;
+      item.updatedAt = now;
+      item.auditTrail.push({
+        timestamp: now,
+        action: actionName,
+        user,
+        details: detailMsg
+      });
+      processedItems.push({ ...item });
+    }
+
+    const totalQuantity = processedItems.reduce((acc, curr) => acc + Number(curr.quantity), 0);
+    return {
+      batch: batchNumber,
+      releasedCount: processedItems.length,
+      activeCount,
+      expiredCount,
+      totalQuantity,
+      items: processedItems
+    };
+  } catch (err) {
+    map.set(outletId, snapshot);
+    throw err;
+  }
+}
+
+export async function searchStockItemsAsync(outletId: string, queryStr: string): Promise<GroceryStockItem[]> {
+  const all = await getStockItemsAsync(outletId);
+  if (!queryStr || !queryStr.trim()) return all;
+  const q = queryStr.toLowerCase().trim();
+  return all.filter(s =>
+    s.batch.toLowerCase().includes(q) ||
+    s.product.toLowerCase().includes(q) ||
+    s.category.toLowerCase().includes(q)
+  );
+}
+
+export function searchStockItems(outletId: string, queryStr: string): GroceryStockItem[] {
+  const all = getStockItems(outletId);
+  if (!queryStr || !queryStr.trim()) return all;
+  const q = queryStr.toLowerCase().trim();
+  return all.filter(s =>
+    s.batch.toLowerCase().includes(q) ||
+    s.product.toLowerCase().includes(q) ||
+    s.category.toLowerCase().includes(q)
+  );
+}
+
+export async function getActiveStockItemsAsync(outletId: string): Promise<GroceryStockItem[]> {
+  const all = await getStockItemsAsync(outletId);
+  // Strict Safety Lock: QUARANTINED, EXPIRED, DISPOSED are fully excluded from active/saleable stock
+  return all.filter(s => s.status === 'ACTIVE' || s.status === 'NEAR_EXPIRY');
+}
+
+export function getActiveStockItems(outletId: string): GroceryStockItem[] {
+  const all = getStockItems(outletId);
+  // Strict Safety Lock: QUARANTINED, EXPIRED, DISPOSED are fully excluded from active/saleable stock
+  return all.filter(s => s.status === 'ACTIVE' || s.status === 'NEAR_EXPIRY');
+}
+
+
+// ----------------------------------------------------
 // DAILY CHECK SERVICES
 // ----------------------------------------------------
 
@@ -2490,6 +2881,23 @@ export async function getActiveGroceryAlertsAsync(outletId: string): Promise<Gro
     });
   }
 
+  const quarantinedItems = stock.filter(s => s.status === 'QUARANTINED');
+  if (quarantinedItems.length > 0) {
+    const uniqueBatches = Array.from(new Set(quarantinedItems.map(i => i.batch)));
+    alerts.push({
+      id: `alt-stock-quarantine-${outletId}`,
+      outletId,
+      type: 'RECALL_QUARANTINE',
+      severity: 'RED',
+      title: `${uniqueBatches.length} Product Batch(es) in Quarantine / Recall Hold`,
+      description: `Stock Safety Lock active. Quarantined batches: ${uniqueBatches.slice(0, 3).join(', ')}${uniqueBatches.length > 3 ? '...' : ''}. Locked from sale and issue.`,
+      entityType: 'stock',
+      requiresAction: true,
+      status: 'OPEN',
+      createdAt: now
+    });
+  }
+
   const receivings = await getReceivingLogsAsync(outletId);
   const recentRejections = receivings.filter(r => r.decision === 'REJECT').slice(0, 2);
   for (const r of recentRejections) {
@@ -2576,6 +2984,23 @@ export function getActiveGroceryAlerts(outletId: string): GroceryAlert[] {
       description: `Review front shelf stock.`,
       entityType: 'stock',
       requiresAction: false,
+      status: 'OPEN',
+      createdAt: now
+    });
+  }
+
+  const quarantinedItemsSync = stock.filter((s: any) => s.status === 'QUARANTINED');
+  if (quarantinedItemsSync.length > 0) {
+    const uniqueBatches = Array.from(new Set(quarantinedItemsSync.map((i: any) => i.batch)));
+    alerts.push({
+      id: `alt-stock-quarantine-${outletId}`,
+      outletId,
+      type: 'RECALL_QUARANTINE',
+      severity: 'RED',
+      title: `${uniqueBatches.length} Product Batch(es) in Quarantine / Recall Hold`,
+      description: `Stock Safety Lock active. Quarantined batches: ${uniqueBatches.slice(0, 3).join(', ')}${uniqueBatches.length > 3 ? '...' : ''}. Locked from sale and issue.`,
+      entityType: 'stock',
+      requiresAction: true,
       status: 'OPEN',
       createdAt: now
     });

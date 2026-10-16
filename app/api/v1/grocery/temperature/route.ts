@@ -26,8 +26,8 @@ export async function GET(req: Request) {
       disclaimer: 'Follow product-specific storage instructions / manufacturer label where applicable.'
     });
   } catch (err: any) {
-    const code = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR') ? 'DATABASE_ERROR' : 'SERVER_ERROR';
-    return fail(code, err.message || 'Failed to retrieve temperature data', 500);
+    const isDb = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR');
+    return fail(isDb ? 'DATABASE_ERROR' : 'SERVER_ERROR', isDb ? 'Database error occurred while retrieving temperature data.' : 'Failed to retrieve temperature data.', 500);
   }
 }
 
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
 
     return ok(result, 201);
   } catch (err: any) {
-    const code = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR') ? 'DATABASE_ERROR' : 'SERVER_ERROR';
-    return fail(code, err.message || 'Failed to record temperature log', 500);
+    const isDb = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR');
+    return fail(isDb ? 'DATABASE_ERROR' : 'SERVER_ERROR', isDb ? 'Database error occurred while recording temperature log.' : 'Failed to record temperature log.', 500);
   }
 }

@@ -24,7 +24,7 @@ export async function GET(req: Request) {
       }
     });
   } catch (err: any) {
-    const code = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR') ? 'DATABASE_ERROR' : 'SERVER_ERROR';
-    return fail(code, err.message || 'Failed to retrieve grocery alerts', 500);
+    const isDb = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR');
+    return fail(isDb ? 'DATABASE_ERROR' : 'SERVER_ERROR', isDb ? 'Database error occurred while retrieving grocery alerts.' : 'Failed to retrieve grocery alerts.', 500);
   }
 }

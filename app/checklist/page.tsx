@@ -29,8 +29,8 @@ export default function Checklist() {
             <ShieldCheck />
             <div>
               <p className="eyebrow">LEARN FIRST</p>
-              <h2>Food Safety — Why?</h2>
-              <p className="muted">Understand why the supervisor checks these controls and how a missed control can affect food safety.</p>
+              <h2>FoSTaC Learning Hub</h2>
+              <p className="muted">Learn practical food safety controls, contamination prevention, and operational standards before daily checks.</p>
             </div>
             <ArrowRight />
           </Link>

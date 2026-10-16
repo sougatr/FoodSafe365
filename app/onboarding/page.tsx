@@ -85,6 +85,8 @@ export default function Onboarding() {
   const [fssaiLicense, setFssaiLicense] = useState('');
   const [managerName, setManagerName] = useState('Restaurant Admin');
   const [mobile, setMobile] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -96,43 +98,51 @@ export default function Onboarding() {
       setError('Please provide your restaurant name and city.');
       return;
     }
+    if (email.trim() && !/^\S+@\S+\.\S+$/.test(email.trim())) {
+      setError('Please provide a valid email address.');
+      return;
+    }
+    if (password && password.length < 8) {
+      setError('Password must be at least 8 characters long.');
+      return;
+    }
 
     setSaving(true);
     setError('');
 
-    const setup = {
-      name: name.trim(),
-      city: city.trim(),
-      restaurantType: outletType,
-      fssaiLicense: fssaiLicense.trim(),
-      managerName: managerName.trim(),
-      mobile: mobile.trim(),
-      createdAt: new Date().toISOString()
-    };
-
     try {
-      // Attempt backend API sync if running
-      await apiFetch<any>('/onboarding', {
+      const res = await fetch('/api/v1/organisations', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user: { name: managerName || 'Restaurant Admin', mobile: mobile || '9999999999' },
+          user: {
+            name: managerName.trim() || 'Restaurant Admin',
+            mobile: mobile.trim() || '9999999999',
+            email: email.trim() || undefined,
+            password: password || undefined
+          },
           organisation: { name: name.trim() },
           outlet: { name: name.trim(), city: city.trim(), restaurantTypeId: outletType }
         })
-      }).catch(() => {
-        // Graceful fallback to client storage
       });
 
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok || json.error) {
+        const errorMsg = json.error?.message || json.message || 'Onboarding failed. Please check inputs and retry.';
+        setError(errorMsg);
+        setSaving(false);
+        return;
+      }
+
+      const createdOutletId = json.data?.outletId || name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
       if (typeof window !== 'undefined') {
-        const slug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'demo-outlet';
-        localStorage.setItem('foodsafe365_outlet_id', slug);
-        localStorage.setItem('foodsafe365_setup', JSON.stringify(setup));
+        localStorage.setItem('foodsafe365_outlet_id', createdOutletId);
       }
 
       router.push('/home');
     } catch (err: any) {
-      setError(err?.message || 'Could not complete setup. Proceeding to dashboard.');
-      setTimeout(() => router.push('/home'), 500);
+      setError(err?.message || 'Network error during onboarding. Please check your connection and retry.');
     } finally {
       setSaving(false);
     }
@@ -369,6 +379,30 @@ export default function Onboarding() {
                     onChange={(e) => setMobile(e.target.value)}
                   />
                   <small style={{ fontSize: 11, color: '#64748b', marginTop: 3 }}>For instant deviation notifications</small>
+                </div>
+
+                <div className="field">
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>Admin Login Email</label>
+                  <input
+                    className="input"
+                    type="email"
+                    placeholder="e.g. admin@abcrestaurant.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                  <small style={{ fontSize: 11, color: '#64748b', marginTop: 3 }}>Account identifier for login</small>
+                </div>
+
+                <div className="field">
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>Account Password</label>
+                  <input
+                    className="input"
+                    type="password"
+                    placeholder="Min. 8 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <small style={{ fontSize: 11, color: '#64748b', marginTop: 3 }}>Secure credential for manager and dashboard access</small>
                 </div>
               </div>
             </div>

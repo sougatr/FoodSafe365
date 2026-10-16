@@ -1,20 +1,28 @@
-import { getAuthContext } from '@/lib/auth';
+import { getAuthContext } from '../../../../../lib/auth';
 import { 
   getServiceRequestById, 
   updateServiceRequestStatus, 
   ServiceRequestStatus 
-} from '@/lib/service-provider-store';
-import { query } from '@/lib/db';
-import { updateDemoAction } from '@/lib/demo-store';
-import { ok, fail } from '@/lib/response';
+} from '../../../../../lib/service-provider-store';
+import { query } from '../../../../../lib/db';
+import { updateDemoAction } from '../../../../../lib/demo-store';
+import { ok, fail } from '../../../../../lib/response';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
+    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+      return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
+    }
+
     const auth = await getAuthContext(req);
     if (!auth) {
       return fail('UNAUTHENTICATED', 'Authentication required', 401);
+    }
+
+    if (auth.journey === 'grocery' || auth.journey === 'client') {
+      return fail('FORBIDDEN', 'Cross-journey access denied for service requests', 403);
     }
 
     const request = await getServiceRequestById(params.id);
@@ -22,7 +30,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       return fail('NOT_FOUND', 'Service request not found', 404);
     }
 
-    const isProvider = auth.role === 'vendor' || auth.role === 'provider' || !!auth.providerId;
+    const isProvider = auth.role === 'vendor' || auth.role === 'provider' || !!auth.providerId || auth.journey === 'provider';
     const activeProviderId = auth.providerId || auth.userId;
 
     if (isProvider) {
@@ -70,9 +78,17 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
+    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+      return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
+    }
+
     const auth = await getAuthContext(req);
     if (!auth) {
       return fail('UNAUTHENTICATED', 'Authentication required', 401);
+    }
+
+    if (auth.journey === 'grocery' || auth.journey === 'client') {
+      return fail('FORBIDDEN', 'Cross-journey access denied for service requests', 403);
     }
 
     const request = await getServiceRequestById(params.id);

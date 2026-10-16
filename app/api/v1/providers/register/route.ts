@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
-import { registerServiceProvider, CONTROLLED_SERVICE_CATEGORIES } from '@/lib/service-provider-store';
-import { ok, fail } from '@/lib/response';
-import { createSessionToken, SESSION_COOKIE_NAME, getSessionCookieOptions } from '@/lib/session';
-import { checkRateLimit, getClientIp, createRateLimitHeaders } from '@/lib/rate-limiter';
-import { parseBoundedJson } from '@/lib/body-guard';
+import { registerServiceProvider, CONTROLLED_SERVICE_CATEGORIES } from '../../../../../lib/service-provider-store';
+import { fail } from '../../../../../lib/response';
+import { createSessionToken, SESSION_COOKIE_NAME, getSessionCookieOptions } from '../../../../../lib/session';
+import { checkRateLimit, getClientIp, createRateLimitHeaders } from '../../../../../lib/rate-limiter';
+import { parseBoundedJson } from '../../../../../lib/body-guard';
+import { hashPassword } from '../../../../../lib/passwords';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +28,10 @@ export async function POST(req: Request) {
       );
     }
 
+    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+      return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
+    }
+
     // Body limit: 1 MB
     const parseRes = await parseBoundedJson<any>(req);
     if (!parseRes.ok) {
@@ -39,6 +44,7 @@ export async function POST(req: Request) {
       contactName,
       mobile,
       email,
+      password,
       address,
       city,
       state,
@@ -67,6 +73,15 @@ export async function POST(req: Request) {
       return fail('VALIDATION_ERROR', 'City / operating location is required', 400);
     }
 
+    let passwordHash: string | undefined = undefined;
+    if (password !== undefined && password !== null && String(password) !== '') {
+      const rawPassword = String(password);
+      if (rawPassword.length < 8) {
+        return fail('VALIDATION_ERROR', 'Password must be at least 8 characters', 400);
+      }
+      passwordHash = await hashPassword(rawPassword);
+    }
+
     // Categories normalization & validation
     let catList: string[] = [];
     if (Array.isArray(categories)) {
@@ -92,12 +107,13 @@ export async function POST(req: Request) {
       businessName: businessName.trim(),
       contactName: contactName.trim(),
       mobile: mobile.trim(),
-      email: email.trim(),
+      email: email.trim().toLowerCase(),
       address: typeof address === 'string' ? address.trim() : '',
       city: city.trim(),
       state: typeof state === 'string' ? state.trim() : 'Maharashtra',
       categories: catList,
-      description: description.trim()
+      description: description.trim(),
+      passwordHash
     });
 
     const sessionToken = createSessionToken({
@@ -105,11 +121,18 @@ export async function POST(req: Request) {
       organisationId: `org-${provider.id}`,
       outletId: 'none',
       role: 'vendor',
-      providerId: provider.id
+      providerId: provider.id,
+      journey: 'provider'
     });
 
     const response = NextResponse.json({ data: provider, error: null }, { status: 201 });
     response.cookies.set(SESSION_COOKIE_NAME, sessionToken, getSessionCookieOptions());
+
+    // Clean up any legacy plaintext cookies
+    for (const k of ['fs_user_id', 'fs_org_id', 'fs_outlet_id', 'fs_role', 'fs_provider_id']) {
+      response.cookies.set(k, '', { httpOnly: true, maxAge: 0, path: '/' });
+    }
+
     return response;
   } catch (error: any) {
     console.error('[API /providers/register] Registration failed:', error);

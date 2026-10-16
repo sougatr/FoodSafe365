@@ -1,31 +1,21 @@
-import { getAuthContext } from '@/lib/auth';
-import { can } from '@/lib/permissions';
-import { query, getPool } from '@/lib/db';
-import { ok, fail } from '@/lib/response';
-import { createDemoAction, listDemoActions } from '@/lib/demo-store';
-import { requireOutletAccess } from '@/lib/tenant';
-
-let tableChecked = false;
-async function ensureColumns() {
-  if (tableChecked) return;
-  const pool = getPool();
-  if (!pool) return;
-  try {
-    await pool.query(`
-      ALTER TABLE corrective_actions ADD COLUMN IF NOT EXISTS requires_external_service boolean DEFAULT false;
-      ALTER TABLE corrective_actions ADD COLUMN IF NOT EXISTS service_category text NULL;
-      ALTER TABLE corrective_actions ADD COLUMN IF NOT EXISTS source_check_code text NULL;
-    `);
-    tableChecked = true;
-  } catch (e) {
-    console.warn('[actions API] Migration check warning:', e);
-  }
-}
+import { getAuthContext } from '../../../../lib/auth';
+import { can } from '../../../../lib/permissions';
+import { query } from '../../../../lib/db';
+import { ok, fail } from '../../../../lib/response';
+import { createDemoAction, listDemoActions } from '../../../../lib/demo-store';
+import { requireOutletAccess } from '../../../../lib/tenant';
 
 export async function GET(req: Request) {
   const auth = await getAuthContext(req);
   if (!auth) return fail('UNAUTHENTICATED', 'Authentication required', 401);
   if (!can(auth.role, 'actions:read')) return fail('FORBIDDEN', 'You do not have permission to view corrective actions', 403);
+  if (auth.journey && auth.journey !== 'restaurant' && auth.journey !== 'platform' && !['platform_admin', 'admin', 'superadmin'].includes(auth.role)) {
+    return fail('FORBIDDEN', 'Account is not authorized for restaurant corrective actions', 403);
+  }
+
+  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
+  }
 
   const url = new URL(req.url);
   const status = url.searchParams.get('status');
@@ -35,7 +25,7 @@ export async function GET(req: Request) {
   if (requestedOutlet && requestedOutlet !== 'all') {
     const access = await requireOutletAccess(requestedOutlet, req);
     if (!access.ok) {
-      return fail('FORBIDDEN', access.message, access.status);
+      return fail((access as any).code || 'FORBIDDEN', access.message, access.status);
     }
     targetOutletId = requestedOutlet;
   }
@@ -54,8 +44,6 @@ export async function GET(req: Request) {
     };
     return ok({ actions: visible, counts, demo: true });
   }
-
-  await ensureColumns();
 
   const params: any[] = [targetOutletId];
   let where = `ca.outlet_id = $1`;
@@ -115,6 +103,13 @@ export async function POST(req: Request) {
   const auth = await getAuthContext(req);
   if (!auth) return fail('UNAUTHENTICATED', 'Authentication required', 401);
   if (!can(auth.role, 'actions:write')) return fail('FORBIDDEN', 'You do not have permission to create corrective actions', 403);
+  if (auth.journey && auth.journey !== 'restaurant' && auth.journey !== 'platform' && !['platform_admin', 'admin', 'superadmin'].includes(auth.role)) {
+    return fail('FORBIDDEN', 'Account is not authorized for restaurant corrective actions', 403);
+  }
+
+  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
+  }
 
   let b: any;
   try {
@@ -130,7 +125,7 @@ export async function POST(req: Request) {
   if (targetOutletId && targetOutletId !== auth.outletId) {
     const access = await requireOutletAccess(targetOutletId, req);
     if (!access.ok) {
-      return fail('FORBIDDEN', access.message, access.status);
+      return fail((access as any).code || 'FORBIDDEN', access.message, access.status);
     }
   }
 
@@ -172,8 +167,6 @@ export async function POST(req: Request) {
     }, auth.userId);
     return ok({ ...action, demo: true }, 201);
   }
-
-  await ensureColumns();
 
   const row = (await query<any>(`
     INSERT INTO corrective_actions(

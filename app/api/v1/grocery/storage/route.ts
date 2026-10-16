@@ -32,8 +32,8 @@ export async function GET(req: Request) {
       }))
     });
   } catch (err: any) {
-    const code = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR') ? 'DATABASE_ERROR' : 'SERVER_ERROR';
-    return fail(code, err.message || 'Failed to retrieve storage zones', 500);
+    const isDb = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR');
+    return fail(isDb ? 'DATABASE_ERROR' : 'SERVER_ERROR', isDb ? 'Database error occurred while retrieving storage zones.' : 'Failed to retrieve storage zones.', 500);
   }
 }
 
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
 
     return ok({ zone: saved }, 201);
   } catch (err: any) {
-    const code = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR') ? 'DATABASE_ERROR' : 'SERVER_ERROR';
-    return fail(code, err.message || 'Failed to save storage zone', 500);
+    const isDb = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR');
+    return fail(isDb ? 'DATABASE_ERROR' : 'SERVER_ERROR', isDb ? 'Database error occurred while saving storage zone.' : 'Failed to save storage zone.', 500);
   }
 }

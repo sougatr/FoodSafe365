@@ -31,7 +31,8 @@ import {
   Mail,
   KeyRound,
   UtensilsCrossed,
-  Smartphone
+  Smartphone,
+  AlertCircle
 } from 'lucide-react';
 import {
   PHASE1_STORAGE_KEY,
@@ -763,11 +764,37 @@ const PROVIDER_COLUMNS: ProviderColumnGroup[] = [
   }
 ];
 
+function mapToServiceCategory(cat: string): string {
+  switch (cat) {
+    case 'pest-control':
+      return 'pest_control';
+    case 'deep-cleaning':
+      return 'deep_cleaning';
+    case 'waste-management':
+      return 'waste_management';
+    case 'cooking-oil':
+      return 'other';
+    case 'water-testing':
+    case 'food-testing':
+      return 'water_testing';
+    case 'calibration':
+      return 'calibration';
+    case 'occupational-health':
+      return 'training';
+    case 'hvac':
+      return 'refrigeration';
+    default:
+      return 'other';
+  }
+}
+
 export default function ProvidersPage() {
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeBookingService, setActiveBookingService] = useState<ServiceItem | null>(null);
   const [bookingSuccess, setBookingSuccess] = useState<{ id: string; service: ServiceItem; slot: string } | null>(null);
+  const [bookingSubmitting, setBookingSubmitting] = useState(false);
+  const [bookingError, setBookingError] = useState<{ code: string; message: string } | null>(null);
 
   // Authentication State for Providers & Restaurant Owners
   const [showSignInModal, setShowSignInModal] = useState(false);
@@ -908,37 +935,94 @@ export default function ProvidersPage() {
   });
 
   // Handle Restaurant Booking Submission
-  function handleConfirmBooking(e: React.FormEvent) {
+  async function handleConfirmBooking(e: React.FormEvent) {
     e.preventDefault();
     if (!activeBookingService) return;
 
-    const bookingId = `FS-SRV-${Math.floor(1000 + Math.random() * 9000)}`;
+    setBookingSubmitting(true);
+    setBookingError(null);
+
     const slotString = `${preferredDate} · ${preferredSlot}`;
+    const payload = {
+      correctiveActionId: `mkt-${activeBookingService.id}`,
+      correctiveActionTitle: activeBookingService.title,
+      serviceCategory: mapToServiceCategory(activeBookingService.category),
+      problemDescription: bookingNotes.trim()
+        ? `${bookingNotes.trim()} (Scope: ${staffCount})`
+        : `Service request for ${activeBookingService.title}. Scope: ${staffCount}. Slot: ${slotString}.`,
+      priority: preferredDate.includes('Today') ? 'urgent' : 'high',
+      contactPerson: contactPerson.trim() || 'Restaurant Manager',
+      contactPhone: phoneNumber.trim(),
+      notes: bookingNotes.trim() || undefined,
+      scheduledAt: slotString,
+      outletName: restaurantName.trim() || 'Restaurant Kitchen'
+    };
 
-    // Record audit trail event in localStorage
     try {
-      const raw = localStorage.getItem(PHASE1_STORAGE_KEY);
-      const state: AppPhase1State = raw ? JSON.parse(raw) : {};
-      const newEvent: AuditTrailEvent = {
-        id: `event-${Date.now()}`,
-        at: new Date().toISOString(),
-        type: 'Service Provider Booked',
-        detail: `Booked [${activeBookingService.title}] (${bookingId}) for ${restaurantName}. Slot: ${slotString}. Staff/Scope: ${staffCount}. Terms: Agreed post-onboarding.`,
-        status: 'pro_dispatched'
-      };
-      state.timeline = [newEvent, ...(state.timeline || [])];
-      localStorage.setItem(PHASE1_STORAGE_KEY, JSON.stringify(state));
-      window.dispatchEvent(new Event('foodsaf365:update'));
-    } catch {
-      // Local fallback
-    }
+      const res = await fetch('/api/v1/service-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json().catch(() => ({}));
 
-    setBookingSuccess({
-      id: bookingId,
-      service: activeBookingService,
-      slot: slotString
-    });
-    setActiveBookingService(null);
+      if (!res.ok) {
+        if (res.status === 401) {
+          setBookingError({
+            code: '401',
+            message: 'Authentication required. Please sign in as an authorized restaurant manager to dispatch service partners.'
+          });
+          return;
+        }
+        if (res.status === 403) {
+          setBookingError({
+            code: '403',
+            message: 'Permission denied. Only restaurant accounts can create service requests. Service partner accounts cannot dispatch other partners.'
+          });
+          return;
+        }
+        setBookingError({
+          code: json?.error?.code || 'ERROR',
+          message: json?.error?.message || 'Failed to dispatch service request. Please check your submission.'
+        });
+        return;
+      }
+
+      const confirmedId = json?.data?.id || `FS-SRV-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      // Record audit trail event in localStorage for offline inspection
+      try {
+        const raw = localStorage.getItem(PHASE1_STORAGE_KEY);
+        const state: AppPhase1State = raw ? JSON.parse(raw) : {};
+        const newEvent: AuditTrailEvent = {
+          id: `event-${Date.now()}`,
+          at: new Date().toISOString(),
+          type: 'Service Provider Booked',
+          detail: `Booked [${activeBookingService.title}] (${confirmedId}) for ${restaurantName}. Slot: ${slotString}. Staff/Scope: ${staffCount}. Terms: Agreed post-onboarding.`,
+          status: 'pro_dispatched'
+        };
+        state.timeline = [newEvent, ...(state.timeline || [])];
+        localStorage.setItem(PHASE1_STORAGE_KEY, JSON.stringify(state));
+        window.dispatchEvent(new Event('foodsaf365:update'));
+      } catch {
+        // Local fallback
+      }
+
+      setBookingSuccess({
+        id: confirmedId,
+        service: activeBookingService,
+        slot: slotString
+      });
+      setActiveBookingService(null);
+    } catch (err: any) {
+      setBookingError({
+        code: 'NETWORK_ERROR',
+        message: err?.message || 'Network connection failed. Please check your network and retry.'
+      });
+    } finally {
+      setBookingSubmitting(false);
+    }
   }
 
   // Handle Service Provider Onboarding Submission
@@ -1030,14 +1114,8 @@ export default function ProvidersPage() {
               </div>
             ) : (
               <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSignInRole('provider');
-                    setShowSignInModal(true);
-                    setSignInStep('input');
-                    setSignInError('');
-                  }}
+                <Link
+                  href="/login?role=provider&redirect=/providers/dashboard"
                   style={{
                     fontSize: 12.5,
                     padding: '6px 12px',
@@ -1045,23 +1123,17 @@ export default function ProvidersPage() {
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: 8,
-                    cursor: 'pointer',
                     fontWeight: 700,
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 5
+                    gap: 5,
+                    textDecoration: 'none'
                   }}
                 >
-                  <KeyRound size={13} /> Provider Sign In
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSignInRole('restaurant');
-                    setShowSignInModal(true);
-                    setSignInStep('input');
-                    setSignInError('');
-                  }}
+                  <KeyRound size={13} /> Provider Portal
+                </Link>
+                <Link
+                  href="/login?role=restaurant&redirect=/providers"
                   style={{
                     fontSize: 12.5,
                     padding: '6px 12px',
@@ -1069,15 +1141,15 @@ export default function ProvidersPage() {
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: 8,
-                    cursor: 'pointer',
                     fontWeight: 700,
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: 5
+                    gap: 5,
+                    textDecoration: 'none'
                   }}
                 >
                   <UtensilsCrossed size={13} /> Restaurant Sign In
-                </button>
+                </Link>
               </>
             )}
             <button
@@ -1472,7 +1544,10 @@ export default function ProvidersPage() {
           }}>
             {/* Modal Close Button */}
             <button
-              onClick={() => setActiveBookingService(null)}
+              onClick={() => {
+                setActiveBookingService(null);
+                setBookingError(null);
+              }}
               style={{
                 position: 'absolute',
                 top: 18,
@@ -1643,10 +1718,72 @@ export default function ProvidersPage() {
                 />
               </div>
 
+              {bookingError && (
+                <div
+                  role="alert"
+                  style={{
+                    padding: '12px 14px',
+                    borderRadius: 10,
+                    background: '#fef2f2',
+                    border: '1px solid #fecaca',
+                    color: '#991b1b',
+                    fontSize: 13,
+                    lineHeight: 1.5
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, marginBottom: bookingError.code === '401' || bookingError.code === '403' ? 6 : 0 }}>
+                    <AlertCircle size={16} color="#dc2626" />
+                    <span>{bookingError.code === '401' ? 'Authentication Required' : bookingError.code === '403' ? 'Permission Denied' : 'Submission Error'}</span>
+                  </div>
+                  <div>{bookingError.message}</div>
+                  {bookingError.code === '401' && (
+                    <div style={{ marginTop: 8 }}>
+                      <Link
+                        href="/login?role=restaurant&redirect=/providers"
+                        style={{
+                          display: 'inline-block',
+                          background: '#dc2626',
+                          color: '#ffffff',
+                          padding: '6px 12px',
+                          borderRadius: 6,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          textDecoration: 'none'
+                        }}
+                      >
+                        Sign In as Restaurant Manager →
+                      </Link>
+                    </div>
+                  )}
+                  {bookingError.code === '403' && (
+                    <div style={{ marginTop: 8 }}>
+                      <Link
+                        href="/login?role=restaurant&redirect=/providers"
+                        style={{
+                          display: 'inline-block',
+                          background: '#dc2626',
+                          color: '#ffffff',
+                          padding: '6px 12px',
+                          borderRadius: 6,
+                          fontSize: 12,
+                          fontWeight: 700,
+                          textDecoration: 'none'
+                        }}
+                      >
+                        Switch to Restaurant Account →
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
                 <button
                   type="button"
-                  onClick={() => setActiveBookingService(null)}
+                  onClick={() => {
+                    setActiveBookingService(null);
+                    setBookingError(null);
+                  }}
                   className="btn secondary"
                   style={{ flex: 1, padding: '12px' }}
                 >
@@ -1654,10 +1791,16 @@ export default function ProvidersPage() {
                 </button>
                 <button
                   type="submit"
+                  disabled={bookingSubmitting}
                   className="btn primary"
-                  style={{ flex: 2, padding: '12px', background: '#059669' }}
+                  style={{
+                    flex: 2,
+                    padding: '12px',
+                    background: bookingSubmitting ? '#94a3b8' : '#059669',
+                    cursor: bookingSubmitting ? 'not-allowed' : 'pointer'
+                  }}
                 >
-                  Confirm &amp; Dispatch Partner →
+                  {bookingSubmitting ? 'Dispatching Partner...' : 'Confirm & Dispatch Partner →'}
                 </button>
               </div>
             </form>

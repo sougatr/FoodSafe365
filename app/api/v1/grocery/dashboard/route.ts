@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     const summary = await getGroceryDashboardSummaryAsync(auth.outletId);
     return ok(summary);
   } catch (err: any) {
-    const code = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR') ? 'DATABASE_ERROR' : 'SERVER_ERROR';
-    return fail(code, err.message || 'Failed to retrieve grocery dashboard summary', 500);
+    const isDb = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR');
+    return fail(isDb ? 'DATABASE_ERROR' : 'SERVER_ERROR', isDb ? 'Database error occurred while retrieving grocery dashboard summary.' : 'Failed to retrieve grocery dashboard summary.', 500);
   }
 }

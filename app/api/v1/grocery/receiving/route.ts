@@ -24,11 +24,12 @@ export async function GET(req: Request) {
     }, { status: 200 });
   } catch (err: any) {
     console.error('[API GET /api/v1/grocery/receiving] Error:', err);
-    const code = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR') ? 'DATABASE_ERROR' : 'SERVER_ERROR';
+    const isDb = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR');
+    const msg = isDb ? 'Database error occurred while retrieving receiving records.' : 'Unable to retrieve receiving records.';
     return NextResponse.json({
       success: false,
-      error: { code, message: err.message || 'Unable to retrieve receiving records.' },
-      message: err.message || 'Unable to retrieve receiving records.'
+      error: { code: isDb ? 'DATABASE_ERROR' : 'SERVER_ERROR', message: msg },
+      message: msg
     }, { status: 500 });
   }
 }
@@ -90,6 +91,7 @@ export async function POST(req: Request) {
         noLeakageOrDamage: true,
         dateMarkingAcceptable: true,
         temperatureAppropriate: true,
+        vehicleCleanAndFoodOnly: true,
         suitableForStorage: true,
         withinCapacity: true
       }
@@ -102,11 +104,12 @@ export async function POST(req: Request) {
     }, { status: 201 });
   } catch (err: any) {
     console.error('[API POST /api/v1/grocery/receiving] Server Error:', err);
-    const code = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR') ? 'DATABASE_ERROR' : 'SERVER_ERROR';
+    const isDb = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR');
+    const msg = isDb ? 'Database error occurred while recording receiving entry.' : 'Unable to record receiving entry.';
     return NextResponse.json({
       success: false,
-      error: { code, message: err.message || 'Unable to record receiving entry. Please try again.' },
-      message: err.message || 'Unable to record receiving entry. Please try again.'
+      error: { code: isDb ? 'DATABASE_ERROR' : 'SERVER_ERROR', message: msg },
+      message: msg
     }, { status: 500 });
   }
 }

@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
-import { saveGroceryOutletAsync } from '@/lib/grocery-store';
-import { ok, fail } from '@/lib/response';
-import { createSessionToken, SESSION_COOKIE_NAME, getSessionCookieOptions } from '@/lib/session';
-import { checkRateLimit, getClientIp, createRateLimitHeaders } from '@/lib/rate-limiter';
-import { parseBoundedJson } from '@/lib/body-guard';
+import { saveGroceryOutletAsync } from '../../../../../lib/grocery-store';
+import { fail } from '../../../../../lib/response';
+import { createSessionToken, SESSION_COOKIE_NAME, getSessionCookieOptions } from '../../../../../lib/session';
+import { checkRateLimit, getClientIp, createRateLimitHeaders } from '../../../../../lib/rate-limiter';
+import { parseBoundedJson } from '../../../../../lib/body-guard';
+import { hashPassword } from '../../../../../lib/passwords';
 
 export async function POST(req: Request) {
   try {
@@ -23,6 +24,10 @@ export async function POST(req: Request) {
       );
     }
 
+    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+      return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
+    }
+
     // Body limit: 1 MB
     const parseRes = await parseBoundedJson<any>(req);
     if (!parseRes.ok) {
@@ -37,13 +42,22 @@ export async function POST(req: Request) {
     const dailyCheckPerson = String(body.dailyCheckPerson || '').trim();
     const managerName = String(body.managerName || dailyCheckPerson || 'Store Manager').trim();
     const contactNumber = String(body.contactNumber || 'Not provided').trim();
-    const contactEmail = String(body.contactEmail || '').trim();
+    const contactEmail = String(body.contactEmail || '').trim().toLowerCase();
     const fssaiNumber = String(body.fssaiNumber || '').trim();
     const storeType = body.storeType || 'supermarket';
     const selectedCategories = Array.isArray(body.selectedCategories) ? body.selectedCategories : [];
 
     if (!name) {
       return fail('VALIDATION_ERROR', 'Store name is required.', 400);
+    }
+
+    let passwordHash: string | undefined = undefined;
+    if (body.password !== undefined && body.password !== null && String(body.password) !== '') {
+      const rawPassword = String(body.password);
+      if (rawPassword.length < 8) {
+        return fail('VALIDATION_ERROR', 'Password must be at least 8 characters.', 400);
+      }
+      passwordHash = await hashPassword(rawPassword);
     }
 
     const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
@@ -62,7 +76,8 @@ export async function POST(req: Request) {
       contactEmail: contactEmail || `manager@${id}.example.com`,
       fssaiNumber: fssaiNumber || '10000000000000',
       storeType,
-      selectedCategories
+      selectedCategories,
+      passwordHash
     });
 
     const response = NextResponse.json({
@@ -75,7 +90,8 @@ export async function POST(req: Request) {
       userId: `mgr-${saved.id}`,
       organisationId: `org-${saved.id}`,
       outletId: saved.id,
-      role: 'outlet_manager'
+      role: 'outlet_manager',
+      journey: 'grocery'
     });
     response.cookies.set(SESSION_COOKIE_NAME, sessionToken, getSessionCookieOptions());
     response.cookies.set('fs_outlet_id', saved.id, { path: '/', httpOnly: false });
@@ -84,7 +100,7 @@ export async function POST(req: Request) {
 
     return response;
   } catch (err: any) {
-    const code = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR') ? 'DATABASE_ERROR' : 'SERVER_ERROR';
-    return fail(code, err.message || 'Failed to onboard grocery store', 500);
+    const isDb = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR');
+    return fail(isDb ? 'DATABASE_ERROR' : 'SERVER_ERROR', isDb ? 'Database error occurred while onboarding grocery store.' : 'Failed to onboard grocery store.', 500);
   }
 }

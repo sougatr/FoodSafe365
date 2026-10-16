@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es2022",
+    "outDir": ".data/test_s6e_dist",
+    "skipLibCheck": true,
+    "isolatedModules": false
+  },
+  "include": [
+    "tests/test-stage6e-minio-interop.ts",
+    "tests/helpers/minio-manager.ts",
+    "scripts/cleanup-abandoned-evidence.ts"
+  ]
+}

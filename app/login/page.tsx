@@ -48,55 +48,45 @@ export default function Login() {
     setError('');
 
     try {
-      // For restaurant role, verify with backend or simulate demo
+      const payload: Record<string, any> = { email, password, role };
+      if (role === 'grocery') {
+        payload.outletId = 'store-nature-basket-bandra';
+      }
+
+      const res = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(body?.error?.message || 'Login failed. Please check credentials.');
+      }
+
       if (role === 'restaurant') {
-        try {
-          const res = await fetch('/api/v1/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, role: 'restaurant' })
-          });
-          const body = await res.json();
-          if (!res.ok) throw new Error(body?.error?.message || 'Login failed');
-        } catch {
-          // Allow demo login
-        }
         router.push('/home');
       } else if (role === 'grocery') {
-        try {
-          await fetch('/api/v1/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, role: 'grocery', outletId: 'store-nature-basket-bandra' })
-          });
-        } catch {}
+        const resolvedOutletId = body?.data?.outlet?.id || 'store-nature-basket-bandra';
         if (typeof window !== 'undefined') {
-          localStorage.setItem('foodsafe365_grocery_outlet_id', 'store-nature-basket-bandra');
-          localStorage.setItem('foodsafe365_outlet_id', 'store-nature-basket-bandra');
+          localStorage.setItem('foodsafe365_grocery_outlet_id', resolvedOutletId);
+          localStorage.setItem('foodsafe365_outlet_id', resolvedOutletId);
         }
         router.push('/grocery');
       } else if (role === 'client') {
-        try {
-          await fetch('/api/v1/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, role: 'client' })
-          });
-        } catch {}
         if (typeof window !== 'undefined') {
           localStorage.setItem('foodsafe365_diner_user', JSON.stringify({ email, name: 'Customer' }));
         }
         router.push('/diner');
       } else if (role === 'provider') {
-        try {
-          await fetch('/api/v1/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, role: 'provider' })
-          });
-        } catch {}
         if (typeof window !== 'undefined') {
-          localStorage.setItem('foodsafe365_provider_user', JSON.stringify({ email, org: 'Certified Compliance Partner' }));
+          localStorage.setItem(
+            'foodsafe365_provider_user',
+            JSON.stringify({
+              id: body?.data?.providerId || body?.data?.user?.id,
+              email,
+              org: body?.data?.organisation?.name || 'Certified Compliance Partner'
+            })
+          );
         }
         router.push('/providers');
       }

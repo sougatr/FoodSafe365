@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { verifyClaimToken, markClaimTokenUsed, updateRestaurantStatus, getRestaurantEntry } from '@/lib/unclaimed-restaurant-store';
-import { fail, ok } from '@/lib/response';
-import { createSessionToken, SESSION_COOKIE_NAME, getSessionCookieOptions } from '@/lib/session';
-import { checkRateLimit, getClientIp, createRateLimitHeaders } from '@/lib/rate-limiter';
-import { parseBoundedJson } from '@/lib/body-guard';
+import {
+  verifyClaimTokenAsync,
+  markClaimTokenUsedAsync,
+  updateRestaurantStatusAsync,
+  getRestaurantEntryAsync
+} from '../../../../../../lib/unclaimed-restaurant-store';
+import { fail, ok } from '../../../../../../lib/response';
+import { createSessionToken, SESSION_COOKIE_NAME, getSessionCookieOptions } from '../../../../../../lib/session';
+import { checkRateLimit, getClientIp, createRateLimitHeaders } from '../../../../../../lib/rate-limiter';
+import { parseBoundedJson } from '../../../../../../lib/body-guard';
+import { POPULAR_RESTAURANTS } from '../../../../../../lib/restaurantsData';
 
 const ClaimSchema = z.object({
   token: z.string().min(8, 'Valid claim token is required'),
@@ -19,6 +25,10 @@ export async function POST(
   { params }: { params: { restaurant_id: string } }
 ) {
   try {
+    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+      return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
+    }
+
     const clientIp = getClientIp(req);
     const restaurantId = params.restaurant_id?.trim();
     if (!restaurantId) {
@@ -54,18 +64,47 @@ export async function POST(
 
     const { token, managerName, managerEmail } = parseResult.data;
 
+    // Check existing restaurant entry and status
+    let restaurant = await getRestaurantEntryAsync(restaurantId);
+    if (!restaurant) {
+      const catalogItem = POPULAR_RESTAURANTS.find(r => r.id === restaurantId);
+      if (catalogItem) {
+        restaurant = {
+          id: catalogItem.id,
+          name: catalogItem.name,
+          businessType: 'RESTAURANT',
+          city: catalogItem.city,
+          location: catalogItem.location,
+          status: (catalogItem.status as any) || 'UNCLAIMED',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+      }
+    }
+
+    if (!restaurant) {
+      return fail('NOT_FOUND', `Restaurant with ID '${restaurantId}' not found`, 404);
+    }
+
+    if (restaurant.status === 'CLAIMED' || restaurant.status === 'ACTIVE' || restaurant.status === 'ONBOARDED') {
+      return fail('INVALID_STATE', 'Restaurant profile has already been claimed.', 409);
+    }
+
     // 1. Verify claim token cryptographically
-    const verification = verifyClaimToken(token, restaurantId);
+    const verification = await verifyClaimTokenAsync(token, restaurantId);
     if (!verification.valid) {
       return fail('FORBIDDEN', `Claim token verification failed: ${verification.reason}`, 403);
     }
 
-    // 2. Mark token as used
+    // 2. Mark token as used (single-use enforcement)
     const claimedBy = managerEmail || managerName;
-    markClaimTokenUsed(token, claimedBy);
+    const marked = await markClaimTokenUsedAsync(token, claimedBy);
+    if (!marked) {
+      return fail('CONFLICT', 'Claim token has already been used or has expired.', 409);
+    }
 
     // 3. Update restaurant status to CLAIMED
-    const updated = updateRestaurantStatus(restaurantId, 'CLAIMED', claimedBy);
+    const updated = await updateRestaurantStatusAsync(restaurantId, 'CLAIMED', claimedBy);
 
     // 4. Return success response and set manager authentication cookies for seamless onboarding
     const res = NextResponse.json({
@@ -101,6 +140,6 @@ export async function POST(
     return res;
   } catch (err: any) {
     console.error('[API restaurant claim POST] Error:', err);
-    return fail('INTERNAL_ERROR', err?.message || 'Failed to claim restaurant profile', 500);
+    return fail('DATABASE_ERROR', 'Failed to claim restaurant profile.', 500);
   }
 }

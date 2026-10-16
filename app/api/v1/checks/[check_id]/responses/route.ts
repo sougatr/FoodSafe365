@@ -1,18 +1,25 @@
-import { getAuthContext } from '@/lib/auth';
-import { can } from '@/lib/permissions';
-import { requireOutletAccess } from '@/lib/tenant';
-import { transaction, query } from '@/lib/db';
-import { ok, fail } from '@/lib/response';
-import { evaluateAndPersistResponse } from '@/lib/food-safety-engine';
-import { applicable } from '@/lib/rule-applicability'; import {getDemoPlan} from '@/lib/demo-haccp'; import {addDemoMonitoring} from '@/lib/demo-monitoring'; import {createDemoAction} from '@/lib/demo-store';
+import { getAuthContext } from '../../../../../../lib/auth';
+import { can } from '../../../../../../lib/permissions';
+import { requireOutletAccess } from '../../../../../../lib/tenant';
+import { transaction, query } from '../../../../../../lib/db';
+import { ok, fail } from '../../../../../../lib/response';
+import { evaluateAndPersistResponse } from '../../../../../../lib/food-safety-engine';
+import { applicable } from '../../../../../../lib/rule-applicability';
+import { getDemoPlan } from '../../../../../../lib/demo-haccp';
+import { addDemoMonitoring } from '../../../../../../lib/demo-monitoring';
+import { createDemoAction } from '../../../../../../lib/demo-store';
 
 export async function POST(req:Request,{params}:{params:{check_id:string}}){
-  const auth=await getAuthContext();
+  const auth=await getAuthContext(req);
   if(!auth) return fail('UNAUTHENTICATED','Authentication required',401);
   if(!can(auth.role,'checks:write')) return fail('FORBIDDEN','You do not have permission to submit check responses',403);
   let body:any; try{body=await req.json();}catch{return fail('VALIDATION_ERROR','Invalid JSON body',400)}
   if(!body?.item_id) return fail('VALIDATION_ERROR','item_id is required',400);
   if(body.response_value===undefined) return fail('VALIDATION_ERROR','response_value is required',400);
+
+  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
+  }
   const focusedNumericRules: Record<string, {max?: number; min?: number; unit: string; label: string}> = {
     'demo-focus-storage': {max: 5, unit: '°C', label: 'chilled-storage temperature'},
     'demo-focus-cooking': {min: 70, unit: '°C', label: 'cooking temperature'},
@@ -56,7 +63,8 @@ export async function POST(req:Request,{params}:{params:{check_id:string}}){
   try{
     const check=(await query<any>(`SELECT id,outlet_id,status FROM check_instances WHERE id=$1`,[params.check_id]))[0];
     if(!check) return fail('NOT_FOUND','Check not found',404);
-    const access=await requireOutletAccess(check.outlet_id); if(!access.ok) return fail(access.status===401?'UNAUTHENTICATED':access.status===403?'FORBIDDEN':'NOT_FOUND',access.message,access.status);
+    const access = await requireOutletAccess(check.outlet_id, req);
+    if (!access.ok) return fail(access.status === 401 ? 'UNAUTHENTICATED' : access.status === 403 ? 'FORBIDDEN' : 'NOT_FOUND', access.message, access.status);
     const result=await transaction(async client=>{
       const evaluated=await evaluateAndPersistResponse(client,{checkId:params.check_id,itemId:body.item_id,responseValue:body.response_value,numericValue:body.numeric_value,temperatureValue:body.temperature_value,userId:auth.userId});
       const profileRows=(await client.query(`SELECT COALESCE((SELECT json_agg(fp.code) FROM outlet_processes op JOIN food_processes fp ON fp.id=op.process_id WHERE op.outlet_id=ci.outlet_id AND op.active=true),'[]') processes,COALESCE((SELECT json_agg(et.code) FROM equipment e JOIN equipment_types et ON et.id=e.equipment_type_id WHERE e.outlet_id=ci.outlet_id AND e.status='active'),'[]') equipment FROM check_instances ci WHERE ci.id=$1`,[params.check_id])).rows[0]||{};
@@ -66,7 +74,7 @@ export async function POST(req:Request,{params}:{params:{check_id:string}}){
       const counts=(await client.query(`SELECT COUNT(*) FILTER(WHERE cti.required=true AND cti.id = ANY($2::uuid[])) required_count,COUNT(*) FILTER(WHERE cr.status IS NOT NULL AND cti.required=true AND cti.id = ANY($2::uuid[])) answered_count,COUNT(*) FILTER(WHERE cr.status IN ('fail','warning') AND cti.required=true AND cti.id = ANY($2::uuid[])) issue_count,COUNT(*) FILTER(WHERE cr.status='pass' AND cti.required=true AND cti.id = ANY($2::uuid[])) pass_count FROM check_template_items cti LEFT JOIN check_responses cr ON cr.check_template_item_id=cti.id AND cr.check_instance_id=$1 WHERE cti.check_template_id=(SELECT check_template_id FROM check_instances WHERE id=$1) AND cti.active=true`,[params.check_id,Array.from(applicableIds)])).rows[0];
       const pct=counts.required_count?Math.round(Number(counts.answered_count)/Number(counts.required_count)*100):0;
       const status=Number(counts.answered_count)>=Number(counts.required_count)?'completed':'in_progress';
-      await client.query(`UPDATE check_instances SET completion_percentage=$2,status=$3,risk_status=CASE WHEN $4::int>0 THEN 'high' ELSE 'low' END,completed_at=CASE WHEN $3='completed' THEN COALESCE(completed_at,now()) ELSE completed_at END WHERE id=$1`,[params.check_id,pct,status,Number(counts.issue_count)]);
+      await client.query(`UPDATE check_instances SET completion_percentage=$2,status=$3::check_status,risk_status=CASE WHEN $4::int>0 THEN 'high'::risk_level ELSE 'low'::risk_level END,completed_at=CASE WHEN $3::text='completed' THEN COALESCE(completed_at,now()) ELSE completed_at END WHERE id=$1`,[params.check_id,pct,status,Number(counts.issue_count)]);
       if(status==='completed'){
         await client.query(`INSERT INTO restaurant_activity(id,organisation_id,outlet_id,user_id,event_type,entity_type,entity_id) SELECT gen_random_uuid(),o.organisation_id,o.id,$2,'check_completed','check',$1 FROM outlets o JOIN check_instances ci ON ci.outlet_id=o.id WHERE ci.id=$1`,[params.check_id,auth.userId]);
         await client.query(`INSERT INTO audit_logs(id,organisation_id,user_id,entity_type,entity_id,action,new_value) SELECT gen_random_uuid(),o.organisation_id,$2,'check',$1,'completed',$3 FROM outlets o JOIN check_instances ci ON ci.outlet_id=o.id WHERE ci.id=$1`,[params.check_id,auth.userId,JSON.stringify({completion_percentage:pct})]);
@@ -74,5 +82,9 @@ export async function POST(req:Request,{params}:{params:{check_id:string}}){
       return {...evaluated,check:{completionPercentage:pct,status}};
     });
     return ok(result);
-  }catch(e:any){return fail(e.code||'INTERNAL_ERROR',e.message||'Unable to submit response',e.code==='NOT_FOUND'?404:e.code==='INVALID_STATE'?409:500)}
+  } catch (e: any) {
+    console.error('[API POST /checks/[check_id]/responses] Error:', e);
+    const status = e.code === 'NOT_FOUND' ? 404 : e.code === 'INVALID_STATE' ? 409 : 500;
+    return fail(e.code || 'INTERNAL_ERROR', status === 500 ? 'Unable to submit response.' : e.message, status);
+  }
 }

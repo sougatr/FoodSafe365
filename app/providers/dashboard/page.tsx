@@ -29,73 +29,74 @@ export default function ProviderDashboardPage() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [activeTab, setActiveTab] = useState<'new' | 'in_progress' | 'completed'>('new');
   const [loading, setLoading] = useState(true);
+  const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated' | 'forbidden' | 'error'>('loading');
+  const [errorMessage, setErrorMessage] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [completionNotes, setCompletionNotes] = useState<Record<string, string>>({});
   const [followUpDates, setFollowUpDates] = useState<Record<string, string>>({});
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null);
   const [message, setMessage] = useState<{ type: 'good' | 'error'; text: string } | null>(null);
 
-  // Initialize provider session
-  useEffect(() => {
-    let currentProvider: any = null;
-    try {
-      const stored = localStorage.getItem('foodsafe365_provider');
-      if (stored) {
-        currentProvider = JSON.parse(stored);
-      }
-    } catch {}
-
-    if (!currentProvider) {
-      // Default to standard seed provider for easy testing/demo
-      currentProvider = {
-        id: 'prov-pest-apex',
-        businessName: 'Apex Commercial Pest Control',
-        contactName: 'Sunil Verma',
-        city: 'Mumbai',
-        categories: ['pest_control'],
-        verificationStatus: 'unverified'
-      };
-      localStorage.setItem('foodsafe365_provider', JSON.stringify(currentProvider));
-      fetch('/api/v1/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: `${currentProvider.id}@partner.example.com`, role: 'provider' })
-      }).catch(() => {});
-      document.cookie = `fs_user_id=${currentProvider.id}; path=/; max-age=2592000`;
-      document.cookie = `fs_role=vendor; path=/; max-age=2592000`;
-      document.cookie = `fs_provider_id=${currentProvider.id}; path=/; max-age=2592000`;
-    }
-
-    setProvider(currentProvider);
-  }, []);
-
-  const fetchRequests = useCallback(async (providerId: string) => {
+  const fetchRequests = useCallback(async () => {
     setLoading(true);
+    setErrorMessage('');
     try {
-      const res = await fetch(`/api/v1/service-requests?providerId=${providerId}`, {
-        headers: {
-          'x-foodsafe-user-id': providerId,
-          'x-foodsafe-role': 'vendor',
-          'x-foodsafe-provider-id': providerId
-        },
+      const res = await fetch('/api/v1/service-requests', {
+        credentials: 'same-origin',
         cache: 'no-store'
       });
-      const json = await res.json();
-      if (res.ok && json.data) {
-        setRequests(json.data);
+      const json = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        setAuthStatus('unauthenticated');
+        setErrorMessage('Authentication required. Your session has expired or you are not signed in as a service partner.');
+        setRequests([]);
+        return;
       }
-    } catch (err) {
+      if (res.status === 403) {
+        setAuthStatus('forbidden');
+        setErrorMessage('Access denied. A verified service provider account is required to view this portal.');
+        setRequests([]);
+        return;
+      }
+      if (!res.ok) {
+        setAuthStatus('error');
+        setErrorMessage(json?.error?.message || 'Failed to retrieve service requests');
+        setRequests([]);
+        return;
+      }
+
+      setAuthStatus('authenticated');
+      const data: ServiceRequest[] = json.data || [];
+      setRequests(data);
+
+      if (data.length > 0) {
+        const first = data[0];
+        setProvider((prev: any) => ({
+          ...(prev || {}),
+          id: first.providerId,
+          businessName: first.providerName || prev?.businessName || 'Service Partner Agency',
+          city: first.outletCity || prev?.city || 'Mumbai'
+        }));
+      }
+    } catch (err: any) {
       console.error('Error fetching provider requests:', err);
+      setAuthStatus('error');
+      setErrorMessage(err.message || 'Network error occurred while fetching service requests.');
+      setRequests([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (provider?.id) {
-      fetchRequests(provider.id);
-    }
-  }, [provider, fetchRequests]);
+    try {
+      const stored = localStorage.getItem('foodsafe365_provider');
+      if (stored) {
+        setProvider(JSON.parse(stored));
+      }
+    } catch {}
+    fetchRequests();
+  }, [fetchRequests]);
 
   const handleStatusUpdate = async (id: string, newStatus: string, notes?: string) => {
     setActionLoading(id);
@@ -104,14 +105,21 @@ export default function ProviderDashboardPage() {
       const res = await fetch(`/api/v1/service-requests/${id}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
-          'x-foodsafe-user-id': provider.id,
-          'x-foodsafe-role': 'vendor',
-          'x-foodsafe-provider-id': provider.id
+          'Content-Type': 'application/json'
         },
+        credentials: 'same-origin',
         body: JSON.stringify({ status: newStatus, notes })
       });
-      const json = await res.json();
+      const json = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        setMessage({ type: 'error', text: 'Your session has expired. Please sign in again.' });
+        setAuthStatus('unauthenticated');
+        return;
+      }
+      if (res.status === 403) {
+        setMessage({ type: 'error', text: 'Permission denied: This service request cannot be modified by your account.' });
+        return;
+      }
       if (!res.ok) {
         throw new Error(json?.error?.message || 'Failed to update request status');
       }
@@ -121,9 +129,7 @@ export default function ProviderDashboardPage() {
         text: `Request updated to "${newStatus.replace(/_/g, ' ')}" successfully.`
       });
 
-      if (provider?.id) {
-        await fetchRequests(provider.id);
-      }
+      await fetchRequests();
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message || 'Status transition failed' });
     } finally {
@@ -135,7 +141,7 @@ export default function ProviderDashboardPage() {
   const inProgressRequests = requests.filter(r => r.status === 'accepted' || r.status === 'in_progress');
   const completedRequests = requests.filter(r => r.status === 'completed' || r.status === 'restaurant_confirmed' || r.status === 'declined');
 
-  const switchProvider = (id: string, name: string) => {
+  const switchProvider = async (id: string, name: string) => {
     const p = {
       id,
       businessName: name,
@@ -145,16 +151,16 @@ export default function ProviderDashboardPage() {
       verificationStatus: 'unverified'
     };
     setProvider(p);
-    localStorage.setItem('foodsafe365_provider', JSON.stringify(p));
-    fetch('/api/v1/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: `${id}@partner.example.com`, role: 'provider' })
-    }).catch(() => {});
-    document.cookie = `fs_user_id=${id}; path=/; credentials=same-origin; max-age=2592000`;
-    document.cookie = `fs_role=vendor; path=/; credentials=same-origin; max-age=2592000`;
-    document.cookie = `fs_provider_id=${id}; path=/; credentials=same-origin; max-age=2592000`;
-    fetchRequests(id);
+    try {
+      localStorage.setItem('foodsafe365_provider', JSON.stringify(p));
+      await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ email: `${id}@partner.example.com`, password: 'partner123', role: 'provider' })
+      });
+    } catch {}
+    await fetchRequests();
   };
 
   return (
@@ -206,8 +212,41 @@ export default function ProviderDashboardPage() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{ fontSize: 13, color: '#475569' }}>
-            Active Profile: <strong>{provider?.businessName || 'Loading...'}</strong> ({provider?.city || 'Mumbai'})
+            Active Profile: <strong>{authStatus === 'unauthenticated' ? 'Not Signed In' : (provider?.businessName || requests[0]?.providerName || 'Service Partner Agency')}</strong>
           </div>
+
+          {authStatus === 'unauthenticated' ? (
+            <Link
+              href="/login?role=provider&redirect=/providers/dashboard"
+              style={{
+                fontSize: 12,
+                color: '#ffffff',
+                textDecoration: 'none',
+                padding: '6px 14px',
+                background: '#059669',
+                borderRadius: 6,
+                fontWeight: 700
+              }}
+            >
+              Sign In
+            </Link>
+          ) : (
+            <Link
+              href="/login?role=provider&redirect=/providers/dashboard"
+              style={{
+                fontSize: 12,
+                color: '#475569',
+                textDecoration: 'none',
+                padding: '6px 10px',
+                background: '#f1f5f9',
+                border: '1px solid #cbd5e1',
+                borderRadius: 6,
+                fontWeight: 600
+              }}
+            >
+              Switch Account
+            </Link>
+          )}
 
           <select
             aria-label="Switch active demo provider profile"
@@ -274,7 +313,7 @@ export default function ProviderDashboardPage() {
             </p>
           </div>
           <button
-            onClick={() => provider?.id && fetchRequests(provider.id)}
+            onClick={() => fetchRequests()}
             disabled={loading}
             style={{
               display: 'inline-flex',
@@ -312,7 +351,160 @@ export default function ProviderDashboardPage() {
           </div>
         )}
 
-        {/* SPRINT 23: 3 CLEAN TABS */}
+        {/* Session Recovery / Permission Denial States */}
+        {authStatus === 'unauthenticated' ? (
+          <div style={{
+            background: '#ffffff',
+            borderRadius: 16,
+            border: '1.5px solid #fed7aa',
+            padding: '36px 28px',
+            textAlign: 'center',
+            marginBottom: 24,
+            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+          }}>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              background: '#fff7ed',
+              color: '#ea580c',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px'
+            }}>
+              <AlertTriangle size={28} />
+            </div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 8px', color: '#0F172A' }}>
+              Service Partner Authentication Required
+            </h2>
+            <p style={{ margin: '0 auto 20px', fontSize: 14, color: '#64748b', maxWidth: 480, lineHeight: 1.5 }}>
+              Your session has expired or you are not currently signed in. Please sign in with your authorized service provider credentials to access incoming job tickets.
+            </p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <Link
+                href="/login?role=provider&redirect=/providers/dashboard"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '10px 20px',
+                  background: '#059669',
+                  color: '#ffffff',
+                  borderRadius: 8,
+                  fontWeight: 700,
+                  fontSize: 14,
+                  textDecoration: 'none'
+                }}
+              >
+                Sign In as Service Partner
+              </Link>
+              <button
+                type="button"
+                onClick={() => fetchRequests()}
+                style={{
+                  padding: '10px 18px',
+                  background: '#ffffff',
+                  color: '#334155',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: 'pointer'
+                }}
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        ) : authStatus === 'forbidden' ? (
+          <div style={{
+            background: '#ffffff',
+            borderRadius: 16,
+            border: '1.5px solid #fecaca',
+            padding: '36px 28px',
+            textAlign: 'center',
+            marginBottom: 24,
+            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+          }}>
+            <div style={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              background: '#fef2f2',
+              color: '#dc2626',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px'
+            }}>
+              <XCircle size={28} />
+            </div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, margin: '0 0 8px', color: '#0F172A' }}>
+              Partner Role Access Denied
+            </h2>
+            <p style={{ margin: '0 auto 20px', fontSize: 14, color: '#64748b', maxWidth: 480, lineHeight: 1.5 }}>
+              Your current session does not have service partner permissions (or belongs to another business journey). To manage partner service requests, please switch to a verified service provider account.
+            </p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <Link
+                href="/login?role=provider&redirect=/providers/dashboard"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '10px 20px',
+                  background: '#0f172a',
+                  color: '#ffffff',
+                  borderRadius: 8,
+                  fontWeight: 700,
+                  fontSize: 14,
+                  textDecoration: 'none'
+                }}
+              >
+                Switch to Partner Account
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <>
+            {authStatus === 'error' && (
+              <div style={{
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
+                color: '#991b1b',
+                borderRadius: 10,
+                padding: '16px 20px',
+                marginBottom: 20,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: 13.5
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <AlertCircle size={18} />
+                  <span>{errorMessage}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => fetchRequests()}
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #fca5a5',
+                    color: '#991b1b',
+                    padding: '6px 14px',
+                    borderRadius: 6,
+                    fontWeight: 700,
+                    fontSize: 12,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+
+            {/* SPRINT 23: 3 CLEAN TABS */}
         <div style={{
           display: 'flex',
           gap: 12,
@@ -800,6 +992,8 @@ export default function ProviderDashboardPage() {
               </div>
             )}
           </div>
+        )}
+          </>
         )}
       </div>
     </main>

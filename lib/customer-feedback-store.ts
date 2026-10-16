@@ -143,47 +143,9 @@ function writeFileStore(ratings: DinerSafetyRating[]): void {
   }
 }
 
-let pgInitialized = false;
-
 async function ensurePgTable(): Promise<boolean> {
-  if (pgInitialized) return true;
-  const pool = getPool();
-  if (!pool) return false;
-
-  // In production, runtime code strictly assumes required schema has already been migrated.
-  if (process.env.NODE_ENV === 'production') {
-    pgInitialized = true;
-    return true;
-  }
-
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS customer_feedback (
-        id text PRIMARY KEY,
-        outlet_id text NOT NULL,
-        outlet_name text NOT NULL,
-        overall_score numeric(3,2) NOT NULL,
-        cleanliness_score numeric(3,2) NOT NULL,
-        staff_hygiene_score numeric(3,2) NOT NULL,
-        food_freshness_score numeric(3,2) NOT NULL,
-        safe_water_score numeric(3,2) NOT NULL,
-        washroom_score numeric(3,2) NOT NULL,
-        feedback text,
-        diner_name text,
-        diner_mobile text,
-        table_number text,
-        verified_dine_in boolean DEFAULT true,
-        created_at timestamptz DEFAULT now()
-      );
-      CREATE INDEX IF NOT EXISTS idx_customer_feedback_outlet ON customer_feedback(outlet_id);
-      CREATE INDEX IF NOT EXISTS idx_customer_feedback_created ON customer_feedback(created_at DESC);
-    `);
-    pgInitialized = true;
-    return true;
-  } catch (err) {
-    console.error('[customer-feedback-store] PostgreSQL table initialization failed:', err);
-    throw err;
-  }
+  // Schema is managed exclusively by migration 009_create_customer_feedback.sql. Dynamic runtime DDL is eliminated.
+  return true;
 }
 
 function mapPgRowToRating(r: any): DinerSafetyRating {

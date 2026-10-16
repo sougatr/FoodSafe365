@@ -5,7 +5,7 @@ import { ok, fail } from '../../../../lib/response';
 import { getCustomerFeedback, saveCustomerFeedback } from '../../../../lib/customer-feedback-store';
 import { authorizeFeedbackAccess } from '../../../../lib/tenant';
 import { DinerSafetyRating } from '../../../../lib/foodsafety28';
-import { getRestaurantEntry, processCustomerFeedbackForUnclaimedRestaurant } from '../../../../lib/unclaimed-restaurant-store';
+import { getRestaurantEntry, getRestaurantEntryAsync, processCustomerFeedbackForUnclaimedRestaurant, processCustomerFeedbackForUnclaimedRestaurantAsync } from '../../../../lib/unclaimed-restaurant-store';
 import { checkRateLimit as checkDistributedRateLimit, getClientIp, createRateLimitHeaders } from '../../../../lib/rate-limiter';
 import { parseBoundedJson } from '../../../../lib/body-guard';
 
@@ -117,7 +117,7 @@ export async function GET(req: NextRequest) {
     if (err?.message?.startsWith('DATABASE_ERROR')) {
       return fail('DATABASE_ERROR', 'Production database read operation failed.', 500);
     }
-    return fail('INTERNAL_ERROR', err?.message || 'Failed to retrieve customer feedback', 500);
+    return fail('INTERNAL_ERROR', 'Failed to retrieve customer feedback.', 500);
   }
 }
 
@@ -128,6 +128,10 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
+    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+      return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
+    }
+
     const clientIp = getClientIp(req);
 
     // 1. Distributed Rate Limiter: 10 submissions per 5 minutes per IP
@@ -232,14 +236,14 @@ export async function POST(req: NextRequest) {
     const { rating, storage } = await saveCustomerFeedback(ratingRecord);
 
     // Check if the restaurant is UNCLAIMED and process mock outbox notification if eligible
-    const restEntry = getRestaurantEntry(ratingRecord.outletId);
+    const restEntry = await getRestaurantEntryAsync(ratingRecord.outletId);
     const isUnclaimed = restEntry ? (restEntry.status === 'UNCLAIMED' || restEntry.status === 'DISCOVERED' || restEntry.status === 'INVITED') : false;
 
     let notificationResult: any = null;
     if (isUnclaimed) {
       const origin = req.headers.get('origin') || req.headers.get('host') || 'http://localhost:3000';
       const baseUrl = origin.startsWith('http') ? origin : `http://${origin}`;
-      notificationResult = processCustomerFeedbackForUnclaimedRestaurant(rating, { baseUrl });
+      notificationResult = await processCustomerFeedbackForUnclaimedRestaurantAsync(rating, { baseUrl });
     }
 
     // Record submission in sliding window cache
@@ -252,9 +256,16 @@ export async function POST(req: NextRequest) {
       storage
     });
 
-    const responseMessage = isUnclaimed
-      ? 'Your Customer Food-Safety Rating has been recorded by FoodSafe365. This restaurant has not yet claimed its FoodSafe365 profile.'
-      : 'Customer food-safety feedback submitted successfully and persisted to server storage.';
+    let responseMessage: string;
+    if (isUnclaimed) {
+      if (notificationResult?.generated) {
+        responseMessage = 'Thank you for your feedback. Your Customer Food-Safety Rating has been recorded by FoodSafe365. This food business has not yet claimed its FoodSafe365 profile. FoodSafe365 has prepared a notification for the business so it can claim its profile.';
+      } else {
+        responseMessage = 'Thank you for your feedback. Your Customer Food-Safety Rating has been recorded by FoodSafe365. This food business has not yet claimed its FoodSafe365 profile.';
+      }
+    } else {
+      responseMessage = 'Thank you for your feedback. Your Customer Food-Safety Rating has been shared with the business.';
+    }
 
     return NextResponse.json({
       data: {
@@ -279,6 +290,6 @@ export async function POST(req: NextRequest) {
     if (err?.message?.startsWith('DATABASE_ERROR')) {
       return fail('DATABASE_ERROR', 'Production database write operation failed.', 500);
     }
-    return fail('INTERNAL_ERROR', err?.message || 'Failed to submit customer rating', 500);
+    return fail('INTERNAL_ERROR', 'Failed to submit customer rating.', 500);
   }
 }

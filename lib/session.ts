@@ -1,11 +1,14 @@
 import { createHmac, timingSafeEqual, randomUUID } from 'crypto';
 
+export type SessionJourney = 'restaurant' | 'grocery' | 'provider' | 'client' | 'platform';
+
 export interface SessionData {
   userId: string;
   organisationId: string;
   outletId: string;
   role: string;
   providerId?: string;
+  journey?: SessionJourney;
   sessionId: string; // Unique session JTI
   issuedAt: number;  // Timestamp ms
   expiresAt: number; // Timestamp ms

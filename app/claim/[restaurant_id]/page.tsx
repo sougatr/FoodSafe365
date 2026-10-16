@@ -9,6 +9,7 @@ import GlobalHeader from '@/components/GlobalHeader';
 interface RestaurantInfo {
   id: string;
   name: string;
+  businessType?: string;
   city: string;
   location: string;
   status: string;
@@ -41,10 +42,10 @@ export default function ClaimRestaurantPage({ params }: { params: { restaurant_i
             }
           }
         } else {
-          setError('Restaurant not found in FoodSafe365 directory.');
+          setError('Food business not found in FoodSafe365 directory.');
         }
       } catch (err: any) {
-        setError('Unable to load restaurant details.');
+        setError('Unable to load business details.');
       } finally {
         setIsLoading(false);
       }
@@ -73,14 +74,14 @@ export default function ClaimRestaurantPage({ params }: { params: { restaurant_i
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           token: token.trim(),
-          managerName: managerName.trim() || 'Restaurant Manager',
+          managerName: managerName.trim() || 'Business Manager',
           managerEmail: managerEmail.trim() || undefined
         })
       });
 
       const json = await res.json();
       if (!res.ok) {
-        throw new Error(json.error?.message || 'Failed to claim restaurant profile. Token may be invalid or expired.');
+        throw new Error(json.error?.message || 'Failed to claim business profile. Token may be invalid or expired.');
       }
 
       setSuccess(true);
@@ -91,7 +92,7 @@ export default function ClaimRestaurantPage({ params }: { params: { restaurant_i
         localStorage.setItem('foodsafe365_setup', JSON.stringify({
           name: restaurant?.name || params.restaurant_id,
           city: restaurant?.city || 'Mumbai',
-          managerName: managerName || 'Restaurant Manager',
+          managerName: managerName || 'Business Manager',
           claimedAt: new Date().toISOString()
         }));
       }
@@ -111,7 +112,7 @@ export default function ClaimRestaurantPage({ params }: { params: { restaurant_i
           
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
             <span className="pill good" style={{ fontSize: 11, padding: '4px 10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              RESTAURANT PROFILE CLAIM
+              FOOD BUSINESS PROFILE CLAIM
             </span>
             {restaurant && (
               <span className="pill neutral" style={{ fontSize: 11, padding: '4px 10px' }}>
@@ -121,7 +122,7 @@ export default function ClaimRestaurantPage({ params }: { params: { restaurant_i
           </div>
 
           <h1 style={{ fontSize: 26, fontWeight: 900, color: '#0f172a', margin: '4px 0 8px' }}>
-            Claim {restaurant ? restaurant.name : 'Restaurant'} Profile
+            Claim {restaurant ? restaurant.name : 'Food Business'} Profile
           </h1>
 
           <p className="muted" style={{ margin: '0 0 20px', fontSize: 14, lineHeight: 1.5 }}>
@@ -141,7 +142,7 @@ export default function ClaimRestaurantPage({ params }: { params: { restaurant_i
               </p>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
                 <Link
-                  href="/manager"
+                  href={restaurant?.businessType === 'GROCERY' || restaurant?.businessType === 'SUPERMARKET' ? '/grocery' : '/manager'}
                   className="btn primary"
                   style={{
                     background: '#059669',
@@ -157,7 +158,7 @@ export default function ClaimRestaurantPage({ params }: { params: { restaurant_i
                   View Manager Review &amp; Customer Voice →
                 </Link>
                 <Link
-                  href="/home"
+                  href={restaurant?.businessType === 'GROCERY' || restaurant?.businessType === 'SUPERMARKET' ? '/grocery' : '/home'}
                   className="btn secondary"
                   style={{
                     padding: '10px 18px',
@@ -166,7 +167,7 @@ export default function ClaimRestaurantPage({ params }: { params: { restaurant_i
                     textDecoration: 'none'
                   }}
                 >
-                  Kitchen Home
+                  Dashboard Home
                 </Link>
               </div>
             </div>
@@ -177,7 +178,7 @@ export default function ClaimRestaurantPage({ params }: { params: { restaurant_i
                   <Lock size={15} color="#059669" />
                   Controlled Verification Required
                 </div>
-                Customer feedback for this restaurant is securely stored. To claim this profile and inspect diner observations, enter your authorized business verification token.
+                Customer feedback for this food business is securely stored. To claim this profile and inspect customer observations, enter your authorized business verification token.
               </div>
 
               {error && (

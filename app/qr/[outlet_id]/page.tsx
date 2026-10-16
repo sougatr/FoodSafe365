@@ -45,6 +45,14 @@ export default function TableQrPage() {
   const [dinerName, setDinerName] = useState('');
   const [dinerPhone, setDinerPhone] = useState('');
 
+  const [responseRequested, setResponseRequested] = useState<'no' | 'yes'>('no');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [confirmationMessage, setConfirmationMessage] = useState<string>('');
+
+  // Contextual classification (Restaurant vs Grocery / Supermarket)
+  const isGrocery = outletId.includes('grocery') || outletId.includes('supermarket') || outletId.includes('freshmart');
+
   // 5-Point Safety Scores
   const [cleanliness, setCleanliness] = useState(5);
   const [staffHygiene, setStaffHygiene] = useState(5);
@@ -86,8 +94,8 @@ export default function TableQrPage() {
       outletId,
       outletName: `${displayName} — ${displayLocation}`,
       createdAt: new Date().toISOString(),
-      dinerName: dinerName.trim() || 'Customer',
-      dinerMobile: dinerPhone.trim() || undefined,
+      dinerName: responseRequested === 'yes' ? (dinerName.trim() || undefined) : undefined,
+      dinerMobile: responseRequested === 'yes' ? (customerPhone.trim() || dinerPhone.trim() || undefined) : undefined,
       tableNumber,
       scores: {
         cleanliness,
@@ -98,16 +106,26 @@ export default function TableQrPage() {
       },
       overallScore: parseFloat(overallRating),
       feedback: feedback.trim() || undefined,
-      verifiedDineIn: true
+      verifiedDineIn: true,
+      responseRequested: responseRequested === 'yes',
+      consentToShareContact: responseRequested === 'yes',
+      customerEmail: responseRequested === 'yes' ? (customerEmail.trim() || undefined) : undefined,
+      customerPhone: responseRequested === 'yes' ? (customerPhone.trim() || dinerPhone.trim() || undefined) : undefined
     };
 
     // 1. Persist to server / database API
     try {
-      await fetch('/api/v1/customer-feedback', {
+      const res = await fetch('/api/v1/customer-feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newRating)
       });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data?.message) {
+          setConfirmationMessage(json.data.message);
+        }
+      }
     } catch (err) {
       console.warn('[QR Rating] Server API error, saving locally:', err);
     }
@@ -121,8 +139,8 @@ export default function TableQrPage() {
       const newEvent: AuditTrailEvent = {
         id: `event-${Date.now()}`,
         at: new Date().toISOString(),
-        type: 'Diner Food-Safety Rating',
-        detail: `Diner at ${tableNumber} rated food safety ${overallRating}/5★ (Cleanliness: ${cleanliness}★, Hygiene: ${staffHygiene}★, Freshness: ${foodFreshness}★).`,
+        type: 'Customer Food-Safety Rating',
+        detail: `Customer at ${tableNumber} rated food safety ${overallRating}/5★ (Cleanliness: ${cleanliness}★, Hygiene: ${staffHygiene}★, Freshness: ${foodFreshness}★).`,
         status: 'guest_rated'
       };
       state.timeline = [newEvent, ...(state.timeline || [])];
@@ -134,58 +152,58 @@ export default function TableQrPage() {
     setRatingSubmitted(true);
   }
 
-  function handleGrievanceSubmit(e: React.FormEvent) {
+  async function handleGrievanceSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!grievanceDesc.trim()) return;
 
     const ticketId = `GRV-${Math.floor(1000 + Math.random() * 9000)}`;
-    const actionId = `act-guest-${Date.now()}`;
 
-    const incident: DinerIncidentReport = {
-      id: ticketId,
+    // Map acute grievance to customer feedback contract with critical hazard scoring
+    const grievanceFeedback: DinerSafetyRating = {
+      id: `cfr-grv-${Date.now()}`,
       outletId,
-      outletName: 'ABC Restaurant — Bandra West',
+      outletName: `${displayName} — ${displayLocation}`,
       createdAt: new Date().toISOString(),
-      dinerName: dinerName.trim() || 'Table Guest',
-      dinerPhone: dinerPhone.trim() || 'Not Provided',
-      tableNumber,
-      category: grievanceCategory,
-      severity: 'critical',
-      description: grievanceDesc.trim(),
-      status: 'received',
-      actionId
+      dinerName: dinerName.trim() || undefined,
+      dinerMobile: dinerPhone.trim() || undefined,
+      tableNumber: tableNumber.trim() || undefined,
+      scores: {
+        cleanliness: (grievanceCategory === 'dirty_cutlery' || grievanceCategory === 'pest_sighting') ? 1 : 2,
+        staffHygiene: (grievanceCategory === 'hygiene_violation') ? 1 : 2,
+        foodFreshness: (grievanceCategory === 'undercooked_food' || grievanceCategory === 'bad_odor_taste' || grievanceCategory === 'foreign_object') ? 1 : 2,
+        safeWater: 2,
+        washroom: 2
+      },
+      overallScore: 1,
+      feedback: `[GRIEVANCE: ${grievanceCategory.toUpperCase()}] ${grievanceDesc.trim()}`,
+      verifiedDineIn: true,
+      responseRequested: Boolean(dinerPhone.trim()),
+      consentToShareContact: Boolean(dinerPhone.trim()),
+      customerPhone: dinerPhone.trim() || undefined
     };
 
-    // Auto-create a high-priority action for the restaurant manager
-    const newAction: CorrectiveAction = {
-      id: actionId,
-      issueId: `issue-${ticketId}`,
-      checkCode: 'GUEST-GRIEVANCE',
-      title: `[Guest Alert - ${tableNumber}] ${grievanceCategory.replace('_', ' ').toUpperCase()}`,
-      description: `Reported by ${dinerName || 'Guest'} (${dinerPhone || 'No phone'}): ${grievanceDesc.trim()}`,
-      severity: 'critical',
-      status: 'open',
-      createdAt: new Date().toISOString(),
-      immediateAction: 'Manager on duty to visit table immediately, inspect item, and issue replacement/remedy.',
-      correctiveAction: 'Audit kitchen prep station, verify CCP limits, and brief duty cooks on standard.',
-      rootCause: 'Immediate diner grievance requiring resolution before leaving premises.'
-    };
+    // 1. Submit through official POST /api/v1/customer-feedback
+    try {
+      const res = await fetch('/api/v1/customer-feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(grievanceFeedback)
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data?.message) {
+          setConfirmationMessage(json.data.message);
+        }
+      }
+    } catch (err) {
+      console.warn('[QR Grievance] Server API error, saving to local feedback store:', err);
+    }
 
+    // 2. Local cache fallback — save as customer feedback only (never auto-create CorrectiveAction or audit finding)
     try {
       const raw = localStorage.getItem(PHASE1_STORAGE_KEY);
       const state: AppPhase1State = raw ? JSON.parse(raw) : {};
-      state.dinerIncidents = [incident, ...(state.dinerIncidents || [])];
-      state.actions = [newAction, ...(state.actions || [])];
-
-      const newEvent: AuditTrailEvent = {
-        id: `event-${Date.now()}`,
-        at: new Date().toISOString(),
-        type: 'Urgent Guest Grievance Logged',
-        detail: `[Ticket ${ticketId}] Diner at ${tableNumber} reported ${grievanceCategory}: "${grievanceDesc.trim().slice(0, 60)}...". Action created.`,
-        status: 'guest_alert'
-      };
-      state.timeline = [newEvent, ...(state.timeline || [])];
-
+      state.dinerRatings = [grievanceFeedback, ...(state.dinerRatings || [])];
       localStorage.setItem(PHASE1_STORAGE_KEY, JSON.stringify(state));
       window.dispatchEvent(new Event('foodsaf365:update'));
     } catch {}
@@ -323,12 +341,15 @@ export default function TableQrPage() {
                   <Check size={28} />
                 </div>
                 <h2 style={{ fontSize: 20, margin: '0 0 8px' }}>Thank You for Your Feedback!</h2>
-                <p className="muted" style={{ fontSize: 14, maxWidth: 440, margin: '0 auto 20px' }}>
-                  Your {overallRating} / 5 Customer Food-Safety Feedback has been saved and shared with {displayName} management.
+                <p className="muted" style={{ fontSize: 14, maxWidth: 440, margin: '0 auto 20px', lineHeight: 1.5 }}>
+                  {confirmationMessage || `Your ${overallRating} / 5 Customer Food-Safety Feedback has been saved and shared with ${displayName} management.`}
                 </p>
                 <button
                   type="button"
-                  onClick={() => setRatingSubmitted(false)}
+                  onClick={() => {
+                    setRatingSubmitted(false);
+                    setConfirmationMessage('');
+                  }}
                   className="btn secondary"
                   style={{ fontSize: 13 }}
                 >
@@ -340,16 +361,22 @@ export default function TableQrPage() {
                 <div>
                   <h2 style={{ fontSize: 18, margin: '0 0 4px' }}>Customer Food-Safety Rating</h2>
                   <p className="muted" style={{ fontSize: 13, margin: 0 }}>
-                    Share your observation of table cleanliness, staff hygiene, food handling &amp; temperature, and washroom standards.
+                    {isGrocery
+                      ? 'Share your observations regarding store hygiene, product freshness, cold-chain integrity, and retail standards.'
+                      : 'Share your observation of table cleanliness, staff hygiene, food handling & temperature, and washroom standards.'}
                   </p>
                 </div>
 
-                {/* Score Item 1: Cleanliness */}
+                {/* Score Item 1: Cleanliness / Store Hygiene */}
                 <div style={{ background: '#f8fafc', padding: 14, borderRadius: 10 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                     <div>
-                      <strong style={{ fontSize: 14, color: '#0f172a' }}>1. Dining Area &amp; Table Cleanliness</strong>
-                      <p className="muted" style={{ margin: 0, fontSize: 12 }}>Tables sanitized, odorless, clean cutlery &amp; napkins</p>
+                      <strong style={{ fontSize: 14, color: '#0f172a' }}>
+                        {isGrocery ? '1. Store & Surface Hygiene' : '1. Dining Area & Table Cleanliness'}
+                      </strong>
+                      <p className="muted" style={{ margin: 0, fontSize: 12 }}>
+                        {isGrocery ? 'Aisles clean, shelves dusted, checkout counters sanitized' : 'Tables sanitized, odorless, clean cutlery & napkins'}
+                      </p>
                     </div>
                     <span style={{ fontWeight: 800, color: '#059669', fontSize: 15 }}>{cleanliness}★</span>
                   </div>
@@ -380,8 +407,12 @@ export default function TableQrPage() {
                 <div style={{ background: '#f8fafc', padding: 14, borderRadius: 10 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                     <div>
-                      <strong style={{ fontSize: 14, color: '#0f172a' }}>2. Server &amp; Staff Hygiene</strong>
-                      <p className="muted" style={{ margin: 0, fontSize: 12 }}>Clean uniforms, hair secured, clean fingernails/gloves</p>
+                      <strong style={{ fontSize: 14, color: '#0f172a' }}>
+                        {isGrocery ? '2. Staff Hygiene & Handling' : '2. Server & Staff Hygiene'}
+                      </strong>
+                      <p className="muted" style={{ margin: 0, fontSize: 12 }}>
+                        {isGrocery ? 'Clean attire, hair restrained, clean hands/gloves when packing' : 'Clean uniforms, hair secured, clean fingernails/gloves'}
+                      </p>
                     </div>
                     <span style={{ fontWeight: 800, color: '#059669', fontSize: 15 }}>{staffHygiene}★</span>
                   </div>
@@ -408,12 +439,16 @@ export default function TableQrPage() {
                   </div>
                 </div>
 
-                {/* Score Item 3: Food Freshness & Temp */}
+                {/* Score Item 3: Food Freshness & Temp / Product Freshness */}
                 <div style={{ background: '#f8fafc', padding: 14, borderRadius: 10 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                     <div>
-                      <strong style={{ fontSize: 14, color: '#0f172a' }}>3. Food Freshness &amp; Proper Temperature</strong>
-                      <p className="muted" style={{ margin: 0, fontSize: 12 }}>Hot dishes served hot, salads cold, fresh taste &amp; aroma</p>
+                      <strong style={{ fontSize: 14, color: '#0f172a' }}>
+                        {isGrocery ? '3. Product Freshness & Temperature Control' : '3. Food Freshness & Proper Temperature'}
+                      </strong>
+                      <p className="muted" style={{ margin: 0, fontSize: 12 }}>
+                        {isGrocery ? 'Chilled dairy/meats kept cold, fresh produce, no expired packs' : 'Hot dishes served hot, salads cold, fresh taste & aroma'}
+                      </p>
                     </div>
                     <span style={{ fontWeight: 800, color: '#059669', fontSize: 15 }}>{foodFreshness}★</span>
                   </div>
@@ -440,12 +475,16 @@ export default function TableQrPage() {
                   </div>
                 </div>
 
-                {/* Score Item 4: Safe Drinking Water */}
+                {/* Score Item 4: Safe Drinking Water / Packaging & Expiry */}
                 <div style={{ background: '#f8fafc', padding: 14, borderRadius: 10 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                     <div>
-                      <strong style={{ fontSize: 14, color: '#0f172a' }}>4. Safe Drinking Water &amp; Clean Glasses</strong>
-                      <p className="muted" style={{ margin: 0, fontSize: 12 }}>Clear odorless water, spotless glasses, sealed ice hygiene</p>
+                      <strong style={{ fontSize: 14, color: '#0f172a' }}>
+                        {isGrocery ? '4. Packaging & Expiry Integrity' : '4. Safe Drinking Water & Clean Glasses'}
+                      </strong>
+                      <p className="muted" style={{ margin: 0, fontSize: 12 }}>
+                        {isGrocery ? 'Clear labels, intact seals, visible Use By / Best Before dates' : 'Clear odorless water, spotless glasses, sealed ice hygiene'}
+                      </p>
                     </div>
                     <span style={{ fontWeight: 800, color: '#059669', fontSize: 15 }}>{safeWater}★</span>
                   </div>
@@ -472,12 +511,16 @@ export default function TableQrPage() {
                   </div>
                 </div>
 
-                {/* Score Item 5: Washroom Sanitation */}
+                {/* Score Item 5: Washroom Sanitation / Overall Food-Safety Confidence */}
                 <div style={{ background: '#f8fafc', padding: 14, borderRadius: 10 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                     <div>
-                      <strong style={{ fontSize: 14, color: '#0f172a' }}>5. Washroom &amp; Handwash Cleanliness</strong>
-                      <p className="muted" style={{ margin: 0, fontSize: 12 }}>Hand soap available, clean basin, dry paper/hand-dryer</p>
+                      <strong style={{ fontSize: 14, color: '#0f172a' }}>
+                        {isGrocery ? '5. Overall Food-Safety Confidence' : '5. Washroom & Handwash Cleanliness'}
+                      </strong>
+                      <p className="muted" style={{ margin: 0, fontSize: 12 }}>
+                        {isGrocery ? 'Pest-free environment, pleasant odor, trustworthy food storage' : 'Hand soap available, clean basin, dry paper/hand-dryer'}
+                      </p>
                     </div>
                     <span style={{ fontWeight: 800, color: '#059669', fontSize: 15 }}>{washroom}★</span>
                   </div>
@@ -525,7 +568,9 @@ export default function TableQrPage() {
                       minHeight: 80,
                       borderColor: (feedback.trim() ? feedback.trim().split(/\s+/).length : 0) > 100 ? '#dc2626' : undefined
                     }}
-                    placeholder="Share specific observations regarding table hygiene, cutlery cleanliness, food temperature, or staff habits (up to 100 words)..."
+                    placeholder={isGrocery
+                      ? "Share specific observations regarding display hygiene, product expiry, dairy chiller temp, or handling habits (up to 100 words)..."
+                      : "Share specific observations regarding table hygiene, cutlery cleanliness, food temperature, or staff habits (up to 100 words)..."}
                     value={feedback}
                     onChange={e => {
                       const val = e.target.value;
@@ -544,6 +589,61 @@ export default function TableQrPage() {
                   )}
                 </label>
 
+                {/* Response Consent Block */}
+                <div style={{ background: '#f8fafc', padding: 14, borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                  <label style={{ display: 'block', fontWeight: 600, fontSize: 13.5, marginBottom: 8, color: '#0f172a' }}>
+                    Would you like the food business to respond to your feedback?
+                  </label>
+                  <div style={{ display: 'flex', gap: 16, marginBottom: responseRequested === 'yes' ? 12 : 0 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, cursor: 'pointer' }}>
+                      <input
+                        type="radio"
+                        name="responseRequested"
+                        value="no"
+                        checked={responseRequested === 'no'}
+                        onChange={() => setResponseRequested('no')}
+                      />
+                      <span>NO — just submit my feedback anonymously</span>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, cursor: 'pointer' }}>
+                      <input
+                        type="radio"
+                        name="responseRequested"
+                        value="yes"
+                        checked={responseRequested === 'yes'}
+                        onChange={() => setResponseRequested('yes')}
+                      />
+                      <span>YES — I'd like the business to respond</span>
+                    </label>
+                  </div>
+
+                  {responseRequested === 'yes' && (
+                    <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10, borderTop: '1px solid #e2e8f0', paddingTop: 12 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                        <input
+                          type="email"
+                          className="input"
+                          placeholder="Your email address (optional)"
+                          value={customerEmail}
+                          onChange={e => setCustomerEmail(e.target.value)}
+                          style={{ fontSize: 13 }}
+                        />
+                        <input
+                          type="tel"
+                          className="input"
+                          placeholder="Your mobile number (optional)"
+                          value={customerPhone}
+                          onChange={e => setCustomerPhone(e.target.value)}
+                          style={{ fontSize: 13 }}
+                        />
+                      </div>
+                      <p className="muted" style={{ fontSize: 11.5, margin: 0, color: '#64748b' }}>
+                        Your contact details will be shared with this food business only so that it can respond to your feedback.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
                 <button
                   type="submit"
                   className="btn primary"
@@ -557,7 +657,7 @@ export default function TableQrPage() {
                     gap: 8
                   }}
                 >
-                  <Send size={15} /> Submit Diner Food-Safety Rating ({overallRating}★)
+                  <Send size={15} /> Submit Customer Food-Safety Rating ({overallRating}★)
                 </button>
               </form>
             )}
@@ -587,10 +687,10 @@ export default function TableQrPage() {
                 </span>
                 <h2 style={{ fontSize: 20, margin: '8px 0 6px' }}>Manager on Duty Notified</h2>
                 <p className="muted" style={{ fontSize: 14, maxWidth: 440, margin: '0 auto 16px' }}>
-                  Your food safety report has been logged directly into the restaurant’s <strong>Actions Centre</strong>. The General Manager has been requested to visit <strong>{tableNumber}</strong> immediately.
+                  Your food safety report has been logged directly into the restaurant’s <strong>Customer Feedback</strong> record. The General Manager has been requested to visit <strong>{tableNumber}</strong> immediately.
                 </p>
                 <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: 12, maxWidth: 360, margin: '0 auto 20px', textAlign: 'left', fontSize: 13 }}>
-                  <div><strong>Outlet:</strong> ABC Restaurant</div>
+                  <div><strong>Outlet:</strong> {displayName}</div>
                   <div><strong>Table:</strong> {tableNumber}</div>
                   <div><strong>Category:</strong> {grievanceCategory.replace('_', ' ')}</div>
                   <div><strong>Status:</strong> Immediate Resolution In Progress</div>

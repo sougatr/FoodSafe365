@@ -31,11 +31,12 @@ export async function GET(req: Request) {
     }, { status: 200 });
   } catch (err: any) {
     console.error('[API GET /api/v1/grocery/daily-check] Error:', err);
-    const code = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR') ? 'DATABASE_ERROR' : 'SERVER_ERROR';
+    const isDb = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR');
+    const msg = isDb ? 'Database error occurred while retrieving daily check history.' : 'Unable to retrieve daily check history.';
     return NextResponse.json({
       success: false,
-      error: { code, message: err.message || 'Unable to retrieve daily check history.' },
-      message: err.message || 'Unable to retrieve daily check history.'
+      error: { code: isDb ? 'DATABASE_ERROR' : 'SERVER_ERROR', message: msg },
+      message: msg
     }, { status: 500 });
   }
 }
@@ -75,11 +76,12 @@ export async function POST(req: Request) {
     }, { status: 201 });
   } catch (err: any) {
     console.error('[API POST /api/v1/grocery/daily-check] Error:', err);
-    const code = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR') ? 'DATABASE_ERROR' : 'SERVER_ERROR';
+    const isDb = err.code === 'DATABASE_ERROR' || err.message?.includes('DATABASE_ERROR');
+    const msg = isDb ? 'Database error occurred while recording daily check.' : 'Unable to record daily check.';
     return NextResponse.json({
       success: false,
-      error: { code, message: err.message || 'Failed to record daily check' },
-      message: err.message || 'Unable to record daily check. Please try again.'
+      error: { code: isDb ? 'DATABASE_ERROR' : 'SERVER_ERROR', message: msg },
+      message: msg
     }, { status: 500 });
   }
 }

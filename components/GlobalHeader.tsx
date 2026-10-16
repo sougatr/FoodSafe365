@@ -76,12 +76,7 @@ export default function GlobalHeader() {
     }
   }
 
-  function handleOpenLogin() {
-    if (typeof window !== 'undefined') {
-      setMobileMenuOpen(false);
-      window.dispatchEvent(new CustomEvent('open-customer-otp-modal'));
-    }
-  }
+
 
   function handleTriggerChatbot() {
     if (typeof window !== 'undefined') {
@@ -270,28 +265,28 @@ export default function GlobalHeader() {
               )}
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={handleOpenLogin}
+            <Link
+              href="/login"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 5,
                 fontSize: 12.5,
-                padding: '6px 12px',
+                padding: '6px 14px',
                 borderRadius: 8,
                 background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
                 border: 'none',
                 color: '#ffffff',
                 fontWeight: 700,
-                cursor: 'pointer',
+                textDecoration: 'none',
                 boxShadow: '0 2px 6px rgba(5, 150, 105, 0.25)',
                 whiteSpace: 'nowrap'
               }}
-              title="Customer Login with Mobile OTP"
+              title="Sign in to FoodSafe365 (Restaurant, Grocery, Customer, Partner)"
             >
-              <span>Customer Login</span>
-            </button>
+              <User size={13} />
+              <span>Log In</span>
+            </Link>
           )}
 
           <LanguageSelector compact={true} />
@@ -353,9 +348,8 @@ export default function GlobalHeader() {
               <User size={18} />
             </button>
           ) : (
-            <button
-              type="button"
-              onClick={handleOpenLogin}
+            <Link
+              href="/login"
               style={{
                 fontSize: 12,
                 padding: '6px 10px',
@@ -364,12 +358,15 @@ export default function GlobalHeader() {
                 border: 'none',
                 color: '#ffffff',
                 fontWeight: 700,
-                cursor: 'pointer'
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4
               }}
-              aria-label="Customer Login"
+              aria-label="Log In"
             >
-              Login
-            </button>
+              <span>Login</span>
+            </Link>
           )}
 
           {/* Hamburger Menu Toggle Button */}
@@ -509,9 +506,9 @@ export default function GlobalHeader() {
                 </button>
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={handleOpenLogin}
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
                 style={{
                   width: '100%',
                   padding: '10px 14px',
@@ -521,15 +518,17 @@ export default function GlobalHeader() {
                   color: '#ffffff',
                   fontSize: 13.5,
                   fontWeight: 700,
-                  cursor: 'pointer',
+                  textDecoration: 'none',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 8
+                  gap: 8,
+                  boxSizing: 'border-box'
                 }}
               >
-                <span>📱 Customer Login with Mobile OTP</span>
-              </button>
+                <User size={16} />
+                <span>Sign In / Select Role</span>
+              </Link>
             )}
           </div>
         </div>

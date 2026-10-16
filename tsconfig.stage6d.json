@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es2022",
+    "outDir": ".data/test_s6d_dist",
+    "skipLibCheck": true,
+    "isolatedModules": false
+  },
+  "include": [
+    "tests/test-stage6d-real-s3-integration.ts",
+    "tests/helpers/disposable-s3-server.ts",
+    "scripts/cleanup-abandoned-evidence.ts"
+  ]
+}

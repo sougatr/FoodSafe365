@@ -137,7 +137,7 @@ async function runRateLimitingAndBodyGuardSuite() {
         'content-type': 'application/json',
         'x-forwarded-for': loginAttackerIp
       },
-      body: JSON.stringify({ email: 'target.manager@foodsafe365.com', role: 'manager' })
+      body: JSON.stringify({ email: 'target.manager@foodsafe365.com', password: 'demo', role: 'manager' })
     });
     const lRes = await loginHandler(lReq);
     assert.strictEqual(lRes.status, 200, `Login attempt ${i + 1} should proceed`);
@@ -150,7 +150,7 @@ async function runRateLimitingAndBodyGuardSuite() {
       'content-type': 'application/json',
       'x-forwarded-for': loginAttackerIp
     },
-    body: JSON.stringify({ email: 'target.manager@foodsafe365.com', role: 'manager' })
+    body: JSON.stringify({ email: 'target.manager@foodsafe365.com', password: 'demo', role: 'manager' })
   });
   const lResBlocked = await loginHandler(lReqBlocked);
   assert.strictEqual(lResBlocked.status, 429, '6th login attempt must return HTTP 429');
@@ -170,7 +170,7 @@ async function runRateLimitingAndBodyGuardSuite() {
       'content-type': 'application/json',
       'x-forwarded-for': '198.51.100.88'
     },
-    body: JSON.stringify({ email: 'valid.user@foodsafe365.com', role: 'manager' })
+    body: JSON.stringify({ email: 'valid.user@foodsafe365.com', password: 'demo', role: 'manager' })
   });
   const legitLoginRes = await loginHandler(legitLoginReq);
   assert.strictEqual(legitLoginRes.status, 200);

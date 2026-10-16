@@ -13,27 +13,15 @@ import {
   Wrench,
   Thermometer,
   Clock,
-  ArrowRight
+  ArrowRight,
+  RefreshCw
 } from 'lucide-react';
 import {
   FOODSAFE28,
   CheckRecord,
-  Issue,
   CorrectiveAction,
-  AuditTrailEvent,
-  AppPhase1State,
-  PHASE1_STORAGE_KEY,
-  isScheduledCheck,
-  calculateDailyBadge
+  AuditTrailEvent
 } from '@/lib/foodsafety28';
-
-function loadState(): AppPhase1State {
-  try {
-    return JSON.parse(localStorage.getItem(PHASE1_STORAGE_KEY) || '{}');
-  } catch {
-    return {};
-  }
-}
 
 const fmt = (v?: string | null) => {
   if (!v) return '—';
@@ -65,114 +53,109 @@ const statusLabel = (s: string) => {
 };
 
 export default function Records() {
-  const [data, setData] = useState<AppPhase1State>({});
+  const [serverData, setServerData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorCode, setErrorCode] = useState<'401' | '403' | 'ERROR' | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [tab, setTab] = useState('checks');
 
+  async function loadRecords() {
+    setIsLoading(true);
+    setErrorCode(null);
+    setErrorMessage(null);
+    try {
+      const res = await fetch('/api/v1/records', { cache: 'no-store' });
+      if (!res.ok) {
+        if (res.status === 401) {
+          setErrorCode('401');
+          setErrorMessage('Your session has expired or authentication is required. Please sign in to view traceable compliance records.');
+          return;
+        }
+        if (res.status === 403) {
+          setErrorCode('403');
+          setErrorMessage('Access denied: Your account role does not have permission to view traceable compliance records for this outlet.');
+          return;
+        }
+        const errJson = await res.json().catch(() => ({}));
+        setErrorCode('ERROR');
+        setErrorMessage(errJson?.error?.message || errJson?.message || `Server returned error (${res.status}).`);
+        return;
+      }
+      const json = await res.json();
+      setServerData(json.data);
+    } catch (err: any) {
+      console.warn('[Records] Error fetching records:', err);
+      setErrorCode('ERROR');
+      setErrorMessage(err?.message || 'Could not load traceable records. Please check your network connection and retry.');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   useEffect(() => {
-    const refresh = () => setData(loadState());
-    refresh();
-    window.addEventListener('foodsaf365:update', refresh);
-    return () => window.removeEventListener('foodsaf365:update', refresh);
+    loadRecords();
   }, []);
 
-  const checks: Record<string, CheckRecord> = data.checks || {};
-  const issues: Issue[] = data.issues || [];
-  const actions: CorrectiveAction[] = data.actions || [];
-  const timeline: AuditTrailEvent[] = data.timeline || [];
+  const rawChecks: any[] = serverData?.checks || [];
+  const actions: CorrectiveAction[] = serverData?.actions || [];
+  const timeline: AuditTrailEvent[] = serverData?.timeline || [];
+  const rawMonitoring: any[] = serverData?.monitoring || [];
+  const outletName = serverData?.outlet?.name || 'ABC Restaurant';
+  const summary = serverData?.summary || {
+    checksRecorded: rawChecks.length,
+    issues: actions.length,
+    openActions: actions.filter((a: any) => a.status !== 'closed').length,
+    closedActions: actions.filter((a: any) => a.status === 'closed').length,
+    monitoringRecords: rawMonitoring.length
+  };
 
-  const scheduled = useMemo(() => FOODSAFE28.filter(isScheduledCheck), []);
-  const badge = useMemo(() => calculateDailyBadge(checks, issues, scheduled), [checks, issues, scheduled]);
-
-  // List of completed checks
   const completedChecksList = useMemo(() => {
-    return Object.entries(checks).map(([code, record]) => {
-      const def = FOODSAFE28.find(x => x.code === code);
+    return rawChecks.map((r: any) => {
+      const def = FOODSAFE28.find(x => x.code === r.code);
       return {
-        code,
-        title: def ? def.title : code,
-        category: def ? def.category : 'General',
-        frequency: def ? def.frequency : 'Daily',
-        input: def ? def.input : 'yes_no',
-        standard: def ? def.standard : '',
-        why: def ? def.why : '',
-        ...record
+        code: r.code || 'FS-CHECK',
+        title: r.title || def?.title || r.template || 'Food Safety Check',
+        category: r.area || def?.category || 'General',
+        frequency: r.frequency || def?.frequency || 'Daily',
+        input: r.input || def?.input || 'yes_no',
+        standard: def?.standard || '',
+        why: def?.why || '',
+        value: typeof r.value === 'object' ? JSON.stringify(r.value) : String(r.value ?? 'Recorded'),
+        time: r.time || new Date().toISOString(),
+        status: r.result === 'pass' || r.result === 'good' ? 'good' : r.result === 'na' ? 'na' : 'attention',
+        reviewStatus: r.reviewStatus || 'approved',
+        managerNote: r.note || r.managerNote
       };
-    }).sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-  }, [checks]);
+    });
+  }, [rawChecks]);
 
-  // Temperature & CCP monitoring entries
   const tempControlsList = useMemo(() => {
-    const tempCodes = ['FS28-19', 'FS28-20', 'FS28-21', 'FS28-22', 'FS28-32', 'FS28-33'];
-    return completedChecksList.filter(c => tempCodes.includes(c.code));
+    const tempCodes = ['FS28-19', 'FS28-20', 'FS28-21', 'FS28-22', 'FS28-32', 'FS28-33', 'FS-STO-005', 'FS-PREP-003', 'FS-PREP-005', 'FS-PREP-006'];
+    return completedChecksList.filter(c => tempCodes.includes(c.code) || c.input === 'temperature');
   }, [completedChecksList]);
 
-  // Derived audit events if timeline is empty
-  const activeTimeline = useMemo(() => {
-    if (timeline.length > 0) return timeline;
-
-    const events: AuditTrailEvent[] = [];
-    Object.entries(checks).forEach(([code, r], idx) => {
-      events.push({
-        id: `synth-chk-${idx}`,
-        at: r.time,
-        type: 'Supervisor check submitted',
-        detail: `${code}: ${r.value} (${r.status === 'na' ? 'Not Applicable' : r.status === 'good' ? 'Acceptable' : 'Needs attention'})`,
-        status: r.reviewStatus
-      });
-      if (r.reviewedAt) {
-        events.push({
-          id: `synth-rev-${idx}`,
-          at: r.reviewedAt,
-          type: r.reviewStatus === 'approved' ? 'Manager approved check' : 'Manager confirmed alert',
-          detail: `${code} reviewed as ${r.reviewStatus.toUpperCase()}.${r.managerNote ? ` Note: "${r.managerNote}"` : ''}`,
-          status: r.reviewStatus
-        });
-      }
-    });
-
-    actions.forEach((a, idx) => {
-      events.push({
-        id: `synth-act-open-${idx}`,
-        at: a.createdAt,
-        type: 'Corrective action opened',
-        detail: `${a.title}: ${a.description}`,
-        status: 'open'
-      });
-      if (a.completedAt) {
-        events.push({
-          id: `synth-act-sub-${idx}`,
-          at: a.completedAt,
-          type: 'Restaurant submitted correction',
-          detail: `${a.title} submitted for verification. Immediate: ${a.immediateAction}`,
-          status: 'awaiting_verification'
-        });
-      }
-      if (a.closedAt) {
-        events.push({
-          id: `synth-act-cls-${idx}`,
-          at: a.closedAt,
-          type: 'Manager verified correction',
-          detail: `${a.title} verified and closed.${a.verificationNote ? ` Note: "${a.verificationNote}"` : ''}`,
-          status: 'closed'
-        });
-      }
-    });
-
-    return events.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
-  }, [timeline, checks, actions]);
-
-  const openActionsCount = actions.filter(a => a.status !== 'closed').length;
-  const closedActionsCount = actions.filter(a => a.status === 'closed').length;
+  const openActionsCount = summary.openActions;
+  const closedActionsCount = summary.closedActions;
 
   return (
     <main>
       <div className="topbar">
         <Link href="/home" className="brand">FoodSafe365</Link>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <button
+            onClick={loadRecords}
+            disabled={isLoading}
+            className="btn secondary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}
+            title="Refresh records"
+          >
+            <RefreshCw size={13} style={{ animation: isLoading ? 'spin 1s linear infinite' : 'none' }} />
+            {isLoading ? 'Loading…' : 'Refresh'}
+          </button>
           <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
             <Home size={14} /> Home
           </Link>
-          <div className="muted">ABC Restaurant · Traceable Records</div>
+          <div className="muted">{outletName} · Traceable Records</div>
         </div>
       </div>
 
@@ -187,316 +170,390 @@ export default function Records() {
         <div className="checks-header">
           <div>
             <p className="eyebrow">TRACEABLE FOOD-SAFETY RECORD</p>
-            <h1>Records & History</h1>
+            <h1>Records &amp; History</h1>
             <p className="muted">
               Complete traceable record of supervisor observations, manager review decisions, corrective actions, and verification audit trail.
             </p>
           </div>
           <div className="check-progress-box">
             <strong>{completedChecksList.length}</strong>
-            <span className="muted">checks recorded today</span>
+            <span className="muted">checks recorded</span>
           </div>
         </div>
 
-        {/* DAILY BADGE SNAPSHOT */}
-        <div className={`card daily-badge ${badge.tone === 'good' ? 'badge-good' : badge.tone === 'danger' ? 'badge-action' : 'badge-attention'}`} style={{ marginBottom: 24 }}>
-          <div className="badge-icon">
-            {badge.tone === 'good' ? <CheckCircle2 /> : <ClipboardCheck />}
-          </div>
-          <div>
-            <p className="eyebrow">TODAY’S FOODSAFE365 BADGE</p>
-            <h2>{badge.status}</h2>
-            <p className="muted">{badge.explanation}</p>
-          </div>
-        </div>
-
-        {/* METRICS */}
-        <div className="grid grid3 record-summary" style={{ marginBottom: 28 }}>
-          <div className="card metric-card">
-            <ClipboardCheck />
-            <span>Checks recorded</span>
-            <strong>{completedChecksList.length}</strong>
-            <small>{badge.counts.approved} manager-approved</small>
-          </div>
-          <div className="card metric-card">
-            <Wrench />
-            <span>Open actions</span>
-            <strong>{openActionsCount}</strong>
-            <small>{badge.counts.criticalAlerts} critical</small>
-          </div>
-          <div className="card metric-card">
-            <ShieldCheck />
-            <span>Closed & verified</span>
-            <strong>{closedActionsCount}</strong>
-            <small>Audited corrections</small>
-          </div>
-        </div>
-
-        {/* TABS */}
-        <div className="tabs record-tabs">
-          <button
-            className={`tab ${tab === 'checks' ? 'active' : ''}`}
-            onClick={() => setTab('checks')}
-          >
-            Daily checks ({completedChecksList.length})
-          </button>
-          <button
-            className={`tab ${tab === 'actions' ? 'active' : ''}`}
-            onClick={() => setTab('actions')}
-          >
-            Corrective actions ({actions.length})
-          </button>
-          <button
-            className={`tab ${tab === 'monitoring' ? 'active' : ''}`}
-            onClick={() => setTab('monitoring')}
-          >
-            Temperature controls ({tempControlsList.length})
-          </button>
-          <button
-            className={`tab ${tab === 'timeline' ? 'active' : ''}`}
-            onClick={() => setTab('timeline')}
-          >
-            Audit trail ({activeTimeline.length})
-          </button>
-        </div>
-
-        {/* TAB 1: DAILY CHECKS */}
-        {tab === 'checks' && (
-          <section>
-            <div className="section-title">
-              <div>
-                <h2>Completed daily check records</h2>
-                <span className="muted">Recorded by supervisor and reviewed by manager</span>
-              </div>
-              <Link href="/checks" className="btn secondary">
-                Perform checks <ArrowRight size={15} />
-              </Link>
+        {isLoading && !serverData && (
+          <div style={{ padding: '60px 20px', textAlign: 'center', background: 'var(--surface, #ffffff)', borderRadius: 12, border: '1px solid var(--border, #e2e8f0)', marginBottom: 24 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: '#64748b', fontSize: 15 }}>
+              <RefreshCw className="animate-spin" size={20} />
+              <span>Loading traceable compliance records...</span>
             </div>
+          </div>
+        )}
 
-            {completedChecksList.length === 0 ? (
-              <div className="card empty-state">
+        {errorCode === '401' && (
+          <div className="card" style={{ padding: '24px 28px', marginBottom: 28, border: '1px solid #fed7aa', background: '#fffbeb', borderRadius: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#ea580c', marginBottom: 10 }}>
+              <ShieldCheck size={22} />
+              <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Session Expired or Sign In Required</h3>
+            </div>
+            <p style={{ margin: '0 0 16px 0', fontSize: 14, color: '#334155', lineHeight: 1.5 }}>
+              {errorMessage}
+            </p>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+              <Link
+                href="/login?redirect=/records"
+                className="btn primary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 16px', borderRadius: 8, textDecoration: 'none' }}
+              >
+                <span>Sign In to FoodSafe365</span>
+                <ArrowRight size={14} />
+              </Link>
+              <button
+                type="button"
+                onClick={loadRecords}
+                className="btn secondary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px' }}
+              >
+                <RefreshCw size={14} />
+                <span>Retry</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {errorCode === '403' && (
+          <div className="card" style={{ padding: '24px 28px', marginBottom: 28, border: '1px solid #fecaca', background: '#fef2f2', borderRadius: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#dc2626', marginBottom: 10 }}>
+              <AlertTriangle size={22} />
+              <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>Access Denied (Permission Denied)</h3>
+            </div>
+            <p style={{ margin: '0 0 16px 0', fontSize: 14, color: '#334155', lineHeight: 1.5 }}>
+              {errorMessage}
+            </p>
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+              <Link
+                href="/login?redirect=/records"
+                className="btn secondary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', textDecoration: 'none' }}
+              >
+                <span>Switch Account / Sign In</span>
+              </Link>
+              <Link
+                href="/home"
+                className="btn secondary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', textDecoration: 'none' }}
+              >
+                <span>Return to Home</span>
+              </Link>
+              <button
+                type="button"
+                onClick={loadRecords}
+                className="btn secondary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px' }}
+              >
+                <RefreshCw size={14} />
+                <span>Retry</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {errorCode === 'ERROR' && (
+          <div className="notice error" style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <AlertTriangle size={18} />
+              <span>{errorMessage}</span>
+            </div>
+            <button
+              type="button"
+              onClick={loadRecords}
+              className="btn secondary"
+              style={{ fontSize: 12, padding: '5px 12px', display: 'inline-flex', alignItems: 'center', gap: 5, flexShrink: 0 }}
+            >
+              <RefreshCw size={13} />
+              <span>Retry</span>
+            </button>
+          </div>
+        )}
+
+        {/* METRICS & TABS — RENDER ONLY WHEN SERVER DATA IS AVAILABLE */}
+        {serverData && (
+          <>
+            <div className="grid grid3 record-summary" style={{ marginBottom: 28 }}>
+              <div className="card metric-card">
                 <ClipboardCheck />
-                <div>
-                  <strong>No checks recorded today yet</strong>
-                  <p className="muted">As the supervisor completes checks, each observation will be archived here.</p>
-                </div>
+                <span>Checks recorded</span>
+                <strong>{completedChecksList.length}</strong>
+                <small>Audited check observations</small>
               </div>
-            ) : (
-              <div className="record-list">
-                {completedChecksList.map(c => (
-                  <div className="card record-row" key={c.code}>
-                    <div className={`record-icon ${c.status === 'na' ? '' : c.status === 'good' ? '' : 'icon-attention'}`}>
-                      {c.input === 'temperature' ? <Thermometer /> : <ClipboardCheck />}
-                    </div>
-                    <div className="record-main" style={{ flex: 1 }}>
-                      <div className="record-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <span className="eyebrow" style={{ margin: 0 }}>{c.code} · {c.category}</span>
-                          <h3 style={{ margin: '2px 0 0' }}>{c.title}</h3>
-                        </div>
-                        <div style={{ display: 'flex', gap: 6 }}>
-                          <span className={`pill ${c.status === 'na' ? 'neutral' : c.status === 'good' ? 'good' : 'attention'}`}>
-                            {c.status === 'na' ? 'Not Applicable' : c.status === 'good' ? 'Acceptable' : 'Needs attention'}
-                          </span>
-                          <span className={`pill ${c.reviewStatus === 'approved' ? 'good' : c.reviewStatus === 'alerted' ? 'danger' : 'neutral'}`}>
-                            {c.reviewStatus === 'pending_manager' ? 'PENDING REVIEW' : c.reviewStatus.toUpperCase()}
-                          </span>
-                        </div>
-                      </div>
-                      <p className="muted" style={{ margin: '6px 0 2px' }}>
-                        Recorded value: <strong>{c.value}</strong>
-                      </p>
-                      <p className="muted" style={{ fontSize: 13, margin: 0 }}>
-                        <Clock size={13} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
-                        {fmt(c.time)}
-                        {c.managerNote && ` · Manager note: "${c.managerNote}"`}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+              <div className="card metric-card">
+                <Wrench />
+                <span>Open actions</span>
+                <strong>{openActionsCount}</strong>
+                <small>Remediation required</small>
               </div>
-            )}
-          </section>
-        )}
-
-        {/* TAB 2: CORRECTIVE ACTIONS */}
-        {tab === 'actions' && (
-          <section>
-            <div className="section-title">
-              <div>
-                <h2>Corrective-action records</h2>
-                <span className="muted">Actions stemming from manager-confirmed alerts</span>
+              <div className="card metric-card">
+                <ShieldCheck />
+                <span>Closed &amp; verified</span>
+                <strong>{closedActionsCount}</strong>
+                <small>Manager-audited corrections</small>
               </div>
-              <Link href="/actions" className="btn secondary">
-                Open Actions Centre <ArrowRight size={15} />
-              </Link>
             </div>
 
-            {actions.length === 0 ? (
-              <div className="card empty-state">
-                <CheckCircle2 />
-                <div>
-                  <strong>No corrective actions on record</strong>
-                  <p className="muted">When a food safety alert is confirmed, corrective actions will be recorded here.</p>
-                </div>
-              </div>
-            ) : (
-              <div className="record-list">
-                {actions.map(a => (
-                  <Link href={`/actions/${a.id}`} className="card record-row record-link" key={a.id}>
-                    <div className={`record-icon ${a.status === 'closed' ? '' : 'icon-danger'}`}>
-                      {a.status === 'closed' ? <CheckCircle2 /> : <Wrench />}
-                    </div>
-                    <div className="record-main" style={{ flex: 1 }}>
-                      <div className="record-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <span className="eyebrow" style={{ margin: 0 }}>ACTION #{a.id}</span>
-                          <h3 style={{ margin: '2px 0 0' }}>{a.title}</h3>
-                        </div>
-                        <div style={{ display: 'flex', gap: 6 }}>
-                          <span className={`pill ${a.severity === 'critical' ? 'danger' : 'attention'}`}>
-                            {a.severity.toUpperCase()}
-                          </span>
-                          <span className={`pill ${a.status === 'closed' ? 'good' : 'attention'}`}>
-                            {statusLabel(a.status)}
-                          </span>
-                        </div>
-                      </div>
-                      <p className="muted" style={{ margin: '6px 0 4px' }}>{a.description}</p>
-                      {a.immediateAction && (
-                        <p style={{ margin: '2px 0', fontSize: 13 }}>
-                          <strong>Immediate action:</strong> {a.immediateAction}
-                        </p>
-                      )}
-                      {a.correctiveAction && (
-                        <p style={{ margin: '2px 0', fontSize: 13 }}>
-                          <strong>Corrective action:</strong> {a.correctiveAction}
-                        </p>
-                      )}
-                      {a.verificationNote && (
-                        <p style={{ margin: '2px 0', fontSize: 13, color: 'var(--success, #16a34a)' }}>
-                          <strong>Manager verification:</strong> {a.verificationNote}
-                        </p>
-                      )}
-                      <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
-                        Created: {fmt(a.createdAt)} {a.closedAt && `· Verified & Closed: ${fmt(a.closedAt)}`}
-                      </p>
-                    </div>
-                    <ArrowRight size={18} className="muted" />
+            {/* TABS */}
+            <div className="tabs record-tabs">
+              <button
+                className={`tab ${tab === 'checks' ? 'active' : ''}`}
+                onClick={() => setTab('checks')}
+              >
+                Daily checks ({completedChecksList.length})
+              </button>
+              <button
+                className={`tab ${tab === 'actions' ? 'active' : ''}`}
+                onClick={() => setTab('actions')}
+              >
+                Corrective actions ({actions.length})
+              </button>
+              <button
+                className={`tab ${tab === 'monitoring' ? 'active' : ''}`}
+                onClick={() => setTab('monitoring')}
+              >
+                Temperature controls ({tempControlsList.length})
+              </button>
+              <button
+                className={`tab ${tab === 'timeline' ? 'active' : ''}`}
+                onClick={() => setTab('timeline')}
+              >
+                Audit trail ({timeline.length})
+              </button>
+            </div>
+
+            {/* TAB 1: DAILY CHECKS */}
+            {tab === 'checks' && (
+              <section>
+                <div className="section-title">
+                  <div>
+                    <h2>Completed daily check records</h2>
+                    <span className="muted">Recorded by supervisor and reviewed by manager</span>
+                  </div>
+                  <Link href="/checks" className="btn secondary">
+                    Perform checks <ArrowRight size={15} />
                   </Link>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* TAB 3: TEMPERATURE CONTROLS */}
-        {tab === 'monitoring' && (
-          <section>
-            <div className="section-title">
-              <div>
-                <h2>Temperature & CCP monitoring history</h2>
-                <span className="muted">Storage, cooking, cooling, reheating, and holding</span>
-              </div>
-              <Link href="/temperature-controls" className="btn secondary">
-                Temperature Controls Guide
-              </Link>
-            </div>
-
-            {tempControlsList.length === 0 ? (
-              <div className="card empty-state">
-                <Thermometer />
-                <div>
-                  <strong>No temperature controls recorded today</strong>
-                  <p className="muted">Recorded storage, cooking, cooling, reheating, and holding temperatures will show here.</p>
                 </div>
-              </div>
-            ) : (
-              <div className="record-list">
-                {tempControlsList.map(t => (
-                  <div className="card record-row" key={t.code}>
-                    <div className="record-icon">
-                      <Thermometer />
-                    </div>
-                    <div className="record-main" style={{ flex: 1 }}>
-                      <div className="record-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <span className="eyebrow" style={{ margin: 0 }}>{t.code}</span>
-                          <h3 style={{ margin: '2px 0 0' }}>{t.title}</h3>
-                        </div>
-                        <div style={{ display: 'flex', gap: 6 }}>
-                          <span className={`pill ${t.status === 'good' ? 'good' : 'action'}`}>
-                            {t.status === 'good' ? 'Within Limit' : 'Deviation'}
-                          </span>
-                          <span className={`pill ${t.reviewStatus === 'approved' ? 'good' : 'neutral'}`}>
-                            {t.reviewStatus.toUpperCase()}
-                          </span>
-                        </div>
-                      </div>
-                      <p className="muted" style={{ margin: '6px 0 2px' }}>
-                        Measurement: <strong>{t.value}</strong>
-                      </p>
-                      <p className="muted" style={{ fontSize: 13, margin: 0 }}>
-                        Recorded at {fmt(t.time)} · Standard: {t.standard}
-                      </p>
+
+                {completedChecksList.length === 0 ? (
+                  <div className="card empty-state">
+                    <ClipboardCheck />
+                    <div>
+                      <strong>No checks recorded yet</strong>
+                      <p className="muted">As supervisors record daily checks, each observation will be archived here.</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
-
-        {/* TAB 4: AUDIT TRAIL */}
-        {tab === 'timeline' && (
-          <section>
-            <div className="section-title">
-              <div>
-                <h2>Chronological audit trail</h2>
-                <span className="muted">Traceable log of all food safety actions</span>
-              </div>
-            </div>
-
-            {activeTimeline.length === 0 ? (
-              <div className="card empty-state">
-                <History />
-                <div>
-                  <strong>No audit events recorded yet</strong>
-                  <p className="muted">Every supervisor check, manager review, action submission, and verification will appear in this audit trail.</p>
-                </div>
-              </div>
-            ) : (
-              <div className="timeline">
-                {activeTimeline.map(e => (
-                  <div className="card timeline-row" key={e.id}>
-                    <div className="timeline-dot">
-                      <History />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <strong>{e.type}</strong>
-                        <small className="muted">{fmt(e.at)}</small>
+                ) : (
+                  <div className="record-list">
+                    {completedChecksList.map((c, idx) => (
+                      <div className="card record-row" key={`${c.code}-${idx}`}>
+                        <div className={`record-icon ${c.status === 'na' ? '' : c.status === 'good' ? '' : 'icon-attention'}`}>
+                          {c.input === 'temperature' ? <Thermometer /> : <ClipboardCheck />}
+                        </div>
+                        <div className="record-main" style={{ flex: 1 }}>
+                          <div className="record-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <span className="eyebrow" style={{ margin: 0 }}>{c.code} · {c.category}</span>
+                              <h3 style={{ margin: '2px 0 0' }}>{c.title}</h3>
+                            </div>
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <span className={`pill ${c.status === 'na' ? 'neutral' : c.status === 'good' ? 'good' : 'attention'}`}>
+                                {c.status === 'na' ? 'Not Applicable' : c.status === 'good' ? 'Acceptable' : 'Needs attention'}
+                              </span>
+                              <span className={`pill ${c.reviewStatus === 'approved' ? 'good' : c.reviewStatus === 'alerted' ? 'danger' : 'neutral'}`}>
+                                {c.reviewStatus === 'pending_manager' ? 'PENDING REVIEW' : String(c.reviewStatus).toUpperCase()}
+                              </span>
+                            </div>
+                          </div>
+                          <p className="muted" style={{ margin: '6px 0 2px' }}>
+                            Recorded value: <strong>{c.value}</strong>
+                          </p>
+                          <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+                            <Clock size={13} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 4 }} />
+                            {fmt(c.time)}
+                            {c.managerNote && ` · Note: "${c.managerNote}"`}
+                          </p>
+                        </div>
                       </div>
-                      <p style={{ margin: '4px 0 0', fontSize: 14 }}>{e.detail}</p>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* TAB 2: CORRECTIVE ACTIONS */}
+            {tab === 'actions' && (
+              <section>
+                <div className="section-title">
+                  <div>
+                    <h2>Corrective-action records</h2>
+                    <span className="muted">Actions stemming from manager-confirmed alerts</span>
+                  </div>
+                  <Link href="/actions" className="btn secondary">
+                    Open Actions Centre <ArrowRight size={15} />
+                  </Link>
+                </div>
+
+                {actions.length === 0 ? (
+                  <div className="card empty-state">
+                    <CheckCircle2 />
+                    <div>
+                      <strong>No corrective actions on record</strong>
+                      <p className="muted">When a food safety alert is confirmed, corrective actions will be recorded here.</p>
                     </div>
                   </div>
-                ))}
-              </div>
+                ) : (
+                  <div className="record-list">
+                    {actions.map(a => (
+                      <Link href={`/actions/${a.id}`} className="card record-row record-link" key={a.id}>
+                        <div className={`record-icon ${a.status === 'closed' ? '' : 'icon-danger'}`}>
+                          {a.status === 'closed' ? <CheckCircle2 /> : <Wrench />}
+                        </div>
+                        <div className="record-main" style={{ flex: 1 }}>
+                          <div className="record-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <span className="eyebrow" style={{ margin: 0 }}>ACTION #{a.id}</span>
+                              <h3 style={{ margin: '2px 0 0' }}>{a.title}</h3>
+                            </div>
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <span className={`pill ${a.severity === 'critical' ? 'danger' : 'attention'}`}>
+                                {String(a.severity).toUpperCase()}
+                              </span>
+                              <span className={`pill ${a.status === 'closed' ? 'good' : 'attention'}`}>
+                                {statusLabel(a.status)}
+                              </span>
+                            </div>
+                          </div>
+                          <p className="muted" style={{ margin: '6px 0 4px' }}>{a.description}</p>
+                          {a.immediateAction && (
+                            <p style={{ margin: '2px 0', fontSize: 13 }}>
+                              <strong>Immediate action:</strong> {a.immediateAction}
+                            </p>
+                          )}
+                          {a.correctiveAction && (
+                            <p style={{ margin: '2px 0', fontSize: 13 }}>
+                              <strong>Corrective action:</strong> {a.correctiveAction}
+                            </p>
+                          )}
+                          <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+                            Created: {fmt(a.createdAt)} {a.closedAt && `· Verified & Closed: ${fmt(a.closedAt)}`}
+                          </p>
+                        </div>
+                        <ArrowRight size={18} className="muted" />
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </section>
             )}
-          </section>
-        )}
 
-        <div className="action-bar" style={{ marginTop: 32 }}>
-          <Link href="/home" className="btn secondary">
-            Back to Home
-          </Link>
-          <Link href="/manager" className="btn secondary">
-            Manager Review
-          </Link>
-          <Link href="/checks" className="btn primary">
-            Supervisor Checks
-          </Link>
-        </div>
+            {/* TAB 3: TEMPERATURE CONTROLS */}
+            {tab === 'monitoring' && (
+              <section>
+                <div className="section-title">
+                  <div>
+                    <h2>Temperature &amp; CCP monitoring history</h2>
+                    <span className="muted">Storage, cooking, cooling, reheating, and holding</span>
+                  </div>
+                  <Link href="/temperature-controls" className="btn secondary">
+                    Temperature Controls Guide
+                  </Link>
+                </div>
+
+                {tempControlsList.length === 0 ? (
+                  <div className="card empty-state">
+                    <Thermometer />
+                    <div>
+                      <strong>No temperature controls recorded yet</strong>
+                      <p className="muted">Recorded storage, cooking, cooling, reheating, and holding temperatures will show here.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="record-list">
+                    {tempControlsList.map((t, idx) => (
+                      <div className="card record-row" key={`${t.code}-${idx}`}>
+                        <div className="record-icon">
+                          <Thermometer />
+                        </div>
+                        <div className="record-main" style={{ flex: 1 }}>
+                          <div className="record-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <span className="eyebrow" style={{ margin: 0 }}>{t.code}</span>
+                              <h3 style={{ margin: '2px 0 0' }}>{t.title}</h3>
+                            </div>
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <span className={`pill ${t.status === 'good' ? 'good' : 'action'}`}>
+                                {t.status === 'good' ? 'Within Limit' : 'Deviation'}
+                              </span>
+                              <span className={`pill ${t.reviewStatus === 'approved' ? 'good' : 'neutral'}`}>
+                                {String(t.reviewStatus).toUpperCase()}
+                              </span>
+                            </div>
+                          </div>
+                          <p className="muted" style={{ margin: '6px 0 2px' }}>
+                            Measurement: <strong>{t.value}</strong>
+                          </p>
+                          <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+                            Recorded at {fmt(t.time)} {t.standard && `· Standard: ${t.standard}`}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* TAB 4: AUDIT TRAIL */}
+            {tab === 'timeline' && (
+              <section>
+                <div className="section-title">
+                  <div>
+                    <h2>Independent audit trail</h2>
+                    <span className="muted">Timestamped record of supervisor checks, manager reviews, and verifications</span>
+                  </div>
+                  <span className="pill good">IMMUTABLE EVENT LOG</span>
+                </div>
+
+                {timeline.length === 0 ? (
+                  <div className="card empty-state">
+                    <FileText />
+                    <div>
+                      <strong>No audit trail events recorded yet</strong>
+                      <p className="muted">All system actions and reviews will create an unalterable log here.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="timeline">
+                    {timeline.map((evt, idx) => (
+                      <div className="timeline-item" key={evt.id || `evt-${idx}`}>
+                        <div className="timeline-dot" />
+                        <div className="timeline-content card">
+                          <div className="timeline-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <strong>{evt.type}</strong>
+                            <span className="muted" style={{ fontSize: 12 }}>{fmt(evt.at)}</span>
+                          </div>
+                          <p className="muted" style={{ margin: '6px 0 0', fontSize: 13.5 }}>{evt.detail}</p>
+                          {evt.status && (
+                            <span className="pill neutral" style={{ marginTop: 8, display: 'inline-block', fontSize: 11 }}>
+                              Status: {evt.status}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
+          </>
+        )}
       </div>
     </main>
   );

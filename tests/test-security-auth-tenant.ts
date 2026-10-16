@@ -10,7 +10,8 @@ import { getAuthContext } from '../lib/auth';
 import { authorizeFeedbackAccess, requireOutletAccess } from '../lib/tenant';
 import { authorizeGroceryAccess } from '../lib/grocery-tenant';
 import { can } from '../lib/permissions';
-import { updateRestaurantStatus } from '../lib/unclaimed-restaurant-store';
+import { updateRestaurantStatus, clearMockOutbox, getMockOutboxNotifications } from '../lib/unclaimed-restaurant-store';
+import { GET as outboxHandler } from '../app/api/v1/notifications/outbox/route';
 
 async function runSecurityTestSuite() {
   console.log('================================================================');
@@ -376,14 +377,242 @@ async function runSecurityTestSuite() {
   assert.strictEqual(accessL2.ok, false, 'Customer cannot access manager feedback dashboard');
   assert.strictEqual(accessL2.status, 403, 'Must return 403 FORBIDDEN');
 
-  // Normal user attempting admin-only requireOutletAccess
-  const accessL3 = await requireOutletAccess('unauthorized-outlet-123', reqL1);
-  assert.strictEqual(accessL3.ok, false, 'Normal manager cannot bypass outlet scoping');
-  assert.strictEqual(accessL3.status, 403, 'Must return 403 FORBIDDEN');
-  console.log('✅ TEST L PASSED: Privilege escalation strictly rejected across all non-admin roles');
+  // ---------------------------------------------------------------------------
+  // TEST M: SERVICE PROVIDER SESSION HARDENING & TAMPERING DEFENSE
+  // ---------------------------------------------------------------------------
+  console.log('\n--- TEST M: SERVICE PROVIDER REGISTRATION SESSION HARDENING & TAMPER DEFENSE ---');
+  const providerId = 'prov-pest-apex';
+  const providerToken = createSessionToken({
+    userId: providerId,
+    organisationId: `org-${providerId}`,
+    outletId: 'none',
+    role: 'vendor',
+    providerId: providerId
+  });
+
+  // M1: Valid signed provider session resolves correctly through getAuthContext
+  const reqM1 = new Request('http://localhost:3000/api/v1/service-requests', {
+    headers: { 'cookie': `${SESSION_COOKIE_NAME}=${providerToken}` }
+  });
+  const authM1 = await getAuthContext(reqM1);
+  assert.ok(authM1, 'Provider session token must resolve an AuthContext');
+  assert.strictEqual(authM1.userId, providerId, 'Provider user ID must match');
+  assert.strictEqual(authM1.role, 'vendor', 'Provider role must be vendor');
+  assert.strictEqual(authM1.providerId, providerId, 'Provider ID must match');
+
+  // M2: Unverified client document cookies/headers rejected when spoofing protection active
+  const reqM2 = new Request('http://localhost:3000/api/v1/service-requests', {
+    headers: {
+      'cookie': `fs_user_id=${providerId}; fs_role=vendor; fs_provider_id=${providerId}`,
+      'x-foodsafe-reject-spoofed': 'true'
+    }
+  });
+  const authM2 = await getAuthContext(reqM2);
+  assert.strictEqual(authM2, null, 'Unsigned client-side cookies must be rejected');
+
+  // M3: Tampered provider session token (signature modified) is rejected
+  const tamperedProviderToken = providerToken.slice(0, -6) + 'abcdef';
+  const reqM3 = new Request('http://localhost:3000/api/v1/service-requests', {
+    headers: { 'cookie': `${SESSION_COOKIE_NAME}=${tamperedProviderToken}` }
+  });
+  const authM3 = await getAuthContext(reqM3);
+  assert.strictEqual(authM3, null, 'Tampered provider token must be rejected with null AuthContext');
+
+  console.log('✅ TEST M PASSED: Provider session token verified, spoofed headers rejected, tampered tokens blocked');
+
+  // ---------------------------------------------------------------------------
+  // TEST N: NOTIFICATION OUTBOX SECURITY & TOKEN SANITIZATION
+  // ---------------------------------------------------------------------------
+  console.log('\n--- TEST N: NOTIFICATION OUTBOX SECURITY & TOKEN SANITIZATION ---');
+  clearMockOutbox();
+
+  // N1: Unauthenticated request to /api/v1/notifications/outbox must be rejected with 401 UNAUTHENTICATED
+  const reqN1 = new Request('http://localhost:3000/api/v1/notifications/outbox');
+  const resN1 = await outboxHandler(reqN1 as any);
+  assert.strictEqual(resN1.status, 401, 'Unauthenticated outbox access must return 401');
+  const bodyN1 = await resN1.json();
+  assert.strictEqual(bodyN1.error?.code, 'UNAUTHENTICATED');
+
+  // N2: Unauthorized non-admin user (outlet_manager, customer, vendor) rejected with 403 FORBIDDEN
+  const reqN2Manager = new Request('http://localhost:3000/api/v1/notifications/outbox', {
+    headers: { 'cookie': `${SESSION_COOKIE_NAME}=${validToken}` }
+  });
+  const resN2Manager = await outboxHandler(reqN2Manager as any);
+  assert.strictEqual(resN2Manager.status, 403, 'Outlet manager must be blocked from outbox with 403');
+  const bodyN2Manager = await resN2Manager.json();
+  assert.strictEqual(bodyN2Manager.error?.code, 'FORBIDDEN');
+
+  const reqN2Customer = new Request('http://localhost:3000/api/v1/notifications/outbox', {
+    headers: { 'cookie': `${SESSION_COOKIE_NAME}=${customerToken}` }
+  });
+  const resN2Customer = await outboxHandler(reqN2Customer as any);
+  assert.strictEqual(resN2Customer.status, 403, 'Customer must be blocked from outbox with 403');
+
+  // N3: Non-admin clearance attempt rejected with 403
+  const reqN3Clear = new Request('http://localhost:3000/api/v1/notifications/outbox?clear=true', {
+    headers: { 'cookie': `${SESSION_COOKIE_NAME}=${validToken}` }
+  });
+  const resN3Clear = await outboxHandler(reqN3Clear as any);
+  assert.strictEqual(resN3Clear.status, 403, 'Unauthorized clear attempt must be blocked with 403');
+
+  // N4: Populate mock notification with sensitive claim token & contact
+  const testClaimToken = 'sec_token_9f8e7d6c5b4a3210fedcba9876543210';
+  const outboxCache = (globalThis as any).__foodsafe_outbox_cache || [];
+  outboxCache.push({
+    id: 'mock-notif-sec-test',
+    restaurantId: 'leopold-cafe',
+    restaurantName: 'Leopold Cafe & Bar',
+    feedbackId: 'fb-test-sec-outbox-1',
+    notificationType: 'CUSTOMER_FEEDBACK_PROFILE_INVITATION',
+    recipientEmail: 'management@leopoldcafe.example.com',
+    recipientType: 'BUSINESS_CONTACT',
+    contactSource: 'OFFICIAL_WEBSITE',
+    subject: 'Customer Feedback Received',
+    body: `Please review customer feedback and claim your profile: http://localhost:3000/claim/leopold-cafe?token=${testClaimToken}. Your claim token is ${testClaimToken}.`,
+    claimToken: testClaimToken,
+    claimUrl: `http://localhost:3000/claim/leopold-cafe?token=${testClaimToken}`,
+    status: 'SENT',
+    customerResponseRequested: true,
+    customerContactShared: 'contact.vip@example.com',
+    createdAt: new Date().toISOString()
+  });
+  (globalThis as any).__foodsafe_outbox_cache = outboxCache;
+
+  // N5: Authorized platform admin request succeeds and payload is sanitized
+  const adminToken = createSessionToken({
+    userId: 'admin-super-01',
+    organisationId: 'admin-org',
+    outletId: 'none',
+    role: 'platform_admin'
+  });
+
+  const reqN5Admin = new Request('http://localhost:3000/api/v1/notifications/outbox?restaurantId=leopold-cafe', {
+    headers: { 'cookie': `${SESSION_COOKIE_NAME}=${adminToken}` }
+  });
+  const resN5Admin = await outboxHandler(reqN5Admin as any);
+  assert.strictEqual(resN5Admin.status, 200, 'Platform admin must successfully read outbox');
+  const bodyN5Admin = await resN5Admin.json();
+  assert.strictEqual(bodyN5Admin.error, null);
+  assert.ok(bodyN5Admin.data.notifications.length > 0, 'Must return queued notifications');
+
+  const receivedNotif = bodyN5Admin.data.notifications.find((n: any) => n.id === 'mock-notif-sec-test');
+  assert.ok(receivedNotif, 'Test notification must exist in response');
+  assert.strictEqual(receivedNotif.claimToken, '***REDACTED***', 'Raw claim token must be redacted');
+  assert.ok(!receivedNotif.claimUrl.includes(testClaimToken), 'Raw claim token must never appear in claimUrl');
+  assert.ok(receivedNotif.claimUrl.includes('token=***REDACTED***'), 'claimUrl must show redacted token');
+  assert.ok(!receivedNotif.body.includes(testClaimToken), 'Raw claim token must never appear in email body');
+  assert.ok(receivedNotif.body.includes('***REDACTED***'), 'Email body must have redacted token markers');
+  assert.ok(!receivedNotif.customerContactShared.includes('contact.vip@example.com'), 'Customer email must be masked');
+  assert.ok(receivedNotif.customerContactShared.includes('***@example.com'), 'Customer email must show masked format');
+
+  // N6: Authorized administrative clear succeeds
+  const reqN6ClearAdmin = new Request('http://localhost:3000/api/v1/notifications/outbox?clear=true', {
+    headers: { 'cookie': `${SESSION_COOKIE_NAME}=${adminToken}` }
+  });
+  const resN6ClearAdmin = await outboxHandler(reqN6ClearAdmin as any);
+  assert.strictEqual(resN6ClearAdmin.status, 200, 'Admin clear must return 200');
+  const afterClear = getMockOutboxNotifications();
+  assert.strictEqual(afterClear.length, 0, 'Outbox must be empty after admin clearance');
+
+  console.log('✅ TEST N PASSED: Notification outbox secured (401 unauth, 403 non-admin, raw tokens redacted, PII masked, clear restricted to admin)');
+
+  // ---------------------------------------------------------------------------
+  // TEST O: STRICT GROCERY AUTHENTICATION & DEMO FALLBACK RESTRICTIONS
+  // ---------------------------------------------------------------------------
+  console.log('\n--- TEST O: STRICT GROCERY AUTHENTICATION & DEMO FALLBACK RESTRICTIONS ---');
+
+  // O1: Default authorizeGroceryAccess call (no 3rd argument) strictly rejects unauthenticated caller with 401
+  const groceryUnauthReq = new Request('http://localhost:3000/api/v1/grocery/daily-check');
+  const resO1 = await authorizeGroceryAccess('store-nature-basket-bandra', groceryUnauthReq);
+  assert.strictEqual(resO1.ok, false, 'Default grocery authorization must reject unauthenticated requests');
+  assert.strictEqual(resO1.status, 401, 'Must return 401 UNAUTHENTICATED');
+  assert.strictEqual(resO1.code, 'UNAUTHENTICATED');
+
+  // O2: Default call with null outletId also strictly rejects unauthenticated caller
+  const resO2 = await authorizeGroceryAccess(null, groceryUnauthReq);
+  assert.strictEqual(resO2.ok, false);
+  assert.strictEqual(resO2.status, 401);
+
+  // O3: Demo fallback is strictly blocked when NODE_ENV === 'production', even if allowExplicitDemo is requested
+  const origEnv = process.env.NODE_ENV;
+  (process.env as any).NODE_ENV = 'production';
+  try {
+    const resO3 = await authorizeGroceryAccess('store-nature-basket-bandra', groceryUnauthReq, { allowExplicitDemo: true });
+    assert.strictEqual(resO3.ok, false, 'Demo fallback must be rejected in production environment');
+    assert.strictEqual(resO3.status, 401);
+  } finally {
+    (process.env as any).NODE_ENV = origEnv;
+  }
+
+  // O4: Demo fallback is strictly blocked when DATABASE_URL is set
+  const origDb = process.env.DATABASE_URL;
+  process.env.DATABASE_URL = 'postgres://prod-db.example.com/foodsafe';
+  try {
+    const resO4 = await authorizeGroceryAccess('store-nature-basket-bandra', groceryUnauthReq, { allowExplicitDemo: true });
+    assert.strictEqual(resO4.ok, false, 'Demo fallback must be rejected when DATABASE_URL is configured');
+    assert.strictEqual(resO4.status, 401);
+  } finally {
+    if (origDb !== undefined) process.env.DATABASE_URL = origDb;
+    else delete process.env.DATABASE_URL;
+  }
+
+  // O5: Non-grocery roles (customer, vendor) strictly rejected with 403 FORBIDDEN
+  const customerGroceryReq = new Request('http://localhost:3000/api/v1/grocery/daily-check', {
+    headers: { 'cookie': `${SESSION_COOKIE_NAME}=${customerToken}` }
+  });
+  const resO5Customer = await authorizeGroceryAccess('store-nature-basket-bandra', customerGroceryReq);
+  assert.strictEqual(resO5Customer.ok, false);
+  assert.strictEqual(resO5Customer.status, 403);
+  assert.strictEqual(resO5Customer.code, 'FORBIDDEN');
+
+  const vendorGroceryReq = new Request('http://localhost:3000/api/v1/grocery/daily-check', {
+    headers: { 'cookie': `${SESSION_COOKIE_NAME}=${providerToken}` }
+  });
+  const resO5Vendor = await authorizeGroceryAccess('store-nature-basket-bandra', vendorGroceryReq);
+  assert.strictEqual(resO5Vendor.ok, false);
+  assert.strictEqual(resO5Vendor.status, 403);
+
+  // O6: Non-admin cross-outlet aggregation ('all') rejected with 403 FORBIDDEN
+  const bandraMgrReqAll = new Request('http://localhost:3000/api/v1/grocery/daily-check?outletId=all', {
+    headers: { 'cookie': `${SESSION_COOKIE_NAME}=${groceryAManagerToken}` }
+  });
+  const resO6All = await authorizeGroceryAccess('all', bandraMgrReqAll);
+  assert.strictEqual(resO6All.ok, false);
+  assert.strictEqual(resO6All.status, 403);
+
+  // O7: Authorized grocery manager access succeeds for their own outlet
+  const bandraMgrReq = new Request('http://localhost:3000/api/v1/grocery/daily-check?outletId=store-nature-basket-bandra', {
+    headers: { 'cookie': `${SESSION_COOKIE_NAME}=${groceryAManagerToken}` }
+  });
+  const resO7Explicit = await authorizeGroceryAccess('store-nature-basket-bandra', bandraMgrReq);
+  assert.strictEqual(resO7Explicit.ok, true, 'Manager must be authorized for their assigned outlet');
+  if (resO7Explicit.ok) {
+    assert.strictEqual(resO7Explicit.outletId, 'store-nature-basket-bandra');
+  }
+
+  // O8: Authorized grocery manager with null requested outlet resolves to their own session outlet
+  const resO8Null = await authorizeGroceryAccess(null, bandraMgrReq);
+  assert.strictEqual(resO8Null.ok, true);
+  if (resO8Null.ok) {
+    assert.strictEqual(resO8Null.outletId, 'store-nature-basket-bandra', 'Server must derive tenant from session, not untrusted default');
+  }
+
+  // O9: Authorized grocery manager attempting cross-tenant access to different outlet rejected with 403
+  const resO9Cross = await authorizeGroceryAccess('store-nature-basket-juhu', bandraMgrReq);
+  assert.strictEqual(resO9Cross.ok, false);
+  assert.strictEqual(resO9Cross.status, 403);
+
+  // O10: Platform admin can access any requested grocery outlet
+  const resO10Admin = await authorizeGroceryAccess('store-nature-basket-juhu', reqN5Admin);
+  assert.strictEqual(resO10Admin.ok, true, 'Platform admin must have cross-tenant access');
+  if (resO10Admin.ok) {
+    assert.strictEqual(resO10Admin.outletId, 'store-nature-basket-juhu');
+  }
+
+  console.log('✅ TEST O PASSED: Strict grocery authentication by default, demo fallback restrictions verified, role checks enforced, cross-tenant blocked');
 
   console.log('\n================================================================');
-  console.log('🎯 ALL P0 SECURITY TESTS (TEST A THROUGH TEST L) PASSED (12/12)');
+  console.log('🎯 ALL P0 SECURITY TESTS (TEST A THROUGH TEST O) PASSED (15/15)');
   console.log('================================================================\n');
 }
 

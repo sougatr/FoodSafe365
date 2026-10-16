@@ -73,7 +73,7 @@ export default function GroceryDailyCheckFrontlinePage() {
       id: 'hygiene',
       number: 4,
       title: 'HYGIENE & PREMISES',
-      subtitle: 'Store aisles clean, well-lit, and properly ventilated',
+      subtitle: 'Store cleanliness, observable staff hygiene & health, lighting and ventilation',
       icon: Sparkles,
       codes: ['GR22-02', 'GR22-03', 'GR22-04']
     },
@@ -97,7 +97,7 @@ export default function GroceryDailyCheckFrontlinePage() {
       id: 'stock',
       number: 7,
       title: 'STOCK & PACKAGING',
-      subtitle: 'No expired food, intact packaging, and FEFO stock rotation',
+      subtitle: 'No expired food, intact packaging, category-applicable labels, and FEFO stock rotation',
       icon: RotateCw,
       codes: ['GR22-11', 'GR22-12', 'GR22-15']
     },

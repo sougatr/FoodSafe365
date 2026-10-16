@@ -14,12 +14,12 @@ export const GROCERY_OPERATIONAL_CHECKS: GroceryOperationalCheckDef[] = [
   {
     code: 'GR22-02',
     number: 2,
-    title: 'Store Premises Cleanliness',
-    category: 'Premises & Hygiene',
-    why: 'Clean floors, display aisles, and billing counters prevent dust and pest attraction and maintain retail sanitary standards.',
-    what: 'Inspect all retail sales floor aisles, checkout belts, product shelves, and entryways for dust, spillages, and debris.',
-    standard: 'Aisles, checkout counters, and display shelving must be clean, free of sticky spills, dust accumulation, and litter.',
-    action: 'Instruct duty cleaning staff to wet-mop with food-safe disinfectant and clean stained display shelving immediately.'
+    title: 'Store Cleanliness & Staff Hygiene',
+    category: 'Premises & Staff Hygiene',
+    why: 'Clean retail surfaces and clean, healthy staff prevent contamination of food and maintain retail hygiene standards without exposing confidential medical records.',
+    what: 'Check that store aisles and counters are clean, and verify observable staff hygiene: clean aprons/attire, hair restrained, clean trimmed nails, cuts/wounds covered with waterproof dressings, no active vomiting/diarrhea/cough/fever symptoms on duty, and no smoking/spitting in food areas.',
+    standard: 'Premises clean; food handlers observe personal cleanliness (clean workwear, covered wounds, absence of visible communicable illness symptoms); handwashing with soap available.',
+    action: 'Relieve staff exhibiting acute illness symptoms or open uncovered wounds from food handling immediately; replace soiled aprons; clean and sanitize affected work surfaces.'
   },
   {
     code: 'GR22-03',
@@ -144,12 +144,12 @@ export const GROCERY_OPERATIONAL_CHECKS: GroceryOperationalCheckDef[] = [
   {
     code: 'GR22-15',
     number: 15,
-    title: 'Packaging Integrity — No Swelling, Rust, or Leaks',
+    title: 'Packaging Integrity & Product Labelling',
     category: 'Packaging & Product Quality',
-    why: 'Dented or bloated cans indicate botulism/bacterial spoilage; torn pouches allow moisture, pest, and pathogen ingress.',
-    what: 'Inspect canned goods, aseptic cartons, pouches, and vacuum packs for bulging ends, seam leaks, pinholes, or heavy rust.',
-    standard: '100% of shelf packages intact, airtight, vacuum intact where specified, free of dents on rim/seam and zero swelling.',
-    action: 'Withdraw swollen, severely dented, leaking, or compromised packages from display immediately; log into quarantine.'
+    why: 'Intact packaging prevents microbial and physical contamination; legible category-applicable labels (Veg/Non-Veg logo, batch code, date markings) ensure consumer safety and product traceability.',
+    what: 'Inspect shelf stock for intact packaging (no swelling, severe dents, torn seals, or leaks) and verify applicable labels are legible (Veg/Non-Veg logo, batch code, Use-By/Expiry date, and manufacturer details on packaged goods). Note: Unpackaged whole produce and loose staples do not require packaged-goods labels.',
+    standard: '100% of packaged foods have intact packaging with category-applicable date markings and mandatory logos clearly legible; zero bloated, rusty, or leaking packs on display.',
+    action: 'Immediately remove damaged, bloated, leaking, or unlabelled packaged stock from shelves to the quarantine area; record batch details for vendor credit or safe disposal.'
   },
   {
     code: 'GR22-16',

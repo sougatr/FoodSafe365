@@ -156,74 +156,9 @@ function writeFileStore<T>(filePath: string, data: T[]): void {
   }
 }
 
-let pgInitialized = false;
-
 async function ensurePgTables(): Promise<boolean> {
-  if (pgInitialized) return true;
-  const pool = getPool();
-  if (!pool) return false;
-
-  // In production, runtime code strictly assumes required schema has already been migrated.
-  if (process.env.NODE_ENV === 'production') {
-    pgInitialized = true;
-    return true;
-  }
-
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS service_providers (
-        id text PRIMARY KEY,
-        business_name text NOT NULL,
-        contact_name text NOT NULL,
-        mobile text NOT NULL,
-        email text NOT NULL,
-        address text,
-        city text NOT NULL,
-        state text,
-        categories text[] NOT NULL,
-        description text NOT NULL,
-        verification_status text DEFAULT 'unverified',
-        status text DEFAULT 'active',
-        created_at timestamptz DEFAULT now()
-      );
-
-      CREATE TABLE IF NOT EXISTS restaurant_service_requests (
-        id text PRIMARY KEY,
-        organisation_id text NOT NULL,
-        outlet_id text NOT NULL,
-        outlet_name text NOT NULL,
-        outlet_city text,
-        outlet_address text,
-        corrective_action_id text NOT NULL,
-        corrective_action_title text NOT NULL,
-        provider_id text NOT NULL,
-        provider_name text NOT NULL,
-        service_category text NOT NULL,
-        problem_description text NOT NULL,
-        priority text DEFAULT 'high',
-        contact_person text,
-        contact_phone text,
-        notes text,
-        completion_notes text,
-        rejection_notes text,
-        status text NOT NULL,
-        requested_at timestamptz DEFAULT now(),
-        scheduled_at timestamptz NULL,
-        completed_at timestamptz NULL,
-        confirmed_at timestamptz NULL,
-        audit_trail jsonb DEFAULT '[]'::jsonb
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_srv_requests_outlet ON restaurant_service_requests(outlet_id);
-      CREATE INDEX IF NOT EXISTS idx_srv_requests_provider ON restaurant_service_requests(provider_id);
-      CREATE INDEX IF NOT EXISTS idx_srv_requests_action ON restaurant_service_requests(corrective_action_id);
-    `);
-    pgInitialized = true;
-    return true;
-  } catch (err) {
-    console.error('[service-provider-store] PostgreSQL table initialization failed:', err);
-    throw err;
-  }
+  // Schema is managed exclusively by migration 010_create_service_providers.sql. Dynamic runtime DDL is eliminated.
+  return true;
 }
 
 function assertNotProductionFileFallback(operation: string): void {
@@ -300,7 +235,9 @@ export async function getServiceProviderById(id: string): Promise<ServiceProvide
   return rows[0] || null;
 }
 
-export async function registerServiceProvider(data: Partial<ServiceProvider>): Promise<ServiceProvider> {
+export async function registerServiceProvider(
+  data: Partial<ServiceProvider> & { passwordHash?: string }
+): Promise<ServiceProvider> {
   const id = data.id || `prov-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
   const now = new Date().toISOString();
 
@@ -309,7 +246,7 @@ export async function registerServiceProvider(data: Partial<ServiceProvider>): P
     businessName: (data.businessName || '').trim(),
     contactName: (data.contactName || '').trim(),
     mobile: (data.mobile || '').trim(),
-    email: (data.email || '').trim(),
+    email: (data.email || '').trim().toLowerCase(),
     address: data.address?.trim() || '',
     city: (data.city || 'Mumbai').trim(),
     state: data.state?.trim() || 'Maharashtra',
@@ -340,6 +277,13 @@ export async function registerServiceProvider(data: Partial<ServiceProvider>): P
     provider.address, provider.city, provider.state, provider.categories, provider.description,
     provider.verificationStatus, provider.status
   ]);
+
+  if (data.passwordHash) {
+    await query(
+      `UPDATE service_providers SET password_hash = $2 WHERE id = $1`,
+      [provider.id, data.passwordHash]
+    );
+  }
 
   return provider;
 }

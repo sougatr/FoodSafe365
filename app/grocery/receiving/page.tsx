@@ -52,6 +52,7 @@ export default function GroceryReceivingPage() {
     noLeakageOrDamage: true,
     dateMarkingAcceptable: true,
     temperatureAppropriate: true,
+    vehicleCleanAndFoodOnly: true,
     suitableForStorage: true,
     withinCapacity: true
   });
@@ -93,7 +94,14 @@ export default function GroceryReceivingPage() {
     setChecklist(updated);
 
     // If critical conditions fail, suggest Hold or Reject
-    const anyFailed = !updated.approvedSupplier || !updated.acceptableCondition || !updated.packagingIntact || !updated.noLeakageOrDamage || !updated.temperatureAppropriate;
+    const anyFailed =
+      !updated.approvedSupplier ||
+      !updated.acceptableCondition ||
+      !updated.packagingIntact ||
+      !updated.noLeakageOrDamage ||
+      !updated.temperatureAppropriate ||
+      !updated.vehicleCleanAndFoodOnly;
+
     if (anyFailed && decision === 'ACCEPT') {
       setDecision('REJECT');
     } else if (!anyFailed && decision === 'REJECT') {
@@ -382,10 +390,10 @@ export default function GroceryReceivingPage() {
               )}
             </div>
 
-            {/* 8-Point Receiving Inspection Checklist */}
+            {/* Dockside Receiving Inspection Checklist */}
             <div style={{ marginBottom: 20 }}>
               <strong style={{ display: 'block', fontSize: 13.5, color: '#0F2922', marginBottom: 10 }}>
-                8-Point Dockside Inspection Checklist:
+                Dockside Receiving Inspection Checklist:
               </strong>
               <div style={{
                 display: 'grid',
@@ -397,10 +405,11 @@ export default function GroceryReceivingPage() {
                   { key: 'acceptableCondition', label: '2. Product in acceptable fresh condition' },
                   { key: 'packagingIntact', label: '3. Packaging intact, clean & sealed' },
                   { key: 'noLeakageOrDamage', label: '4. No leakage, punctures or crushing' },
-                  { key: 'dateMarkingAcceptable', label: '5. Date marking legible & compliant' },
+                  { key: 'dateMarkingAcceptable', label: '5. Date markings & applicable labels legible' },
                   { key: 'temperatureAppropriate', label: '6. Temperature complies with SOP' },
-                  { key: 'suitableForStorage', label: '7. Suitable for intended store zone' },
-                  { key: 'withinCapacity', label: '8. Within store storage capacity' }
+                  { key: 'vehicleCleanAndFoodOnly', label: '7. Delivery vehicle clean & food-only' },
+                  { key: 'suitableForStorage', label: '8. Suitable for intended store zone' },
+                  { key: 'withinCapacity', label: '9. Within store storage capacity' }
                 ].map(item => {
                   const checked = (checklist as any)[item.key];
                   return (

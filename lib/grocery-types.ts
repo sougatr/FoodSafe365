@@ -220,6 +220,7 @@ export interface GroceryReceiving {
     temperatureAppropriate: boolean;
     suitableForStorage: boolean;
     withinCapacity: boolean;
+    vehicleCleanAndFoodOnly?: boolean;
   };
   correctiveActionId?: string;
   createdAt: string;
@@ -294,7 +295,39 @@ export type AlertType =
   | 'SEGREGATION_RISK'
   | 'MISSED_TEMP_CHECK'
   | 'MISSED_DAILY_CHECK'
-  | 'OVERDUE_ACTION';
+  | 'OVERDUE_ACTION'
+  | 'RECALL_QUARANTINE';
+
+export type RecallReasonCategory =
+  | 'MANUFACTURER_RECALL'
+  | 'SUPPLIER_ALERT'
+  | 'CONTAMINATION_SUSPECTED'
+  | 'PACKAGING_DEFECT'
+  | 'OTHER_SAFETY_CONCERN';
+
+export type ReleaseReasonCategory =
+  | 'FORMAL_RECALL_WITHDRAWAL'
+  | 'LAB_CLEARANCE_CERTIFICATE'
+  | 'SUPPLIER_ADVISORY_REVOKED'
+  | 'PRECAUTIONARY_HOLD_CLEARED'
+  | 'AUTHORISED_SAFETY_CLEARANCE';
+
+export interface BatchQuarantineResult {
+  batch: string;
+  affectedCount: number;
+  alreadyQuarantinedCount: number;
+  totalQuantity: number;
+  items: GroceryStockItem[];
+}
+
+export interface BatchReleaseResult {
+  batch: string;
+  releasedCount: number;
+  activeCount: number;
+  expiredCount: number;
+  totalQuantity: number;
+  items: GroceryStockItem[];
+}
 
 export interface GroceryAlert {
   id: string;
@@ -310,3 +343,4 @@ export interface GroceryAlert {
   createdAt: string;
   resolvedAt?: string;
 }
+
