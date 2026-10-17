@@ -228,16 +228,18 @@ export function validateEnvironment(
   const issues: ValidationIssue[] = [];
 
   let activeDbUrl: string | undefined;
+  let hasDbResolutionError = false;
   try {
     activeDbUrl = getEffectiveDatabaseUrl({ customEnv: env });
   } catch (err: any) {
+    hasDbResolutionError = true;
     issues.push({
       variable: 'DATABASE_URL',
       message: err?.message || 'Database configuration error: Failed to resolve database URL.'
     });
   }
 
-  if (activeDbUrl !== undefined) {
+  if (!hasDbResolutionError) {
     const dbIssue = validateDatabaseUrl(activeDbUrl, isProduction);
     if (dbIssue) issues.push(dbIssue);
   }

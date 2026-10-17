@@ -7,7 +7,8 @@ import {
   isDatabaseConfigured,
   assertDatabaseConfigured
 } from '../lib/db-config';
-import { validateEnvironment, assertProductionBoot } from '../lib/env-validator';
+import { validateEnvironment, assertProductionBoot, validateSessionSecret, DEV_DEFAULT_SESSION_SECRET, MIN_SESSION_SECRET_LENGTH } from '../lib/env-validator';
+import { getSessionSecret, createSessionToken, verifySessionToken } from '../lib/session';
 
 async function runPreviewDbWiringTests() {
   console.log('================================================================');
@@ -340,6 +341,159 @@ async function runPreviewDbWiringTests() {
     assert.strictEqual(missingDbConfig.ok, false, 'assertDatabaseConfigured must return false when Preview DB is missing');
     if (!missingDbConfig.ok) {
       assert.ok(missingDbConfig.error.includes('PREVIEW_CONFIGURATION_ERROR'), 'Must contain PREVIEW_CONFIGURATION_ERROR');
+    }
+  });
+
+  // 17. Preview environment fails closed when SESSION_SECRET is missing or empty
+  runTest('17. Preview environment fails closed when SESSION_SECRET is missing or empty', () => {
+    const previewDbUrl = 'postgresql://preview_user:secret_preview_pw@ep-preview-456.eu-central-1.aws.neon.tech/foodsafe_preview?sslmode=require';
+
+    // A: SESSION_SECRET is missing entirely
+    const envMissingSecret: NodeJS.ProcessEnv = {
+      NODE_ENV: 'production',
+      VERCEL_ENV: 'preview',
+      PREVIEW_DB_DATABASE_URL: previewDbUrl
+    };
+
+    assert.throws(
+      () => getSessionSecret(envMissingSecret),
+      (err: any) => err.message.includes('Production configuration error: SESSION_SECRET is missing or empty.'),
+      'getSessionSecret must fail fast when SESSION_SECRET is missing in Preview runtime'
+    );
+
+    const resMissing = validateEnvironment(envMissingSecret);
+    assert.strictEqual(resMissing.valid, false, 'validateEnvironment must fail when SESSION_SECRET is missing in Preview');
+    assert.ok(
+      resMissing.issues.some(i => i.variable === 'SESSION_SECRET' && i.message.includes('SESSION_SECRET is missing or empty.')),
+      'Must record exact missing SESSION_SECRET error issue'
+    );
+
+    // B: SESSION_SECRET is empty string
+    const envEmptySecret: NodeJS.ProcessEnv = {
+      NODE_ENV: 'production',
+      VERCEL_ENV: 'preview',
+      PREVIEW_DB_DATABASE_URL: previewDbUrl,
+      SESSION_SECRET: '   '
+    };
+
+    assert.throws(
+      () => getSessionSecret(envEmptySecret),
+      (err: any) => err.message.includes('Production configuration error: SESSION_SECRET is missing or empty.'),
+      'getSessionSecret must fail fast when SESSION_SECRET is blank whitespace in Preview runtime'
+    );
+
+    const resEmpty = validateEnvironment(envEmptySecret);
+    assert.strictEqual(resEmpty.valid, false, 'validateEnvironment must fail when SESSION_SECRET is empty');
+  });
+
+  // 18. Preview environment succeeds when valid SESSION_SECRET and PREVIEW_DB_DATABASE_URL are configured
+  runTest('18. Preview environment succeeds when valid SESSION_SECRET and PREVIEW_DB_DATABASE_URL are configured', () => {
+    const previewDbUrl = 'postgresql://preview_user:secret_preview_pw@ep-preview-456.eu-central-1.aws.neon.tech/foodsafe_preview?sslmode=require';
+    const validSecret = 'preview_cryptographic_signing_secret_min_32_characters_long_2026!';
+    const env: NodeJS.ProcessEnv = {
+      NODE_ENV: 'production',
+      VERCEL_ENV: 'preview',
+      PREVIEW_DB_DATABASE_URL: previewDbUrl,
+      SESSION_SECRET: validSecret
+      // DATABASE_URL is intentionally absent
+    };
+
+    const resolvedSecret = getSessionSecret(env);
+    assert.strictEqual(resolvedSecret, validSecret, 'getSessionSecret must return the configured secret');
+
+    const envValidation = validateEnvironment(env);
+    assert.strictEqual(envValidation.valid, true, 'Environment validation must pass with valid Preview DB and SESSION_SECRET');
+    assert.strictEqual(envValidation.issues.length, 0, 'Must have zero issues');
+
+    const dbConfig = assertDatabaseConfigured(env);
+    assert.strictEqual(dbConfig.ok, true, 'assertDatabaseConfigured must succeed');
+  });
+
+  // 19. Preview environment rejects weak, placeholder, and default development SESSION_SECRET
+  runTest('19. Preview environment rejects weak, placeholder, and default development SESSION_SECRET', () => {
+    // Hard-coded dev fallback
+    assert.throws(
+      () => getSessionSecret({ NODE_ENV: 'production', VERCEL_ENV: 'preview', SESSION_SECRET: DEV_DEFAULT_SESSION_SECRET }),
+      (err: any) => err.message.includes('SESSION_SECRET is using the hard-coded source repository default.'),
+      'Must reject repository default secret'
+    );
+
+    // Insecure placeholder
+    assert.throws(
+      () => getSessionSecret({ NODE_ENV: 'production', VERCEL_ENV: 'preview', SESSION_SECRET: 'my_awesome_changeme_secret_32_chars_long!!' }),
+      (err: any) => err.message.includes('SESSION_SECRET contains a known insecure placeholder'),
+      'Must reject known placeholder'
+    );
+
+    // Too short (< 32 chars)
+    assert.throws(
+      () => getSessionSecret({ NODE_ENV: 'production', VERCEL_ENV: 'preview', SESSION_SECRET: 'too_short_key' }),
+      (err: any) => err.message.includes(`too short (13 chars). Minimum ${MIN_SESSION_SECRET_LENGTH} characters required`),
+      'Must reject short secret'
+    );
+
+    // Low entropy
+    assert.throws(
+      () => getSessionSecret({ NODE_ENV: 'production', VERCEL_ENV: 'preview', SESSION_SECRET: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' }),
+      (err: any) => err.message.includes('SESSION_SECRET has insufficient entropy'),
+      'Must reject low-entropy secret'
+    );
+  });
+
+  // 20. Onboarding and provider registration session issuance reproduces exact Preview error when SESSION_SECRET is missing
+  runTest('20. Onboarding and provider registration session issuance reproduces exact Preview error when SESSION_SECRET is missing', () => {
+    const savedNodeEnv = process.env.NODE_ENV;
+    const savedVercelEnv = process.env.VERCEL_ENV;
+    const savedSessionSecret = process.env.SESSION_SECRET;
+    const savedJwtSecret = process.env.JWT_SECRET;
+
+    try {
+      // Simulate live Preview deployment environment where SESSION_SECRET was not added to Preview
+      (process.env as any).NODE_ENV = 'production';
+      (process.env as any).VERCEL_ENV = 'preview';
+      delete process.env.SESSION_SECRET;
+      delete process.env.JWT_SECRET;
+
+      // When grocery onboarding or service provider registration calls createSessionToken:
+      assert.throws(
+        () => {
+          createSessionToken({
+            userId: 'test-user-id',
+            organisationId: 'test-org-id',
+            outletId: 'test-outlet-id',
+            role: 'outlet_manager',
+            journey: 'grocery'
+          });
+        },
+        (err: any) => {
+          return err.message === 'Production configuration error: SESSION_SECRET is missing or empty.';
+        },
+        'createSessionToken must throw exact Production configuration error: SESSION_SECRET is missing or empty.'
+      );
+
+      // Now configure a valid SESSION_SECRET in the simulated environment
+      process.env.SESSION_SECRET = 'valid_preview_secret_32_characters_long_entropy_verified!';
+
+      const token = createSessionToken({
+        userId: 'test-user-id',
+        organisationId: 'test-org-id',
+        outletId: 'test-outlet-id',
+        role: 'outlet_manager',
+        journey: 'grocery'
+      });
+
+      assert.ok(typeof token === 'string' && token.includes('.'), 'Must generate a valid dot-separated session token');
+      const verified = verifySessionToken(token);
+      assert.strictEqual(verified.valid, true, 'Generated token must verify cleanly');
+      assert.strictEqual(verified.data?.userId, 'test-user-id');
+      assert.strictEqual(verified.data?.journey, 'grocery');
+    } finally {
+      (process.env as any).NODE_ENV = savedNodeEnv;
+      (process.env as any).VERCEL_ENV = savedVercelEnv;
+      if (savedSessionSecret !== undefined) process.env.SESSION_SECRET = savedSessionSecret;
+      else delete process.env.SESSION_SECRET;
+      if (savedJwtSecret !== undefined) process.env.JWT_SECRET = savedJwtSecret;
+      else delete process.env.JWT_SECRET;
     }
   });
 

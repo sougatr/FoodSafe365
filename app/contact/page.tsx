@@ -120,7 +120,7 @@ export default function ContactPage() {
 
             <div className="contact-item" style={{ marginBottom: 20 }}>
               <strong style={{ display: 'block', fontSize: 14, color: 'var(--text, #0f172a)' }}>Official Administrator Desk</strong>
-              <span style={{ fontSize: 13.5, color: '#059669', fontWeight: 600 }}>ray.health.ai@gmail.com</span>
+              <span style={{ fontSize: 13.5, color: '#059669', fontWeight: 600 }}>foodsafe365@gmail.com</span>
             </div>
 
             <div style={{

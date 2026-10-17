@@ -729,7 +729,7 @@ export default function Home() {
         <footer className="home-footer">
           <Link href="/providers">Providers &amp; Vendors</Link>
           <Link href="/contact">Contact Us</Link>
-          <a href="mailto:ray.health.ai@gmail.com">ray.health.ai@gmail.com</a>
+          <a href="mailto:foodsafe365@gmail.com">foodsafe365@gmail.com</a>
           <span style={{ marginLeft: 'auto', color: 'var(--muted)' }}>© FoodSafe365 · All Rights Reserved</span>
         </footer>
       </div>

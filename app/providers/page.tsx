@@ -2002,11 +2002,11 @@ export default function ProvidersPage() {
                   FoodSafe365 Partner Onboarding Desk
                 </div>
                 <div style={{ fontSize: 13, color: '#1e293b', marginTop: 2 }}>
-                  ✉️ Email: <a href="mailto:ray.health.ai@gmail.com?subject=FoodSafe365%20Provider%20Partnership" style={{ color: '#059669', fontWeight: 700, textDecoration: 'underline' }}>ray.health.ai@gmail.com</a>
+                  ✉️ Email: <a href="mailto:foodsafe365@gmail.com?subject=FoodSafe365%20Provider%20Partnership" style={{ color: '#059669', fontWeight: 700, textDecoration: 'underline' }}>foodsafe365@gmail.com</a>
                 </div>
               </div>
               <a
-                href="mailto:ray.health.ai@gmail.com?subject=FoodSafe365%20Provider%20Partnership%20Query"
+                href="mailto:foodsafe365@gmail.com?subject=FoodSafe365%20Provider%20Partnership%20Query"
                 className="btn secondary"
                 style={{ fontSize: 12, padding: '6px 12px', background: '#ffffff', color: '#166534', borderColor: '#86efac', display: 'inline-flex', alignItems: 'center', gap: 4 }}
               >
@@ -2180,7 +2180,7 @@ export default function ProvidersPage() {
               </div>
 
               <p style={{ fontSize: 11.5, color: '#64748b', margin: '6px 0 0', textAlign: 'center', lineHeight: 1.4 }}>
-                🔒 Your application is submitted directly to our Partner Desk at <strong>ray.health.ai@gmail.com</strong>. Our team verifies NABL/FSSAI credentials and contacts you directly via phone &amp; email within 24 business hours.
+                🔒 Your application is submitted directly to our Partner Desk at <strong>foodsafe365@gmail.com</strong>. Our team verifies NABL/FSSAI credentials and contacts you directly via phone &amp; email within 24 business hours.
               </p>
             </form>
           </div>
@@ -2260,7 +2260,7 @@ export default function ProvidersPage() {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: '#64748b' }}>Assigned Desk:</span>
-                <strong style={{ color: '#059669' }}>ray.health.ai@gmail.com</strong>
+                <strong style={{ color: '#059669' }}>foodsafe365@gmail.com</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: '#64748b' }}>Verification SLA:</span>
@@ -2285,7 +2285,7 @@ export default function ProvidersPage() {
               </p>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 <a
-                  href={`mailto:ray.health.ai@gmail.com?subject=${encodeURIComponent(`FoodSafe365 Provider Onboarding: ${partnerSuccess.orgName} (${partnerSuccess.category}) - Ref ${partnerSuccess.id}`)}&body=${encodeURIComponent(
+                  href={`mailto:foodsafe365@gmail.com?subject=${encodeURIComponent(`FoodSafe365 Provider Onboarding: ${partnerSuccess.orgName} (${partnerSuccess.category}) - Ref ${partnerSuccess.id}`)}&body=${encodeURIComponent(
 `Hi FoodSafe365 Partnerships Team,
 
 Here are the details of our service provider application:

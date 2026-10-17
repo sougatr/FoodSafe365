@@ -79,7 +79,7 @@ export function checkRateLimit(ip = 'unknown'): boolean {
  * Dispatches contact message server-side to Administrator
  */
 export async function sendContactEmail(payload: ContactMessagePayload): Promise<{ success: boolean; message: string; recordId?: string }> {
-  const adminEmail = process.env.ADMIN_EMAIL || 'ray.health.ai@gmail.com';
+  const adminEmail = process.env.ADMIN_EMAIL || 'foodsafe365@gmail.com';
   const cleanName = sanitizeHeader(payload.name, 100);
   const cleanEmail = sanitizeHeader(payload.email, 120);
   const cleanSubject = sanitizeHeader(payload.subject, 150);

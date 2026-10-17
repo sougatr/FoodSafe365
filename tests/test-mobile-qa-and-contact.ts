@@ -27,7 +27,7 @@ async function runMobileAndContactTests() {
   const outbox = getContactOutboxMessages();
   const createdRecord = outbox.find(r => r.id === result.recordId);
   assert(createdRecord, 'Record must exist in contact outbox');
-  assert.strictEqual(createdRecord?.adminRecipient, 'ray.health.ai@gmail.com');
+  assert.strictEqual(createdRecord?.adminRecipient, 'foodsafe365@gmail.com');
   assert.strictEqual(createdRecord?.replyTo, 'amitabh.sharma@example.com');
   assert.strictEqual(createdRecord?.name, 'Amitabh Sharma');
   assert.strictEqual(createdRecord?.organisation, 'The Bombay Bistro');
