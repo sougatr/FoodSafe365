@@ -69,18 +69,6 @@ export async function checkRateLimit(options: RateLimitOptions): Promise<RateLim
   const isProd = process.env.NODE_ENV === 'production';
   const pool = testPoolOverride || getPool();
 
-  // In production, distributed state via PostgreSQL is mandatory
-  if (isProd && !pool) {
-    console.error(`[CRITICAL_SECURITY_FAILURE] Rate limiting requested in production but PostgreSQL pool is unavailable.`);
-    return {
-      allowed: false,
-      limit,
-      remaining: 0,
-      resetSeconds: windowSeconds,
-      retryAfterSeconds: windowSeconds
-    };
-  }
-
   if (pool) {
     try {
       const queryText = `
@@ -116,18 +104,7 @@ export async function checkRateLimit(options: RateLimitOptions): Promise<RateLim
         retryAfterSeconds
       };
     } catch (err: any) {
-      console.error(`[RATE_LIMIT_ERROR] Failed to query distributed rate limit for key "${key}":`, err?.message || err);
-      if (isProd) {
-        // In production, fail safely: block requests under error to prevent DoS exploitation
-        return {
-          allowed: false,
-          limit,
-          remaining: 0,
-          resetSeconds: windowSeconds,
-          retryAfterSeconds: windowSeconds
-        };
-      }
-      // In local development fallback:
+      console.warn(`[RATE_LIMIT_WARNING] Database rate limiter error for key "${key}", falling back to in-memory:`, err?.message || err);
     }
   }
 

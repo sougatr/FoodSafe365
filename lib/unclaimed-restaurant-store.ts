@@ -611,7 +611,7 @@ export async function getRestaurantEntryAsync(restaurantId: string): Promise<Res
       }
       return null;
     } catch (err) {
-      if (process.env.NODE_ENV === 'production') throw err;
+      console.warn('[unclaimed-restaurant-store] getRestaurantEntryAsync database error, using fallback:', err);
       return getRestaurantEntry(restaurantId);
     }
   }
@@ -630,7 +630,7 @@ export async function getAllRestaurantEntriesAsync(): Promise<RestaurantDirector
       `);
       return rows;
     } catch (err) {
-      if (process.env.NODE_ENV === 'production') throw err;
+      console.warn('[unclaimed-restaurant-store] getAllRestaurantEntriesAsync database error, using fallback:', err);
       return getAllRestaurantEntries();
     }
   }
@@ -659,7 +659,7 @@ export async function updateRestaurantStatusAsync(
       updateRestaurantStatus(restaurantId, status, claimedByUserId);
       return rows[0];
     } catch (err) {
-      if (process.env.NODE_ENV === 'production') throw err;
+      console.warn('[unclaimed-restaurant-store] updateRestaurantStatusAsync database error, using fallback:', err);
       return updateRestaurantStatus(restaurantId, status, claimedByUserId);
     }
   }
@@ -680,7 +680,7 @@ export async function getRestaurantBusinessContactsAsync(restaurantId: string): 
       `, [restaurantId]);
       return rows;
     } catch (err) {
-      if (process.env.NODE_ENV === 'production') throw err;
+      console.warn('[unclaimed-restaurant-store] getRestaurantBusinessContactsAsync database error, using fallback:', err);
       return getRestaurantBusinessContacts(restaurantId);
     }
   }

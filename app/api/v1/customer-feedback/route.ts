@@ -19,13 +19,13 @@ const FeedbackSchema = z.object({
   dinerMobile: z.string().max(50).optional(),
   tableNumber: z.string().max(50).optional(),
   scores: z.object({
-    cleanliness: z.number().min(1).max(5),
-    staffHygiene: z.number().min(1).max(5),
-    foodFreshness: z.number().min(1).max(5),
-    safeWater: z.number().min(1).max(5),
-    washroom: z.number().min(1).max(5),
+    cleanliness: z.number().min(0).max(5),
+    staffHygiene: z.number().min(0).max(5),
+    foodFreshness: z.number().min(0).max(5),
+    safeWater: z.number().min(0).max(5),
+    washroom: z.number().min(0).max(5),
   }),
-  overallScore: z.number().min(1).max(5),
+  overallScore: z.number().min(0).max(5),
   feedback: z.string().max(1500).optional(),
   verifiedDineIn: z.boolean().default(true),
   responseRequested: z.boolean().optional().default(false),
@@ -264,8 +264,12 @@ export async function POST(req: NextRequest) {
 
       let recipientEmail = notificationResult?.notification?.recipientEmail;
       if (!recipientEmail) {
-        const contacts = await getRestaurantBusinessContactsAsync(rating.outletId);
-        recipientEmail = contacts.find(c => c.contactType === 'EMAIL' && c.permittedForFeedbackNotification)?.contactValue;
+        try {
+          const contacts = await getRestaurantBusinessContactsAsync(rating.outletId);
+          recipientEmail = contacts.find(c => c.contactType === 'EMAIL' && c.permittedForFeedbackNotification)?.contactValue;
+        } catch (contactErr) {
+          console.warn('[customer-feedback] Error fetching business contacts:', contactErr);
+        }
       }
 
       await sendCustomerRatingAlert({
