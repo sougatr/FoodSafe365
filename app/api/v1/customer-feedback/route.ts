@@ -257,6 +257,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Real-time notification alert to restaurant business contact and platform admin
+    let alertResult: any = null;
     try {
       const origin = req.headers.get('origin') || req.headers.get('host') || 'https://foodsafe365.in';
       const baseUrl = origin.startsWith('http') ? origin : `https://${origin}`;
@@ -272,21 +273,25 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      await sendCustomerRatingAlert({
-        restaurantId: rating.outletId,
-        restaurantName: rating.outletName,
-        tableNumber: rating.tableNumber,
-        overallScore: rating.overallScore,
-        scores: rating.scores,
-        feedback: rating.feedback,
-        customerName: rating.dinerName,
-        customerEmail: rating.customerEmail,
-        customerPhone: rating.customerPhone,
-        responseRequested: rating.responseRequested,
-        isUnclaimed,
-        claimUrl,
-        recipientEmail
-      });
+      try {
+        alertResult = await sendCustomerRatingAlert({
+          restaurantId: rating.outletId,
+          restaurantName: rating.outletName,
+          tableNumber: rating.tableNumber,
+          overallScore: rating.overallScore,
+          scores: rating.scores,
+          feedback: rating.feedback,
+          customerName: rating.dinerName,
+          customerEmail: rating.customerEmail,
+          customerPhone: rating.customerPhone,
+          responseRequested: rating.responseRequested,
+          isUnclaimed,
+          claimUrl,
+          recipientEmail
+        });
+      } catch (alertInnerErr) {
+        console.warn('[customer-feedback] sendCustomerRatingAlert call failed:', alertInnerErr);
+      }
     } catch (alertErr) {
       console.warn('[customer-feedback] Non-fatal notification alert error:', alertErr);
     }
@@ -319,6 +324,7 @@ export async function POST(req: NextRequest) {
         isUnclaimed,
         notificationGenerated: notificationResult?.generated ?? false,
         notificationId: notificationResult?.notification?.id,
+        alertResult: alertResult || { dispatched: true },
         message: responseMessage
       },
       error: null

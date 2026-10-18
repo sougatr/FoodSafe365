@@ -23,30 +23,30 @@ export async function GET() {
   try {
     // Dispatch a REAL Customer Food-Safety Report Alert directly through the email service
     const alertResult = await sendCustomerRatingAlert({
-      restaurantId: 'pal-dhaba',
-      restaurantName: 'Pal Dhaba (Chandigarh)',
-      tableNumber: 'Table QR #04',
-      overallScore: 4.8,
+      restaurantId: 'peter-cat-kolkata',
+      restaurantName: 'Peter Cat',
+      tableNumber: 'Table QR #07',
+      overallScore: 4.6,
       scores: {
         cleanliness: 5,
         staffHygiene: 5,
         foodFreshness: 5,
         safeWater: 4,
-        washroom: 5
+        washroom: 4
       },
-      feedback: 'Verification Test: Clean cutlery, prompt food hygiene service, spotless dining area. All 5 food-safety checks passed!',
-      customerName: 'Verified Diner (FoodSafe365 Quality Check)',
-      customerEmail: adminEmail,
-      customerPhone: '+91 98765 43210',
+      feedback: 'good',
+      customerName: 'Customer (+91 83903...)',
+      customerEmail: 'sougatr@gmail.com',
+      customerPhone: '+91 8390367279',
       responseRequested: true,
       isUnclaimed: false,
-      claimUrl: 'https://foodsafe365.in/claim/pal-dhaba'
+      claimUrl: 'https://foodsafe365.in/claim/peter-cat-kolkata'
     });
 
     if (alertResult.success && alertResult.resendStatus === 200) {
       return NextResponse.json({
         success: true,
-        message: `Success! Full Food-Safety Rating Report Alert has been dispatched to ${alertResult.recipient || adminEmail}. Check your Gmail inbox now!`,
+        message: `Success! Peter Cat Food-Safety Rating Alert has been dispatched to ${alertResult.recipient || adminEmail}. Check your Gmail inbox now!`,
         emailSubject: alertResult.subject,
         recipient: alertResult.recipient || adminEmail,
         resendStatus: alertResult.resendStatus,

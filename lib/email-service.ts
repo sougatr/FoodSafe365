@@ -312,10 +312,18 @@ https://foodsafe365.in/manager
       const isCustomSender = Boolean(process.env.EMAIL_FROM && !process.env.EMAIL_FROM.includes('resend.dev'));
       const targetRecipients = isCustomSender ? recipientsArray : [adminEmail];
 
-      // Ensure reply_to is a valid email or fallback to adminEmail
-      const validReplyTo = (payload.customerEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.customerEmail.trim()))
-        ? payload.customerEmail.trim()
-        : adminEmail;
+      // Resend Sandbox Safety: In onboarding@resend.dev mode, do NOT set reply_to to an external
+      // address because Resend sandbox strictly flags unverified external reply-to domains.
+      const emailPayload: any = {
+        from: process.env.EMAIL_FROM || 'FoodSafe365 <onboarding@resend.dev>',
+        to: targetRecipients,
+        subject: emailSubject,
+        text: emailBodyText
+      };
+
+      if (isCustomSender && payload.customerEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.customerEmail.trim())) {
+        emailPayload.reply_to = payload.customerEmail.trim();
+      }
 
       let resendJson: any = null;
       const resendRes = await fetch('https://api.resend.com/emails', {
@@ -324,13 +332,7 @@ https://foodsafe365.in/manager
           'Authorization': `Bearer ${process.env.RESEND_API_KEY.trim()}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          from: process.env.EMAIL_FROM || 'FoodSafe365 <onboarding@resend.dev>',
-          to: targetRecipients,
-          reply_to: validReplyTo,
-          subject: emailSubject,
-          text: emailBodyText
-        })
+        body: JSON.stringify(emailPayload)
       });
 
       try {

@@ -306,6 +306,9 @@ export default function Landing() {
         if (json.data && typeof json.data.isUnclaimed === 'boolean') {
           isUnclaimed = json.data.isUnclaimed;
         }
+        if (json.data?.alertResult?.resendStatus === 200) {
+          showToast(`🚀 Food-safety rating alert emailed to ${json.data.alertResult.recipient || 'foodsafe365@gmail.com'}!`);
+        }
       } else {
         console.warn('[handleSubmitRating] Server API returned status:', res.status);
       }
