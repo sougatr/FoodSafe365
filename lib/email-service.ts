@@ -210,3 +210,162 @@ Reply-To is set to: ${cleanEmail}. You can reply directly to this email to respo
 export function getContactOutboxMessages(): ContactMessageRecord[] {
   return [...getOutbox()];
 }
+
+export interface RatingNotificationPayload {
+  restaurantId: string;
+  restaurantName: string;
+  tableNumber?: string;
+  overallScore: number;
+  scores: {
+    cleanliness: number;
+    staffHygiene: number;
+    foodFreshness: number;
+    safeWater: number;
+    washroom: number;
+  };
+  feedback?: string;
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  responseRequested?: boolean;
+  isUnclaimed?: boolean;
+  claimUrl?: string;
+  recipientEmail?: string;
+}
+
+/**
+ * Dispatches an automated real-time notification alert when a customer rates a restaurant.
+ * Sends directly to restaurant manager / business contact AND platform admin.
+ */
+export async function sendCustomerRatingAlert(payload: RatingNotificationPayload): Promise<{ success: boolean; message: string; recordId?: string }> {
+  const adminEmail = process.env.ADMIN_EMAIL || 'foodsafe365@gmail.com';
+  const cleanRestName = sanitizeHeader(payload.restaurantName, 120);
+  const cleanScore = Math.min(5, Math.max(0, payload.overallScore)).toFixed(1);
+
+  const recipientList = new Set<string>();
+  recipientList.add(adminEmail);
+  if (payload.recipientEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.recipientEmail)) {
+    recipientList.add(payload.recipientEmail.trim());
+  }
+
+  const emailSubject = payload.isUnclaimed
+    ? `[FoodSafe365] Customer Food-Safety Feedback for ${cleanRestName} (${cleanScore}★)`
+    : `[FoodSafe365 Alert] New Customer Rating for ${cleanRestName} (${cleanScore}★)`;
+
+  const emailBodyText = `FoodSafe365 Customer Food-Safety Rating Alert
+==================================================
+
+Restaurant: ${cleanRestName}
+Table / Seat: ${payload.tableNumber || 'Dine-In QR'}
+Overall Score: ${cleanScore} / 5.0 ★
+Status: ${payload.isUnclaimed ? 'UNCLAIMED DIRECTORY LISTING' : 'REGISTERED RESTAURANT'}
+Timestamp: ${new Date().toISOString()}
+
+Category Breakdown:
+  1. Table & Cutlery Hygiene: ${payload.scores.cleanliness} ★
+  2. Staff Grooming & Uniform: ${payload.scores.staffHygiene} ★
+  3. Food Freshness & Temp (Food Handling): ${payload.scores.foodFreshness} ★
+  4. Safe Drinking Water & Washrooms: ${payload.scores.safeWater} ★
+  5. Overall Food Safety Confidence: ${payload.scores.washroom} ★
+
+Customer Observations / Comments:
+${payload.feedback ? `"${sanitizeBody(payload.feedback, 2000)}"` : '(No written observations provided)'}
+
+Customer Attribution & Response Request:
+  - Diner: ${payload.customerName || 'Customer'}
+  ${payload.customerEmail ? `- Customer Email: ${sanitizeHeader(payload.customerEmail, 120)}` : ''}
+  ${payload.customerPhone ? `- Customer Phone: ${sanitizeHeader(payload.customerPhone, 50)}` : ''}
+  - Direct Response Requested: ${payload.responseRequested ? 'YES (Customer requested response/resolution)' : 'No'}
+
+${payload.claimUrl ? `--------------------------------------------------
+Claim Profile Link for Restaurant:
+${payload.claimUrl}
+--------------------------------------------------` : ''}
+
+Log in to the FoodSafe365 Manager Portal to view full records:
+https://foodsafe365.in/manager
+==================================================`;
+
+  const recordId = `alert-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+  let providerUsed = 'MOCK_OUTBOX';
+  let status: 'DELIVERED_EXTERNAL' | 'QUEUED_OUTBOX' = 'QUEUED_OUTBOX';
+
+  const recipientsArray = Array.from(recipientList);
+
+  // 1. Check if Resend API key is available
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const resendRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: process.env.EMAIL_FROM || 'FoodSafe365 <noreply@foodsafe365.org>',
+          to: recipientsArray,
+          reply_to: payload.customerEmail || adminEmail,
+          subject: emailSubject,
+          text: emailBodyText
+        })
+      });
+      if (resendRes.ok) {
+        providerUsed = 'RESEND';
+        status = 'DELIVERED_EXTERNAL';
+      }
+    } catch (err) {
+      console.warn('[Rating Alert Email] Resend attempt failed, falling back to outbox:', err);
+    }
+  }
+
+  // 2. Check if SendGrid API key is available
+  if (status === 'QUEUED_OUTBOX' && process.env.SENDGRID_API_KEY) {
+    try {
+      const sgRes = await fetch('https://api.sendgrid.com/v3/mail/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          personalizations: [{ to: recipientsArray.map(email => ({ email })) }],
+          from: { email: process.env.EMAIL_FROM || 'noreply@foodsafe365.org', name: 'FoodSafe365' },
+          reply_to: { email: payload.customerEmail || adminEmail, name: payload.customerName || 'Customer' },
+          subject: emailSubject,
+          content: [{ type: 'text/plain', value: emailBodyText }]
+        })
+      });
+      if (sgRes.ok) {
+        providerUsed = 'SENDGRID';
+        status = 'DELIVERED_EXTERNAL';
+      }
+    } catch (err) {
+      console.warn('[Rating Alert Email] SendGrid attempt failed, falling back to outbox:', err);
+    }
+  }
+
+  // Record in contact outbox
+  const record: ContactMessageRecord = {
+    id: recordId,
+    name: payload.customerName || 'Customer Feedback',
+    email: payload.customerEmail || adminEmail,
+    subject: emailSubject,
+    message: emailBodyText,
+    organisation: payload.restaurantName,
+    ipAddress: '127.0.0.1',
+    createdAt: new Date().toISOString(),
+    adminRecipient: adminEmail,
+    replyTo: payload.customerEmail || adminEmail,
+    status,
+    providerUsed
+  };
+
+  const outbox = getOutbox();
+  outbox.push(record);
+
+  return {
+    success: true,
+    message: 'Customer rating alert recorded successfully.',
+    recordId
+  };
+}

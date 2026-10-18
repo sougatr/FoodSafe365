@@ -53,12 +53,12 @@ export default function TableQrPage() {
   // Contextual classification (Restaurant vs Grocery / Supermarket)
   const isGrocery = outletId.includes('grocery') || outletId.includes('supermarket') || outletId.includes('freshmart');
 
-  // 5-Point Safety Scores
-  const [cleanliness, setCleanliness] = useState(5);
-  const [staffHygiene, setStaffHygiene] = useState(5);
-  const [foodFreshness, setFoodFreshness] = useState(5);
-  const [safeWater, setSafeWater] = useState(5);
-  const [washroom, setWashroom] = useState(5);
+  // 5-Point Safety Scores (Starts at 0 / unselected)
+  const [cleanliness, setCleanliness] = useState(0);
+  const [staffHygiene, setStaffHygiene] = useState(0);
+  const [foodFreshness, setFoodFreshness] = useState(0);
+  const [safeWater, setSafeWater] = useState(0);
+  const [washroom, setWashroom] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
 
@@ -85,10 +85,17 @@ export default function TableQrPage() {
     }
   }, []);
 
-  const overallRating = ((cleanliness + staffHygiene + foodFreshness + safeWater + washroom) / 5).toFixed(1);
+  const allRated = cleanliness > 0 && staffHygiene > 0 && foodFreshness > 0 && safeWater > 0 && washroom > 0;
+  const overallRating = allRated
+    ? ((cleanliness + staffHygiene + foodFreshness + safeWater + washroom) / 5).toFixed(1)
+    : '0.0';
 
   async function handleRatingSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!allRated) {
+      alert('Please select a star rating for all 5 food safety categories.');
+      return;
+    }
     const newRating: DinerSafetyRating = {
       id: `cfr-${Date.now()}`,
       outletId,
@@ -378,7 +385,9 @@ export default function TableQrPage() {
                         {isGrocery ? 'Aisles clean, shelves dusted, checkout counters sanitized' : 'Tables sanitized, odorless, clean cutlery & napkins'}
                       </p>
                     </div>
-                    <span style={{ fontWeight: 800, color: '#059669', fontSize: 15 }}>{cleanliness}★</span>
+                    <span style={{ fontWeight: 800, color: cleanliness > 0 ? '#059669' : '#94a3b8', fontSize: 15 }}>
+                      {cleanliness > 0 ? `${cleanliness}★` : '—'}
+                    </span>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     {[1, 2, 3, 4, 5].map(star => (
@@ -414,7 +423,9 @@ export default function TableQrPage() {
                         {isGrocery ? 'Clean attire, hair restrained, clean hands/gloves when packing' : 'Clean uniforms, hair secured, clean fingernails/gloves'}
                       </p>
                     </div>
-                    <span style={{ fontWeight: 800, color: '#059669', fontSize: 15 }}>{staffHygiene}★</span>
+                    <span style={{ fontWeight: 800, color: staffHygiene > 0 ? '#059669' : '#94a3b8', fontSize: 15 }}>
+                      {staffHygiene > 0 ? `${staffHygiene}★` : '—'}
+                    </span>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     {[1, 2, 3, 4, 5].map(star => (
@@ -450,7 +461,9 @@ export default function TableQrPage() {
                         {isGrocery ? 'Chilled dairy/meats kept cold, fresh produce, no expired packs' : 'Hot dishes served hot, salads cold, fresh taste & aroma'}
                       </p>
                     </div>
-                    <span style={{ fontWeight: 800, color: '#059669', fontSize: 15 }}>{foodFreshness}★</span>
+                    <span style={{ fontWeight: 800, color: foodFreshness > 0 ? '#059669' : '#94a3b8', fontSize: 15 }}>
+                      {foodFreshness > 0 ? `${foodFreshness}★` : '—'}
+                    </span>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     {[1, 2, 3, 4, 5].map(star => (
@@ -486,7 +499,9 @@ export default function TableQrPage() {
                         {isGrocery ? 'Clear labels, intact seals, visible Use By / Best Before dates' : 'Clear odorless water, spotless glasses, sealed ice hygiene'}
                       </p>
                     </div>
-                    <span style={{ fontWeight: 800, color: '#059669', fontSize: 15 }}>{safeWater}★</span>
+                    <span style={{ fontWeight: 800, color: safeWater > 0 ? '#059669' : '#94a3b8', fontSize: 15 }}>
+                      {safeWater > 0 ? `${safeWater}★` : '—'}
+                    </span>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     {[1, 2, 3, 4, 5].map(star => (
@@ -522,7 +537,9 @@ export default function TableQrPage() {
                         {isGrocery ? 'Pest-free environment, pleasant odor, trustworthy food storage' : 'Hand soap available, clean basin, dry paper/hand-dryer'}
                       </p>
                     </div>
-                    <span style={{ fontWeight: 800, color: '#059669', fontSize: 15 }}>{washroom}★</span>
+                    <span style={{ fontWeight: 800, color: washroom > 0 ? '#059669' : '#94a3b8', fontSize: 15 }}>
+                      {washroom > 0 ? `${washroom}★` : '—'}
+                    </span>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     {[1, 2, 3, 4, 5].map(star => (
@@ -646,18 +663,22 @@ export default function TableQrPage() {
 
                 <button
                   type="submit"
+                  disabled={!allRated}
                   className="btn primary"
                   style={{
                     padding: '12px 20px',
                     fontSize: 15,
-                    background: '#059669',
+                    background: allRated ? '#059669' : '#64748b',
+                    borderColor: allRated ? '#059669' : '#64748b',
+                    cursor: allRated ? 'pointer' : 'not-allowed',
+                    opacity: allRated ? 1 : 0.75,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 8
                   }}
                 >
-                  <Send size={15} /> Submit Customer Food-Safety Rating ({overallRating}★)
+                  <Send size={15} /> {allRated ? `Submit Customer Food-Safety Rating (${overallRating}★)` : 'Please Rate All 5 Categories to Submit'}
                 </button>
               </form>
             )}

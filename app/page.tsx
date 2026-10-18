@@ -74,7 +74,7 @@ export default function Landing() {
   // Rating Modal State
   const [ratingModalRestaurant, setRatingModalRestaurant] = useState<RestaurantItem | null>(null);
   const [rateTableNum, setRateTableNum] = useState('Table 4');
-  const [rateScores, setRateScores] = useState({ q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 });
+  const [rateScores, setRateScores] = useState({ q1: 0, q2: 0, q3: 0, q4: 0, q5: 0 });
   const [rateRemarks, setRateRemarks] = useState('');
   const [wantsFeedback, setWantsFeedback] = useState(false);
   const [dinerEmail, setDinerEmail] = useState('');
@@ -244,7 +244,7 @@ export default function Landing() {
 
   function handleOpenRating(restaurant: RestaurantItem) {
     setRatingModalRestaurant(restaurant);
-    setRateScores({ q1: 5, q2: 5, q3: 5, q4: 5, q5: 5 });
+    setRateScores({ q1: 0, q2: 0, q3: 0, q4: 0, q5: 0 });
     setRateRemarks('');
     setRateTableNum(restaurant.tableCode || 'Table 4');
     setWantsFeedback(false);
@@ -255,6 +255,13 @@ export default function Landing() {
   async function handleSubmitRating(e: React.FormEvent) {
     e.preventDefault();
     if (!ratingModalRestaurant) return;
+
+    const allScoresRated = rateScores.q1 > 0 && rateScores.q2 > 0 && rateScores.q3 > 0 && rateScores.q4 > 0 && rateScores.q5 > 0;
+    if (!allScoresRated) {
+      showToast('Please select a star rating for all 5 food safety categories.');
+      return;
+    }
+
     setIsSubmittingRating(true);
 
     const avgScore = (
@@ -2323,24 +2330,35 @@ export default function Landing() {
                       <div key={item.key} style={{ background: '#131b26', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 12, padding: '12px 14px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                           <strong style={{ fontSize: 13.5, color: '#ffffff' }}>{item.label}</strong>
-                          <div style={{ display: 'flex', gap: 4 }}>
-                            {[1, 2, 3, 4, 5].map(star => (
-                              <button
-                                key={star}
-                                type="button"
-                                onClick={() => setRateScores(prev => ({ ...prev, [item.key]: star }))}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  padding: 2,
-                                  color: star <= val ? '#10b981' : 'rgba(255, 255, 255, 0.15)',
-                                  fontSize: 18
-                                }}
-                              >
-                                ★
-                              </button>
-                            ))}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <div style={{ display: 'flex', gap: 2 }}>
+                              {[1, 2, 3, 4, 5].map(star => (
+                                <button
+                                  key={star}
+                                  type="button"
+                                  onClick={() => setRateScores(prev => ({ ...prev, [item.key]: star }))}
+                                  title={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                                  aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: '2px 4px',
+                                    color: star <= val ? '#10b981' : 'rgba(255, 255, 255, 0.18)',
+                                    fontSize: 22,
+                                    lineHeight: 1,
+                                    transition: 'transform 0.15s ease, color 0.15s ease'
+                                  }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.2)'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                                >
+                                  ★
+                                </button>
+                              ))}
+                            </div>
+                            <span style={{ fontSize: 13, fontWeight: 800, color: val > 0 ? '#10b981' : '#64748b', minWidth: 26, textAlign: 'right' }}>
+                              {val > 0 ? `${val}★` : '—'}
+                            </span>
                           </div>
                         </div>
                         <p style={{ margin: 0, fontSize: 12, color: '#cbd5e1' }}>{item.desc}</p>
@@ -2451,25 +2469,35 @@ export default function Landing() {
 
                 {/* Action Buttons */}
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                  <button
-                    type="submit"
-                    disabled={isSubmittingRating}
-                    className="btn primary"
-                    style={{
-                      flex: '1 1 200px',
-                      justifyContent: 'center',
-                      background: '#059669',
-                      borderColor: '#059669',
-                      fontSize: 14,
-                      fontWeight: 800,
-                      padding: '12px',
-                      borderRadius: 12,
-                      cursor: 'pointer',
-                      boxShadow: '0 4px 14px rgba(5, 150, 105, 0.3)'
-                    }}
-                  >
-                    {isSubmittingRating ? 'Submitting Feedback...' : 'Submit Customer Feedback →'}
-                  </button>
+                  {(() => {
+                    const allScoresRated = rateScores.q1 > 0 && rateScores.q2 > 0 && rateScores.q3 > 0 && rateScores.q4 > 0 && rateScores.q5 > 0;
+                    return (
+                      <button
+                        type="submit"
+                        disabled={isSubmittingRating || !allScoresRated}
+                        className="btn primary"
+                        style={{
+                          flex: '1 1 200px',
+                          justifyContent: 'center',
+                          background: allScoresRated ? '#059669' : '#334155',
+                          borderColor: allScoresRated ? '#059669' : '#334155',
+                          fontSize: 14,
+                          fontWeight: 800,
+                          padding: '12px',
+                          borderRadius: 12,
+                          cursor: allScoresRated ? 'pointer' : 'not-allowed',
+                          opacity: allScoresRated ? 1 : 0.75,
+                          boxShadow: allScoresRated ? '0 4px 14px rgba(5, 150, 105, 0.3)' : 'none'
+                        }}
+                      >
+                        {isSubmittingRating
+                          ? 'Submitting Feedback...'
+                          : !allScoresRated
+                          ? 'Please Rate All 5 Categories'
+                          : 'Submit Customer Feedback →'}
+                      </button>
+                    );
+                  })()}
                   <Link
                     href={`/qr/${ratingModalRestaurant.id}`}
                     className="btn secondary"

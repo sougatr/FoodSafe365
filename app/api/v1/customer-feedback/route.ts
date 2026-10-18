@@ -5,9 +5,10 @@ import { ok, fail } from '../../../../lib/response';
 import { getCustomerFeedback, saveCustomerFeedback } from '../../../../lib/customer-feedback-store';
 import { authorizeFeedbackAccess } from '../../../../lib/tenant';
 import { DinerSafetyRating } from '../../../../lib/foodsafety28';
-import { getRestaurantEntry, getRestaurantEntryAsync, processCustomerFeedbackForUnclaimedRestaurant, processCustomerFeedbackForUnclaimedRestaurantAsync } from '../../../../lib/unclaimed-restaurant-store';
+import { getRestaurantEntry, getRestaurantEntryAsync, getRestaurantBusinessContactsAsync, processCustomerFeedbackForUnclaimedRestaurant, processCustomerFeedbackForUnclaimedRestaurantAsync } from '../../../../lib/unclaimed-restaurant-store';
 import { checkRateLimit as checkDistributedRateLimit, getClientIp, createRateLimitHeaders } from '../../../../lib/rate-limiter';
 import { parseBoundedJson } from '../../../../lib/body-guard';
+import { sendCustomerRatingAlert } from '../../../../lib/email-service';
 
 // Validation schema for incoming Customer Food-Safety Ratings
 const FeedbackSchema = z.object({
@@ -237,13 +238,44 @@ export async function POST(req: NextRequest) {
 
     // Check if the restaurant is UNCLAIMED and process mock outbox notification if eligible
     const restEntry = await getRestaurantEntryAsync(ratingRecord.outletId);
-    const isUnclaimed = restEntry ? (restEntry.status === 'UNCLAIMED' || restEntry.status === 'DISCOVERED' || restEntry.status === 'INVITED') : false;
+    const isUnclaimed = restEntry ? (restEntry.status === 'UNCLAIMED' || restEntry.status === 'DISCOVERED' || restEntry.status === 'INVITED') : true;
 
     let notificationResult: any = null;
     if (isUnclaimed) {
       const origin = req.headers.get('origin') || req.headers.get('host') || 'http://localhost:3000';
       const baseUrl = origin.startsWith('http') ? origin : `http://${origin}`;
       notificationResult = await processCustomerFeedbackForUnclaimedRestaurantAsync(rating, { baseUrl });
+    }
+
+    // Real-time notification alert to restaurant business contact and platform admin
+    try {
+      const origin = req.headers.get('origin') || req.headers.get('host') || 'https://foodsafe365.in';
+      const baseUrl = origin.startsWith('http') ? origin : `https://${origin}`;
+      const claimUrl = notificationResult?.notification?.claimUrl || (isUnclaimed ? `${baseUrl}/claim/${encodeURIComponent(rating.outletId)}` : undefined);
+
+      let recipientEmail = notificationResult?.notification?.recipientEmail;
+      if (!recipientEmail) {
+        const contacts = await getRestaurantBusinessContactsAsync(rating.outletId);
+        recipientEmail = contacts.find(c => c.contactType === 'EMAIL' && c.permittedForFeedbackNotification)?.contactValue;
+      }
+
+      await sendCustomerRatingAlert({
+        restaurantId: rating.outletId,
+        restaurantName: rating.outletName,
+        tableNumber: rating.tableNumber,
+        overallScore: rating.overallScore,
+        scores: rating.scores,
+        feedback: rating.feedback,
+        customerName: rating.dinerName,
+        customerEmail: rating.customerEmail,
+        customerPhone: rating.customerPhone,
+        responseRequested: rating.responseRequested,
+        isUnclaimed,
+        claimUrl,
+        recipientEmail
+      });
+    } catch (alertErr) {
+      console.warn('[customer-feedback] Non-fatal notification alert error:', alertErr);
     }
 
     // Record submission in sliding window cache

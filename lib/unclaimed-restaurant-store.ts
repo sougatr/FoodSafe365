@@ -429,7 +429,10 @@ export function processCustomerFeedbackForUnclaimedRestaurant(
     customRecipientEmail?: string;
   }
 ): NotificationGenerationResult {
-  const restaurant = getRestaurantEntry(rating.outletId);
+  let restaurant = getRestaurantEntry(rating.outletId);
+  if (!restaurant) {
+    restaurant = updateRestaurantStatus(rating.outletId, 'DISCOVERED');
+  }
   if (!restaurant || (restaurant.status !== 'UNCLAIMED' && restaurant.status !== 'DISCOVERED' && restaurant.status !== 'INVITED')) {
     return { generated: false, reason: 'RESTAURANT_NOT_UNCLAIMED' };
   }
@@ -444,7 +447,6 @@ export function processCustomerFeedbackForUnclaimedRestaurant(
   // 2. Fetch legitimate business contact
   const contacts = getRestaurantBusinessContacts(rating.outletId);
   const eligibleContact = contacts.find(c => c.isBusinessContact && c.permittedForFeedbackNotification && c.contactType === 'EMAIL');
-
   if (!eligibleContact && !options?.customRecipientEmail) {
     return { generated: false, reason: 'NO_LEGITIMATE_CONTACT' };
   }
@@ -761,7 +763,10 @@ export async function processCustomerFeedbackForUnclaimedRestaurantAsync(
     customRecipientEmail?: string;
   }
 ): Promise<NotificationGenerationResult> {
-  const restaurant = await getRestaurantEntryAsync(rating.outletId);
+  let restaurant = await getRestaurantEntryAsync(rating.outletId);
+  if (!restaurant) {
+    restaurant = await updateRestaurantStatusAsync(rating.outletId, 'DISCOVERED');
+  }
   if (!restaurant || (restaurant.status !== 'UNCLAIMED' && restaurant.status !== 'DISCOVERED' && restaurant.status !== 'INVITED')) {
     return { generated: false, reason: 'RESTAURANT_NOT_UNCLAIMED' };
   }
