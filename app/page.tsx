@@ -308,12 +308,19 @@ export default function Landing() {
         }
         if (json.data?.alertResult?.resendStatus === 200) {
           showToast(`🚀 Food-safety rating alert emailed to ${json.data.alertResult.recipient || 'foodsafe365@gmail.com'}!`);
+        } else if (json.data?.alertResult?.message) {
+          showToast(`ℹ️ Rating saved. Alert status: ${json.data.alertResult.message}`);
+        } else {
+          showToast(`⭐ Food-safety rating recorded!`);
         }
       } else {
-        console.warn('[handleSubmitRating] Server API returned status:', res.status);
+        const errJson = await res.json().catch(() => ({}));
+        console.warn('[handleSubmitRating] Server API returned status:', res.status, errJson);
+        showToast(`⚠️ Server error: ${errJson.error || res.status}`);
       }
-    } catch (apiErr) {
+    } catch (apiErr: any) {
       console.warn('[handleSubmitRating] Server API fetch failed, proceeding with local backup:', apiErr);
+      showToast(`⚠️ Network error: ${apiErr?.message || 'Check connection'}`);
     }
 
     // 2. Also update local storage for immediate responsiveness

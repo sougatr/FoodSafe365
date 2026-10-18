@@ -356,9 +356,23 @@ https://foodsafe365.in/manager
         };
       } else {
         console.error('[Rating Alert Email] Resend API error:', resendRes.status, resendJson);
+        return {
+          success: false,
+          message: 'Resend API error: ' + JSON.stringify(resendJson),
+          recordId,
+          resendStatus: resendRes.status,
+          resendData: resendJson,
+          recipient: targetRecipients[0],
+          subject: emailSubject
+        };
       }
-    } catch (err) {
+    } catch (err: any) {
       console.warn('[Rating Alert Email] Resend attempt failed, falling back to outbox:', err);
+      return {
+        success: false,
+        message: 'Resend exception: ' + (err?.message || String(err)),
+        recordId
+      };
     }
   } else {
     console.warn('[Rating Alert Email] RESEND_API_KEY is not defined in process.env, queued in outbox');
