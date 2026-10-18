@@ -19,7 +19,11 @@ import {
   Filter,
   ShieldCheck,
   Zap,
-  AlertCircle
+  AlertCircle,
+  Clock,
+  Award,
+  Droplets,
+  HeartPulse
 } from 'lucide-react';
 import GlobalHeader from '@/components/GlobalHeader';
 
@@ -574,6 +578,120 @@ export default function FoSTaCLearningHubPage() {
               Authoritative Reference Notes:
             </strong>
             The Temperature Danger Zone (5°C–60°C) and chilled storage (≤5°C) limits are established under FSSAI Schedule 4 regulations. The 2-hour ambient limit and 2-stage cooling protocols represent international Codex/FoSTaC educational good practices to prevent spore activation. Bacterial doubling times (~20 mins) illustrate optimum mesophilic growth rates in laboratory conditions and vary with food pH and water activity.
+          </div>
+        </section>
+
+        {/* LUXURY & PREMIER HOSPITALITY BENCHMARKS */}
+        <section style={{
+          background: '#ffffff',
+          border: '1px solid #E2E8F0',
+          borderRadius: 20,
+          padding: '28px 24px',
+          marginBottom: 32,
+          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.04)'
+        }}>
+          <div style={{ marginBottom: 20 }}>
+            <span style={{ fontSize: 11.5, fontWeight: 800, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              HOSPITALITY BENCHMARKS
+            </span>
+            <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0F2922', margin: '4px 0 6px' }}>
+              Best Practices Followed in 5-Star Kitchens
+            </h2>
+            <p style={{ color: '#475569', fontSize: 14, margin: 0, maxWidth: 840, lineHeight: 1.5 }}>
+              How premier professional hospitality kitchens ensure that hundreds of meals are prepared daily with strict controls to minimize food safety and contamination risks:
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+            {/* 1. Blast Chilling */}
+            <div style={{ background: '#F8FAF6', border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px 18px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(16, 185, 129, 0.1)', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Clock size={18} />
+                </div>
+                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0F172A' }}>
+                  1. Rapid Chilling (&lt;90 Min Rule)
+                </h4>
+              </div>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
+                Brings hot core temperature from 70°C to &lt;3°C within 90 minutes, swiftly passing through the microbial danger zone.
+              </p>
+            </div>
+
+            {/* 2. 6-Color Chopping Matrix */}
+            <div style={{ background: '#F8FAF6', border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px 18px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(59, 130, 246, 0.1)', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Layers size={18} />
+                </div>
+                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0F172A' }}>
+                  2. 6-Color Chopping Matrix
+                </h4>
+              </div>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
+                Strict color separation: Red (Meat), Yellow (Poultry), Blue (Fish), Green (Produce), White (Dairy), Brown (Cooked).
+              </p>
+            </div>
+
+            {/* 3. FIFO & Day-Dot System */}
+            <div style={{ background: '#F8FAF6', border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px 18px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(245, 158, 11, 0.1)', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Award size={18} />
+                </div>
+                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0F172A' }}>
+                  3. FIFO &amp; Day-Dot System
+                </h4>
+              </div>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
+                Color-coded weekday labels stamped with preparation time, chef initials, and mandatory discard dates.
+              </p>
+            </div>
+
+            {/* 4. Core Temperature Probing */}
+            <div style={{ background: '#F8FAF6', border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px 18px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(239, 68, 68, 0.1)', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Thermometer size={18} />
+                </div>
+                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0F172A' }}>
+                  4. Digital Probe Verification
+                </h4>
+              </div>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
+                Calibrated digital probe checks ensure poultry &amp; meats reach safe core cook temperatures (≥75°C) and hot-holding (≥65°C).
+              </p>
+            </div>
+
+            {/* 5. Cooking Oil Monitoring */}
+            <div style={{ background: '#F8FAF6', border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px 18px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(249, 115, 22, 0.1)', color: '#ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Droplets size={18} />
+                </div>
+                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0F172A' }}>
+                  5. Digital Cooking Oil Monitoring
+                </h4>
+              </div>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
+                Daily digital checking of Total Polar Compounds (TPC); oil is safely discarded well before exceeding the 25% safety limit.
+              </p>
+            </div>
+
+            {/* 6. Medical Fitness & Sanitation */}
+            <div style={{ background: '#F8FAF6', border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px 18px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(168, 85, 247, 0.1)', color: '#9333ea', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <HeartPulse size={18} />
+                </div>
+                <h4 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#0F172A' }}>
+                  6. Medical Clearance (Form 1A)
+                </h4>
+              </div>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
+                Regular health fitness examinations and certified sanitizing protocols for food contact surfaces and wash stations.
+              </p>
+            </div>
           </div>
         </section>
 

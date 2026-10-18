@@ -113,7 +113,79 @@ export const DICTIONARY: Record<string, Record<Language, string>> = {
     hi: 'अपनी रसोई को बेदाग रखें, कोल्ड चेन बरकरार रखें और FDA निरीक्षण में 100% सुरक्षित रहें।',
     mr: 'आपले स्वयंपाकघर स्वच्छ ठेवा, कोल्ड चेन अखंड ठेवा आणि FDA तपासणीत १००% सुरक्षित राहा.'
   },
-  'hero.dailyStatus': { en: 'DAILY VERIFIED STATUS', hi: 'दैनिक सत्यापित स्थिति', mr: 'दैनिक प्रमाणित स्थिती' }
+  'hero.dailyStatus': { en: 'DAILY VERIFIED STATUS', hi: 'दैनिक सत्यापित स्थिति', mr: 'दैनिक प्रमाणित स्थिती' },
+
+  // Simple Landing Redesign
+  'landing.headline': {
+    en: 'Know your kitchen is safe before you eat',
+    hi: 'खाने से पहले जानें कि रसोई सुरक्षित है',
+    mr: 'जेवण्यापूर्वी जाणून घ्या की स्वयंपाकघर सुरक्षित आहे'
+  },
+  'landing.subline': {
+    en: 'Scan the table QR, rate the food safety, and see daily kitchen records',
+    hi: 'टेबल QR स्कैन करें, खाद्य सुरक्षा रेट करें और दैनिक रसोई रिकॉर्ड देखें',
+    mr: 'टेबल QR स्कॅन करा, अन्न सुरक्षा रेट करा आणि दैनंदिन स्वयंपाकघर नोंदी पहा'
+  },
+  'landing.eatingOut': {
+    en: 'I’m eating out',
+    hi: 'मैं बाहर खा रहा हूँ',
+    mr: 'मी बाहेर जेवत आहे'
+  },
+  'landing.foodBusiness': {
+    en: 'I run a food business',
+    hi: 'मैं खाद्य व्यवसाय चलाता हूँ',
+    mr: 'माझा अन्न व्यवसाय आहे'
+  },
+  'landing.step1.title': { en: '1. Scan', hi: '1. स्कैन', mr: '1. स्कॅन' },
+  'landing.step1.desc': {
+    en: 'Scan table QR or search',
+    hi: 'टेबल QR स्कैन करें या खोजें',
+    mr: 'टेबल QR स्कॅन करा किंवा शोधा'
+  },
+  'landing.step2.title': { en: '2. Rate', hi: '2. रेट करें', mr: '2. रेट करा' },
+  'landing.step2.desc': {
+    en: '5 quick food-safety questions',
+    hi: '5 आसान खाद्य सुरक्षा प्रश्न',
+    mr: '5 सोपे अन्न सुरक्षा प्रश्न'
+  },
+  'landing.step3.title': { en: '3. See the record', hi: '3. रिकॉर्ड देखें', mr: '3. नोंदी पहा' },
+  'landing.step3.desc': {
+    en: 'Daily kitchen checks & hygiene logs',
+    hi: 'दैनिक रसोई जांच और स्वच्छता रिकॉर्ड',
+    mr: 'दैनंदिन स्वयंपाकघर तपासणी आणि स्वच्छता नोंदी'
+  },
+  'landing.role.restaurant': { en: 'Restaurant', hi: 'रेस्तरां', mr: 'रेस्टॉरंट' },
+  'landing.role.restaurant.desc': {
+    en: 'Daily kitchen checks, temperature logs, and direct diner feedback.',
+    hi: 'दैनिक रसोई जांच, तापमान लॉग और सीधी ग्राहक प्रतिक्रिया।',
+    mr: 'दैनंदिन स्वयंपाकघर तपासणी, तापमान नोंदी आणि थेट ग्राहक अभिप्राय.'
+  },
+  'landing.role.grocery': { en: 'Grocery', hi: 'किराना / ग्रॉसरी', mr: 'किराणा दुकान' },
+  'landing.role.grocery.desc': {
+    en: 'Receiving inspection, cold storage, shelf-life and stock rotation.',
+    hi: 'सामग्री प्राप्ति जांच, कोल्ड स्टोरेज और स्टॉक रोटेशन।',
+    mr: 'माल स्वीकार तपासणी, कोल्ड स्टोरेज आणि स्टॉक रोटेशन.'
+  },
+  'landing.role.provider': { en: 'Service Provider', hi: 'सेवा प्रदाता', mr: 'सेवा पुरवठादार' },
+  'landing.role.provider.desc': {
+    en: 'Pest control, water & food testing labs, equipment maintenance.',
+    hi: 'कीट नियंत्रण, पानी व भोजन परीक्षण लैब, उपकरण रखरखाव।',
+    mr: 'कीटक नियंत्रण, पाणी व अन्न चाचणी लॅब, उपकरण देखभाल.'
+  },
+  'landing.getStarted': { en: 'Get started', hi: 'शुरू करें', mr: 'सुरू करा' },
+  'landing.searchPlaceholder': {
+    en: 'Search restaurant or cafe (e.g. Peter Cat, The Table)...',
+    hi: 'रेस्तरां या कैफे खोजें (जैसे Peter Cat, The Table)...',
+    mr: 'रेस्टॉरंट किंवा कॅफे शोधा (उदा. Peter Cat, The Table)...'
+  },
+  'landing.scanQr': { en: 'Scan QR', hi: 'QR स्कैन करें', mr: 'QR स्कॅन करा' },
+  'landing.filter.all': { en: 'All Places', hi: 'सभी स्थान', mr: 'सर्व ठिकाणे' },
+  'landing.filter.dinein': { en: 'Dine-In', hi: 'डाइन-इन', mr: 'डाइन-इन' },
+  'landing.filter.delivery': { en: 'Quick Bites & Delivery', hi: 'क्विक बाइट्स और डिलीवरी', mr: 'डिलिव्हरी आणि क्विक बाईट्स' },
+  'landing.addRestaurant': { en: 'Add Restaurant', hi: 'रेस्तरां जोड़ें', mr: 'रेस्टॉरंट जोडा' },
+  'landing.rateNow': { en: 'Rate Safety', hi: 'सुरक्षा रेट करें', mr: 'सुरक्षा रेट करा' },
+  'landing.viewRecord': { en: 'See Record', hi: 'रिकॉर्ड देखें', mr: 'नोंदी पहा' },
+  'landing.newOnPlatform': { en: 'Be first to rate', hi: 'पहले रेट करें', mr: 'पहिले रेट करा' }
 };
 
 export interface SafeguardTranslation {
