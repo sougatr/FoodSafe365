@@ -295,15 +295,21 @@ https://foodsafe365.in/manager
   // 1. Check if Resend API key is available
   if (process.env.RESEND_API_KEY) {
     try {
+      // In Resend free test mode (onboarding@resend.dev), Resend strictly requires
+      // the recipient to be the registered account email (adminEmail).
+      // Once EMAIL_FROM is verified with a custom domain, all recipients can receive it.
+      const isCustomSender = Boolean(process.env.EMAIL_FROM && !process.env.EMAIL_FROM.includes('resend.dev'));
+      const targetRecipients = isCustomSender ? recipientsArray : [adminEmail];
+
       const resendRes = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY.trim()}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           from: process.env.EMAIL_FROM || 'FoodSafe365 <onboarding@resend.dev>',
-          to: recipientsArray,
+          to: targetRecipients,
           reply_to: payload.customerEmail || adminEmail,
           subject: emailSubject,
           text: emailBodyText
@@ -312,6 +318,9 @@ https://foodsafe365.in/manager
       if (resendRes.ok) {
         providerUsed = 'RESEND';
         status = 'DELIVERED_EXTERNAL';
+      } else {
+        const errText = await resendRes.text();
+        console.error('[Rating Alert Email] Resend API error:', resendRes.status, errText);
       }
     } catch (err) {
       console.warn('[Rating Alert Email] Resend attempt failed, falling back to outbox:', err);
