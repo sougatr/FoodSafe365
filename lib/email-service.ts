@@ -237,7 +237,15 @@ export interface RatingNotificationPayload {
  * Dispatches an automated real-time notification alert when a customer rates a restaurant.
  * Sends directly to restaurant manager / business contact AND platform admin.
  */
-export async function sendCustomerRatingAlert(payload: RatingNotificationPayload): Promise<{ success: boolean; message: string; recordId?: string }> {
+export async function sendCustomerRatingAlert(payload: RatingNotificationPayload): Promise<{
+  success: boolean;
+  message: string;
+  recordId?: string;
+  resendStatus?: number;
+  resendData?: any;
+  recipient?: string;
+  subject?: string;
+}> {
   const adminEmail = process.env.ADMIN_EMAIL || 'foodsafe365@gmail.com';
   const cleanRestName = sanitizeHeader(payload.restaurantName, 120);
   const cleanScore = Math.min(5, Math.max(0, payload.overallScore)).toFixed(1);
@@ -304,8 +312,12 @@ https://foodsafe365.in/manager
       const isCustomSender = Boolean(process.env.EMAIL_FROM && !process.env.EMAIL_FROM.includes('resend.dev'));
       const targetRecipients = isCustomSender ? recipientsArray : [adminEmail];
 
-      console.log('[Rating Alert Email] Sending via Resend to:', targetRecipients);
+      // Ensure reply_to is a valid email or fallback to adminEmail
+      const validReplyTo = (payload.customerEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.customerEmail.trim()))
+        ? payload.customerEmail.trim()
+        : adminEmail;
 
+      let resendJson: any = null;
       const resendRes = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -315,18 +327,33 @@ https://foodsafe365.in/manager
         body: JSON.stringify({
           from: process.env.EMAIL_FROM || 'FoodSafe365 <onboarding@resend.dev>',
           to: targetRecipients,
-          reply_to: payload.customerEmail || adminEmail,
+          reply_to: validReplyTo,
           subject: emailSubject,
           text: emailBodyText
         })
       });
+
+      try {
+        resendJson = await resendRes.json();
+      } catch {
+        resendJson = { raw: await resendRes.text().catch(() => '') };
+      }
+
       if (resendRes.ok) {
         providerUsed = 'RESEND';
         status = 'DELIVERED_EXTERNAL';
-        console.log('[Rating Alert Email] SUCCESS: Delivered via Resend to:', targetRecipients);
+        console.log('[Rating Alert Email] SUCCESS: Delivered via Resend to:', targetRecipients, resendJson);
+        return {
+          success: true,
+          message: 'Customer rating alert delivered successfully via Resend.',
+          recordId,
+          resendStatus: resendRes.status,
+          resendData: resendJson,
+          recipient: targetRecipients[0],
+          subject: emailSubject
+        };
       } else {
-        const errText = await resendRes.text();
-        console.error('[Rating Alert Email] Resend API error:', resendRes.status, errText);
+        console.error('[Rating Alert Email] Resend API error:', resendRes.status, resendJson);
       }
     } catch (err) {
       console.warn('[Rating Alert Email] Resend attempt failed, falling back to outbox:', err);

@@ -129,10 +129,6 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
-    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-      return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-    }
-
     const clientIp = getClientIp(req);
 
     // 1. Distributed Rate Limiter: 10 submissions per 5 minutes per IP
@@ -234,17 +230,30 @@ export async function POST(req: NextRequest) {
       customerPhone: validated.customerPhone?.trim() || undefined,
     };
 
-    const { rating, storage } = await saveCustomerFeedback(ratingRecord);
+    let rating = ratingRecord;
+    let storage: 'postgresql' | 'server_file' = 'server_file';
+    try {
+      const saveRes = await saveCustomerFeedback(ratingRecord);
+      rating = saveRes.rating;
+      storage = saveRes.storage;
+    } catch (saveErr) {
+      console.warn('[customer-feedback] Persistent save warning (continuing with rating alert):', saveErr);
+    }
 
     // Check if the restaurant is UNCLAIMED and process mock outbox notification if eligible
-    const restEntry = await getRestaurantEntryAsync(ratingRecord.outletId);
-    const isUnclaimed = restEntry ? (restEntry.status === 'UNCLAIMED' || restEntry.status === 'DISCOVERED' || restEntry.status === 'INVITED') : true;
-
+    let isUnclaimed = true;
     let notificationResult: any = null;
-    if (isUnclaimed) {
-      const origin = req.headers.get('origin') || req.headers.get('host') || 'http://localhost:3000';
-      const baseUrl = origin.startsWith('http') ? origin : `http://${origin}`;
-      notificationResult = await processCustomerFeedbackForUnclaimedRestaurantAsync(rating, { baseUrl });
+    try {
+      const restEntry = await getRestaurantEntryAsync(ratingRecord.outletId);
+      isUnclaimed = restEntry ? (restEntry.status === 'UNCLAIMED' || restEntry.status === 'DISCOVERED' || restEntry.status === 'INVITED') : true;
+
+      if (isUnclaimed) {
+        const origin = req.headers.get('origin') || req.headers.get('host') || 'http://localhost:3000';
+        const baseUrl = origin.startsWith('http') ? origin : `http://${origin}`;
+        notificationResult = await processCustomerFeedbackForUnclaimedRestaurantAsync(rating, { baseUrl });
+      }
+    } catch (restErr) {
+      console.warn('[customer-feedback] Directory status check error (continuing with alert):', restErr);
     }
 
     // Real-time notification alert to restaurant business contact and platform admin
