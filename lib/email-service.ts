@@ -130,7 +130,7 @@ Reply-To is set to: ${cleanEmail}. You can reply directly to this email to respo
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: process.env.EMAIL_FROM || 'FoodSafe365 <noreply@foodsafe365.org>',
+          from: process.env.EMAIL_FROM || 'FoodSafe365 <onboarding@resend.dev>',
           to: [adminEmail],
           reply_to: cleanEmail,
           subject: emailSubject,
@@ -302,7 +302,7 @@ https://foodsafe365.in/manager
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          from: process.env.EMAIL_FROM || 'FoodSafe365 <noreply@foodsafe365.org>',
+          from: process.env.EMAIL_FROM || 'FoodSafe365 <onboarding@resend.dev>',
           to: recipientsArray,
           reply_to: payload.customerEmail || adminEmail,
           subject: emailSubject,
