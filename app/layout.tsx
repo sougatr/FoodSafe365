@@ -3,8 +3,8 @@ import type { Metadata, Viewport } from 'next';
 import FoodSafetyChatbot from '@/components/FoodSafetyChatbot';
 
 export const metadata: Metadata = {
-  title: 'FoodSafe365 — Clean Kitchens Don’t Get Shut Down',
-  description: 'Digital food-safety intelligence and operational compliance platform for restaurants, bars, cloud kitchens, and hospitality.',
+  title: 'FoodSafe365 — Clean Kitchens Don’t Fear Inspections',
+  description: 'Daily digital checklists for food businesses. Verified hygiene transparency for diners before they order.',
   themeColor: '#059669',
   appleWebApp: {
     capable: true,

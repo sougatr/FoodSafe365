@@ -117,14 +117,14 @@ export const DICTIONARY: Record<string, Record<Language, string>> = {
 
   // Simple Landing Redesign
   'landing.headline': {
-    en: 'Know your kitchen is safe before you eat',
-    hi: 'खाने से पहले जानें कि रसोई सुरक्षित है',
-    mr: 'जेवण्यापूर्वी जाणून घ्या की स्वयंपाकघर सुरक्षित आहे'
+    en: 'Clean kitchens don’t fear inspections.',
+    hi: 'स्वच्छ रसोई को किसी निरीक्षण का डर नहीं होता।',
+    mr: 'स्वच्छ स्वयंपाकघराला तपासणीची भीती नसते.'
   },
   'landing.subline': {
-    en: 'Scan the table QR, rate the food safety, and see daily kitchen records',
-    hi: 'टेबल QR स्कैन करें, खाद्य सुरक्षा रेट करें और दैनिक रसोई रिकॉर्ड देखें',
-    mr: 'टेबल QR स्कॅन करा, अन्न सुरक्षा रेट करा आणि दैनंदिन स्वयंपाकघर नोंदी पहा'
+    en: 'Daily digital checklists for food businesses. Verified hygiene transparency for diners before they order.',
+    hi: 'खाद्य व्यवसायों के लिए दैनिक डिजिटल जांच। ग्राहकों के लिए पारदर्शी और सत्यापित स्वच्छता।',
+    mr: 'अन्न व्यवसायांसाठी दैनंदिन डिजिटल तपासणी. ग्राहकांसाठी पारदर्शक आणि प्रमाणित स्वच्छता.'
   },
   'landing.eatingOut': {
     en: 'I’m eating out',
