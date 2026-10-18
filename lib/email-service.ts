@@ -292,6 +292,9 @@ https://foodsafe365.in/manager
 
   const recipientsArray = Array.from(recipientList);
 
+  console.log('[Rating Alert Email] Dispatching alert for:', cleanRestName);
+  console.log('[Rating Alert Email] RESEND_API_KEY configured?', Boolean(process.env.RESEND_API_KEY));
+
   // 1. Check if Resend API key is available
   if (process.env.RESEND_API_KEY) {
     try {
@@ -300,6 +303,8 @@ https://foodsafe365.in/manager
       // Once EMAIL_FROM is verified with a custom domain, all recipients can receive it.
       const isCustomSender = Boolean(process.env.EMAIL_FROM && !process.env.EMAIL_FROM.includes('resend.dev'));
       const targetRecipients = isCustomSender ? recipientsArray : [adminEmail];
+
+      console.log('[Rating Alert Email] Sending via Resend to:', targetRecipients);
 
       const resendRes = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -318,6 +323,7 @@ https://foodsafe365.in/manager
       if (resendRes.ok) {
         providerUsed = 'RESEND';
         status = 'DELIVERED_EXTERNAL';
+        console.log('[Rating Alert Email] SUCCESS: Delivered via Resend to:', targetRecipients);
       } else {
         const errText = await resendRes.text();
         console.error('[Rating Alert Email] Resend API error:', resendRes.status, errText);
@@ -325,6 +331,8 @@ https://foodsafe365.in/manager
     } catch (err) {
       console.warn('[Rating Alert Email] Resend attempt failed, falling back to outbox:', err);
     }
+  } else {
+    console.warn('[Rating Alert Email] RESEND_API_KEY is not defined in process.env, queued in outbox');
   }
 
   // 2. Check if SendGrid API key is available
