@@ -115,16 +115,36 @@ export const DICTIONARY: Record<string, Record<Language, string>> = {
   },
   'hero.dailyStatus': { en: 'DAILY VERIFIED STATUS', hi: 'दैनिक सत्यापित स्थिति', mr: 'दैनिक प्रमाणित स्थिती' },
 
-  // Simple Landing Redesign
+  // Dynamic Hero Messages
+  'landing.heroDiner.headline': {
+    en: 'Eat where food safety is a priority, not an afterthought.',
+    hi: 'सिर्फ वहीं खाएं जहां खाद्य सुरक्षा पहली प्राथमिकता है, औपचारिकता नहीं।',
+    mr: 'फक्त तिथेच जेवा जिथे अन्न सुरक्षेला सर्वोच्च प्राधान्य आहे, देखावा नाही.'
+  },
+  'landing.heroDiner.subline': {
+    en: 'Check verified kitchen hygiene logs, cold-storage checks, and real diner ratings before you order.',
+    hi: 'ऑर्डर करने से पहले सत्यापित रसोई स्वच्छता, कोल्ड-स्टोरेज और ग्राहकों की लाइव रेटिंग देखें।',
+    mr: 'ऑर्डर करण्यापूर्वी प्रमाणित स्वयंपाकघर स्वच्छता, कोल्ड-स्टोरेज आणि ग्राहकांच्या थेट नोंदी पहा.'
+  },
+  'landing.heroBiz.headline': {
+    en: 'Turn food safety into your restaurant’s biggest advantage.',
+    hi: 'खाद्य सुरक्षा को अपने रेस्तरां की सबसे बड़ी ताकत बनाएं।',
+    mr: 'अन्न सुरक्षेला आपल्या रेस्टॉरंटची सर्वात मोठी ताकद बनवा.'
+  },
+  'landing.heroBiz.subline': {
+    en: 'Show customers and FDA officials that your kitchen runs on certified, verifiable daily standards.',
+    hi: 'ग्राहकों और FDA अधिकारियों को दिखाएं कि आपकी रसोई प्रमाणित दैनिक मानकों पर चलती है।',
+    mr: 'ग्राहक आणि अन्न सुरक्षा अधिकाऱ्यांना दाखवा की आपले स्वयंपाकघर प्रमाणित दैनंदिन नियमांचे पालन करते.'
+  },
   'landing.headline': {
-    en: 'Clean kitchens don’t fear inspections.',
-    hi: 'स्वच्छ रसोई को किसी निरीक्षण का डर नहीं होता।',
-    mr: 'स्वच्छ स्वयंपाकघराला तपासणीची भीती नसते.'
+    en: 'Eat where food safety is a priority, not an afterthought.',
+    hi: 'सिर्फ वहीं खाएं जहां खाद्य सुरक्षा पहली प्राथमिकता है, औपचारिकता नहीं।',
+    mr: 'फक्त तिथेच जेवा जिथे अन्न सुरक्षेला सर्वोच्च प्राधान्य आहे, देखावा नाही.'
   },
   'landing.subline': {
-    en: 'Daily digital checklists for food businesses. Verified hygiene transparency for diners before they order.',
-    hi: 'खाद्य व्यवसायों के लिए दैनिक डिजिटल जांच। ग्राहकों के लिए पारदर्शी और सत्यापित स्वच्छता।',
-    mr: 'अन्न व्यवसायांसाठी दैनंदिन डिजिटल तपासणी. ग्राहकांसाठी पारदर्शक आणि प्रमाणित स्वच्छता.'
+    en: 'Check verified kitchen hygiene logs, cold-storage checks, and real diner ratings before you order.',
+    hi: 'ऑर्डर करने से पहले सत्यापित रसोई स्वच्छता, कोल्ड-स्टोरेज और ग्राहकों की लाइव रेटिंग देखें।',
+    mr: 'ऑर्डर करण्यापूर्वी प्रमाणित स्वयंपाकघर स्वच्छता, कोल्ड-स्टोरेज आणि ग्राहकांच्या थेट नोंदी पहा.'
   },
   'landing.eatingOut': {
     en: 'I’m eating out',
@@ -136,6 +156,13 @@ export const DICTIONARY: Record<string, Record<Language, string>> = {
     hi: 'मैं खाद्य व्यवसाय चलाता हूँ',
     mr: 'माझा अन्न व्यवसाय आहे'
   },
+  'landing.filter.mumbaiAll': { en: 'All Mumbai (Pilot)', hi: 'सभी मुंबई (पायलट)', mr: 'सर्व मुंबई (पायलट)' },
+  'landing.filter.colaba': { en: 'Colaba & Fort', hi: 'कोलाबा और फोर्ट', mr: 'कुलाबा आणि फोर्ट' },
+  'landing.filter.bandra': { en: 'Bandra West', hi: 'बांद्रा वेस्ट', mr: 'वांद्रे पश्चिम' },
+  'landing.filter.lowerParel': { en: 'Lower Parel', hi: 'लोअर परेल', mr: 'लोअर परळ' },
+  'landing.filter.otherCities': { en: 'Other Cities', hi: 'अन्य शहर', mr: 'इतर शहरे' },
+  'landing.seeMore': { en: 'See more restaurants', hi: 'और रेस्तरां देखें', mr: 'आणखी रेस्टॉरंट्स पहा' },
+  'landing.seeLess': { en: 'Show fewer', hi: 'कम दिखाएं', mr: 'कमी दाखवा' },
   'landing.step1.title': { en: '1. Scan', hi: '1. स्कैन', mr: '1. स्कॅन' },
   'landing.step1.desc': {
     en: 'Scan table QR or search',

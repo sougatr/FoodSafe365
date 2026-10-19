@@ -11,18 +11,17 @@ import {
   Search,
   Star,
   MapPin,
-  Thermometer,
-  UserCheck,
   UtensilsCrossed,
   ShoppingBag,
   Wrench,
   Smartphone,
   X,
-  Clock,
-  Sparkles,
   User,
   AlertCircle,
-  Check
+  Check,
+  ChevronDown,
+  Building2,
+  ExternalLink
 } from 'lucide-react';
 import GlobalHeader from '@/components/GlobalHeader';
 import { POPULAR_RESTAURANTS, RestaurantItem } from '@/lib/restaurantsData';
@@ -41,9 +40,14 @@ export default function Landing() {
   // Mode: "I'm eating out" (default) or "I run a food business"
   const [activeMode, setActiveMode] = useState<'eating_out' | 'food_business'>('eating_out');
 
-  // Diner Search & 3 Filters
+  // Search Query
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'dine_in' | 'delivery'>('all');
+
+  // Mumbai Pilot Area Filter
+  const [selectedArea, setSelectedArea] = useState<'all' | 'colaba' | 'bandra' | 'lower_parel' | 'other'>('all');
+
+  // Show top 6 cards by default
+  const [showAllCards, setShowAllCards] = useState(false);
 
   // Universal Sign-in State
   const [customerPhone, setCustomerPhone] = useState<string | null>(null);
@@ -65,11 +69,15 @@ export default function Landing() {
   const [customRestaurants, setCustomRestaurants] = useState<RestaurantItem[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newRestName, setNewRestName] = useState('');
-  const [newRestCity, setNewRestCity] = useState('kolkata');
+  const [newRestCity, setNewRestCity] = useState('mumbai');
   const [newRestLocation, setNewRestLocation] = useState('');
   const [newRestCuisine, setNewRestCuisine] = useState('');
   const [newRestTable, setNewRestTable] = useState('Table QR #01');
   const [addError, setAddError] = useState('');
+
+  // Chain Outlet Selection Modal State
+  const [chainModalRestaurant, setChainModalRestaurant] = useState<RestaurantItem | null>(null);
+  const [customBranchInput, setCustomBranchInput] = useState('');
 
   // Rating Modal State
   const [ratingModalRestaurant, setRatingModalRestaurant] = useState<RestaurantItem | null>(null);
@@ -241,6 +249,39 @@ export default function Landing() {
     }, 1000);
   }
 
+  // Check if a restaurant is a multi-outlet chain
+  function isChainBrand(restaurant: RestaurantItem): boolean {
+    const nameLower = restaurant.name.toLowerCase();
+    const locLower = restaurant.location.toLowerCase();
+    return (
+      restaurant.city === 'pan-india' ||
+      locLower.includes('multiple') ||
+      locLower.includes('pan-india') ||
+      ['mcdonald', 'subway', "domino's", 'burger king', 'faasos', 'biryani by kilo', 'starbucks', 'kfc', 'chaayos'].some(b => nameLower.includes(b))
+    );
+  }
+
+  // Initiate rating flow: prompts branch if it's a chain, or opens rating directly
+  function handleInitiateRating(restaurant: RestaurantItem) {
+    if (isChainBrand(restaurant)) {
+      setChainModalRestaurant(restaurant);
+      setCustomBranchInput('');
+    } else {
+      handleOpenRating(restaurant);
+    }
+  }
+
+  function handleSelectChainBranch(branchName: string) {
+    if (!chainModalRestaurant) return;
+    const customized: RestaurantItem = {
+      ...chainModalRestaurant,
+      location: `${branchName}, Mumbai`,
+      tableCode: `Branch: ${branchName}`
+    };
+    setChainModalRestaurant(null);
+    handleOpenRating(customized);
+  }
+
   function handleOpenRating(restaurant: RestaurantItem) {
     setRatingModalRestaurant(restaurant);
     setRateScores({ q1: 0, q2: 0, q3: 0, q4: 0, q5: 0 });
@@ -406,49 +447,68 @@ export default function Landing() {
     return [...customRestaurants, ...POPULAR_RESTAURANTS];
   }, [customRestaurants]);
 
-  // Compute real ratings for each restaurant, removing placeholder ratings
+  // Compute real ratings with ≥10 rating threshold
   function getRestaurantRealRating(restaurantId: string) {
     const matching = storedRatings.filter(r => r.outletId === restaurantId);
-    if (matching.length > 0) {
+    if (matching.length >= 10) {
       const sum = matching.reduce((acc, curr) => acc + (curr.overallScore || 0), 0);
       const avg = (sum / matching.length).toFixed(1);
       return {
-        hasRealRating: true,
+        hasSufficientRatings: true,
         score: avg,
         reviewCount: matching.length
       };
     }
     return {
-      hasRealRating: false,
+      hasSufficientRatings: false,
       score: null,
-      reviewCount: 0
+      reviewCount: matching.length
     };
   }
 
-  // 3 Filters Logic: 'all' | 'dine_in' | 'delivery'
+  // Check if restaurant has verified daily kitchen records
+  function hasVerifiedKitchenRecords(restaurant: RestaurantItem): boolean {
+    return Boolean(
+      restaurant.lastCheck &&
+      restaurant.lastCheck.toLowerCase().includes('today') &&
+      restaurant.signals?.cold?.title
+    );
+  }
+
+  // Filter restaurants based on Mumbai Pilot Areas & Search
   const filteredRestaurants = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
 
     return allRestaurants.filter(r => {
-      // Filter tab check
-      if (selectedFilter === 'dine_in') {
-        if (r.category === 'delivery') return false;
-      } else if (selectedFilter === 'delivery') {
-        if (r.category !== 'delivery' && !r.cuisine.toLowerCase().includes('delivery') && !r.cuisine.toLowerCase().includes('bakery')) {
-          return false;
-        }
+      const loc = r.location.toLowerCase();
+      const city = r.city.toLowerCase();
+
+      // Area filter: default to Mumbai pilot
+      if (selectedArea === 'colaba') {
+        if (!loc.includes('colaba') && !loc.includes('fort') && !loc.includes('marine lines')) return false;
+      } else if (selectedArea === 'bandra') {
+        if (!loc.includes('bandra') && !loc.includes('khar') && !loc.includes('santacruz')) return false;
+      } else if (selectedArea === 'lower_parel') {
+        if (!loc.includes('lower parel') && !loc.includes('worli') && !loc.includes('prabhadevi')) return false;
+      } else if (selectedArea === 'other') {
+        if (city === 'mumbai') return false;
+      } else {
+        // 'all' Mumbai pilot: prioritize Mumbai and Pan-India
+        if (city !== 'mumbai' && city !== 'pan-india') return false;
       }
 
-      // Query check
+      // Search Query
       if (!q) return true;
       return (
         r.name.toLowerCase().includes(q) ||
         r.location.toLowerCase().includes(q) ||
-        r.cuisine.toLowerCase().includes(q) ||
-        r.city.toLowerCase().includes(q)
+        r.cuisine.toLowerCase().includes(q)
       );
     });
-  }, [searchQuery, selectedFilter, allRestaurants]);
+  }, [searchQuery, selectedArea, allRestaurants]);
+
+  // Top 6 vs All Cards
+  const displayedRestaurants = showAllCards ? filteredRestaurants : filteredRestaurants.slice(0, 6);
 
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -468,7 +528,7 @@ export default function Landing() {
     );
 
     if (matched) {
-      handleOpenRating(matched);
+      handleInitiateRating(matched);
       showToast(`🎯 Found ${matched.name}. Opening rating...`);
     }
   }
@@ -490,12 +550,21 @@ export default function Landing() {
       setShowQrScanModal(false);
       setInputQrCode('');
       setQrSearchError('');
-      handleOpenRating(matched);
+      handleInitiateRating(matched);
       showToast(`🎯 QR Verified: ${matched.name}`);
     } else {
       setQrSearchError(`No restaurant matches QR "${qrCodeString}". Search by restaurant name below.`);
     }
   }
+
+  // Dynamic Headline and Subline based on active mode
+  const heroHeadline = activeMode === 'eating_out'
+    ? t('landing.heroDiner.headline')
+    : t('landing.heroBiz.headline');
+
+  const heroSubline = activeMode === 'eating_out'
+    ? t('landing.heroDiner.subline')
+    : t('landing.heroBiz.subline');
 
   return (
     <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F8FAF6', width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
@@ -506,43 +575,43 @@ export default function Landing() {
       <section style={{
         background: 'linear-gradient(180deg, #FFFFFF 0%, #F1F5F0 100%)',
         borderBottom: '1px solid #E2E8F0',
-        paddingTop: 'clamp(32px, 5vw, 48px)',
-        paddingBottom: 'clamp(32px, 5vw, 44px)',
+        paddingTop: 'clamp(28px, 4vw, 42px)',
+        paddingBottom: 'clamp(28px, 4vw, 36px)',
         paddingLeft: 16,
         paddingRight: 16
       }}>
-        <div style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
-          {/* Main Headline */}
+        <div style={{ maxWidth: 780, margin: '0 auto', textAlign: 'center' }}>
+          {/* Dynamic Main Headline */}
           <h1 style={{
-            fontSize: 'clamp(28px, 6vw, 44px)',
-            lineHeight: 1.15,
+            fontSize: 'clamp(26px, 5.2vw, 40px)',
+            lineHeight: 1.18,
             fontWeight: 900,
             color: '#0F2922',
-            margin: '0 0 12px',
+            margin: '0 0 10px',
             letterSpacing: '-0.025em'
           }}>
-            {t('landing.headline')}
+            {heroHeadline}
           </h1>
 
-          {/* Clear Subline */}
+          {/* Dynamic Subline */}
           <p style={{
-            fontSize: 'clamp(15px, 2.8vw, 19px)',
+            fontSize: 'clamp(14.5px, 2.6vw, 17.5px)',
             color: '#475569',
-            margin: '0 auto 28px',
+            margin: '0 auto 24px',
             maxWidth: 620,
             lineHeight: 1.45,
             fontWeight: 500
           }}>
-            {t('landing.subline')}
+            {heroSubline}
           </p>
 
           {/* TWO LARGE PRIMARY ACTION BUTTONS */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: 14,
-            maxWidth: 580,
-            margin: '0 auto 32px'
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: 12,
+            maxWidth: 540,
+            margin: '0 auto 24px'
           }}>
             {/* Action 1: Diner */}
             <button
@@ -557,20 +626,20 @@ export default function Landing() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 10,
-                minHeight: 56,
-                padding: '16px 22px',
-                borderRadius: 16,
-                fontSize: 16,
+                minHeight: 52,
+                padding: '14px 20px',
+                borderRadius: 14,
+                fontSize: 15.5,
                 fontWeight: 800,
                 cursor: 'pointer',
                 border: activeMode === 'eating_out' ? '2.5px solid #059669' : '1.5px solid #CBD5E1',
                 background: activeMode === 'eating_out' ? '#059669' : '#FFFFFF',
                 color: activeMode === 'eating_out' ? '#FFFFFF' : '#0F2922',
-                boxShadow: activeMode === 'eating_out' ? '0 6px 20px rgba(5, 150, 105, 0.3)' : '0 2px 8px rgba(0,0,0,0.04)',
+                boxShadow: activeMode === 'eating_out' ? '0 6px 20px rgba(5, 150, 105, 0.28)' : '0 2px 6px rgba(0,0,0,0.03)',
                 transition: 'all 0.15s ease'
               }}
             >
-              <span style={{ fontSize: 20 }}>🍽️</span>
+              <span style={{ fontSize: 19 }}>🍽️</span>
               <span>{t('landing.eatingOut')}</span>
             </button>
 
@@ -587,44 +656,60 @@ export default function Landing() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 10,
-                minHeight: 56,
-                padding: '16px 22px',
-                borderRadius: 16,
-                fontSize: 16,
+                minHeight: 52,
+                padding: '14px 20px',
+                borderRadius: 14,
+                fontSize: 15.5,
                 fontWeight: 800,
                 cursor: 'pointer',
                 border: activeMode === 'food_business' ? '2.5px solid #0F2922' : '1.5px solid #CBD5E1',
                 background: activeMode === 'food_business' ? '#0F2922' : '#FFFFFF',
                 color: activeMode === 'food_business' ? '#FFFFFF' : '#0F2922',
-                boxShadow: activeMode === 'food_business' ? '0 6px 20px rgba(15, 41, 34, 0.3)' : '0 2px 8px rgba(0,0,0,0.04)',
+                boxShadow: activeMode === 'food_business' ? '0 6px 20px rgba(15, 41, 34, 0.28)' : '0 2px 6px rgba(0,0,0,0.03)',
                 transition: 'all 0.15s ease'
               }}
             >
-              <span style={{ fontSize: 20 }}>🏪</span>
+              <span style={{ fontSize: 19 }}>🏪</span>
               <span>{t('landing.foodBusiness')}</span>
             </button>
           </div>
 
-          {/* 3-STEP STRIP: Scan, Rate, See the record */}
+          {/* INTERACTIVE 3-STEP STRIP: Each step is a direct clickable shortcut */}
           <div style={{
             background: '#FFFFFF',
             border: '1px solid #E2E8F0',
             borderRadius: 16,
-            padding: '16px 20px',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.04)',
+            padding: '14px 18px',
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.03)',
             maxWidth: 720,
             margin: '0 auto',
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: 16,
+            gap: 12,
             textAlign: 'left'
           }}>
-            {/* Step 1 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {/* Step 1: Click to Scan */}
+            <div
+              onClick={() => {
+                setShowQrScanModal(true);
+                setInputQrCode('');
+                setQrSearchError('');
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                cursor: 'pointer',
+                padding: '4px 6px',
+                borderRadius: 10,
+                transition: 'background 0.15s ease'
+              }}
+              title="Click to scan table QR code"
+            >
               <div style={{
-                width: 42,
-                height: 42,
-                borderRadius: 12,
+                width: 40,
+                height: 40,
+                borderRadius: 10,
                 background: 'rgba(16, 185, 129, 0.12)',
                 color: '#059669',
                 display: 'flex',
@@ -632,24 +717,40 @@ export default function Landing() {
                 justifyContent: 'center',
                 flexShrink: 0
               }}>
-                <QrCode size={22} />
+                <QrCode size={20} />
               </div>
               <div>
-                <strong style={{ display: 'block', fontSize: 14.5, color: '#0F2922' }}>
+                <strong style={{ display: 'block', fontSize: 14, color: '#0F2922' }}>
                   {t('landing.step1.title')}
                 </strong>
-                <span style={{ fontSize: 12, color: '#64748B' }}>
-                  {t('landing.step1.desc')}
+                <span style={{ fontSize: 11.5, color: '#059669', fontWeight: 600 }}>
+                  Tap to scan table QR →
                 </span>
               </div>
             </div>
 
-            {/* Step 2 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {/* Step 2: Click to Focus Search & Rate */}
+            <div
+              onClick={() => {
+                setActiveMode('eating_out');
+                const input = document.getElementById('search-input');
+                if (input) input.focus();
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                cursor: 'pointer',
+                padding: '4px 6px',
+                borderRadius: 10,
+                transition: 'background 0.15s ease'
+              }}
+              title="Click to search and rate a restaurant"
+            >
               <div style={{
-                width: 42,
-                height: 42,
-                borderRadius: 12,
+                width: 40,
+                height: 40,
+                borderRadius: 10,
                 background: 'rgba(245, 158, 11, 0.12)',
                 color: '#d97706',
                 display: 'flex',
@@ -657,24 +758,40 @@ export default function Landing() {
                 justifyContent: 'center',
                 flexShrink: 0
               }}>
-                <Star size={22} fill="#d97706" />
+                <Star size={20} fill="#d97706" />
               </div>
               <div>
-                <strong style={{ display: 'block', fontSize: 14.5, color: '#0F2922' }}>
+                <strong style={{ display: 'block', fontSize: 14, color: '#0F2922' }}>
                   {t('landing.step2.title')}
                 </strong>
-                <span style={{ fontSize: 12, color: '#64748B' }}>
-                  {t('landing.step2.desc')}
+                <span style={{ fontSize: 11.5, color: '#64748B' }}>
+                  5 quick safety questions
                 </span>
               </div>
             </div>
 
-            {/* Step 3 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {/* Step 3: Click to View Kitchen Records */}
+            <div
+              onClick={() => {
+                setActiveMode('eating_out');
+                const grid = document.getElementById('restaurants-grid');
+                if (grid) grid.scrollIntoView({ behavior: 'smooth' });
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                cursor: 'pointer',
+                padding: '4px 6px',
+                borderRadius: 10,
+                transition: 'background 0.15s ease'
+              }}
+              title="Click to view daily kitchen records"
+            >
               <div style={{
-                width: 42,
-                height: 42,
-                borderRadius: 12,
+                width: 40,
+                height: 40,
+                borderRadius: 10,
                 background: 'rgba(59, 130, 246, 0.12)',
                 color: '#2563eb',
                 display: 'flex',
@@ -682,14 +799,14 @@ export default function Landing() {
                 justifyContent: 'center',
                 flexShrink: 0
               }}>
-                <ShieldCheck size={22} />
+                <ShieldCheck size={20} />
               </div>
               <div>
-                <strong style={{ display: 'block', fontSize: 14.5, color: '#0F2922' }}>
+                <strong style={{ display: 'block', fontSize: 14, color: '#0F2922' }}>
                   {t('landing.step3.title')}
                 </strong>
-                <span style={{ fontSize: 12, color: '#64748B' }}>
-                  {t('landing.step3.desc')}
+                <span style={{ fontSize: 11.5, color: '#64748B' }}>
+                  Daily cold &amp; hygiene logs
                 </span>
               </div>
             </div>
@@ -697,28 +814,29 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* BRANCH A: EATING OUT (Search & Scan Only) */}
+      {/* BRANCH A: EATING OUT (Search, Pilot Filters, 3-State Cards) */}
       {activeMode === 'eating_out' && (
         <section id="search-strip" style={{
           maxWidth: 960,
           margin: '0 auto',
           width: '100%',
-          padding: '28px 16px 54px'
+          padding: '24px 16px 48px'
         }}>
           {/* Search Bar & Scan Button */}
           <form onSubmit={handleSearchSubmit} style={{
             background: '#FFFFFF',
             border: '2px solid #CBD5E1',
-            borderRadius: 18,
+            borderRadius: 16,
             padding: '8px 12px',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.06)',
+            boxShadow: '0 6px 20px rgba(0, 0, 0, 0.05)',
             display: 'flex',
             alignItems: 'center',
             gap: 10,
-            marginBottom: 20
+            marginBottom: 16
           }}>
             <Search size={22} color="#059669" style={{ flexShrink: 0 }} />
             <input
+              id="search-input"
               type="text"
               placeholder={t('landing.searchPlaceholder')}
               value={searchQuery}
@@ -726,7 +844,7 @@ export default function Landing() {
               style={{
                 border: 'none',
                 outline: 'none',
-                fontSize: 16,
+                fontSize: 15.5,
                 width: '100%',
                 color: '#0F172A',
                 background: 'transparent',
@@ -765,7 +883,7 @@ export default function Landing() {
                 color: '#059669',
                 padding: '9px 14px',
                 borderRadius: 12,
-                fontSize: 13.5,
+                fontSize: 13,
                 fontWeight: 700,
                 cursor: 'pointer',
                 flexShrink: 0,
@@ -777,76 +895,42 @@ export default function Landing() {
             </button>
           </form>
 
-          {/* Quick Trending Dining Chips */}
-          <div style={{
-            display: 'flex',
-            gap: 8,
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            marginBottom: 24
-          }}>
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: '#64748B' }}>Popular:</span>
-            {[
-              'Peter Cat',
-              'The Table',
-              'Paradise Biryani',
-              'Flurys',
-              'Bastian',
-              'Mocambo',
-              'Rawat Mishtan'
-            ].map(name => (
-              <button
-                key={name}
-                type="button"
-                onClick={() => setSearchQuery(name)}
-                style={{
-                  background: searchQuery === name ? '#059669' : '#FFFFFF',
-                  color: searchQuery === name ? '#FFFFFF' : '#334155',
-                  border: '1px solid #E2E8F0',
-                  borderRadius: 9999,
-                  padding: '5px 12px',
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                {name}
-              </button>
-            ))}
-          </div>
-
-          {/* EXACTLY 3 FILTERS AND ONE ADD RESTAURANT ACTION */}
+          {/* MUMBAI PILOT AREA FILTER BAR + ONE ADD RESTAURANT ACTION */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: 12,
-            marginBottom: 24,
+            gap: 10,
+            marginBottom: 20,
             borderBottom: '1px solid #E2E8F0',
-            paddingBottom: 16
+            paddingBottom: 14
           }}>
-            {/* The 3 Filter Pills */}
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {/* Filter Pills */}
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {[
-                { id: 'all', label: t('landing.filter.all') },
-                { id: 'dine_in', label: t('landing.filter.dinein') },
-                { id: 'delivery', label: t('landing.filter.delivery') }
+                { id: 'all', label: t('landing.filter.mumbaiAll') },
+                { id: 'colaba', label: t('landing.filter.colaba') },
+                { id: 'bandra', label: t('landing.filter.bandra') },
+                { id: 'lower_parel', label: t('landing.filter.lowerParel') },
+                { id: 'other', label: t('landing.filter.otherCities') }
               ].map(f => (
                 <button
                   key={f.id}
                   type="button"
-                  onClick={() => setSelectedFilter(f.id as any)}
+                  onClick={() => {
+                    setSelectedArea(f.id as any);
+                    setShowAllCards(false);
+                  }}
                   style={{
-                    minHeight: 40,
-                    padding: '8px 16px',
+                    minHeight: 36,
+                    padding: '6px 14px',
                     borderRadius: 9999,
-                    fontSize: 13,
-                    fontWeight: selectedFilter === f.id ? 800 : 600,
-                    border: selectedFilter === f.id ? '2px solid #059669' : '1.5px solid #CBD5E1',
-                    background: selectedFilter === f.id ? '#059669' : '#FFFFFF',
-                    color: selectedFilter === f.id ? '#FFFFFF' : '#334155',
+                    fontSize: 12.5,
+                    fontWeight: selectedArea === f.id ? 800 : 600,
+                    border: selectedArea === f.id ? '2px solid #059669' : '1.5px solid #CBD5E1',
+                    background: selectedArea === f.id ? '#059669' : '#FFFFFF',
+                    color: selectedArea === f.id ? '#FFFFFF' : '#334155',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease'
                   }}
@@ -866,11 +950,11 @@ export default function Landing() {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: 6,
-                minHeight: 40,
-                padding: '8px 16px',
+                gap: 5,
+                minHeight: 36,
+                padding: '6px 14px',
                 borderRadius: 9999,
-                fontSize: 13,
+                fontSize: 12.5,
                 fontWeight: 700,
                 border: '1.5px dashed #059669',
                 background: 'rgba(16, 185, 129, 0.08)',
@@ -884,34 +968,42 @@ export default function Landing() {
             </button>
           </div>
 
-          {/* Restaurant List Cards */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: 16
-          }}>
-            {filteredRestaurants.slice(0, 18).map(r => {
+          {/* RESTAURANTS GRID: Tappable cards with 3 clean states and single button */}
+          <div
+            id="restaurants-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: 16
+            }}
+          >
+            {displayedRestaurants.map(r => {
               const realRating = getRestaurantRealRating(r.id);
+              const hasRecords = hasVerifiedKitchenRecords(r);
+              const isChain = isChainBrand(r);
+              const isUnclaimed = r.status === 'UNCLAIMED' || (!hasRecords && !realRating.hasSufficientRatings);
 
               return (
                 <div
                   key={r.id}
+                  onClick={() => handleInitiateRating(r)}
                   style={{
                     background: '#FFFFFF',
-                    border: '1px solid #E2E8F0',
+                    border: hasRecords ? '1.5px solid #A7F3D0' : '1px solid #E2E8F0',
                     borderRadius: 16,
                     padding: '18px 20px',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)',
+                    cursor: 'pointer',
                     transition: 'transform 0.15s ease, box-shadow 0.15s ease'
                   }}
                 >
                   <div>
-                    {/* Header info */}
+                    {/* Header info & Status Pill */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-                      <div>
+                      <div style={{ maxWidth: '75%' }}>
                         <h3 style={{ margin: '0 0 3px', fontSize: 17, fontWeight: 800, color: '#0F2922' }}>
                           {r.name}
                         </h3>
@@ -921,14 +1013,27 @@ export default function Landing() {
                         </p>
                       </div>
 
-                      {/* Real Rating Badge - Only shown if real ratings exist */}
-                      {realRating.hasRealRating ? (
+                      {/* State Badge */}
+                      {hasRecords ? (
+                        <span style={{
+                          background: 'rgba(16, 185, 129, 0.15)',
+                          color: '#047857',
+                          border: '1px solid rgba(16, 185, 129, 0.35)',
+                          padding: '3px 7px',
+                          borderRadius: 6,
+                          fontSize: 10.5,
+                          fontWeight: 800,
+                          flexShrink: 0
+                        }}>
+                          🛡️ VERIFIED
+                        </span>
+                      ) : realRating.hasSufficientRatings ? (
                         <div style={{
                           background: '#059669',
                           color: '#FFFFFF',
                           padding: '3px 8px',
-                          borderRadius: 8,
-                          fontSize: 12,
+                          borderRadius: 6,
+                          fontSize: 11.5,
                           fontWeight: 800,
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -936,104 +1041,186 @@ export default function Landing() {
                           flexShrink: 0
                         }}>
                           <Star size={11} fill="#FFFFFF" />
-                          <span>{realRating.score}★ ({realRating.reviewCount})</span>
+                          <span>{realRating.score}★</span>
                         </div>
                       ) : (
                         <span style={{
-                          fontSize: 11,
+                          fontSize: 10.5,
                           fontWeight: 700,
-                          color: '#059669',
-                          background: 'rgba(16, 185, 129, 0.1)',
-                          padding: '3px 8px',
+                          color: '#64748B',
+                          background: '#F1F5F9',
+                          padding: '3px 7px',
                           borderRadius: 6,
                           flexShrink: 0
                         }}>
-                          {t('landing.newOnPlatform')}
+                          NEW
                         </span>
                       )}
                     </div>
 
-                    {/* Plain Language Hygiene Signals */}
-                    <div style={{
-                      background: '#F8FAF6',
-                      border: '1px solid #E2E8F0',
-                      borderRadius: 10,
-                      padding: '8px 10px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 4,
-                      marginBottom: 16,
-                      fontSize: 11.5,
-                      color: '#475569'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Check size={13} color="#059669" />
-                        <span>Refrigeration Checked</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Check size={13} color="#059669" />
-                        <span>Staff Health Certified</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Check size={13} color="#059669" />
-                        <span>Pest Control Verified</span>
-                      </div>
+                    {/* Cuisine tag */}
+                    <div style={{ marginBottom: 12 }}>
+                      <span style={{ fontSize: 11.5, color: '#64748B', background: '#F8FAF6', padding: '2px 8px', borderRadius: 4, border: '1px solid #E2E8F0' }}>
+                        {r.cuisine}
+                      </span>
                     </div>
+
+                    {/* 3 VISIBLE STATES BODY */}
+                    {hasRecords ? (
+                      /* STATE 1: VERIFIED KITCHEN */
+                      <div style={{
+                        background: '#F0FDF4',
+                        border: '1px solid #BBF7D0',
+                        borderRadius: 10,
+                        padding: '10px 12px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 5,
+                        marginBottom: 16,
+                        fontSize: 12,
+                        color: '#166534'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
+                          <Check size={14} color="#059669" />
+                          <span>Cold Storage: Inspected (≤4°C)</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
+                          <Check size={14} color="#059669" />
+                          <span>Staff Health: Form 1A Cleared</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
+                          <Check size={14} color="#059669" />
+                          <span>Pest Defense: Inspected</span>
+                        </div>
+                        <div style={{ fontSize: 10.5, color: '#15803D', marginTop: 2 }}>
+                          Checked: {r.lastCheck}
+                        </div>
+                      </div>
+                    ) : realRating.hasSufficientRatings ? (
+                      /* STATE 2: RATED BY DINERS (≥10 verified submissions) */
+                      <div style={{
+                        background: '#F8FAF6',
+                        border: '1px solid #E2E8F0',
+                        borderRadius: 10,
+                        padding: '10px 12px',
+                        marginBottom: 16,
+                        fontSize: 12,
+                        color: '#475569'
+                      }}>
+                        <div style={{ fontWeight: 700, color: '#0F2922', marginBottom: 2 }}>
+                          ⭐ {realRating.score} / 5.0 Food Safety Score
+                        </div>
+                        <div style={{ fontSize: 11.5, color: '#64748B' }}>
+                          Verified across {realRating.reviewCount} customer dining observations.
+                        </div>
+                      </div>
+                    ) : (
+                      /* STATE 3: NOT YET VERIFIED ON FOODSAFE365 */
+                      <div style={{
+                        background: '#F8FAFC',
+                        border: '1px dashed #CBD5E1',
+                        borderRadius: 10,
+                        padding: '10px 12px',
+                        marginBottom: 16,
+                        fontSize: 11.5,
+                        color: '#64748B'
+                      }}>
+                        <span>No verified kitchen logs uploaded yet. Share your dining observation to verify this kitchen.</span>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Primary Actions: Rate Safety & See Record */}
-                  <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                  {/* SINGLE PRIMARY ACTION BUTTON + CONDITIONAL RECORD LINK */}
+                  <div>
                     <button
                       type="button"
-                      onClick={() => handleOpenRating(r)}
+                      onClick={e => {
+                        e.stopPropagation();
+                        handleInitiateRating(r);
+                      }}
                       style={{
-                        flex: 1,
+                        width: '100%',
                         minHeight: 44,
                         background: '#059669',
                         color: '#FFFFFF',
                         border: 'none',
                         borderRadius: 10,
-                        fontSize: 13,
+                        fontSize: 13.5,
                         fontWeight: 700,
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: 5,
-                        boxShadow: '0 2px 6px rgba(5, 150, 105, 0.25)'
+                        gap: 6,
+                        boxShadow: '0 2px 6px rgba(5, 150, 105, 0.22)'
                       }}
                     >
                       <Star size={14} fill="#FFFFFF" />
-                      <span>{t('landing.rateNow')}</span>
+                      <span>{hasRecords ? 'Rate Safety' : 'Be First to Rate Safety'}</span>
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => setPassportModalRestaurant(r)}
-                      style={{
-                        minHeight: 44,
-                        padding: '0 14px',
-                        background: '#FFFFFF',
-                        color: '#334155',
-                        border: '1px solid #CBD5E1',
-                        borderRadius: 10,
-                        fontSize: 12.5,
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 4
-                      }}
-                    >
-                      <ShieldCheck size={14} color="#059669" />
-                      <span>{t('landing.viewRecord')}</span>
-                    </button>
+                    {/* Show "See Daily Record" ONLY if record actually exists! */}
+                    {hasRecords && (
+                      <div style={{ textAlign: 'center', marginTop: 8 }}>
+                        <button
+                          type="button"
+                          onClick={e => {
+                            e.stopPropagation();
+                            setPassportModalRestaurant(r);
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#047857',
+                            fontSize: 12,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            textDecoration: 'underline'
+                          }}
+                        >
+                          <ShieldCheck size={13} />
+                          <span>See Verified Daily Record →</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
             })}
           </div>
+
+          {/* PAGINATION / SEE MORE BUTTON (Shows 6 initially) */}
+          {filteredRestaurants.length > 6 && (
+            <div style={{ textAlign: 'center', marginTop: 24 }}>
+              <button
+                type="button"
+                onClick={() => setShowAllCards(!showAllCards)}
+                style={{
+                  background: '#FFFFFF',
+                  border: '1.5px solid #CBD5E1',
+                  color: '#0F2922',
+                  padding: '10px 24px',
+                  borderRadius: 9999,
+                  fontSize: 13.5,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
+                }}
+              >
+                <span>
+                  {showAllCards
+                    ? t('landing.seeLess')
+                    : `${t('landing.seeMore')} (${filteredRestaurants.length - 6} more) ↓`}
+                </span>
+              </button>
+            </div>
+          )}
 
           {filteredRestaurants.length === 0 && (
             <div style={{
@@ -1077,7 +1264,7 @@ export default function Landing() {
           maxWidth: 960,
           margin: '0 auto',
           width: '100%',
-          padding: '28px 16px 54px'
+          padding: '24px 16px 48px'
         }}>
           <div style={{ textAlign: 'center', marginBottom: 28 }}>
             <span style={{
@@ -1087,7 +1274,7 @@ export default function Landing() {
               textTransform: 'uppercase',
               letterSpacing: '0.06em'
             }}>
-              FOOD BUSINESS COMPLIANCE
+              FOOD BUSINESS OPERATIONAL SYSTEM
             </span>
             <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0F2922', margin: '6px 0 8px' }}>
               Select your business type
@@ -1319,6 +1506,154 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      {/* ========================================================================= */}
+      {/* CHAIN OUTLET SELECTION MODAL: Multi-outlet chains ask which branch */}
+      {/* ========================================================================= */}
+      {chainModalRestaurant && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(6px)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 16
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: 20,
+            maxWidth: 440,
+            width: '100%',
+            padding: 24,
+            boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
+            position: 'relative'
+          }}>
+            <button
+              type="button"
+              onClick={() => setChainModalRestaurant(null)}
+              style={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                background: '#f1f5f9',
+                border: 'none',
+                borderRadius: '50%',
+                width: 32,
+                height: 32,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#64748b'
+              }}
+            >
+              <X size={18} />
+            </button>
+            <div style={{ textAlign: 'center', marginBottom: 18 }}>
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: 14,
+                background: 'rgba(16, 185, 129, 0.12)',
+                color: '#059669',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 10px'
+              }}>
+                <Building2 size={24} />
+              </div>
+              <h3 style={{ margin: '0 0 4px', fontSize: 19, fontWeight: 900, color: '#0F2922' }}>
+                Which outlet are you rating?
+              </h3>
+              <p style={{ margin: 0, fontSize: 13, color: '#64748B' }}>
+                Select your branch of <strong>{chainModalRestaurant.name}</strong> for accurate kitchen records:
+              </p>
+            </div>
+
+            {/* Quick Branch Options */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+              {[
+                'Colaba Causeway',
+                'Bandra West (Linking Road)',
+                'Lower Parel (High Street Phoenix)',
+                'Andheri West (Lokhandwala)',
+                'Dadar West'
+              ].map(branch => (
+                <button
+                  key={branch}
+                  type="button"
+                  onClick={() => handleSelectChainBranch(branch)}
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: 10,
+                    border: '1.5px solid #E2E8F0',
+                    background: '#F8FAF6',
+                    fontSize: 13.5,
+                    fontWeight: 700,
+                    color: '#0F2922',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <span>📍 {branch}</span>
+                  <span style={{ color: '#059669' }}>Select →</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Custom Branch input */}
+            <form onSubmit={e => {
+              e.preventDefault();
+              if (customBranchInput.trim()) {
+                handleSelectChainBranch(customBranchInput.trim());
+              }
+            }}>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <input
+                  type="text"
+                  placeholder="Or enter other branch..."
+                  value={customBranchInput}
+                  onChange={e => setCustomBranchInput(e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: '9px 12px',
+                    borderRadius: 8,
+                    border: '1.5px solid #CBD5E1',
+                    fontSize: 13
+                  }}
+                />
+                <button
+                  type="submit"
+                  disabled={!customBranchInput.trim()}
+                  style={{
+                    padding: '9px 14px',
+                    borderRadius: 8,
+                    background: '#059669',
+                    color: '#ffffff',
+                    border: 'none',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: customBranchInput.trim() ? 'pointer' : 'default',
+                    opacity: customBranchInput.trim() ? 1 : 0.6
+                  }}
+                >
+                  Continue
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* MODAL 1: INTERACTIVE 5-STAR RATING MODAL (Working Resend Alerts Pipeline) */}
@@ -1697,7 +2032,7 @@ export default function Landing() {
               <input
                 type="text"
                 autoFocus
-                placeholder="E.g. Table QR #02 or peter-cat"
+                placeholder="E.g. Table QR #02 or the-table"
                 value={inputQrCode}
                 onChange={e => setInputQrCode(e.target.value)}
                 style={{
@@ -1817,8 +2152,8 @@ export default function Landing() {
                     onChange={e => setNewRestCity(e.target.value)}
                     style={{ width: '100%', padding: '10px 8px', borderRadius: 8, border: '1.5px solid #CBD5E1', fontSize: 13.5 }}
                   >
+                    <option value="mumbai">Mumbai (Pilot)</option>
                     <option value="kolkata">Kolkata</option>
-                    <option value="mumbai">Mumbai</option>
                     <option value="delhi">New Delhi</option>
                     <option value="hyderabad">Hyderabad</option>
                     <option value="bengaluru">Bengaluru</option>
@@ -1833,7 +2168,7 @@ export default function Landing() {
                   </label>
                   <input
                     type="text"
-                    placeholder="E.g. Park Street"
+                    placeholder="E.g. Colaba, Bandra"
                     value={newRestLocation}
                     onChange={e => setNewRestLocation(e.target.value)}
                     style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1.5px solid #CBD5E1', fontSize: 14, boxSizing: 'border-box' }}
@@ -1948,7 +2283,7 @@ export default function Landing() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ color: '#64748B' }}>Cold Storage &amp; Prep:</span>
-                <strong style={{ color: '#059669' }}>Inspected (≤5°C)</strong>
+                <strong style={{ color: '#059669' }}>Inspected (≤4°C)</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ color: '#64748B' }}>Staff Hygiene &amp; Health:</span>
@@ -1970,7 +2305,7 @@ export default function Landing() {
                 onClick={() => {
                   const r = passportModalRestaurant;
                   setPassportModalRestaurant(null);
-                  handleOpenRating(r);
+                  handleInitiateRating(r);
                 }}
                 style={{
                   flex: 1,
