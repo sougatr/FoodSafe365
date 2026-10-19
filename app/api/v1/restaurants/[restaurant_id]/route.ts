@@ -26,23 +26,21 @@ export async function GET(
       });
     }
 
-    // Check catalog fallback when not in production DB
-    if (!process.env.DATABASE_URL) {
-      const catalogItem = POPULAR_RESTAURANTS.find(r => r.id === restaurantId);
-      if (catalogItem) {
-        return ok({
-          restaurant: {
-            id: catalogItem.id,
-            name: catalogItem.name,
-            city: catalogItem.city,
-            location: catalogItem.location,
-            status: catalogItem.status || 'UNCLAIMED',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          },
-          isUnclaimed: (catalogItem.status || 'UNCLAIMED') === 'UNCLAIMED'
-        });
-      }
+    // Check catalog fallback from POPULAR_RESTAURANTS if not found in database store
+    const catalogItem = POPULAR_RESTAURANTS.find(r => r.id === restaurantId);
+    if (catalogItem) {
+      return ok({
+        restaurant: {
+          id: catalogItem.id,
+          name: catalogItem.name,
+          city: catalogItem.city,
+          location: catalogItem.location,
+          status: catalogItem.status || 'UNCLAIMED',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        isUnclaimed: (catalogItem.status || 'UNCLAIMED') === 'UNCLAIMED'
+      });
     }
 
     return fail('NOT_FOUND', `Restaurant with ID '${restaurantId}' not found`, 404);

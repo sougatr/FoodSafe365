@@ -1660,3 +1660,35 @@ export const POPULAR_RESTAURANTS: RestaurantItem[] = [
     }
   }
 ];
+
+/**
+ * Robust resolver for restaurant names across rating submissions, email notifications,
+ * and management summaries. Guarantees that generic placeholders like 'Restaurant'
+ * or missing strings are always resolved to their authoritative name or clean humanized title.
+ */
+export function resolveRestaurantName(id?: string, fallbackName?: string): string {
+  const cleanFallback = (fallbackName || '').trim();
+  if (
+    cleanFallback &&
+    cleanFallback.toLowerCase() !== 'restaurant' &&
+    cleanFallback.toLowerCase() !== 'unknown-outlet' &&
+    cleanFallback.toLowerCase() !== 'all'
+  ) {
+    return cleanFallback;
+  }
+  if (!id) return cleanFallback || 'The Table';
+
+  const normalizedId = id.trim().toLowerCase();
+  const match = POPULAR_RESTAURANTS.find(r => r.id.toLowerCase() === normalizedId);
+  if (match && match.name) return match.name;
+
+  // Humanize kebab or snake_case id (e.g. 'the-table' -> 'The Table', 'peter-cat-kolkata' -> 'Peter Cat Kolkata')
+  const words = id.replace(/[-_]+/g, ' ').trim().split(/\s+/);
+  if (words.length > 0 && words[0]) {
+    return words
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ');
+  }
+
+  return cleanFallback || 'The Table';
+}

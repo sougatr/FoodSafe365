@@ -5,6 +5,7 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
+import { resolveRestaurantName } from './restaurantsData';
 
 export interface ContactMessagePayload {
   name: string;
@@ -247,7 +248,8 @@ export async function sendCustomerRatingAlert(payload: RatingNotificationPayload
   subject?: string;
 }> {
   const adminEmail = process.env.ADMIN_EMAIL || 'foodsafe365@gmail.com';
-  const cleanRestName = sanitizeHeader(payload.restaurantName, 120);
+  const resolvedRestName = resolveRestaurantName(payload.restaurantId, payload.restaurantName);
+  const cleanRestName = sanitizeHeader(resolvedRestName, 120);
   const cleanScore = Math.min(5, Math.max(0, payload.overallScore)).toFixed(1);
 
   const recipientList = new Set<string>();
@@ -294,6 +296,97 @@ Log in to the FoodSafe365 Manager Portal to view full records:
 https://foodsafe365.in/manager
 ==================================================`;
 
+  const emailHtmlBody = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }
+    .card { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    .header { background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 24px; color: #ffffff; text-align: left; }
+    .header h1 { margin: 0 0 6px 0; font-size: 20px; font-weight: 700; color: #ffffff; }
+    .header p { margin: 0; opacity: 0.9; font-size: 13px; color: #ffffff; }
+    .body { padding: 24px; }
+    .restaurant-badge { display: inline-block; background: #ecfdf5; color: #065f46; font-weight: 700; font-size: 16px; padding: 6px 14px; border-radius: 6px; border: 1px solid #a7f3d0; margin-bottom: 16px; }
+    .stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+    .stat-label { color: #64748b; font-weight: 500; }
+    .stat-value { color: #0f172a; font-weight: 600; text-align: right; }
+    .breakdown-title { font-size: 13px; font-weight: 700; text-transform: uppercase; color: #475569; letter-spacing: 0.5px; margin: 20px 0 10px 0; }
+    .score-bar { background: #f8fafc; border-radius: 8px; padding: 12px; margin-bottom: 16px; border: 1px solid #e2e8f0; }
+    .score-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+    .comment-box { background: #fefce8; border-left: 4px solid #eab308; padding: 14px; border-radius: 0 8px 8px 0; margin-top: 16px; font-size: 14px; font-style: italic; color: #713f12; }
+    .footer { padding: 16px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; text-align: center; }
+    .btn { display: inline-block; background: #059669; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 13px; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>FoodSafe365 Rating Alert</h1>
+      <p>Automated Real-Time Food-Safety Diner Feedback</p>
+    </div>
+    <div class="body">
+      <div class="restaurant-badge">🍽️ ${cleanRestName}</div>
+      <div class="stat-row">
+        <span class="stat-label">Overall Safety Score:</span>
+        <span class="stat-value" style="color: #059669; font-size: 18px; font-weight: 800;">${cleanScore} / 5.0 ★</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Table / Seat:</span>
+        <span class="stat-value">${payload.tableNumber || 'Dine-In QR'}</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Listing Status:</span>
+        <span class="stat-value">${payload.isUnclaimed ? 'Unclaimed Directory Listing' : 'Registered Restaurant'}</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Diner Attribution:</span>
+        <span class="stat-value">${payload.customerName || 'Verified Diner'}</span>
+      </div>
+      ${payload.customerEmail ? `
+      <div class="stat-row">
+        <span class="stat-label">Diner Email:</span>
+        <span class="stat-value">${sanitizeHeader(payload.customerEmail, 120)}</span>
+      </div>` : ''}
+      ${payload.customerPhone ? `
+      <div class="stat-row">
+        <span class="stat-label">Diner Phone:</span>
+        <span class="stat-value">${sanitizeHeader(payload.customerPhone, 50)}</span>
+      </div>` : ''}
+      <div class="stat-row">
+        <span class="stat-label">Direct Response Requested:</span>
+        <span class="stat-value" style="color: ${payload.responseRequested ? '#dc2626' : '#64748b'}; font-weight: 700;">${payload.responseRequested ? 'YES (Customer requested response/resolution)' : 'No'}</span>
+      </div>
+
+      <div class="breakdown-title">Food Safety Category Ratings</div>
+      <div class="score-bar">
+        <div class="score-row"><span>1. Table & Cutlery Hygiene:</span><strong>${payload.scores.cleanliness} ★</strong></div>
+        <div class="score-row"><span>2. Staff Grooming & Uniform:</span><strong>${payload.scores.staffHygiene} ★</strong></div>
+        <div class="score-row"><span>3. Food Freshness & Handling:</span><strong>${payload.scores.foodFreshness} ★</strong></div>
+        <div class="score-row"><span>4. Safe Water & Washrooms:</span><strong>${payload.scores.safeWater} ★</strong></div>
+        <div class="score-row"><span>5. Overall Food Safety Confidence:</span><strong>${payload.scores.washroom} ★</strong></div>
+      </div>
+
+      ${payload.feedback ? `
+      <div class="breakdown-title">Diner Observations</div>
+      <div class="comment-box">"${sanitizeBody(payload.feedback, 2000)}"</div>` : ''}
+
+      ${payload.claimUrl ? `
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="${payload.claimUrl}" class="btn" style="color: #ffffff;">Claim Restaurant Profile & Control Plan</a>
+      </div>` : `
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="https://foodsafe365.in/manager" class="btn" style="color: #ffffff;">Open Manager Portal & Audit Logs</a>
+      </div>`}
+    </div>
+    <div class="footer">
+      FoodSafe365 — India's Standard for Food Safety Transparency & Verification.<br/>
+      Generated automatically at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
+    </div>
+  </div>
+</body>
+</html>`;
+
   const recordId = `alert-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
   let providerUsed = 'MOCK_OUTBOX';
   let status: 'DELIVERED_EXTERNAL' | 'QUEUED_OUTBOX' = 'QUEUED_OUTBOX';
@@ -318,7 +411,8 @@ https://foodsafe365.in/manager
         from: process.env.EMAIL_FROM || 'FoodSafe365 <onboarding@resend.dev>',
         to: targetRecipients,
         subject: emailSubject,
-        text: emailBodyText
+        text: emailBodyText,
+        html: emailHtmlBody
       };
 
       if (isCustomSender && payload.customerEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.customerEmail.trim())) {

@@ -371,6 +371,8 @@ export default function Landing() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          outletId: ratingModalRestaurant.id,
+          outletName: ratingModalRestaurant.name,
           restaurantId: ratingModalRestaurant.id,
           restaurantName: ratingModalRestaurant.name,
           tableNumber: rateTableNum,
@@ -383,9 +385,11 @@ export default function Landing() {
           },
           overallScore: parseFloat(avgScore),
           feedback: rateRemarks.trim() || undefined,
+          dinerName: 'Verified Diner',
           customerName: 'Verified Diner',
           customerEmail: wantsFeedback && dinerEmail.trim() ? dinerEmail.trim() : (customerEmail || undefined),
           customerPhone: customerPhone ? `+91 ••••• •${customerPhone.replace(/\D/g, '').slice(-4)}` : undefined,
+          dinerMobile: customerPhone ? `+91 ••••• •${customerPhone.replace(/\D/g, '').slice(-4)}` : undefined,
           responseRequested: wantsFeedback,
           isUnclaimed,
           claimUrl: isUnclaimed ? `https://foodsafe365.in/claim/${ratingModalRestaurant.id}` : undefined

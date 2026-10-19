@@ -20,6 +20,7 @@ import {
 } from '@/lib/foodsafety28';
 import ThemeToggle from '@/components/ThemeToggle';
 import GlobalHeader from '@/components/GlobalHeader';
+import { resolveRestaurantName as lookupRestaurantName } from '@/lib/restaurantsData';
 
 function loadState(): AppPhase1State {
   try {
@@ -49,12 +50,7 @@ export default function ManagerPage() {
   const [activeRestaurantName, setActiveRestaurantName] = useState<string>('Leopold Cafe & Bar');
 
   function resolveRestaurantName(outletId: string): string {
-    if (outletId === 'leopold-cafe') return 'Leopold Cafe & Bar';
-    if (outletId === 'the-table') return 'The Table';
-    if (outletId === 'the-bombay-canteen') return 'The Bombay Canteen';
-    if (outletId === 'bastian-mumbai') return 'Bastian';
-    if (outletId === 'peter-cat') return 'Peter Cat';
-    if (outletId === 'abc-restaurant') return 'ABC Restaurant';
+    if (!outletId || outletId === 'all') return 'All Outlets';
     if (typeof window !== 'undefined') {
       try {
         const setupStr = localStorage.getItem('foodsafe365_setup');
@@ -64,7 +60,7 @@ export default function ManagerPage() {
         }
       } catch {}
     }
-    return outletId === 'all' ? 'All Outlets' : 'Restaurant';
+    return lookupRestaurantName(outletId, '');
   }
 
   async function loadDashboardData(outletId: string = selectedOutletId) {

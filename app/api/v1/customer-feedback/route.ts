@@ -6,6 +6,7 @@ import { getCustomerFeedback, saveCustomerFeedback } from '../../../../lib/custo
 import { authorizeFeedbackAccess } from '../../../../lib/tenant';
 import { DinerSafetyRating } from '../../../../lib/foodsafety28';
 import { sendCustomerRatingAlert } from '../../../../lib/email-service';
+import { resolveRestaurantName } from '../../../../lib/restaurantsData';
 
 function maskDinerPhone(phone?: string): string | undefined {
   if (!phone) return undefined;
@@ -79,15 +80,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid JSON request body' }, { status: 400 });
     }
 
-    const outletId = String(body.outletId || 'unknown-outlet').trim();
-    const outletName = String(body.outletName || 'Restaurant').trim();
-    const tableNumber = body.tableNumber ? String(body.tableNumber).trim() : 'Table QR';
-    const dinerName = body.dinerName ? String(body.dinerName).trim() : 'Customer';
-    const dinerMobile = body.dinerMobile ? String(body.dinerMobile).trim() : undefined;
-    const customerEmail = body.customerEmail ? String(body.customerEmail).trim() : undefined;
-    const customerPhone = body.customerPhone ? String(body.customerPhone).trim() : undefined;
+    const rawOutletId = body.outletId || body.restaurantId;
+    const rawOutletName = body.outletName || body.restaurantName;
+    const outletId = String(rawOutletId || 'the-table').trim();
+    const outletName = resolveRestaurantName(outletId, rawOutletName);
+    const tableNumber = body.tableNumber || body.tableCode ? String(body.tableNumber || body.tableCode).trim() : 'Table QR';
+    const dinerName = body.dinerName || body.customerName ? String(body.dinerName || body.customerName).trim() : 'Verified Diner';
+    const dinerMobile = body.dinerMobile || body.customerPhone ? String(body.dinerMobile || body.customerPhone).trim() : undefined;
+    const customerEmail = body.customerEmail || body.dinerEmail ? String(body.customerEmail || body.dinerEmail).trim() : undefined;
+    const customerPhone = body.customerPhone || body.dinerMobile ? String(body.customerPhone || body.dinerMobile).trim() : undefined;
     const feedback = body.feedback ? String(body.feedback).trim() : '';
     const responseRequested = Boolean(body.responseRequested);
+    const isUnclaimed = typeof body.isUnclaimed === 'boolean' ? body.isUnclaimed : false;
 
     const scores = {
       cleanliness: Number(body.scores?.cleanliness) || 5,
@@ -131,8 +135,8 @@ export async function POST(req: NextRequest) {
         customerEmail,
         customerPhone,
         responseRequested,
-        isUnclaimed: false,
-        claimUrl: `https://foodsafe365.in/claim/${encodeURIComponent(outletId)}`
+        isUnclaimed,
+        claimUrl: body.claimUrl || (isUnclaimed ? `https://foodsafe365.in/claim/${encodeURIComponent(outletId)}` : undefined)
       });
       console.log('[customer-feedback] sendCustomerRatingAlert completed:', alertResult);
     } catch (alertErr: any) {
