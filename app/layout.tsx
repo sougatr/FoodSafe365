@@ -3,8 +3,16 @@ import type { Metadata, Viewport } from 'next';
 import FoodSafetyChatbot from '@/components/FoodSafetyChatbot';
 
 export const metadata: Metadata = {
-  title: 'FoodSafe365 — Food Safety is a Priority, Not an Afterthought',
-  description: 'Check verified kitchen hygiene logs, cold-storage checks, and real diner ratings before you order.',
+  title: 'FoodSafe365 — Rate any Kitchen for Food Safety',
+  description: 'Rate a kitchen/store for food safety, Scan QR, See Daily Checks',
+  manifest: '/manifest.json',
+  openGraph: {
+    title: 'FoodSafe365 — Rate any Kitchen for Food Safety',
+    description: 'Rate a kitchen/store for food safety, Scan QR, See Daily Checks',
+    url: 'https://foodsafe365.in',
+    siteName: 'FoodSafe365',
+    type: 'website'
+  },
   themeColor: '#059669',
   appleWebApp: {
     capable: true,
