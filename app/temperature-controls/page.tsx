@@ -2,6 +2,8 @@
 import Link from 'next/link';
 import { Thermometer, ChevronRight, ChevronLeft, Home } from 'lucide-react';
 
+import GlobalHeader from '@/components/GlobalHeader';
+
 const controls = [
   ['storage', '🧊', 'Storage', 'Keep chilled, frozen and stored foods at the right temperature and protected from contamination.'],
   ['cooking', '🍳', 'Cooking', 'Achieve the applicable food-specific cooking core temperature and time.'],
@@ -14,15 +16,7 @@ const controls = [
 export default function TemperatureControls() {
   return (
     <main>
-      <div className="topbar">
-        <Link href="/home" className="brand">FoodSafe365</Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
-            <Home size={14} /> Home
-          </Link>
-          <div className="muted">Priority Food-Safety Controls</div>
-        </div>
-      </div>
+      <GlobalHeader />
 
       <div className="container" style={{ paddingTop: 20 }}>
         <div className="checks-nav">

@@ -23,6 +23,7 @@ import {
   X
 } from 'lucide-react';
 import { ServiceRequest, CONTROLLED_SERVICE_CATEGORIES } from '@/lib/service-provider-contracts';
+import GlobalHeader from '@/components/GlobalHeader';
 
 export default function ProviderDashboardPage() {
   const [provider, setProvider] = useState<any>(null);
@@ -165,48 +166,32 @@ export default function ProviderDashboardPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#F7F8F5', color: '#0F172A', paddingBottom: 60 }}>
-      {/* Topbar */}
+      <GlobalHeader />
+
+      {/* Provider Subbar */}
       <div style={{
         background: '#ffffff',
         borderBottom: '1px solid #e2e8f0',
-        padding: '14px 24px',
+        padding: '10px 20px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
         gap: 12
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Link href="/home" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-            <div style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff',
-              fontWeight: 800,
-              fontSize: 14
-            }}>
-              FS
-            </div>
-            <span style={{ fontSize: 17, fontWeight: 700, color: '#0F172A' }}>FoodSafe365</span>
-          </Link>
-          <span style={{ color: '#cbd5e1' }}>/</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{
             background: '#ecfdf5',
             color: '#065f46',
             fontSize: 12,
-            fontWeight: 600,
-            padding: '4px 10px',
+            fontWeight: 700,
+            padding: '3px 8px',
             borderRadius: 6,
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 6
+            gap: 5
           }}>
-            <ShieldCheck size={14} /> Service Provider Portal
+            <ShieldCheck size={13} /> Service Provider Portal
           </span>
         </div>
 

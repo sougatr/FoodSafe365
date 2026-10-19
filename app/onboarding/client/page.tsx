@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ShieldCheck, QrCode, Star, AlertTriangle, ArrowRight, Check, Heart, Sparkles, Home } from 'lucide-react';
+import GlobalHeader from '@/components/GlobalHeader';
 
 export default function ClientOnboarding() {
   const [name, setName] = useState('');
@@ -47,21 +48,7 @@ export default function ClientOnboarding() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: 60 }}>
-      <div className="topbar">
-        <Link href="/home" className="brand">FoodSafe365</Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <Link
-            href="/home"
-            className="btn secondary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '7px 14px' }}
-          >
-            <Home size={15} /> Home
-          </Link>
-          <Link href="/login?role=client" className="btn secondary" style={{ fontSize: 13, padding: '7px 14px' }}>
-            Sign In
-          </Link>
-        </div>
-      </div>
+      <GlobalHeader />
 
       <div className="container" style={{ maxWidth: 860, paddingTop: 36 }}>
         <div className="grid grid2" style={{ gap: 32, alignItems: 'start' }}>

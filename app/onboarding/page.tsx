@@ -18,6 +18,7 @@ import {
   UtensilsCrossed,
   Wrench
 } from 'lucide-react';
+import GlobalHeader from '@/components/GlobalHeader';
 import { apiFetch } from '@/lib/api';
 
 interface OutletTypeOption {
@@ -150,22 +151,7 @@ export default function Onboarding() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#f8fafc', paddingBottom: 64 }}>
-      {/* Top Bar */}
-      <div className="topbar">
-        <Link href="/home" className="brand">FoodSafe365</Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <Link
-            href="/home"
-            className="btn secondary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '7px 14px' }}
-          >
-            <Home size={15} /> Home
-          </Link>
-          <Link href="/login" className="btn secondary" style={{ fontSize: 13, padding: '7px 14px' }}>
-            Log in
-          </Link>
-        </div>
-      </div>
+      <GlobalHeader />
 
       <div className="container" style={{ maxWidth: 860, paddingTop: 36 }}>
         <div className="card" style={{ padding: '36px 32px', borderRadius: 20 }}>

@@ -3,6 +3,7 @@ import {useMemo,useState} from 'react';
 import Link from 'next/link';
 import {ArrowLeft,ArrowRight,CheckCircle2,Home,Info,ShieldCheck,AlertTriangle,ClipboardCheck} from 'lucide-react';
 import {apiFetch} from '@/lib/api';
+import GlobalHeader from '@/components/GlobalHeader';
 
 const steps=[
   {id:'loading',title:'Is the refrigerator overloaded?',why:'Overloading can restrict cold-air circulation and make it harder to maintain the target temperature.',options:['Yes','No','Not sure']},
@@ -42,7 +43,7 @@ export default function RefrigerationNextStep(){
 
   const next=()=>{ if(!answer)return; if(index<steps.length-1) setIndex(i=>i+1); else finish(); };
 
-  return <main><div className="topbar"><Link href="/home" className="brand">FoodSafe365</Link><div style={{display:'flex',gap:10,alignItems:'center'}}><Link href="/home" className="btn secondary" style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:13,padding:'6px 12px'}}><Home size={14}/> Home</Link><div className="muted">ABC Restaurant · Manager</div></div></div>
+  return <main><GlobalHeader />
     <div className="container detail-shell">
       <div className="back-row"><Link href="/home" className="nav-link" style={{marginRight:12}}><ArrowLeft size={16}/> Home</Link><Link href="/manager/risk/refrigeration" className="nav-link"><ArrowLeft size={16}/> Back to Refrigerator 2</Link></div>
       {!done ? <>

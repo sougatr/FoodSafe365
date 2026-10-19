@@ -1,38 +1,12 @@
 'use client';
 import Link from 'next/link';
 import { ShieldCheck, ArrowLeft, Lock, FileText, CheckCircle2 } from 'lucide-react';
-import ThemeToggle from '@/components/ThemeToggle';
+import GlobalHeader from '@/components/GlobalHeader';
 
 export default function PrivacyPolicy() {
   return (
     <main style={{ minHeight: '100vh', background: 'var(--bg, #f8fafc)' }}>
-      <div className="topbar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <Link href="/home" className="brand">
-            <span style={{
-              width: 32,
-              height: 32,
-              borderRadius: 10,
-              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-              color: '#ffffff',
-              display: 'inline-grid',
-              placeItems: 'center',
-              fontSize: 16,
-              boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)'
-            }}>🛡️</span>
-            FoodSafe365
-          </Link>
-          <span className="pill good" style={{ fontSize: 10.5, padding: '3px 9px' }}>
-            Privacy &amp; Security
-          </span>
-        </div>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <ThemeToggle />
-          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
-            <ArrowLeft size={14} /> Back to Home
-          </Link>
-        </div>
-      </div>
+      <GlobalHeader />
 
       <div className="container" style={{ maxWidth: 840, paddingTop: 36, paddingBottom: 64 }}>
         <div className="card" style={{ padding: '36px 32px', background: 'var(--card-bg, #ffffff)', borderRadius: 20, border: '1px solid var(--border, #e2e8f0)' }}>

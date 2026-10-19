@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Home, Utensils, Building2, User, CheckCircle2, ArrowRight, ShieldCheck, ShoppingBag } from 'lucide-react';
+import GlobalHeader from '@/components/GlobalHeader';
 
 export type UserRole = 'restaurant' | 'grocery' | 'client' | 'provider';
 
@@ -99,32 +100,7 @@ export default function Login() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#f8fafc' }}>
-      <div className="topbar">
-        <Link href="/home" className="brand">
-          <div style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 14
-          }}>
-            FS
-          </div>
-          <span>FoodSafe365</span>
-        </Link>
-        <Link
-          href="/home"
-          className="btn secondary"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '7px 14px' }}
-        >
-          <Home size={15} /> Home
-        </Link>
-      </div>
+      <GlobalHeader />
 
       <div className="container" style={{ maxWidth: 600, paddingTop: 40, paddingBottom: 60 }}>
         {/* Role Selector Tabs */}

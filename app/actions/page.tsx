@@ -9,6 +9,7 @@ import {
   AuditTrailEvent
 } from '@/lib/foodsafety28';
 import ThemeToggle from '@/components/ThemeToggle';
+import GlobalHeader from '@/components/GlobalHeader';
 
 function loadState(): AppPhase1State {
   try {
@@ -124,44 +125,22 @@ export default function ActionsPage() {
 
   return (
     <main>
-      <div className="topbar">
-        <Link href="/home" className="brand">
-          <div style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 14
-          }}>
-            FS
-          </div>
-          <span>FoodSafe365</span>
-        </Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <span className="pill neutral" style={{ fontSize: 11, padding: '3px 9px' }}>
-            CORRECTIVE ACTIONS HUB
-          </span>
-          <ThemeToggle />
-          <button
-            onClick={syncServerActions}
-            disabled={isSyncing}
-            className="btn secondary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, padding: '6px 12px' }}
-            title="Sync with server persistence"
-          >
-            <RefreshCw size={13} style={{ animation: isSyncing ? 'spin 1s linear infinite' : 'none' }} />
-            {isSyncing ? 'Syncing…' : 'Sync'}
-          </button>
-          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
-            <Home size={14} /> Home
-          </Link>
-          <div className="muted" style={{ fontSize: 13 }}>ABC Restaurant · Actions Centre</div>
+      <GlobalHeader />
+
+      <div style={{ background: '#f1f5f9', borderBottom: '1px solid #e2e8f0', padding: '8px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#475569' }}>
+          Corrective Actions Centre · ABC Restaurant
         </div>
+        <button
+          onClick={syncServerActions}
+          disabled={isSyncing}
+          className="btn secondary"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, padding: '5px 11px' }}
+          title="Sync with server persistence"
+        >
+          <RefreshCw size={13} style={{ animation: isSyncing ? 'spin 1s linear infinite' : 'none' }} />
+          {isSyncing ? 'Syncing…' : 'Sync'}
+        </button>
       </div>
 
       <div className="container">

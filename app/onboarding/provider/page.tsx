@@ -17,6 +17,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { CONTROLLED_SERVICE_CATEGORIES } from '@/lib/service-provider-contracts';
+import GlobalHeader from '@/components/GlobalHeader';
 
 export default function ProviderOnboardingPage() {
   const router = useRouter();
@@ -107,49 +108,7 @@ export default function ProviderOnboardingPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#F7F8F5', color: '#0F172A', paddingBottom: 60 }}>
-      {/* Topbar */}
-      <div style={{
-        background: '#ffffff',
-        borderBottom: '1px solid #e2e8f0',
-        padding: '16px 24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <div style={{
-            width: 34,
-            height: 34,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 15
-          }}>
-            FS
-          </div>
-          <span style={{ fontSize: 18, fontWeight: 700, color: '#0F172A' }}>FoodSafe365</span>
-        </Link>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{
-            background: '#e0f2fe',
-            color: '#0284c7',
-            fontSize: 12,
-            fontWeight: 600,
-            padding: '4px 10px',
-            borderRadius: 6
-          }}>
-            Service Provider Onboarding
-          </span>
-          <Link href="/onboarding" style={{ color: '#64748b', fontSize: 13, textDecoration: 'none' }}>
-            Restaurant Onboarding →
-          </Link>
-        </div>
-      </div>
+      <GlobalHeader />
 
       <div style={{ maxWidth: 760, margin: '32px auto 0', padding: '0 20px' }}>
         <Link href="/home" style={{

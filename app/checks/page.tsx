@@ -23,6 +23,7 @@ import {
 } from '@/lib/foodsafety28';
 import ThemeToggle from '@/components/ThemeToggle';
 import LanguageSelector from '@/components/LanguageSelector';
+import GlobalHeader from '@/components/GlobalHeader';
 import { useLanguage } from '@/lib/vernacular';
 import { Award } from 'lucide-react';
 
@@ -558,36 +559,7 @@ export default function Checks() {
 
     return (
       <main>
-        <div className="topbar">
-          <Link href="/home" className="brand">
-            <div style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff',
-              fontWeight: 800,
-              fontSize: 14
-            }}>
-              FS
-            </div>
-            <span>FoodSafe365</span>
-          </Link>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            <LanguageSelector />
-            <ThemeToggle />
-            <Link href="/showcase" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
-              <Award size={14} /> {t('nav.showcase')}
-            </Link>
-            <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
-              <Home size={14} /> {t('nav.home')}
-            </Link>
-            <div className="muted">Supervisor · Guided check</div>
-          </div>
-        </div>
+        <GlobalHeader />
         <div className="container detail-shell">
           <button
             className="plain-link muted nav-link back-row"
@@ -1623,36 +1595,7 @@ export default function Checks() {
 
   return (
     <main>
-      <div className="topbar">
-        <Link href="/home" className="brand">
-          <div style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 14
-          }}>
-            FS
-          </div>
-          <span>FoodSafe365</span>
-        </Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <LanguageSelector />
-          <ThemeToggle />
-          <Link href="/showcase" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
-            <Award size={14} /> {t('nav.showcase')}
-          </Link>
-          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
-            <Home size={14} /> {t('nav.home')}
-          </Link>
-          <div className="muted">Supervisor · Checks</div>
-        </div>
-      </div>
+      <GlobalHeader />
       <div className="container checks-shell">
         <Link href="/home" className="nav-link muted back-row">
           <ChevronLeft size={17} /> {t('nav.home')}

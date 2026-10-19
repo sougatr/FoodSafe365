@@ -25,6 +25,7 @@ import {
   PHASE1_STORAGE_KEY,
   AppPhase1State
 } from '@/lib/foodsafety28';
+import GlobalHeader from '@/components/GlobalHeader';
 import { useLanguage, Language } from '@/lib/vernacular';
 import LanguageSelector from '@/components/LanguageSelector';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -125,37 +126,8 @@ export default function ShowcasePage() {
   return (
     <main style={{ minHeight: '100vh', background: 'var(--bg, #f8fafc)' }}>
       {/* Top Navigation Bar - Hidden during printing */}
-      <div className="topbar print-hide">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <Link href="/home" className="brand">
-            <span style={{
-              width: 32,
-              height: 32,
-              borderRadius: 10,
-              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-              color: '#ffffff',
-              display: 'inline-grid',
-              placeItems: 'center',
-              fontSize: 16,
-              boxShadow: '0 2px 6px rgba(5, 150, 105, 0.3)'
-            }}>🛡️</span>
-            FoodSafe365
-          </Link>
-          <span className="pill good" style={{ fontSize: 10.5, padding: '3px 9px' }}>
-            {t('badge.verified')}
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <LanguageSelector />
-          <ThemeToggle />
-          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px', borderRadius: 10 }}>
-            <Home size={14} /> {t('nav.home')}
-          </Link>
-          <Link href="/checks" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px', borderRadius: 10 }}>
-            {t('nav.checks')}
-          </Link>
-        </div>
+      <div className="print-hide">
+        <GlobalHeader />
       </div>
 
       <div className="container" style={{ maxWidth: 900, paddingTop: 28, paddingBottom: 64 }}>

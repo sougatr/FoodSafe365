@@ -19,6 +19,7 @@ import {
   calculateDailyBadge
 } from '@/lib/foodsafety28';
 import ThemeToggle from '@/components/ThemeToggle';
+import GlobalHeader from '@/components/GlobalHeader';
 
 function loadState(): AppPhase1State {
   try {
@@ -267,38 +268,19 @@ export default function ManagerPage() {
 
   return (
     <main>
-      <div className="topbar">
-        <Link href="/home" className="brand">
-          <div style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 14
-          }}>
-            FS
-          </div>
-          <span>FoodSafe365</span>
-        </Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+      <GlobalHeader />
+
+      <div style={{ background: '#f1f5f9', borderBottom: '1px solid #e2e8f0', padding: '8px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span className="pill good" style={{ fontSize: 11, padding: '3px 9px' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#059669', display: 'inline-block', marginRight: 4 }} />
             MANAGER OVERSIGHT ACTIVE
           </span>
-          <ThemeToggle />
-          <Link href="/manager/trends" className="btn secondary" style={{ fontSize: 13, padding: '6px 12px', color: 'var(--green)' }}>
-            AI Trends
-          </Link>
-          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
-            <Home size={14} /> Home
-          </Link>
-          <div className="muted" style={{ fontSize: 13 }}>{activeRestaurantName} · Manager</div>
+          <span style={{ fontSize: 13, color: '#64748b' }}>{activeRestaurantName}</span>
         </div>
+        <Link href="/manager/trends" className="btn secondary" style={{ fontSize: 12.5, padding: '5px 11px', color: 'var(--green)' }}>
+          AI Trends &rarr;
+        </Link>
       </div>
 
       <div className="container manager-shell">

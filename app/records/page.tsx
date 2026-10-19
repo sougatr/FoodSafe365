@@ -22,6 +22,7 @@ import {
   CorrectiveAction,
   AuditTrailEvent
 } from '@/lib/foodsafety28';
+import GlobalHeader from '@/components/GlobalHeader';
 
 const fmt = (v?: string | null) => {
   if (!v) return '—';
@@ -139,24 +140,22 @@ export default function Records() {
 
   return (
     <main>
-      <div className="topbar">
-        <Link href="/home" className="brand">FoodSafe365</Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <button
-            onClick={loadRecords}
-            disabled={isLoading}
-            className="btn secondary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}
-            title="Refresh records"
-          >
-            <RefreshCw size={13} style={{ animation: isLoading ? 'spin 1s linear infinite' : 'none' }} />
-            {isLoading ? 'Loading…' : 'Refresh'}
-          </button>
-          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
-            <Home size={14} /> Home
-          </Link>
-          <div className="muted">{outletName} · Traceable Records</div>
+      <GlobalHeader />
+
+      <div style={{ background: '#f1f5f9', borderBottom: '1px solid #e2e8f0', padding: '8px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#475569' }}>
+          {outletName} · Traceable Records
         </div>
+        <button
+          onClick={loadRecords}
+          disabled={isLoading}
+          className="btn secondary"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, padding: '5px 11px' }}
+          title="Refresh records"
+        >
+          <RefreshCw size={13} style={{ animation: isLoading ? 'spin 1s linear infinite' : 'none' }} />
+          {isLoading ? 'Loading…' : 'Refresh'}
+        </button>
       </div>
 
       <div className="container">

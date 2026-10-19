@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { ArrowRight, BookOpen, ClipboardCheck, Home, Thermometer, ShieldCheck, type LucideIcon } from 'lucide-react';
 
+import GlobalHeader from '@/components/GlobalHeader';
+
 type AreaItem = {
   title: string;
   text: string;
@@ -15,7 +17,7 @@ const areas: AreaItem[] = [
 ];
 
 export default function FoodSafetyFramework(){
- return <main><div className="topbar"><Link href="/home" className="brand">FoodSafe365</Link><div style={{display:'flex',gap:10,alignItems:'center'}}><Link href="/home" className="btn secondary" style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:13,padding:'7px 14px'}}><Home size={15}/> Home</Link><Link href="/login"><button className="btn secondary">Log in</button></Link></div></div>
+ return <main><GlobalHeader />
   <div className="container page-shell">
    <Link href="/home" className="nav-link muted back-row">← Back to Home</Link>
    <div className="page-title"><span className="pill good">FOOD SAFETY FRAMEWORK</span><h1>How the FoodSafe365 framework fits together</h1><p className="lead muted">FoodSafe365 keeps the technical food-safety framework underneath a simple operational workflow for the restaurant team.</p></div>

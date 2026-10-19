@@ -19,6 +19,7 @@ import {
   XCircle,
   HelpCircle
 } from 'lucide-react';
+import GlobalHeader from '@/components/GlobalHeader';
 import { useParams } from 'next/navigation';
 import {
   CorrectiveAction,
@@ -321,34 +322,7 @@ export default function ActionDetail() {
 
   return (
     <main>
-      <div className="topbar">
-        <Link href="/home" className="brand">
-          <div style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 14
-          }}>
-            FS
-          </div>
-          <span>FoodSafe365</span>
-        </Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <span className="pill neutral" style={{ fontSize: 11, padding: '3px 9px' }}>
-            ACTION TICKET #{action.id}
-          </span>
-          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
-            <Home size={14} /> Home
-          </Link>
-          <div className="muted" style={{ fontSize: 13 }}>ABC Restaurant · Corrective Action</div>
-        </div>
-      </div>
+      <GlobalHeader />
 
       <div className="container">
         <div className="checks-nav" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>

@@ -16,6 +16,7 @@ import {
   ExternalLink,
   Download
 } from 'lucide-react';
+import GlobalHeader from '@/components/GlobalHeader';
 import { sprint19 as d } from '@/lib/sprint19-demo';
 
 interface DocumentRecord {
@@ -147,19 +148,7 @@ export default function Documents() {
 
   return (
     <main>
-      <div className="topbar">
-        <Link href="/home" className="brand">FoodSafe365</Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <Link
-            href="/home"
-            className="btn secondary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}
-          >
-            <Home size={14} /> Home
-          </Link>
-          <div className="muted">{d.outlet.name} · Manager</div>
-        </div>
-      </div>
+      <GlobalHeader />
 
       <div className="container">
         <div className="breadcrumb">

@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { ArrowRight, CheckCircle2, ChevronLeft, Home, ShieldCheck, Thermometer } from 'lucide-react';
+import GlobalHeader from '@/components/GlobalHeader';
 
 type ControlInfo = {
   title: string;
@@ -91,15 +92,7 @@ export default function ControlDetail() {
 
   return (
     <main>
-      <div className="topbar">
-        <Link href="/home" className="brand">FoodSafe365</Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <Link href="/home" className="btn secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 12px' }}>
-            <Home size={14} /> Home
-          </Link>
-          <div className="muted">Temperature Control #{c.checkId}</div>
-        </div>
-      </div>
+      <GlobalHeader />
 
       <div className="container" style={{ paddingTop: 20 }}>
         <div className="checks-nav">

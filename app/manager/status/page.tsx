@@ -3,14 +3,13 @@ import Link from 'next/link';
 import {ArrowLeft,ArrowRight,CheckCircle2,Info,ShieldAlert} from 'lucide-react';
 import {sprint19 as d} from '@/lib/sprint19-demo';
 
+import GlobalHeader from '@/components/GlobalHeader';
+
 const sev=(s:string)=>s==='high'?'action':'attention';
 
 export default function ManagerStatusPage(){
   return <main>
-    <div className="topbar">
-      <div className="brand">FoodSafe365</div>
-      <div className="muted">{d.outlet.name} · Manager</div>
-    </div>
+    <GlobalHeader />
     <div className="container detail-shell">
       <div className="back-row"><Link href="/manager" className="nav-link"><ArrowLeft size={16}/> Back to overview</Link></div>
 

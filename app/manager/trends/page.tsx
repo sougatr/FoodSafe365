@@ -20,6 +20,7 @@ import {
   Bot
 } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
+import GlobalHeader from '@/components/GlobalHeader';
 import {
   TrendPeriod,
   generateAiTrendReport,
@@ -34,41 +35,7 @@ export default function TrendsPage() {
 
   return (
     <main style={{ minHeight: '100vh', paddingBottom: 60 }}>
-      {/* Topbar */}
-      <div className="topbar">
-        <Link href="/home" className="brand">
-          <div style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 14
-          }}>
-            FS
-          </div>
-          <span>FoodSafe365</span>
-        </Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <span className="pill good" style={{ fontSize: 11, padding: '3px 8px' }}>
-            <Sparkles size={11} style={{ marginRight: 4, display: 'inline' }} />
-            AI TREND ENGINE ACTIVE
-          </span>
-          <ThemeToggle />
-          <Link
-            href="/home"
-            className="btn secondary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '7px 14px' }}
-          >
-            <Home size={15} /> Home
-          </Link>
-          <div className="muted" style={{ fontSize: 13 }}>ABC Restaurant · Manager</div>
-        </div>
-      </div>
+      <GlobalHeader />
 
       <div className="container" style={{ maxWidth: 1140, paddingTop: 24 }}>
         {/* Navigation Breadcrumb */}

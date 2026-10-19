@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import {
   Menu,
@@ -13,16 +13,19 @@ import {
   FileText,
   Mail,
   BookOpen,
-  ShieldCheck
+  ShieldCheck,
+  Home,
+  ArrowLeft
 } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
 import ThemeToggle from './ThemeToggle';
 
 export default function GlobalHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const [customerPhone, setCustomerPhone] = useState<string | null>(null);
 
-  // Menu toggle (About, Learning Hub, HACCP, Contact)
+  // Menu toggle (About, Learning Hub, HACCP, Contact, Providers)
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Account popover menu toggle
@@ -83,11 +86,19 @@ export default function GlobalHeader() {
     ? `+91 ••••• •${customerPhone.replace(/\D/g, '').slice(-4) || '••••'}`
     : null;
 
-  const NAV_ITEMS = [
-    { href: '/about', label: 'About Us', icon: Info },
+  // The 5 Core Navigation Pages (Always visible on top of every page)
+  const CORE_NAV_PAGES = [
+    { href: '/', label: 'Home', icon: Home },
+    { href: '/about', label: 'About', icon: Info },
     { href: '/food-safety-why', label: 'FoSTaC Learning Hub', icon: BookOpen },
     { href: '/haccp', label: 'HACCP Principles', icon: FileText },
     { href: '/contact', label: 'Contact Us', icon: Mail }
+  ];
+
+  const NAV_ITEMS = [
+    ...CORE_NAV_PAGES,
+    { href: '/providers', label: 'Service Providers', icon: ShieldCheck },
+    { href: '/showcase', label: 'Food Safety Passport', icon: ShieldCheck }
   ];
 
   return (
@@ -102,6 +113,7 @@ export default function GlobalHeader() {
         boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
       }}
     >
+      {/* Top Header Row */}
       <div
         style={{
           display: 'flex',
@@ -114,49 +126,114 @@ export default function GlobalHeader() {
           gap: 12
         }}
       >
-        {/* Brand Logo & Name */}
-        <Link
-          href="/"
-          className="brand"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 9,
-            textDecoration: 'none',
-            flexShrink: 0
-          }}
-          aria-label="FoodSafe365 Home"
-        >
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 10,
-              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-              fontWeight: 900,
-              fontSize: 15,
-              boxShadow: '0 2px 6px rgba(5, 150, 105, 0.35)'
-            }}
-          >
-            FS
-          </div>
-          <span
-            style={{
-              fontSize: 19,
-              fontWeight: 900,
-              color: 'var(--text, #0f172a)',
-              letterSpacing: '-0.02em'
-            }}
-          >
-            FoodSafe365
-          </span>
-        </Link>
+        {/* Left: Brand Logo & Back Button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          {pathname !== '/' && (
+            <button
+              type="button"
+              onClick={() => router.back()}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '6px 11px',
+                borderRadius: 8,
+                fontSize: 12.5,
+                fontWeight: 700,
+                color: '#334155',
+                background: '#F1F5F9',
+                border: '1px solid #CBD5E1',
+                cursor: 'pointer',
+                transition: 'background 0.15s ease'
+              }}
+              title="Go back to previous page"
+            >
+              <ArrowLeft size={14} />
+              <span>Back</span>
+            </button>
+          )}
 
-        {/* Clean Header Controls: Learn Link, Language Switch, Login, Menu */}
+          <Link
+            href="/"
+            className="brand"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 9,
+              textDecoration: 'none'
+            }}
+            aria-label="FoodSafe365 Home"
+          >
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
+                fontWeight: 900,
+                fontSize: 15,
+                boxShadow: '0 2px 6px rgba(5, 150, 105, 0.35)'
+              }}
+            >
+              FS
+            </div>
+            <span
+              style={{
+                fontSize: 19,
+                fontWeight: 900,
+                color: 'var(--text, #0f172a)',
+                letterSpacing: '-0.02em'
+              }}
+            >
+              FoodSafe365
+            </span>
+          </Link>
+        </div>
+
+        {/* Center: Desktop Visible Core Navigation */}
+        <nav
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            flexWrap: 'wrap'
+          }}
+          className="desktop-only-nav"
+        >
+          {CORE_NAV_PAGES.map(item => {
+            const isActive = pathname === item.href;
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '6px 11px',
+                  borderRadius: 8,
+                  fontSize: 13,
+                  fontWeight: isActive ? 800 : 600,
+                  color: isActive ? '#065F46' : '#334155',
+                  background: isActive ? '#D1FAE5' : 'transparent',
+                  border: isActive ? '1px solid #10B981' : '1px solid transparent',
+                  textDecoration: 'none',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <Icon size={14} color={isActive ? '#059669' : '#64748B'} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Right Controls: Language Switch, Account/Login & Mobile Menu */}
         <div
           style={{
             display: 'flex',
@@ -165,27 +242,6 @@ export default function GlobalHeader() {
             flexShrink: 0
           }}
         >
-          {/* Direct Learn Link */}
-          <Link
-            href="/food-safety-why"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 5,
-              padding: '6px 12px',
-              borderRadius: 8,
-              fontSize: 13,
-              fontWeight: 700,
-              color: '#059669',
-              background: 'rgba(5, 150, 105, 0.08)',
-              textDecoration: 'none',
-              border: '1px solid rgba(5, 150, 105, 0.2)'
-            }}
-          >
-            <BookOpen size={14} />
-            <span>Learn</span>
-          </Link>
-
           {/* Language Switch */}
           <LanguageSelector compact={true} />
 
@@ -406,6 +462,71 @@ export default function GlobalHeader() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Visible Navigation Ribbon across Every Page (Mobile & Desktop Parity) */}
+      <div
+        style={{
+          background: '#F8FAF6',
+          borderTop: '1px solid #E2E8F0',
+          padding: '6px 14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none'
+        }}
+      >
+        {pathname !== '/' && (
+          <button
+            type="button"
+            onClick={() => router.back()}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              padding: '5px 10px',
+              borderRadius: 6,
+              fontSize: 12,
+              fontWeight: 700,
+              color: '#334155',
+              background: '#ffffff',
+              border: '1px solid #CBD5E1',
+              cursor: 'pointer',
+              flexShrink: 0
+            }}
+          >
+            <ArrowLeft size={13} />
+            <span>Back</span>
+          </button>
+        )}
+
+        {CORE_NAV_PAGES.map(item => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                padding: '5px 11px',
+                borderRadius: 6,
+                fontSize: 12.5,
+                fontWeight: isActive ? 800 : 600,
+                color: isActive ? '#065F46' : '#475569',
+                background: isActive ? '#D1FAE5' : '#ffffff',
+                border: isActive ? '1px solid #059669' : '1px solid #E2E8F0',
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
+            >
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
       </div>
     </header>
   );

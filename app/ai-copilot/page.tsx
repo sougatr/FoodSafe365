@@ -18,6 +18,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
+import GlobalHeader from '@/components/GlobalHeader';
 import {
   PersonaRole,
   ChatMessage,
@@ -69,39 +70,7 @@ export default function AiCopilotPage() {
 
   return (
     <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Topbar */}
-      <div className="topbar">
-        <Link href="/home" className="brand">
-          <div style={{
-            width: 32,
-            height: 32,
-            borderRadius: 8,
-            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: 14
-          }}>
-            FS
-          </div>
-          <span>FoodSafe AI Copilot</span>
-        </Link>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <ThemeToggle />
-          <Link
-            href="/home"
-            className="btn secondary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '7px 14px' }}
-          >
-            <Home size={15} /> Home
-          </Link>
-          <Link href="/manager" className="btn secondary" style={{ fontSize: 13, padding: '7px 14px' }}>
-            Manager Review
-          </Link>
-        </div>
-      </div>
+      <GlobalHeader />
 
       <div className="container" style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 16px', maxWidth: 1180 }}>
         {/* Breadcrumb & Title */}
