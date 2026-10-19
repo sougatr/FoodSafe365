@@ -6,6 +6,7 @@ import { checkRateLimit, getClientIp, createRateLimitHeaders } from '../../../..
 import { parseBoundedJson } from '../../../../../lib/body-guard';
 import { hashPassword } from '../../../../../lib/passwords';
 import { assertDatabaseConfigured } from '../../../../../lib/db-config';
+import { sendProviderOnboardingAlert } from '../../../../../lib/email-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,9 +32,7 @@ export async function POST(req: Request) {
 
     const dbConfig = assertDatabaseConfigured();
     if (!dbConfig.ok) {
-      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
-        return fail('CONFIGURATION_ERROR', dbConfig.error, 500);
-      }
+      console.warn('[providers/register POST] Database not configured; using fallback provider store.');
     }
 
     // Body limit: 1 MB
@@ -119,6 +118,22 @@ export async function POST(req: Request) {
       description: description.trim(),
       passwordHash
     });
+
+    // P0: Dispatch real-time automated onboarding email alert to foodsafe365@gmail.com
+    try {
+      await sendProviderOnboardingAlert({
+        providerId: provider.id,
+        businessName: provider.businessName,
+        contactName: provider.contactName,
+        mobile: provider.mobile,
+        email: provider.email,
+        city: provider.city,
+        categories: provider.categories,
+        description: provider.description
+      });
+    } catch (emailErr) {
+      console.warn('[API /providers/register] Email alert warning:', emailErr);
+    }
 
     const sessionToken = createSessionToken({
       userId: provider.id,

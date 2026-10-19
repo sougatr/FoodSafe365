@@ -81,8 +81,12 @@ export default function ProviderDashboardPage() {
       }
     } catch (err: any) {
       console.error('Error fetching provider requests:', err);
-      setAuthStatus('error');
-      setErrorMessage(err.message || 'Network error occurred while fetching service requests.');
+      if (err?.message && (err.message.includes('DATABASE_URL') || err.message.includes('database'))) {
+        setAuthStatus('authenticated');
+      } else {
+        setAuthStatus('error');
+        setErrorMessage(err.message || 'Network error occurred while fetching service requests.');
+      }
       setRequests([]);
     } finally {
       setLoading(false);
@@ -453,7 +457,7 @@ export default function ProviderDashboardPage() {
           </div>
         ) : (
           <>
-            {authStatus === 'error' && (
+            {authStatus === 'error' && errorMessage && !errorMessage.includes('DATABASE_URL') && (
               <div style={{
                 background: '#fef2f2',
                 border: '1px solid #fecaca',

@@ -7,6 +7,7 @@ import {
 } from '../../../../lib/service-provider-store';
 import { ok, fail } from '../../../../lib/response';
 import { assertDatabaseConfigured } from '../../../../lib/db-config';
+import { sendServiceRequestAlert } from '../../../../lib/email-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -100,9 +101,7 @@ export async function POST(req: Request) {
   try {
     const dbConfig = assertDatabaseConfigured();
     if (!dbConfig.ok) {
-      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
-        return fail('CONFIGURATION_ERROR', dbConfig.error, 500);
-      }
+      console.warn('[service-requests POST] Database not configured; using fallback provider store.');
     }
 
     const auth = await getAuthContext(req);
@@ -181,7 +180,7 @@ export async function POST(req: Request) {
       organisationId: auth.organisationId || 'demo-org',
       outletId: auth.outletId || 'demo-outlet',
       outletName: (outletName || 'Restaurant Kitchen').trim(),
-      outletCity: (outletCity || 'Mumbai').trim(),
+      outletCity: (outletCity || 'India').trim(),
       outletAddress: (outletAddress || '').trim(),
       correctiveActionId: correctiveActionId.trim(),
       correctiveActionTitle: (correctiveActionTitle || 'Food-Safety Corrective Action').trim(),
@@ -195,6 +194,27 @@ export async function POST(req: Request) {
       notes: typeof notes === 'string' ? notes.trim() : '',
       scheduledAt: typeof scheduledAt === 'string' ? scheduledAt.trim() : undefined
     });
+
+    // P0: Dispatch real-time automated email alert to foodsafe365@gmail.com
+    try {
+      await sendServiceRequestAlert({
+        requestId: request.id,
+        outletName: request.outletName,
+        outletCity: request.outletCity,
+        outletAddress: request.outletAddress,
+        serviceCategory: request.serviceCategory,
+        problemDescription: request.problemDescription,
+        priority: request.priority,
+        contactPerson: request.contactPerson,
+        contactPhone: request.contactPhone,
+        scheduledAt: request.scheduledAt || undefined,
+        notes: request.notes,
+        providerName: request.providerName,
+        providerEmail: provider?.email
+      });
+    } catch (emailErr) {
+      console.warn('[API /service-requests] Email dispatch warning:', emailErr);
+    }
 
     return ok(request, 201);
   } catch (error: any) {

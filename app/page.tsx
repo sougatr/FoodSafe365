@@ -47,8 +47,8 @@ export default function Landing() {
   // Search Query
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Mumbai Pilot Area Filter
-  const [selectedArea, setSelectedArea] = useState<'all' | 'colaba' | 'bandra' | 'lower_parel' | 'other'>('all');
+  // Pan-India & City Filter
+  const [selectedArea, setSelectedArea] = useState<'all' | 'mumbai' | 'delhi' | 'bengaluru' | 'kolkata' | 'other'>('all');
 
   // Show top 6 cards by default
   const [showAllCards, setShowAllCards] = useState(false);
@@ -509,7 +509,7 @@ export default function Landing() {
     );
   }
 
-  // Filter restaurants based on Mumbai Pilot Areas & Search
+  // Filter restaurants across India & Search
   const filteredRestaurants = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
 
@@ -517,26 +517,27 @@ export default function Landing() {
       const loc = r.location.toLowerCase();
       const city = r.city.toLowerCase();
 
-      // Area filter: default to Mumbai pilot
-      if (selectedArea === 'colaba') {
-        if (!loc.includes('colaba') && !loc.includes('fort') && !loc.includes('marine lines')) return false;
-      } else if (selectedArea === 'bandra') {
-        if (!loc.includes('bandra') && !loc.includes('khar') && !loc.includes('santacruz')) return false;
-      } else if (selectedArea === 'lower_parel') {
-        if (!loc.includes('lower parel') && !loc.includes('worli') && !loc.includes('prabhadevi')) return false;
+      // Pan-India & City Filter
+      if (selectedArea === 'mumbai') {
+        if (city !== 'mumbai' && !loc.includes('mumbai')) return false;
+      } else if (selectedArea === 'delhi') {
+        if (city !== 'delhi' && !loc.includes('delhi') && !loc.includes('noida') && !loc.includes('gurugram')) return false;
+      } else if (selectedArea === 'bengaluru') {
+        if (city !== 'bengaluru' && !loc.includes('bengaluru') && !loc.includes('bangalore')) return false;
+      } else if (selectedArea === 'kolkata') {
+        if (city !== 'kolkata' && !loc.includes('kolkata')) return false;
       } else if (selectedArea === 'other') {
-        if (city === 'mumbai') return false;
-      } else {
-        // 'all' Mumbai pilot: prioritize Mumbai and Pan-India
-        if (city !== 'mumbai' && city !== 'pan-india') return false;
+        if (city === 'mumbai' || city === 'delhi' || city === 'bengaluru' || city === 'kolkata') return false;
       }
+      // 'all': Displays all restaurants across India without exclusion
 
       // Search Query
       if (!q) return true;
       return (
         r.name.toLowerCase().includes(q) ||
         r.location.toLowerCase().includes(q) ||
-        r.cuisine.toLowerCase().includes(q)
+        r.cuisine.toLowerCase().includes(q) ||
+        r.city.toLowerCase().includes(q)
       );
     });
   }, [searchQuery, selectedArea, allRestaurants]);
@@ -929,7 +930,7 @@ export default function Landing() {
             </button>
           </form>
 
-          {/* MUMBAI PILOT AREA FILTER BAR + ONE ADD RESTAURANT ACTION */}
+          {/* PAN-INDIA CITY FILTER BAR + ONE ADD RESTAURANT ACTION */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -943,10 +944,11 @@ export default function Landing() {
             {/* Filter Pills */}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {[
-                { id: 'all', label: t('landing.filter.mumbaiAll') },
-                { id: 'colaba', label: t('landing.filter.colaba') },
-                { id: 'bandra', label: t('landing.filter.bandra') },
-                { id: 'lower_parel', label: t('landing.filter.lowerParel') },
+                { id: 'all', label: t('landing.filter.allIndia') },
+                { id: 'mumbai', label: t('landing.filter.mumbai') },
+                { id: 'delhi', label: t('landing.filter.delhi') },
+                { id: 'bengaluru', label: t('landing.filter.bengaluru') },
+                { id: 'kolkata', label: t('landing.filter.kolkata') },
                 { id: 'other', label: t('landing.filter.otherCities') }
               ].map(f => (
                 <button
@@ -2659,7 +2661,7 @@ export default function Landing() {
                     onChange={e => setNewRestCity(e.target.value)}
                     style={{ width: '100%', padding: '10px 8px', borderRadius: 8, border: '1.5px solid #CBD5E1', fontSize: 13.5 }}
                   >
-                    <option value="mumbai">Mumbai (Pilot)</option>
+                    <option value="mumbai">Mumbai</option>
                     <option value="kolkata">Kolkata</option>
                     <option value="delhi">New Delhi</option>
                     <option value="hyderabad">Hyderabad</option>

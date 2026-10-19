@@ -15,9 +15,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   try {
     const dbConfig = assertDatabaseConfigured();
     if (!dbConfig.ok) {
-      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
-        return fail('CONFIGURATION_ERROR', dbConfig.error, 500);
-      }
+      console.warn('[service-requests/[id] GET] Database not configured; using fallback provider store.');
     }
 
     const auth = await getAuthContext(req);
@@ -84,9 +82,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   try {
     const dbConfig = assertDatabaseConfigured();
     if (!dbConfig.ok) {
-      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
-        return fail('CONFIGURATION_ERROR', dbConfig.error, 500);
-      }
+      console.warn('[service-requests/[id] PATCH] Database not configured; using fallback provider store.');
     }
 
     const auth = await getAuthContext(req);

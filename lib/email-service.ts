@@ -124,23 +124,58 @@ Reply-To is set to: ${cleanEmail}. You can reply directly to this email to respo
   // 1. Check if Resend API key is available
   if (process.env.RESEND_API_KEY) {
     try {
+      const apiKey = process.env.RESEND_API_KEY.trim();
+      const isCustomSender = Boolean(process.env.EMAIL_FROM && !process.env.EMAIL_FROM.includes('resend.dev'));
+      const emailPayload: any = {
+        from: process.env.EMAIL_FROM || 'FoodSafe365 <onboarding@resend.dev>',
+        to: [adminEmail],
+        subject: emailSubject,
+        text: emailBodyText,
+        html: `<!DOCTYPE html>
+<html>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; padding: 20px; color: #1e293b;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden;">
+    <div style="background: #059669; padding: 20px 24px; color: #ffffff;">
+      <h2 style="margin: 0; font-size: 18px;">FoodSafe365 Message Received</h2>
+      <p style="margin: 4px 0 0; font-size: 13px; opacity: 0.9;">Inquiry from Contact / Onboarding Portal</p>
+    </div>
+    <div style="padding: 24px;">
+      <table style="width: 100%; font-size: 14px; border-collapse: collapse; margin-bottom: 20px;">
+        <tr><td style="padding: 6px 0; color: #64748b; width: 120px;">From:</td><td style="font-weight: 600; color: #0f172a;">${cleanName}</td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b;">Email:</td><td style="font-weight: 600; color: #0f172a;"><a href="mailto:${cleanEmail}">${cleanEmail}</a></td></tr>
+        ${cleanOrg ? `<tr><td style="padding: 6px 0; color: #64748b;">Organisation:</td><td style="font-weight: 600; color: #0f172a;">${cleanOrg}</td></tr>` : ''}
+        <tr><td style="padding: 6px 0; color: #64748b;">Subject:</td><td style="font-weight: 600; color: #0f172a;">${cleanSubject}</td></tr>
+      </table>
+      <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 8px;">Message Content</div>
+      <div style="background: #f1f5f9; padding: 16px; border-radius: 8px; font-size: 14px; line-height: 1.6; white-space: pre-wrap; color: #1e293b;">${cleanMessage}</div>
+    </div>
+    <div style="padding: 14px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; text-align: center;">
+      FoodSafe365 Platform Notification · Received at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
+    </div>
+  </div>
+</body>
+</html>`
+      };
+
+      if (isCustomSender && cleanEmail) {
+        emailPayload.reply_to = cleanEmail;
+      }
+
       const resendRes = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Authorization': `Bearer ${apiKey}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          from: process.env.EMAIL_FROM || 'FoodSafe365 <onboarding@resend.dev>',
-          to: [adminEmail],
-          reply_to: cleanEmail,
-          subject: emailSubject,
-          text: emailBodyText
-        })
+        body: JSON.stringify(emailPayload)
       });
       if (resendRes.ok) {
         providerUsed = 'RESEND';
         status = 'DELIVERED_EXTERNAL';
+        console.log('[Contact Email] SUCCESS: Delivered to:', adminEmail);
+      } else {
+        const errText = await resendRes.text().catch(() => '');
+        console.warn('[Contact Email] Resend API returned non-200:', resendRes.status, errText);
       }
     } catch (err) {
       console.warn('[Contact Email] Resend attempt failed, falling back to outbox:', err);
@@ -522,4 +557,294 @@ https://foodsafe365.in/manager
     message: 'Customer rating alert recorded successfully.',
     recordId
   };
+}
+
+export interface ServiceRequestAlertPayload {
+  requestId: string;
+  outletName: string;
+  outletCity?: string;
+  outletAddress?: string;
+  serviceCategory: string;
+  problemDescription: string;
+  priority?: string;
+  contactPerson?: string;
+  contactPhone?: string;
+  scheduledAt?: string;
+  notes?: string;
+  providerName?: string;
+  providerEmail?: string;
+}
+
+/**
+ * Dispatches an automated real-time notification alert when a restaurant requests a service provider.
+ * Sends directly to foodsafe365@gmail.com (and provider if email present).
+ */
+export async function sendServiceRequestAlert(payload: ServiceRequestAlertPayload): Promise<{
+  success: boolean;
+  message: string;
+  recordId?: string;
+  resendStatus?: number;
+  resendData?: any;
+}> {
+  const adminEmail = process.env.ADMIN_EMAIL || 'foodsafe365@gmail.com';
+  const cleanRestName = sanitizeHeader(payload.outletName, 120) || 'Restaurant Kitchen';
+  const cleanCategory = sanitizeHeader(payload.serviceCategory, 80) || 'Food Safety Service';
+  const cleanPriority = (payload.priority || 'HIGH').toUpperCase();
+  const cleanProblem = sanitizeBody(payload.problemDescription, 2000);
+
+  const emailSubject = `[FoodSafe365 Alert] New Service Provider Request: ${cleanRestName} (${cleanCategory} · ${cleanPriority})`;
+
+  const emailBodyText = `FoodSafe365 Service Partner Action Alert
+==================================================
+Request ID: ${payload.requestId}
+Restaurant: ${cleanRestName}
+City: ${payload.outletCity || 'India'}
+Address: ${payload.outletAddress || 'Not specified'}
+
+Service Category: ${cleanCategory}
+Assigned Provider: ${payload.providerName || 'Pending / Unassigned'}
+Priority: ${cleanPriority}
+Scheduled Date: ${payload.scheduledAt || 'Immediate'}
+
+Problem Description / Corrective Action Required:
+${cleanProblem}
+
+${payload.notes ? `Additional Notes:\n${sanitizeBody(payload.notes, 1000)}\n` : ''}
+Restaurant Contact:
+  - Contact Person: ${payload.contactPerson || 'Duty Manager'}
+  - Phone: ${payload.contactPhone || 'Not specified'}
+
+Timestamp: ${new Date().toISOString()}
+
+Manage service requests in the Provider Portal:
+https://foodsafe365.in/providers/dashboard
+==================================================`;
+
+  const emailHtmlBody = `<!DOCTYPE html>
+<html>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; padding: 20px; color: #1e293b;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+    <div style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 24px; color: #ffffff;">
+      <div style="display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Priority: ${cleanPriority}</div>
+      <h2 style="margin: 0; font-size: 20px;">New Service Provider Request</h2>
+      <p style="margin: 4px 0 0; font-size: 13px; opacity: 0.9;">${cleanRestName} (${payload.outletCity || 'India'})</p>
+    </div>
+    <div style="padding: 24px;">
+      <table style="width: 100%; font-size: 14px; border-collapse: collapse; margin-bottom: 16px;">
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; width: 140px;">Request ID:</td><td style="font-weight: 700; color: #0f172a;">${payload.requestId}</td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Service Category:</td><td style="font-weight: 700; color: #059669;">${cleanCategory}</td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Assigned Agency:</td><td style="font-weight: 600; color: #0f172a;">${payload.providerName || 'Pending / Open'}</td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Contact Person:</td><td style="font-weight: 600; color: #0f172a;">${payload.contactPerson || 'Duty Manager'} (${payload.contactPhone || 'No phone'})</td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Address:</td><td style="font-weight: 500; color: #0f172a;">${payload.outletAddress || 'On file'}</td></tr>
+      </table>
+
+      <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #475569; letter-spacing: 0.5px; margin: 16px 0 8px;">Problem / Hazard Description</div>
+      <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 14px; border-radius: 0 8px 8px 0; font-size: 14px; color: #991b1b; line-height: 1.5;">
+        ${cleanProblem}
+      </div>
+
+      ${payload.notes ? `
+      <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #475569; letter-spacing: 0.5px; margin: 16px 0 8px;">Special Instructions</div>
+      <div style="background: #f8fafc; padding: 12px; border-radius: 8px; font-size: 13.5px; color: #334155; border: 1px solid #e2e8f0;">${sanitizeBody(payload.notes, 1000)}</div>` : ''}
+
+      <div style="text-align: center; margin-top: 24px;">
+        <a href="https://foodsafe365.in/providers/dashboard" style="display: inline-block; background: #059669; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 700; font-size: 14px;">View in Service Partner Portal</a>
+      </div>
+    </div>
+    <div style="padding: 14px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; text-align: center;">
+      FoodSafe365 Service Partner Network · Generated at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
+    </div>
+  </div>
+</body>
+</html>`;
+
+  const recordId = `sreq-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+  let providerUsed = 'MOCK_OUTBOX';
+  let status: 'DELIVERED_EXTERNAL' | 'QUEUED_OUTBOX' = 'QUEUED_OUTBOX';
+
+  const recipientList = new Set<string>();
+  recipientList.add(adminEmail);
+  if (payload.providerEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.providerEmail.trim())) {
+    recipientList.add(payload.providerEmail.trim());
+  }
+
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const apiKey = process.env.RESEND_API_KEY.trim();
+      const isCustomSender = Boolean(process.env.EMAIL_FROM && !process.env.EMAIL_FROM.includes('resend.dev'));
+      const targetRecipients = isCustomSender ? Array.from(recipientList) : [adminEmail];
+
+      const emailPayload: any = {
+        from: process.env.EMAIL_FROM || 'FoodSafe365 <onboarding@resend.dev>',
+        to: targetRecipients,
+        subject: emailSubject,
+        text: emailBodyText,
+        html: emailHtmlBody
+      };
+
+      const resendRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(emailPayload)
+      });
+
+      if (resendRes.ok) {
+        providerUsed = 'RESEND';
+        status = 'DELIVERED_EXTERNAL';
+        const resendJson = await resendRes.json().catch(() => ({}));
+        console.log('[Service Request Email] SUCCESS: Delivered to:', targetRecipients);
+        return { success: true, message: 'Service request alert sent.', recordId, resendStatus: 200, resendData: resendJson };
+      } else {
+        const errText = await resendRes.text().catch(() => '');
+        console.warn('[Service Request Email] Resend API error:', resendRes.status, errText);
+      }
+    } catch (err) {
+      console.warn('[Service Request Email] Resend failed:', err);
+    }
+  }
+
+  // Fallback to outbox logging
+  const record: ContactMessageRecord = {
+    id: recordId,
+    name: payload.contactPerson || 'Restaurant Manager',
+    email: adminEmail,
+    subject: emailSubject,
+    message: emailBodyText,
+    organisation: payload.outletName,
+    ipAddress: '127.0.0.1',
+    createdAt: new Date().toISOString(),
+    adminRecipient: adminEmail,
+    replyTo: adminEmail,
+    status,
+    providerUsed
+  };
+  getOutbox().push(record);
+
+  return { success: true, message: 'Service request alert processed.', recordId };
+}
+
+export interface ProviderOnboardingAlertPayload {
+  providerId: string;
+  businessName: string;
+  contactName: string;
+  mobile: string;
+  email: string;
+  city: string;
+  categories: string[];
+  description: string;
+}
+
+/**
+ * Dispatches an automated real-time notification alert when a new service provider onboards.
+ */
+export async function sendProviderOnboardingAlert(payload: ProviderOnboardingAlertPayload): Promise<{
+  success: boolean;
+  message: string;
+  recordId?: string;
+  resendStatus?: number;
+  resendData?: any;
+}> {
+  const adminEmail = process.env.ADMIN_EMAIL || 'foodsafe365@gmail.com';
+  const cleanBusiness = sanitizeHeader(payload.businessName, 120);
+  const cleanContact = sanitizeHeader(payload.contactName, 100);
+  const cleanMobile = sanitizeHeader(payload.mobile, 40);
+  const cleanEmail = sanitizeHeader(payload.email, 120);
+  const cleanCity = sanitizeHeader(payload.city, 80);
+  const categoriesStr = payload.categories.join(', ');
+
+  const emailSubject = `[FoodSafe365 Alert] New Service Provider Onboarded: ${cleanBusiness} (${cleanCity})`;
+
+  const emailBodyText = `New Service Provider Registration
+==================================================
+Provider ID: ${payload.providerId}
+Company / Business: ${cleanBusiness}
+Operating City: ${cleanCity}
+Service Categories: ${categoriesStr}
+
+Contact Information:
+  - Contact Person: ${cleanContact}
+  - Mobile: ${cleanMobile}
+  - Email: ${cleanEmail}
+
+Services Description:
+${sanitizeBody(payload.description, 2000)}
+
+Timestamp: ${new Date().toISOString()}
+
+View registered service partners:
+https://foodsafe365.in/providers
+==================================================`;
+
+  const emailHtmlBody = `<!DOCTYPE html>
+<html>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; padding: 20px; color: #1e293b;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden;">
+    <div style="background: #0f172a; padding: 24px; color: #ffffff;">
+      <h2 style="margin: 0; font-size: 20px; color: #34d399;">🤝 New Service Provider Registered</h2>
+      <p style="margin: 4px 0 0; font-size: 13px; opacity: 0.9;">${cleanBusiness} · ${cleanCity}</p>
+    </div>
+    <div style="padding: 24px;">
+      <table style="width: 100%; font-size: 14px; border-collapse: collapse; margin-bottom: 16px;">
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; width: 140px;">Company Name:</td><td style="font-weight: 700; color: #0f172a;">${cleanBusiness}</td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Categories:</td><td style="font-weight: 600; color: #059669;">${categoriesStr}</td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Contact Person:</td><td style="font-weight: 600; color: #0f172a;">${cleanContact}</td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Mobile:</td><td style="font-weight: 600; color: #0f172a;">${cleanMobile}</td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Email:</td><td style="font-weight: 600; color: #0f172a;"><a href="mailto:${cleanEmail}">${cleanEmail}</a></td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">City / Area:</td><td style="font-weight: 600; color: #0f172a;">${cleanCity}</td></tr>
+      </table>
+
+      <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #475569; margin: 16px 0 8px;">Description of Services</div>
+      <div style="background: #f1f5f9; padding: 14px; border-radius: 8px; font-size: 14px; color: #1e293b; line-height: 1.5;">${sanitizeBody(payload.description, 2000)}</div>
+
+      <div style="text-align: center; margin-top: 24px;">
+        <a href="https://foodsafe365.in/providers" style="display: inline-block; background: #0f172a; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 700; font-size: 14px;">Open Service Partners Directory</a>
+      </div>
+    </div>
+    <div style="padding: 14px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; text-align: center;">
+      FoodSafe365 Partner Onboarding · Received at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
+    </div>
+  </div>
+</body>
+</html>`;
+
+  const recordId = `prov-reg-${Date.now()}`;
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const apiKey = process.env.RESEND_API_KEY.trim();
+      const isCustomSender = Boolean(process.env.EMAIL_FROM && !process.env.EMAIL_FROM.includes('resend.dev'));
+      const targetRecipients = [adminEmail];
+
+      const emailPayload: any = {
+        from: process.env.EMAIL_FROM || 'FoodSafe365 <onboarding@resend.dev>',
+        to: targetRecipients,
+        subject: emailSubject,
+        text: emailBodyText,
+        html: emailHtmlBody
+      };
+
+      if (isCustomSender && cleanEmail) {
+        emailPayload.reply_to = cleanEmail;
+      }
+
+      const resendRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(emailPayload)
+      });
+      if (resendRes.ok) {
+        console.log('[Provider Registration Email] SUCCESS: Delivered to:', adminEmail);
+        return { success: true, message: 'Provider registration alert sent.', recordId, resendStatus: 200 };
+      }
+    } catch (err) {
+      console.warn('[Provider Registration Email] Resend failed:', err);
+    }
+  }
+
+  return { success: true, message: 'Provider registration logged.', recordId };
 }
