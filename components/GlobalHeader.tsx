@@ -101,6 +101,15 @@ export default function GlobalHeader() {
     { href: '/showcase', label: 'Food Safety Passport', icon: ShieldCheck }
   ];
 
+  // Navigate back by exactly 1 page
+  const handleGoBack = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push('/');
+    }
+  };
+
   return (
     <header
       className="topbar"
@@ -131,7 +140,7 @@ export default function GlobalHeader() {
           {pathname !== '/' && (
             <button
               type="button"
-              onClick={() => router.back()}
+              onClick={handleGoBack}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -462,71 +471,6 @@ export default function GlobalHeader() {
             )}
           </div>
         </div>
-      </div>
-
-      {/* Visible Navigation Ribbon across Every Page (Mobile & Desktop Parity) */}
-      <div
-        style={{
-          background: '#F8FAF6',
-          borderTop: '1px solid #E2E8F0',
-          padding: '6px 14px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          overflowX: 'auto',
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none'
-        }}
-      >
-        {pathname !== '/' && (
-          <button
-            type="button"
-            onClick={() => router.back()}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 4,
-              padding: '5px 10px',
-              borderRadius: 6,
-              fontSize: 12,
-              fontWeight: 700,
-              color: '#334155',
-              background: '#ffffff',
-              border: '1px solid #CBD5E1',
-              cursor: 'pointer',
-              flexShrink: 0
-            }}
-          >
-            <ArrowLeft size={13} />
-            <span>Back</span>
-          </button>
-        )}
-
-        {CORE_NAV_PAGES.map(item => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                padding: '5px 11px',
-                borderRadius: 6,
-                fontSize: 12.5,
-                fontWeight: isActive ? 800 : 600,
-                color: isActive ? '#065F46' : '#475569',
-                background: isActive ? '#D1FAE5' : '#ffffff',
-                border: isActive ? '1px solid #059669' : '1px solid #E2E8F0',
-                textDecoration: 'none',
-                whiteSpace: 'nowrap',
-                flexShrink: 0
-              }}
-            >
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
       </div>
     </header>
   );

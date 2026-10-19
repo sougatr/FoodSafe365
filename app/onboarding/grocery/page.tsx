@@ -127,8 +127,7 @@ export default function GroceryOnboardingPage() {
     e.preventDefault();
     setError('');
     if (!storeName.trim()) {
-      setError('Please enter your store or outlet name.');
-      return;
+      setStoreName('Green Harvest Grocery');
     }
     setStep(2);
   };
@@ -137,8 +136,7 @@ export default function GroceryOnboardingPage() {
     e.preventDefault();
     setError('');
     if (selectedCategories.length === 0) {
-      setError('Please select at least one category to continue.');
-      return;
+      setSelectedCategories(['PACKAGED_FOODS']);
     }
     setStep(3);
   };
@@ -147,6 +145,8 @@ export default function GroceryOnboardingPage() {
     e.preventDefault();
     setError('');
 
+    const finalStoreName = storeName.trim() || 'Green Harvest Grocery';
+    const finalCats = selectedCategories.length > 0 ? selectedCategories : ['PACKAGED_FOODS'];
     const assignedPerson = dailyCheckPerson.trim() || 'Store Manager';
 
     setSaving(true);
@@ -155,9 +155,9 @@ export default function GroceryOnboardingPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: storeName.trim(),
+          name: finalStoreName,
           city: city.trim() || 'Mumbai',
-          selectedCategories,
+          selectedCategories: finalCats,
           dailyCheckPerson: assignedPerson,
           managerName: assignedPerson
         })
@@ -314,7 +314,7 @@ export default function GroceryOnboardingPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 18, marginBottom: 28 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                    Store / Outlet Name *
+                    Store / Outlet Name
                   </label>
                   <input
                     type="text"
@@ -322,7 +322,6 @@ export default function GroceryOnboardingPage() {
                     onChange={e => setStoreName(e.target.value)}
                     placeholder="e.g. Green Harvest Grocery, FreshMart"
                     autoFocus
-                    required
                     style={{
                       width: '100%',
                       minHeight: 48,

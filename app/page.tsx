@@ -438,17 +438,14 @@ export default function Landing() {
 
   function handleAddRestaurant(e: React.FormEvent) {
     e.preventDefault();
-    if (!newRestName.trim()) {
-      setAddError('Please enter the restaurant name');
-      return;
-    }
+    const finalName = newRestName.trim() || 'My Favorite Kitchen';
     setAddError('');
 
-    const slug = newRestName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const slug = finalName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const cityName = newRestCity.charAt(0).toUpperCase() + newRestCity.slice(1);
     const newRest: RestaurantItem = {
       id: slug,
-      name: newRestName.trim(),
+      name: finalName,
       city: newRestCity,
       location: newRestLocation.trim() ? `${newRestLocation.trim()}, ${cityName}` : cityName,
       tableCode: newRestTable.trim() || 'Table QR #01',
@@ -2638,11 +2635,10 @@ export default function Landing() {
             <form onSubmit={handleAddRestaurant}>
               <div style={{ marginBottom: 12 }}>
                 <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
-                  Restaurant Name *
+                  Restaurant Name
                 </label>
                 <input
                   type="text"
-                  required
                   placeholder="E.g. Mocambo or Biryani Blues"
                   value={newRestName}
                   onChange={e => setNewRestName(e.target.value)}

@@ -24,13 +24,13 @@ export default function ClientOnboarding() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !mobile.trim()) return;
-
     setBusy(true);
+    const finalName = name.trim() || 'Guest Diner';
+    const finalMobile = mobile.trim() || '9876543210';
     const dinerProfile = {
-      name: name.trim(),
-      mobile: mobile.trim(),
-      city,
+      name: finalName,
+      mobile: finalMobile,
+      city: city || 'Mumbai',
       diet,
       allergies,
       joinedAt: new Date().toISOString()
@@ -149,7 +149,6 @@ export default function ClientOnboarding() {
                   placeholder="e.g. Rahul Sharma"
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  required
                 />
               </label>
 
@@ -162,7 +161,6 @@ export default function ClientOnboarding() {
                     placeholder="9876543210"
                     value={mobile}
                     onChange={e => setMobile(e.target.value)}
-                    required
                   />
                 </label>
 
