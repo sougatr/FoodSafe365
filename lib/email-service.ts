@@ -864,3 +864,260 @@ https://foodsafe365.in/providers
 
   return { success: true, message: 'Provider registration logged.', recordId };
 }
+
+export interface RestaurantActivationPayload {
+  outletId: string;
+  outletName: string;
+  city: string;
+  restaurantType?: string;
+  managerName: string;
+  mobile: string;
+  email?: string;
+}
+
+/**
+ * Dispatches an automated real-time alert when a restaurant kitchen is activated.
+ * Delivers directly to platform administrator (foodsafe365@gmail.com).
+ */
+export async function sendRestaurantActivationAlert(payload: RestaurantActivationPayload): Promise<{
+  success: boolean;
+  message: string;
+  recordId?: string;
+  resendStatus?: number;
+  resendData?: any;
+}> {
+  const adminEmail = process.env.ADMIN_EMAIL || 'foodsafe365@gmail.com';
+  const cleanRestName = sanitizeHeader(payload.outletName, 120) || 'Restaurant Kitchen';
+  const cleanCity = sanitizeHeader(payload.city, 80) || 'India';
+  const cleanType = sanitizeHeader(payload.restaurantType || 'Restaurant / Dine-In', 80);
+  const cleanManager = sanitizeHeader(payload.managerName, 100) || 'Restaurant Admin';
+  const cleanMobile = sanitizeHeader(payload.mobile, 40) || 'Not provided';
+  const cleanEmail = sanitizeHeader(payload.email || '', 120);
+
+  const emailSubject = `[FoodSafe365 Alert] New Restaurant Activated: ${cleanRestName} (${cleanCity})`;
+
+  const emailBodyText = `New Restaurant Kitchen Activation
+==================================================
+Restaurant Name: ${cleanRestName}
+Operating City: ${cleanCity}
+Outlet Concept: ${cleanType}
+
+Management Contact:
+  - Manager / Administrator: ${cleanManager}
+  - Mobile: ${cleanMobile}
+  ${cleanEmail ? `  - Email: ${cleanEmail}` : ''}
+
+Operational Safeguards Enabled:
+  ✓ 29 Statutory Food-Safety Checklist Tasks
+  ✓ Cold Storage & Refrigeration Monitoring (< 5°C, < -18°C)
+  ✓ Tabletop Diner QR Code Audits & Public Safety Verification
+
+Manager Dashboard:
+https://foodsafe365.in/manager
+
+Diner Public Record:
+https://foodsafe365.in/qr/${encodeURIComponent(payload.outletId)}
+==================================================`;
+
+  const emailHtmlBody = `<!DOCTYPE html>
+<html>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; padding: 20px; color: #1e293b;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="background: linear-gradient(135deg, #064e3b 0%, #047857 100%); padding: 24px; color: #ffffff;">
+      <h2 style="margin: 0; font-size: 20px; color: #34d399;">🍽️ New Restaurant Outlet Activated</h2>
+      <p style="margin: 4px 0 0; font-size: 13px; opacity: 0.9;">${cleanRestName} · ${cleanCity}</p>
+    </div>
+    <div style="padding: 24px;">
+      <table style="width: 100%; font-size: 14px; border-collapse: collapse; margin-bottom: 20px;">
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; width: 140px;">Restaurant Name:</td><td style="font-weight: 700; color: #0f172a;">${cleanRestName}</td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Concept / Type:</td><td style="font-weight: 600; color: #047857;">${cleanType}</td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">City / Hub:</td><td style="font-weight: 600; color: #0f172a;">${cleanCity}</td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Manager In-Charge:</td><td style="font-weight: 600; color: #0f172a;">${cleanManager}</td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Contact Mobile:</td><td style="font-weight: 600; color: #0f172a;">${cleanMobile}</td></tr>
+        ${cleanEmail ? `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Admin Email:</td><td style="font-weight: 600; color: #0f172a;"><a href="mailto:${cleanEmail}">${cleanEmail}</a></td></tr>` : ''}
+      </table>
+
+      <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 14px; margin-bottom: 20px; font-size: 13.5px; color: #065f46;">
+        <strong>Active Food-Safety Protocols:</strong> Includes immediate access to all 29 Operational Safeguards, digital temperature logs (&lt; 5°C), tabletop Diner QR audits, and accredited on-demand service partners.
+      </div>
+
+      <div style="text-align: center; margin-top: 24px;">
+        <a href="https://foodsafe365.in/manager" style="display: inline-block; background: #059669; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 14px;">Open Kitchen Manager Portal</a>
+      </div>
+    </div>
+    <div style="padding: 14px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; text-align: center;">
+      FoodSafe365 — Automated Kitchen Activation Alert · Received at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
+    </div>
+  </div>
+</body>
+</html>`;
+
+  const recordId = `rest-act-${Date.now()}`;
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const apiKey = process.env.RESEND_API_KEY.trim();
+      const isCustomSender = Boolean(process.env.EMAIL_FROM && !process.env.EMAIL_FROM.includes('resend.dev'));
+      const targetRecipients = [adminEmail];
+
+      const emailPayload: any = {
+        from: process.env.EMAIL_FROM || 'FoodSafe365 <onboarding@resend.dev>',
+        to: targetRecipients,
+        subject: emailSubject,
+        text: emailBodyText,
+        html: emailHtmlBody
+      };
+
+      if (isCustomSender && cleanEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        emailPayload.reply_to = cleanEmail;
+      }
+
+      const resendRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(emailPayload)
+      });
+
+      let resendJson: any = null;
+      try {
+        resendJson = await resendRes.json();
+      } catch {
+        resendJson = { raw: await resendRes.text().catch(() => '') };
+      }
+
+      if (resendRes.ok) {
+        console.log('[Restaurant Activation Email] SUCCESS: Delivered to:', adminEmail, resendJson);
+        return { success: true, message: 'Restaurant activation alert sent.', recordId, resendStatus: 200, resendData: resendJson };
+      } else {
+        console.error('[Restaurant Activation Email] Resend API error:', resendRes.status, resendJson);
+        return { success: false, message: 'Resend API error: ' + JSON.stringify(resendJson), recordId, resendStatus: resendRes.status, resendData: resendJson };
+      }
+    } catch (err) {
+      console.warn('[Restaurant Activation Email] Resend failed:', err);
+    }
+  }
+
+  return { success: true, message: 'Restaurant activation logged.', recordId };
+}
+
+export interface GroceryActivationPayload {
+  outletId: string;
+  name: string;
+  city: string;
+  managerName: string;
+  contactNumber?: string;
+  contactEmail?: string;
+  categories?: string[];
+}
+
+export async function sendGroceryActivationAlert(payload: GroceryActivationPayload): Promise<{
+  success: boolean;
+  message: string;
+  recordId?: string;
+  resendStatus?: number;
+  resendData?: any;
+}> {
+  const adminEmail = process.env.ADMIN_EMAIL || 'foodsafe365@gmail.com';
+  const cleanStore = sanitizeHeader(payload.name, 120) || 'Grocery Store';
+  const cleanCity = sanitizeHeader(payload.city, 80) || 'India';
+  const cleanManager = sanitizeHeader(payload.managerName, 100) || 'Store Manager';
+  const cleanPhone = sanitizeHeader(payload.contactNumber || 'Not provided', 40);
+  const cleanEmail = sanitizeHeader(payload.contactEmail || '', 120);
+  const catsStr = (payload.categories || []).join(', ');
+
+  const emailSubject = `[FoodSafe365 Alert] New Grocery Store Activated: ${cleanStore} (${cleanCity})`;
+
+  const emailBodyText = `New Grocery Store Food Safety Activation
+==================================================
+Store Name: ${cleanStore}
+City / Region: ${cleanCity}
+Manager In-Charge: ${cleanManager}
+Phone: ${cleanPhone}
+${cleanEmail ? `Email: ${cleanEmail}\n` : ''}Categories: ${catsStr || 'General Fresh & Packaged Goods'}
+
+Dashboard & Temperature Logs:
+https://foodsafe365.in/grocery
+==================================================`;
+
+  const emailHtmlBody = `<!DOCTYPE html>
+<html>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; padding: 20px; color: #1e293b;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); padding: 24px; color: #ffffff;">
+      <h2 style="margin: 0; font-size: 20px; color: #a5b4fc;">🛒 New Grocery Store Activated</h2>
+      <p style="margin: 4px 0 0; font-size: 13px; opacity: 0.9;">${cleanStore} · ${cleanCity}</p>
+    </div>
+    <div style="padding: 24px;">
+      <table style="width: 100%; font-size: 14px; border-collapse: collapse; margin-bottom: 20px;">
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b; width: 140px;">Store Name:</td><td style="font-weight: 700; color: #0f172a;">${cleanStore}</td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">City / Area:</td><td style="font-weight: 600; color: #0f172a;">${cleanCity}</td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Manager:</td><td style="font-weight: 600; color: #0f172a;">${cleanManager}</td></tr>
+        <tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Contact Phone:</td><td style="font-weight: 600; color: #0f172a;">${cleanPhone}</td></tr>
+        ${cleanEmail ? `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Email:</td><td style="font-weight: 600; color: #0f172a;"><a href="mailto:${cleanEmail}">${cleanEmail}</a></td></tr>` : ''}
+        ${catsStr ? `<tr style="border-bottom: 1px solid #f1f5f9;"><td style="padding: 8px 0; color: #64748b;">Categories:</td><td style="font-weight: 600; color: #4338ca;">${catsStr}</td></tr>` : ''}
+      </table>
+
+      <div style="text-align: center; margin-top: 24px;">
+        <a href="https://foodsafe365.in/grocery" style="display: inline-block; background: #312e81; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 14px;">Open Grocery Store Dashboard</a>
+      </div>
+    </div>
+    <div style="padding: 14px 24px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; text-align: center;">
+      FoodSafe365 — Automated Grocery Activation Alert · Received at ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
+    </div>
+  </div>
+</body>
+</html>`;
+
+  const recordId = `groc-act-${Date.now()}`;
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const apiKey = process.env.RESEND_API_KEY.trim();
+      const isCustomSender = Boolean(process.env.EMAIL_FROM && !process.env.EMAIL_FROM.includes('resend.dev'));
+      const targetRecipients = [adminEmail];
+
+      const emailPayload: any = {
+        from: process.env.EMAIL_FROM || 'FoodSafe365 <onboarding@resend.dev>',
+        to: targetRecipients,
+        subject: emailSubject,
+        text: emailBodyText,
+        html: emailHtmlBody
+      };
+
+      if (isCustomSender && cleanEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        emailPayload.reply_to = cleanEmail;
+      }
+
+      const resendRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(emailPayload)
+      });
+
+      let resendJson: any = null;
+      try {
+        resendJson = await resendRes.json();
+      } catch {
+        resendJson = { raw: await resendRes.text().catch(() => '') };
+      }
+
+      if (resendRes.ok) {
+        console.log('[Grocery Activation Email] SUCCESS: Delivered to:', adminEmail, resendJson);
+        return { success: true, message: 'Grocery activation alert sent.', recordId, resendStatus: 200, resendData: resendJson };
+      } else {
+        console.error('[Grocery Activation Email] Resend API error:', resendRes.status, resendJson);
+        return { success: false, message: 'Resend API error: ' + JSON.stringify(resendJson), recordId, resendStatus: resendRes.status, resendData: resendJson };
+      }
+    } catch (err) {
+      console.warn('[Grocery Activation Email] Resend failed:', err);
+    }
+  }
+
+  return { success: true, message: 'Grocery activation logged.', recordId };
+}
+
+

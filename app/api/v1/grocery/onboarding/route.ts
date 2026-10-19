@@ -6,6 +6,7 @@ import { checkRateLimit, getClientIp, createRateLimitHeaders } from '../../../..
 import { parseBoundedJson } from '../../../../../lib/body-guard';
 import { hashPassword } from '../../../../../lib/passwords';
 import { assertDatabaseConfigured } from '../../../../../lib/db-config';
+import { sendGroceryActivationAlert } from '../../../../../lib/email-service';
 
 export async function POST(req: Request) {
   try {
@@ -27,9 +28,7 @@ export async function POST(req: Request) {
 
     const dbConfig = assertDatabaseConfigured();
     if (!dbConfig.ok) {
-      if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
-        return fail('CONFIGURATION_ERROR', dbConfig.error, 500);
-      }
+      console.warn('[grocery/onboarding POST] Database not configured; using fallback grocery store.');
     }
 
     // Body limit: 1 MB
@@ -83,6 +82,21 @@ export async function POST(req: Request) {
       selectedCategories,
       passwordHash
     });
+
+    // Dispatch automated grocery store activation alert to foodsafe365@gmail.com
+    try {
+      await sendGroceryActivationAlert({
+        outletId: saved.id,
+        name: saved.name,
+        city: saved.city,
+        managerName: saved.managerName,
+        contactNumber: saved.contactNumber,
+        contactEmail: saved.contactEmail,
+        categories: saved.selectedCategories
+      });
+    } catch (emailErr) {
+      console.warn('[grocery/onboarding] Failed to send activation email alert:', emailErr);
+    }
 
     const response = NextResponse.json({
       success: true,

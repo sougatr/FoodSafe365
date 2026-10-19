@@ -127,6 +127,34 @@ export default function Onboarding() {
         localStorage.setItem('foodsafe365_outlet_id', createdOutletId);
       }
 
+      // Dual-dispatch to contact alert to guarantee delivery to foodsafe365@gmail.com
+      let cleanContactEmail = email.trim();
+      if (!cleanContactEmail) {
+        cleanContactEmail = 'partner@foodsafe365.in';
+      } else if (!cleanContactEmail.includes('@')) {
+        cleanContactEmail = `${cleanContactEmail}@gmail.com`;
+      }
+
+      await fetch('/api/v1/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: finalManager,
+          email: cleanContactEmail,
+          subject: `[Restaurant Activation] ${finalName} (${finalCity})`,
+          organisation: finalName,
+          message: `NEW RESTAURANT OUTLET ACTIVATED\n\n` +
+            `Restaurant Name: ${finalName}\n` +
+            `Operating City: ${finalCity}\n` +
+            `Concept / Outlet Type: ${outletType}\n` +
+            `Manager / Admin: ${finalManager}\n` +
+            `Mobile: ${finalMobile}\n` +
+            `Admin Login Email: ${email.trim() || 'Not specified'}\n` +
+            `FSSAI License: ${fssaiLicense.trim() || 'Pending verification'}\n\n` +
+            `Operational Safeguards active: 29 Daily Checklist Controls, Cold-Chain monitoring (< 5°C), Tabletop Diner QR audits.`
+        })
+      }).catch(err => console.warn('[Onboarding dual-dispatch warning]:', err));
+
       router.push('/home');
     } catch (err: any) {
       // Graceful fallback to home so user is never trapped
