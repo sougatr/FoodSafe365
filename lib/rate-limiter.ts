@@ -4,7 +4,7 @@
  * Survives multi-pod/instance distribution, prevents authentication brute-forcing and request flooding.
  */
 
-import { getPool } from './db';
+import { getPool, isDatabaseConfigured } from './db';
 import type { PoolClient } from 'pg';
 
 export interface RateLimitOptions {
@@ -67,7 +67,16 @@ function normalizeIp(ip: string): string {
 export async function checkRateLimit(options: RateLimitOptions): Promise<RateLimitResult> {
   const { key, limit, windowSeconds } = options;
   const isProd = process.env.NODE_ENV === 'production';
-  const pool = testPoolOverride || getPool();
+  let pool = testPoolOverride;
+  if (!pool) {
+    try {
+      if (isDatabaseConfigured()) {
+        pool = getPool();
+      }
+    } catch {
+      pool = null;
+    }
+  }
 
   if (pool) {
     try {

@@ -121,8 +121,9 @@ export async function POST(req: Request) {
     });
 
     // P0: Dispatch real-time automated onboarding email alert to foodsafe365@gmail.com
+    let emailAlertResult: any = null;
     try {
-      await sendProviderOnboardingAlert({
+      emailAlertResult = await sendProviderOnboardingAlert({
         providerId: provider.id,
         businessName: provider.businessName,
         contactName: provider.contactName,
@@ -132,6 +133,7 @@ export async function POST(req: Request) {
         categories: provider.categories,
         description: provider.description
       });
+      console.log('[API /providers/register] Email alert result:', emailAlertResult);
     } catch (emailErr) {
       console.warn('[API /providers/register] Email alert warning:', emailErr);
     }
@@ -145,7 +147,7 @@ export async function POST(req: Request) {
       journey: 'provider'
     });
 
-    const response = NextResponse.json({ data: provider, error: null }, { status: 201 });
+    const response = NextResponse.json({ data: provider, emailAlertResult, error: null }, { status: 201 });
     response.cookies.set(SESSION_COOKIE_NAME, sessionToken, getSessionCookieOptions());
 
     // Clean up any legacy plaintext cookies

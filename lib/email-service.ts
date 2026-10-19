@@ -169,13 +169,19 @@ Reply-To is set to: ${cleanEmail}. You can reply directly to this email to respo
         },
         body: JSON.stringify(emailPayload)
       });
+      let resendJson: any = null;
+      try {
+        resendJson = await resendRes.json();
+      } catch {
+        resendJson = { raw: await resendRes.text().catch(() => '') };
+      }
+
       if (resendRes.ok) {
         providerUsed = 'RESEND';
         status = 'DELIVERED_EXTERNAL';
-        console.log('[Contact Email] SUCCESS: Delivered to:', adminEmail);
+        console.log('[Contact Email] SUCCESS: Delivered to:', adminEmail, resendJson);
       } else {
-        const errText = await resendRes.text().catch(() => '');
-        console.warn('[Contact Email] Resend API returned non-200:', resendRes.status, errText);
+        console.warn('[Contact Email] Resend API returned non-200:', resendRes.status, resendJson);
       }
     } catch (err) {
       console.warn('[Contact Email] Resend attempt failed, falling back to outbox:', err);
@@ -837,9 +843,19 @@ https://foodsafe365.in/providers
         },
         body: JSON.stringify(emailPayload)
       });
+      let resendJson: any = null;
+      try {
+        resendJson = await resendRes.json();
+      } catch {
+        resendJson = { raw: await resendRes.text().catch(() => '') };
+      }
+
       if (resendRes.ok) {
-        console.log('[Provider Registration Email] SUCCESS: Delivered to:', adminEmail);
-        return { success: true, message: 'Provider registration alert sent.', recordId, resendStatus: 200 };
+        console.log('[Provider Registration Email] SUCCESS: Delivered to:', adminEmail, resendJson);
+        return { success: true, message: 'Provider registration alert sent.', recordId, resendStatus: 200, resendData: resendJson };
+      } else {
+        console.error('[Provider Registration Email] Resend API error:', resendRes.status, resendJson);
+        return { success: false, message: 'Resend API error: ' + JSON.stringify(resendJson), recordId, resendStatus: resendRes.status, resendData: resendJson };
       }
     } catch (err) {
       console.warn('[Provider Registration Email] Resend failed:', err);
