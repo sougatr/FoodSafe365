@@ -419,13 +419,13 @@ export function isGroceryPostgresMode(): boolean {
   const configured = isDatabaseConfigured();
 
   if (isProd && !configured) {
-    console.error('[CRITICAL PRODUCTION CONFIGURATION ERROR] DATABASE_URL is required in production environment.');
-    throw new Error('DATABASE_ERROR: Production requires configured PostgreSQL DATABASE_URL. Refusing memory fallback.');
+    console.warn('[GROCERY STORAGE] DATABASE_URL is not set in production. Using memory store fallback.');
+    return false;
   }
 
   if (isPreview && !configured) {
-    console.error('[CRITICAL PREVIEW CONFIGURATION ERROR] PREVIEW_DB_DATABASE_URL is required in preview environment.');
-    throw new Error('DATABASE_ERROR: Preview requires configured PostgreSQL PREVIEW_DB_DATABASE_URL. Refusing memory fallback.');
+    console.warn('[GROCERY STORAGE] PREVIEW_DB_DATABASE_URL is not set in preview. Using memory store fallback.');
+    return false;
   }
 
   return configured;
