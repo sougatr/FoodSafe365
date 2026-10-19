@@ -208,8 +208,9 @@ export default function GlobalHeader() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            flexWrap: 'wrap'
+            gap: 4,
+            flexWrap: 'nowrap',
+            whiteSpace: 'nowrap'
           }}
           className="desktop-only-nav"
         >
@@ -223,19 +224,20 @@ export default function GlobalHeader() {
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 11px',
+                  gap: 5,
+                  padding: '6px 9px',
                   borderRadius: 8,
-                  fontSize: 13,
+                  fontSize: 12.5,
                   fontWeight: isActive ? 800 : 600,
                   color: isActive ? '#065F46' : '#334155',
                   background: isActive ? '#D1FAE5' : 'transparent',
                   border: isActive ? '1px solid #10B981' : '1px solid transparent',
                   textDecoration: 'none',
+                  whiteSpace: 'nowrap',
                   transition: 'all 0.15s ease'
                 }}
               >
-                <Icon size={14} color={isActive ? '#059669' : '#64748B'} />
+                <Icon size={13.5} color={isActive ? '#059669' : '#64748B'} />
                 <span>{item.label}</span>
               </Link>
             );

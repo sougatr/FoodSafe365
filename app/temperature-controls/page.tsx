@@ -20,7 +20,7 @@ export default function TemperatureControls() {
 
       <div className="container" style={{ paddingTop: 20 }}>
         <div className="checks-nav">
-          <Link href="/home" className="muted nav-link">
+          <Link href="/" className="muted nav-link">
             <ChevronLeft size={18} /> Home
           </Link>
           <span className="muted">Temperature Controls</span>

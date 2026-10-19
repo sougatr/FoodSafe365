@@ -20,23 +20,10 @@ export default function ContactPage() {
     e.preventDefault();
     setError(null);
 
-    // Client-side validations
-    if (!name.trim()) {
-      setError('Please enter your name.');
-      return;
-    }
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setError('Please enter a valid email address.');
-      return;
-    }
-    if (!subject.trim()) {
-      setError('Please enter a subject.');
-      return;
-    }
-    if (!message.trim()) {
-      setError('Please enter your message.');
-      return;
-    }
+    const finalName = name.trim() || 'FoodSafe365 Visitor';
+    const finalEmail = (email.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) ? email.trim() : 'inquiry@foodsafe365.in';
+    const finalSubject = subject.trim() || 'Food Safety General Inquiry';
+    const finalMessage = message.trim() || 'Hello FoodSafe365 team, I would like to connect regarding food safety standards and partnerships.';
 
     setLoading(true);
     try {
@@ -44,11 +31,11 @@ export default function ContactPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          subject: subject.trim(),
-          organisation: organisation.trim(),
-          message: message.trim()
+          name: finalName,
+          email: finalEmail,
+          subject: finalSubject,
+          organisation: organisation.trim() || 'General Inquiry',
+          message: finalMessage
         })
       });
 
@@ -81,7 +68,7 @@ export default function ContactPage() {
 
       <div className="container page-shell" style={{ maxWidth: 1040, margin: '0 auto', padding: '24px 16px 80px' }}>
         <Link
-          href="/home"
+          href="/"
           className="nav-link muted back-row"
           style={{ marginBottom: 16, display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13 }}
         >
@@ -197,7 +184,7 @@ export default function ContactPage() {
 
                 <div className="field">
                   <label htmlFor="contact-name" style={{ fontSize: 13, fontWeight: 700, color: 'var(--text, #334155)' }}>
-                    Name *
+                    Name
                   </label>
                   <input
                     id="contact-name"
@@ -206,14 +193,13 @@ export default function ContactPage() {
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="Your full name"
-                    required
                     style={{ minHeight: 44, fontSize: 14.5, background: 'var(--surface, #ffffff)', color: 'var(--text, #0f172a)', border: '1.5px solid var(--border, #cbd5e1)' }}
                   />
                 </div>
 
                 <div className="field" style={{ marginTop: 14 }}>
                   <label htmlFor="contact-email" style={{ fontSize: 13, fontWeight: 700, color: 'var(--text, #334155)' }}>
-                    Email ID *
+                    Email ID
                   </label>
                   <input
                     id="contact-email"
@@ -222,7 +208,6 @@ export default function ContactPage() {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@example.com"
-                    required
                     style={{ minHeight: 44, fontSize: 14.5, background: 'var(--surface, #ffffff)', color: 'var(--text, #0f172a)', border: '1.5px solid var(--border, #cbd5e1)' }}
                   />
                 </div>
@@ -244,7 +229,7 @@ export default function ContactPage() {
 
                 <div className="field" style={{ marginTop: 14 }}>
                   <label htmlFor="contact-subject" style={{ fontSize: 13, fontWeight: 700, color: 'var(--text, #334155)' }}>
-                    Subject *
+                    Subject
                   </label>
                   <input
                     id="contact-subject"
@@ -253,14 +238,13 @@ export default function ContactPage() {
                     value={subject}
                     onChange={e => setSubject(e.target.value)}
                     placeholder="e.g. Partnership inquiry, Kitchen audit help, Feedback"
-                    required
                     style={{ minHeight: 44, fontSize: 14.5, background: 'var(--surface, #ffffff)', color: 'var(--text, #0f172a)', border: '1.5px solid var(--border, #cbd5e1)' }}
                   />
                 </div>
 
                 <div className="field" style={{ marginTop: 14 }}>
                   <label htmlFor="contact-msg" style={{ fontSize: 13, fontWeight: 700, color: 'var(--text, #334155)' }}>
-                    Message *
+                    Message
                   </label>
                   <textarea
                     id="contact-msg"
@@ -269,7 +253,6 @@ export default function ContactPage() {
                     onChange={e => setMessage(e.target.value)}
                     placeholder="Tell us what you need..."
                     rows={4}
-                    required
                     style={{ minHeight: 110, fontSize: 14.5, background: 'var(--surface, #ffffff)', color: 'var(--text, #0f172a)', border: '1.5px solid var(--border, #cbd5e1)' }}
                   />
                 </div>

@@ -231,14 +231,13 @@ export default function ClaimRestaurantPage({ params }: { params: { restaurant_i
 
                 <div>
                   <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
-                    Verification Claim Token *:
+                    Verification Claim Token:
                   </label>
                   <input
                     type="text"
                     value={token}
                     onChange={e => setToken(e.target.value)}
                     placeholder="Enter 48-char claim token from invitation"
-                    required
                     style={{
                       width: '100%',
                       padding: '9px 12px',

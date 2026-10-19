@@ -45,7 +45,7 @@ export default function RefrigerationNextStep(){
 
   return <main><GlobalHeader />
     <div className="container detail-shell">
-      <div className="back-row"><Link href="/home" className="nav-link" style={{marginRight:12}}><ArrowLeft size={16}/> Home</Link><Link href="/manager/risk/refrigeration" className="nav-link"><ArrowLeft size={16}/> Back to Refrigerator 2</Link></div>
+      <div className="back-row"><Link href="/" className="nav-link" style={{marginRight:12}}><ArrowLeft size={16}/> Home</Link><Link href="/manager/risk/refrigeration" className="nav-link"><ArrowLeft size={16}/> Back to Refrigerator 2</Link></div>
       {!done ? <>
         <div className="detail-hero"><div className="icon-tile"><ShieldCheck/></div><div><p className="eyebrow">RECOMMENDED CHECK · {index+1} OF {steps.length}</p><h1>Check Refrigerator 2</h1><p className="lead">A short operational check based on the repeated temperature pattern.</p></div></div>
         <div className="progress" style={{marginTop:24}}><div style={{height:8,borderRadius:99,background:'#e8eeeb'}}><div style={{height:8,borderRadius:99,background:'var(--green)',width:`${((index+1)/steps.length)*100}%`}}/></div></div>

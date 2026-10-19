@@ -12,7 +12,7 @@ export default function Checklist() {
     <main>
       <GlobalHeader />
       <div className="container manager-shell" style={{ marginTop: 20 }}>
-        <Link href="/home" className="nav-link muted back-row">
+        <Link href="/" className="nav-link muted back-row">
           <ChevronLeft size={17} /> Back to Home
         </Link>
 

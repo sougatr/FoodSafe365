@@ -1597,7 +1597,7 @@ export default function Checks() {
     <main>
       <GlobalHeader />
       <div className="container checks-shell">
-        <Link href="/home" className="nav-link muted back-row">
+        <Link href="/" className="nav-link muted back-row">
           <ChevronLeft size={17} /> {t('nav.home')}
         </Link>
 

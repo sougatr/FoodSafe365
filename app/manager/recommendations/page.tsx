@@ -72,7 +72,7 @@ export default function Recommendations() {
 
       <div className="container">
         <div className="breadcrumb">
-          <Link href="/home">Home</Link> › <Link href="/manager"><ArrowLeft size={16} /> Manager overview</Link> › Recommendations
+          <Link href="/">Home</Link> › <Link href="/manager"><ArrowLeft size={16} /> Manager overview</Link> › Recommendations
         </div>
 
         <p className="eyebrow">FOODSAFE365 RECOMMENDATIONS</p>

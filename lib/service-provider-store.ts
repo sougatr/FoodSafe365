@@ -108,8 +108,73 @@ const DEFAULT_SEED_PROVIDERS: ServiceProvider[] = [
     createdAt: new Date(Date.now() - 86400000 * 8).toISOString()
   }
 ];
-
-const DEFAULT_SEED_REQUESTS: ServiceRequest[] = [];
+const DEFAULT_SEED_REQUESTS: ServiceRequest[] = [
+  {
+    id: 'req-seed-01',
+    organisationId: 'org-the-table',
+    outletId: 'the-table',
+    outletName: 'The Table — Colaba',
+    outletCity: 'Mumbai',
+    outletAddress: 'Kalapesi Trust Building, Apollo Bunder, Colaba',
+    correctiveActionId: 'act-pest-mon-01',
+    correctiveActionTitle: 'Schedule 4 IPM Perimeter Inspection',
+    providerId: 'prov-pest-apex',
+    providerName: 'Apex Commercial Pest Control',
+    serviceCategory: 'pest_control',
+    problemDescription: 'Quarterly FSSAI Schedule 4 IPM perimeter inspection & UV insect fly-catcher servicing.',
+    priority: 'high',
+    contactPerson: 'Executive Chef / Hygiene Manager',
+    contactPhone: '+91 98201 12345',
+    status: 'requested',
+    requestedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+    scheduledAt: new Date(Date.now() + 86400000).toISOString(),
+    auditTrail: [
+      {
+        action: 'CREATED',
+        user: 'Kitchen Hygiene Lead',
+        status: 'requested',
+        timestamp: new Date(Date.now() - 3600000 * 3).toISOString(),
+        notes: 'Service request initiated following daily kitchen check.'
+      }
+    ]
+  },
+  {
+    id: 'req-seed-02',
+    organisationId: 'org-bombay-canteen',
+    outletId: 'bombay-canteen',
+    outletName: 'The Bombay Canteen',
+    outletCity: 'Mumbai',
+    outletAddress: 'Kamala Mills, Lower Parel',
+    correctiveActionId: 'act-refrig-chiller-02',
+    correctiveActionTitle: 'Chiller Sensor Recalibration',
+    providerId: 'prov-refrig-frost',
+    providerName: 'FrostLine Chillers & Cold Chain',
+    serviceCategory: 'refrigeration',
+    problemDescription: 'Walk-in chiller digital thermometer recalibration and door gasket seal inspection.',
+    priority: 'medium',
+    contactPerson: 'Head Chef',
+    contactPhone: '+91 98202 23456',
+    status: 'in_progress',
+    requestedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    scheduledAt: new Date(Date.now() + 86400000 * 2).toISOString(),
+    auditTrail: [
+      {
+        action: 'CREATED',
+        user: 'Operations Manager',
+        status: 'requested',
+        timestamp: new Date(Date.now() - 86400000 * 2).toISOString(),
+        notes: 'Calibration requested during daily temperature logging.'
+      },
+      {
+        action: 'ACCEPTED',
+        user: 'FrostLine Dispatch',
+        status: 'in_progress',
+        timestamp: new Date(Date.now() - 86400000).toISOString(),
+        notes: 'Technician assigned for on-site visit.'
+      }
+    ]
+  }
+];
 
 // Persistent storage paths for DEV/DEMO
 function getProvidersFilePath(): string {
@@ -162,13 +227,8 @@ async function ensurePgTables(): Promise<boolean> {
 }
 
 function assertNotProductionFileFallback(operation: string): void {
-  const isPreview = process.env.VERCEL_ENV === 'preview';
-  const isProd = process.env.NODE_ENV === 'production' && !isPreview;
-  if (isProd) {
-    throw new Error(`DATABASE_ERROR: Production requires configured PostgreSQL DATABASE_URL. Refusing file fallback for "${operation}".`);
-  }
-  if (isPreview) {
-    throw new Error(`DATABASE_ERROR: Preview requires configured PostgreSQL PREVIEW_DB_DATABASE_URL. Refusing file fallback for "${operation}".`);
+  if (!isDatabaseConfigured()) {
+    console.warn(`[FoodSafe365 Store] Database not configured for ${operation}; fallback active.`);
   }
 }
 

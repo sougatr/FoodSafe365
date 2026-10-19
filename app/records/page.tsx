@@ -160,7 +160,7 @@ export default function Records() {
 
       <div className="container">
         <div className="checks-nav">
-          <Link href="/home" className="muted nav-link">
+          <Link href="/" className="muted nav-link">
             <ChevronLeft size={18} /> Home
           </Link>
           <span className="muted">Traceable Records</span>
@@ -238,7 +238,7 @@ export default function Records() {
                 <span>Switch Account / Sign In</span>
               </Link>
               <Link
-                href="/home"
+                href="/"
                 className="btn secondary"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', textDecoration: 'none' }}
               >

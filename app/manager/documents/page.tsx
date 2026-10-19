@@ -152,7 +152,7 @@ export default function Documents() {
 
       <div className="container">
         <div className="breadcrumb">
-          <Link href="/home">Home</Link> › <Link href="/manager"><ArrowLeft size={16} /> Manager overview</Link> › Documents
+          <Link href="/">Home</Link> › <Link href="/manager"><ArrowLeft size={16} /> Manager overview</Link> › Documents
         </div>
 
         <p className="eyebrow">DOCUMENTS &amp; COMPLIANCE</p>

@@ -96,7 +96,7 @@ export default function ControlDetail() {
 
       <div className="container" style={{ paddingTop: 20 }}>
         <div className="checks-nav">
-          <Link href="/home" className="muted nav-link" style={{ marginRight: 12 }}>
+          <Link href="/" className="muted nav-link" style={{ marginRight: 12 }}>
             <ChevronLeft size={18} /> Home
           </Link>
           <Link href="/temperature-controls" className="muted nav-link">

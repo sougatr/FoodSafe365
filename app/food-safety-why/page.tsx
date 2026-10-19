@@ -951,21 +951,21 @@ export default function FoSTaCLearningHubPage() {
           boxShadow: '0 4px 16px rgba(5, 150, 105, 0.1)'
         }}>
           <h3 style={{ fontSize: 20, fontWeight: 900, color: '#0F172A', margin: '0 0 6px' }}>
-            Ready to Start Today's Store Check?
+            Put Food Safety Learning into Practice
           </h3>
-          <p style={{ fontSize: 14, color: '#64748B', maxWidth: 520, margin: '0 auto 20px', lineHeight: 1.5 }}>
-            Put your learning into action with the 22 routine checks. Takes about 5 minutes.
+          <p style={{ fontSize: 14, color: '#64748B', maxWidth: 540, margin: '0 auto 20px', lineHeight: 1.5 }}>
+            Apply FoSTaC principles to daily kitchen hygiene, temperature logging, and food safety checks.
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
             <Link
-              href="/grocery/daily-check"
+              href="/checks"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 10,
                 background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
                 color: '#ffffff',
-                padding: '14px 32px',
+                padding: '14px 28px',
                 borderRadius: 12,
                 fontSize: 15,
                 fontWeight: 900,
@@ -974,12 +974,32 @@ export default function FoSTaCLearningHubPage() {
               }}
             >
               <ClipboardCheck size={18} />
-              <span>START DAILY CHECK</span>
+              <span>START DAILY KITCHEN CHECK</span>
               <ArrowRight size={18} />
             </Link>
 
             <Link
-              href="/grocery"
+              href="/checklist"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                background: '#ffffff',
+                border: '1.5px solid #CBD5E1',
+                color: '#0F172A',
+                padding: '14px 22px',
+                borderRadius: 12,
+                fontSize: 14.5,
+                fontWeight: 700,
+                textDecoration: 'none'
+              }}
+            >
+              <ShieldCheck size={18} color="#059669" />
+              <span>View Safety Protocols</span>
+            </Link>
+
+            <Link
+              href="/"
               style={{
                 background: '#f1f5f9',
                 color: '#334155',
@@ -990,7 +1010,7 @@ export default function FoSTaCLearningHubPage() {
                 textDecoration: 'none'
               }}
             >
-              Back to Grocery Home
+              Return to Home
             </Link>
           </div>
         </div>

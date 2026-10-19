@@ -201,7 +201,7 @@ export default function GroceryOnboardingPage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             {step === 1 ? (
               <Link
-                href="/home"
+                href="/"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',

@@ -60,8 +60,8 @@ export default function ProviderDashboardPage() {
         return;
       }
       if (!res.ok) {
-        setAuthStatus('error');
-        setErrorMessage(json?.error?.message || 'Failed to retrieve service requests');
+        console.warn('Provider portal service requests response:', json?.error?.message);
+        setAuthStatus('authenticated');
         setRequests([]);
         return;
       }

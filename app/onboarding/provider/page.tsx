@@ -104,7 +104,7 @@ export default function ProviderOnboardingPage() {
       <GlobalHeader />
 
       <div style={{ maxWidth: 760, margin: '32px auto 0', padding: '0 20px' }}>
-        <Link href="/home" style={{
+        <Link href="/" style={{
           display: 'inline-flex',
           alignItems: 'center',
           gap: 6,

@@ -410,13 +410,13 @@ export default function Onboarding() {
 
             {/* Action Buttons */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-              <Link href="/home" className="btn secondary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <Link href="/" className="btn secondary" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                 Cancel
               </Link>
               <button
                 type="submit"
                 className="btn primary"
-                disabled={saving || !name.trim() || !city.trim()}
+                disabled={saving}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',

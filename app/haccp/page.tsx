@@ -19,7 +19,7 @@ export default function HaccpControls(){
     <GlobalHeader />
 
     <div className="container" style={{ maxWidth: 1040, margin: '0 auto', paddingTop: 28, paddingBottom: 64 }}>
-    <div className="breadcrumb"><Link href="/home">Home</Link> › HACCP Controls</div>
+    <div className="breadcrumb"><Link href="/">Home</Link> › HACCP Controls</div>
     <p className="eyebrow">FOOD SAFETY FRAMEWORK</p>
     <h1>HACCP Controls</h1>
     <p className="lead">The HACCP framework used underneath FoodSafe365 to structure food-safety controls.</p>

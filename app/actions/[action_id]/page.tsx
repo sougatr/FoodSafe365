@@ -326,7 +326,7 @@ export default function ActionDetail() {
 
       <div className="container">
         <div className="checks-nav" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-          <Link href="/home" className="muted nav-link" style={{ padding: '4px 8px' }}>
+          <Link href="/" className="muted nav-link" style={{ padding: '4px 8px' }}>
             <ChevronLeft size={16} /> Home
           </Link>
           <span className="muted" style={{ fontSize: 12 }}>/</span>

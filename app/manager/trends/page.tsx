@@ -40,7 +40,7 @@ export default function TrendsPage() {
       <div className="container" style={{ maxWidth: 1140, paddingTop: 24 }}>
         {/* Navigation Breadcrumb */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
-          <Link href="/home" className="muted nav-link" style={{ padding: '2px 6px', fontSize: 13 }}>
+          <Link href="/" className="muted nav-link" style={{ padding: '2px 6px', fontSize: 13 }}>
             <ArrowLeft size={16} /> Home
           </Link>
           <span className="muted">/</span>
