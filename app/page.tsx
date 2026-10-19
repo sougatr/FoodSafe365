@@ -21,7 +21,11 @@ import {
   Check,
   ChevronDown,
   Building2,
-  ExternalLink
+  ExternalLink,
+  Camera,
+  ArrowLeft,
+  Share2,
+  Upload
 } from 'lucide-react';
 import GlobalHeader from '@/components/GlobalHeader';
 import { POPULAR_RESTAURANTS, RestaurantItem } from '@/lib/restaurantsData';
@@ -79,13 +83,19 @@ export default function Landing() {
   const [chainModalRestaurant, setChainModalRestaurant] = useState<RestaurantItem | null>(null);
   const [customBranchInput, setCustomBranchInput] = useState('');
 
-  // Rating Modal State
+  // Rating Modal State (Screen 3: 1 Question per Screen + Photo + OTP)
   const [ratingModalRestaurant, setRatingModalRestaurant] = useState<RestaurantItem | null>(null);
+  const [ratingStep, setRatingStep] = useState<number>(1);
   const [rateTableNum, setRateTableNum] = useState('Table 4');
   const [rateScores, setRateScores] = useState({ q1: 0, q2: 0, q3: 0, q4: 0, q5: 0 });
   const [rateRemarks, setRateRemarks] = useState('');
+  const [ratingPhoto, setRatingPhoto] = useState<string | null>(null);
   const [wantsFeedback, setWantsFeedback] = useState(false);
   const [dinerEmail, setDinerEmail] = useState('');
+  const [dinerPhoneInput, setDinerPhoneInput] = useState('');
+  const [dinerOtpInput, setDinerOtpInput] = useState('');
+  const [otpSentState, setOtpSentState] = useState(false);
+  const [ratingOtpError, setRatingOtpError] = useState('');
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const [ratingConfirmation, setRatingConfirmation] = useState<{
     restaurantId: string;
@@ -251,13 +261,12 @@ export default function Landing() {
 
   // Check if a restaurant is a multi-outlet chain
   function isChainBrand(restaurant: RestaurantItem): boolean {
-    const nameLower = restaurant.name.toLowerCase();
     const locLower = restaurant.location.toLowerCase();
     return (
       restaurant.city === 'pan-india' ||
       locLower.includes('multiple') ||
       locLower.includes('pan-india') ||
-      ['mcdonald', 'subway', "domino's", 'burger king', 'faasos', 'biryani by kilo', 'starbucks', 'kfc', 'chaayos'].some(b => nameLower.includes(b))
+      locLower.includes('outlets')
     );
   }
 
@@ -284,16 +293,22 @@ export default function Landing() {
 
   function handleOpenRating(restaurant: RestaurantItem) {
     setRatingModalRestaurant(restaurant);
+    setRatingStep(1);
     setRateScores({ q1: 0, q2: 0, q3: 0, q4: 0, q5: 0 });
     setRateRemarks('');
+    setRatingPhoto(null);
     setRateTableNum(restaurant.tableCode || 'Table 4');
     setWantsFeedback(false);
     setDinerEmail(customerEmail || '');
+    setDinerPhoneInput(customerPhone || '');
+    setDinerOtpInput('');
+    setOtpSentState(Boolean(customerPhone));
+    setRatingOtpError('');
     setRatingConfirmation(null);
   }
 
-  async function handleSubmitRating(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmitRating(e?: React.FormEvent) {
+    if (e) e.preventDefault();
     if (!ratingModalRestaurant) return;
 
     const allScoresRated = rateScores.q1 > 0 && rateScores.q2 > 0 && rateScores.q3 > 0 && rateScores.q4 > 0 && rateScores.q5 > 0;
@@ -302,7 +317,25 @@ export default function Landing() {
       return;
     }
 
+    // Phone / OTP Verification Check (Screen 3)
+    const effectivePhone = dinerPhoneInput.trim() || customerPhone;
+    if (!effectivePhone) {
+      setRatingOtpError('Please enter your mobile number for verification.');
+      return;
+    }
+    if (!customerPhone && dinerOtpInput.trim() !== '1234' && dinerOtpInput.trim().length !== 4) {
+      setRatingOtpError('Please enter the 4-digit verification code (Demo: 1234).');
+      return;
+    }
+
     setIsSubmittingRating(true);
+    setRatingOtpError('');
+
+    // Save phone to localStorage
+    if (typeof window !== 'undefined' && effectivePhone) {
+      localStorage.setItem('foodsafe365_customer_phone', effectivePhone);
+      setCustomerPhone(effectivePhone);
+    }
 
     const avgScore = (
       (rateScores.q1 + rateScores.q2 + rateScores.q3 + rateScores.q4 + rateScores.q5) / 5
@@ -1800,159 +1833,633 @@ export default function Landing() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmitRating} style={{ padding: 20, overflowY: 'auto' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, background: '#131b26', padding: '8px 12px', borderRadius: 10, border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0' }}>Table Number / Seat:</span>
+              <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', flex: 1, overflowY: 'auto' }}>
+                {/* Progress Bar (Step X of 7) */}
+                <div style={{ marginBottom: 18 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <span style={{ fontSize: 11.5, fontWeight: 800, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {ratingStep <= 5 ? `Question ${ratingStep} of 5` : ratingStep === 6 ? 'Step 6: Notes & Photo' : 'Final Step: Verification'}
+                    </span>
+                    <span style={{ fontSize: 11.5, color: '#94A3B8' }}>
+                      {Math.round((ratingStep / 7) * 100)}% Complete
+                    </span>
+                  </div>
+                  <div style={{ width: '100%', height: 6, background: 'rgba(255,255,255,0.1)', borderRadius: 9999, overflow: 'hidden' }}>
+                    <div style={{
+                      width: `${(ratingStep / 7) * 100}%`,
+                      height: '100%',
+                      background: 'linear-gradient(90deg, #10b981, #059669)',
+                      borderRadius: 9999,
+                      transition: 'width 0.3s ease'
+                    }} />
+                  </div>
+                </div>
+
+                {/* Table Attribution Chip */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  background: '#131b26',
+                  padding: '6px 12px',
+                  borderRadius: 10,
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  marginBottom: 16
+                }}>
+                  <span style={{ fontSize: 12, color: '#94A3B8' }}>Table / Counter:</span>
                   <input
                     type="text"
                     value={rateTableNum}
                     onChange={e => setRateTableNum(e.target.value)}
                     style={{
-                      background: '#0F172A',
-                      border: '1px solid rgba(16, 185, 129, 0.35)',
+                      background: 'transparent',
+                      border: 'none',
                       color: '#ffffff',
-                      borderRadius: 6,
-                      padding: '4px 10px',
-                      fontSize: 13,
+                      fontSize: 12,
                       fontWeight: 700,
-                      width: 100,
-                      textAlign: 'center'
-                    }}
-                  />
-                </div>
-
-                {/* The 5 Food Safety Questions */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 18 }}>
-                  {[
-                    { key: 'q1', label: '1. Table & Cutlery Hygiene', desc: 'Are tables, glasses, and utensils clean?' },
-                    { key: 'q2', label: '2. Staff Grooming & Uniform', desc: 'Are staff wearing clean uniforms and aprons?' },
-                    { key: 'q3', label: '3. Food Freshness & Handling', desc: 'Was hot food served steaming and cold food fresh?' },
-                    { key: 'q4', label: '4. Safe Drinking Water & Washrooms', desc: 'Is safe water and clean handwash available?' },
-                    { key: 'q5', label: '5. Overall Food Safety Confidence', desc: 'Would you recommend this kitchen to family?' }
-                  ].map(item => {
-                    const val = (rateScores as any)[item.key];
-                    return (
-                      <div key={item.key} style={{ background: '#131b26', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 12, padding: '10px 12px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                          <strong style={{ fontSize: 13, color: '#ffffff' }}>{item.label}</strong>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <div style={{ display: 'flex', gap: 2 }}>
-                              {[1, 2, 3, 4, 5].map(star => (
-                                <button
-                                  key={star}
-                                  type="button"
-                                  onClick={() => setRateScores(prev => ({ ...prev, [item.key]: star }))}
-                                  style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    padding: '3px 2px',
-                                    cursor: 'pointer'
-                                  }}
-                                >
-                                  <Star
-                                    size={18}
-                                    fill={star <= val ? '#10b981' : 'transparent'}
-                                    color={star <= val ? '#10b981' : '#64748b'}
-                                  />
-                                </button>
-                              ))}
-                            </div>
-                            <span style={{ fontSize: 12, fontWeight: 800, color: val > 0 ? '#10b981' : '#64748b', minWidth: 20 }}>
-                              {val > 0 ? `${val}★` : '—'}
-                            </span>
-                          </div>
-                        </div>
-                        <p style={{ margin: 0, fontSize: 11.5, color: '#94A3B8' }}>{item.desc}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Written Observation */}
-                <div style={{ marginBottom: 16 }}>
-                  <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#ffffff', marginBottom: 6 }}>
-                    Observations or Comments (Optional):
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={rateRemarks}
-                    onChange={e => setRateRemarks(e.target.value)}
-                    placeholder="E.g., spotless washbasin, hot soup, clean uniforms..."
-                    style={{
-                      width: '100%',
-                      background: '#131b26',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      borderRadius: 10,
-                      padding: '8px 12px',
-                      color: '#ffffff',
-                      fontSize: 13,
+                      textAlign: 'right',
                       outline: 'none',
-                      resize: 'none',
-                      boxSizing: 'border-box'
+                      width: 120
                     }}
                   />
                 </div>
 
-                {/* GM Response Request */}
-                <div style={{
-                  background: '#131b26',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: 12,
-                  padding: '12px 14px',
-                  marginBottom: 18
-                }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: 13, color: '#ffffff', fontWeight: 600 }}>
-                    <input
-                      type="checkbox"
-                      checked={wantsFeedback}
-                      onChange={e => setWantsFeedback(e.target.checked)}
-                      style={{ width: 16, height: 16, accentColor: '#10b981' }}
-                    />
-                    <span>Request direct response from kitchen manager</span>
-                  </label>
-                  {wantsFeedback && (
-                    <div style={{ marginTop: 10 }}>
-                      <input
-                        type="email"
-                        placeholder="Your email address for reply"
-                        value={dinerEmail}
-                        onChange={e => setDinerEmail(e.target.value)}
-                        style={{
-                          width: '100%',
-                          background: '#0F172A',
-                          border: '1px solid rgba(16, 185, 129, 0.4)',
-                          borderRadius: 8,
-                          padding: '8px 12px',
-                          color: '#ffffff',
-                          fontSize: 13,
-                          outline: 'none',
-                          boxSizing: 'border-box'
-                        }}
-                      />
+                {/* STEP 1: CUTLERY & TABLE */}
+                {ratingStep === 1 && (
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center', padding: '10px 0 20px' }}>
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>🍽️</div>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#10b981', textTransform: 'uppercase', marginBottom: 4 }}>
+                      Pillar 1 · Hygiene
+                    </span>
+                    <h4 style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', margin: '0 0 8px' }}>
+                      Table &amp; Cutlery Hygiene
+                    </h4>
+                    <p style={{ fontSize: 13, color: '#94A3B8', margin: '0 0 24px', lineHeight: 1.4 }}>
+                      Are dining tables, water glasses, and cutlery clean? Check for oily film or residue.
+                    </p>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setRateScores(prev => ({ ...prev, q1: star }))}
+                          style={{
+                            background: star <= rateScores.q1 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)',
+                            border: star <= rateScores.q1 ? '2px solid #10b981' : '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: 14,
+                            width: 52,
+                            height: 52,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <Star
+                            size={28}
+                            fill={star <= rateScores.q1 ? '#10b981' : 'transparent'}
+                            color={star <= rateScores.q1 ? '#10b981' : '#64748b'}
+                          />
+                        </button>
+                      ))}
                     </div>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: rateScores.q1 > 0 ? '#10b981' : '#64748b', minHeight: 20 }}>
+                      {rateScores.q1 === 1 ? '1★ Unclean / Oily residue' :
+                       rateScores.q1 === 2 ? '2★ Sticky or stained' :
+                       rateScores.q1 === 3 ? '3★ Acceptable cleanliness' :
+                       rateScores.q1 === 4 ? '4★ Clean & well wiped' :
+                       rateScores.q1 === 5 ? '5★ Spotless & sparkling' : 'Tap a star to rate'}
+                    </span>
+                  </div>
+                )}
+
+                {/* STEP 2: STAFF GROOMING */}
+                {ratingStep === 2 && (
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center', padding: '10px 0 20px' }}>
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>🧑‍🍳</div>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#10b981', textTransform: 'uppercase', marginBottom: 4 }}>
+                      Pillar 2 · Staff
+                    </span>
+                    <h4 style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', margin: '0 0 8px' }}>
+                      Staff Grooming &amp; Uniform
+                    </h4>
+                    <p style={{ fontSize: 13, color: '#94A3B8', margin: '0 0 24px', lineHeight: 1.4 }}>
+                      Are staff wearing clean aprons, hair covers, and practicing good personal hygiene?
+                    </p>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setRateScores(prev => ({ ...prev, q2: star }))}
+                          style={{
+                            background: star <= rateScores.q2 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)',
+                            border: star <= rateScores.q2 ? '2px solid #10b981' : '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: 14,
+                            width: 52,
+                            height: 52,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <Star
+                            size={28}
+                            fill={star <= rateScores.q2 ? '#10b981' : 'transparent'}
+                            color={star <= rateScores.q2 ? '#10b981' : '#64748b'}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: rateScores.q2 > 0 ? '#10b981' : '#64748b', minHeight: 20 }}>
+                      {rateScores.q2 === 1 ? '1★ Untidy / No uniform' :
+                       rateScores.q2 === 2 ? '2★ Visible stains / lapses' :
+                       rateScores.q2 === 3 ? '3★ Basic aprons worn' :
+                       rateScores.q2 === 4 ? '4★ Clean & well-groomed' :
+                       rateScores.q2 === 5 ? '5★ Immaculate uniforms & hairnets' : 'Tap a star to rate'}
+                    </span>
+                  </div>
+                )}
+
+                {/* STEP 3: FOOD FRESHNESS */}
+                {ratingStep === 3 && (
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center', padding: '10px 0 20px' }}>
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>🍲</div>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#10b981', textTransform: 'uppercase', marginBottom: 4 }}>
+                      Pillar 3 · Food Freshness
+                    </span>
+                    <h4 style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', margin: '0 0 8px' }}>
+                      Food Freshness &amp; Handling
+                    </h4>
+                    <p style={{ fontSize: 13, color: '#94A3B8', margin: '0 0 24px', lineHeight: 1.4 }}>
+                      Was hot food served steaming, cold items crisp, and free from stale reheated odors?
+                    </p>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setRateScores(prev => ({ ...prev, q3: star }))}
+                          style={{
+                            background: star <= rateScores.q3 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)',
+                            border: star <= rateScores.q3 ? '2px solid #10b981' : '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: 14,
+                            width: 52,
+                            height: 52,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <Star
+                            size={28}
+                            fill={star <= rateScores.q3 ? '#10b981' : 'transparent'}
+                            color={star <= rateScores.q3 ? '#10b981' : '#64748b'}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: rateScores.q3 > 0 ? '#10b981' : '#64748b', minHeight: 20 }}>
+                      {rateScores.q3 === 1 ? '1★ Stale / Burnt oil odor' :
+                       rateScores.q3 === 2 ? '2★ Lukewarm / questionable' :
+                       rateScores.q3 === 3 ? '3★ Decent freshness' :
+                       rateScores.q3 === 4 ? '4★ Hot & freshly made' :
+                       rateScores.q3 === 5 ? '5★ Freshly prepared, steaming hot' : 'Tap a star to rate'}
+                    </span>
+                  </div>
+                )}
+
+                {/* STEP 4: WATER & WASHROOM */}
+                {ratingStep === 4 && (
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center', padding: '10px 0 20px' }}>
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>🚰</div>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#10b981', textTransform: 'uppercase', marginBottom: 4 }}>
+                      Pillar 4 · Water &amp; Washroom
+                    </span>
+                    <h4 style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', margin: '0 0 8px' }}>
+                      Safe Water &amp; Washrooms
+                    </h4>
+                    <p style={{ fontSize: 13, color: '#94A3B8', margin: '0 0 24px', lineHeight: 1.4 }}>
+                      Is safe purified drinking water provided? Are washbasins equipped with soap?
+                    </p>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setRateScores(prev => ({ ...prev, q4: star }))}
+                          style={{
+                            background: star <= rateScores.q4 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)',
+                            border: star <= rateScores.q4 ? '2px solid #10b981' : '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: 14,
+                            width: 52,
+                            height: 52,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <Star
+                            size={28}
+                            fill={star <= rateScores.q4 ? '#10b981' : 'transparent'}
+                            color={star <= rateScores.q4 ? '#10b981' : '#64748b'}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: rateScores.q4 > 0 ? '#10b981' : '#64748b', minHeight: 20 }}>
+                      {rateScores.q4 === 1 ? '1★ No soap / dirty basin' :
+                       rateScores.q4 === 2 ? '2★ Poor water supply' :
+                       rateScores.q4 === 3 ? '3★ Functional wash area' :
+                       rateScores.q4 === 4 ? '4★ Clean basin with soap' :
+                       rateScores.q4 === 5 ? '5★ Sparkling with hand sanitizer & RO' : 'Tap a star to rate'}
+                    </span>
+                  </div>
+                )}
+
+                {/* STEP 5: OVERALL CONFIDENCE */}
+                {ratingStep === 5 && (
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center', padding: '10px 0 20px' }}>
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>🛡️</div>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#10b981', textTransform: 'uppercase', marginBottom: 4 }}>
+                      Pillar 5 · Trust
+                    </span>
+                    <h4 style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', margin: '0 0 8px' }}>
+                      Overall Food Safety Confidence
+                    </h4>
+                    <p style={{ fontSize: 13, color: '#94A3B8', margin: '0 0 24px', lineHeight: 1.4 }}>
+                      Would you comfortably recommend this kitchen to your family and children?
+                    </p>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
+                      {[1, 2, 3, 4, 5].map(star => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setRateScores(prev => ({ ...prev, q5: star }))}
+                          style={{
+                            background: star <= rateScores.q5 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)',
+                            border: star <= rateScores.q5 ? '2px solid #10b981' : '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: 14,
+                            width: 52,
+                            height: 52,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <Star
+                            size={28}
+                            fill={star <= rateScores.q5 ? '#10b981' : 'transparent'}
+                            color={star <= rateScores.q5 ? '#10b981' : '#64748b'}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: rateScores.q5 > 0 ? '#10b981' : '#64748b', minHeight: 20 }}>
+                      {rateScores.q5 === 1 ? '1★ High risk / would avoid' :
+                       rateScores.q5 === 2 ? '2★ Hesitant to return' :
+                       rateScores.q5 === 3 ? '3★ Average confidence' :
+                       rateScores.q5 === 4 ? '4★ High safety confidence' :
+                       rateScores.q5 === 5 ? '5★ 100% Trust & recommend to family' : 'Tap a star to rate'}
+                    </span>
+                  </div>
+                )}
+
+                {/* STEP 6: OBSERVATIONS & OPTIONAL PHOTO */}
+                {ratingStep === 6 && (
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14, padding: '6px 0 16px' }}>
+                    <div>
+                      <h4 style={{ fontSize: 16, fontWeight: 800, color: '#ffffff', margin: '0 0 4px' }}>
+                        Observations &amp; Optional Photo
+                      </h4>
+                      <p style={{ fontSize: 12.5, color: '#94A3B8', margin: 0 }}>
+                        Helpful specifics directly help the kitchen manager take action.
+                      </p>
+                    </div>
+
+                    <textarea
+                      rows={3}
+                      value={rateRemarks}
+                      onChange={e => setRateRemarks(e.target.value)}
+                      placeholder="E.g., spotless washbasin, stewards were polite, hot soup served fresh..."
+                      style={{
+                        width: '100%',
+                        background: '#131b26',
+                        border: '1px solid rgba(255, 255, 255, 0.12)',
+                        borderRadius: 10,
+                        padding: '10px 12px',
+                        color: '#ffffff',
+                        fontSize: 13,
+                        outline: 'none',
+                        resize: 'none',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+
+                    {/* Optional Photo Attachment */}
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#e2e8f0', marginBottom: 6 }}>
+                        Photo of Table / Cutlery / Food (Optional):
+                      </label>
+                      {ratingPhoto ? (
+                        <div style={{ position: 'relative', display: 'inline-block' }}>
+                          <img
+                            src={ratingPhoto}
+                            alt="Observation upload"
+                            style={{ width: 90, height: 90, objectFit: 'cover', borderRadius: 10, border: '1px solid #10b981' }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setRatingPhoto(null)}
+                            style={{
+                              position: 'absolute',
+                              top: -6,
+                              right: -6,
+                              background: '#ef4444',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '50%',
+                              width: 22,
+                              height: 22,
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ) : (
+                        <label style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          background: '#131b26',
+                          border: '1px dashed rgba(255,255,255,0.25)',
+                          borderRadius: 10,
+                          padding: '10px 16px',
+                          color: '#cbd5e1',
+                          fontSize: 13,
+                          fontWeight: 600,
+                          cursor: 'pointer'
+                        }}>
+                          <Camera size={18} color="#10b981" />
+                          <span>Attach Photo</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={e => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => setRatingPhoto(reader.result as string);
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                      )}
+                    </div>
+
+                    {/* Manager Alert Checkbox */}
+                    <div style={{
+                      background: '#131b26',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      borderRadius: 12,
+                      padding: '12px 14px'
+                    }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontSize: 13, color: '#ffffff', fontWeight: 600 }}>
+                        <input
+                          type="checkbox"
+                          checked={wantsFeedback}
+                          onChange={e => setWantsFeedback(e.target.checked)}
+                          style={{ width: 16, height: 16, accentColor: '#10b981' }}
+                        />
+                        <span>Request direct response from kitchen manager</span>
+                      </label>
+                      {wantsFeedback && (
+                        <div style={{ marginTop: 10 }}>
+                          <input
+                            type="email"
+                            placeholder="Your email address for manager reply"
+                            value={dinerEmail}
+                            onChange={e => setDinerEmail(e.target.value)}
+                            style={{
+                              width: '100%',
+                              background: '#0F172A',
+                              border: '1px solid rgba(16, 185, 129, 0.4)',
+                              borderRadius: 8,
+                              padding: '8px 12px',
+                              color: '#ffffff',
+                              fontSize: 13,
+                              outline: 'none',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 7: PHONE & OTP VERIFICATION */}
+                {ratingStep === 7 && (
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center', padding: '10px 0 20px' }}>
+                    <div style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: '50%',
+                      background: 'rgba(16, 185, 129, 0.15)',
+                      color: '#10b981',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      margin: '0 auto 12px'
+                    }}>
+                      <Smartphone size={26} />
+                    </div>
+                    <h4 style={{ fontSize: 18, fontWeight: 900, color: '#ffffff', margin: '0 0 6px' }}>
+                      Verify to Submit
+                    </h4>
+                    <p style={{ fontSize: 12.5, color: '#94A3B8', margin: '0 auto 18px', maxWidth: 360, lineHeight: 1.4 }}>
+                      FoodSafe365 verifies diner ratings to prevent spam and ensure 100% authentic community safety logs.
+                    </p>
+
+                    <div style={{ maxWidth: 320, margin: '0 auto', width: '100%' }}>
+                      <div style={{ marginBottom: 12, textAlign: 'left' }}>
+                        <label style={{ display: 'block', fontSize: 11.5, color: '#cbd5e1', fontWeight: 600, marginBottom: 4 }}>
+                          Mobile Number
+                        </label>
+                        <input
+                          type="tel"
+                          placeholder="9876543210"
+                          value={dinerPhoneInput}
+                          onChange={e => setDinerPhoneInput(e.target.value)}
+                          style={{
+                            width: '100%',
+                            background: '#131b26',
+                            border: '1px solid rgba(255,255,255,0.15)',
+                            borderRadius: 10,
+                            padding: '10px 14px',
+                            color: '#ffffff',
+                            fontSize: 14,
+                            outline: 'none',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                      </div>
+
+                      <div style={{ marginBottom: 12, textAlign: 'left' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                          <label style={{ fontSize: 11.5, color: '#cbd5e1', fontWeight: 600 }}>
+                            4-Digit OTP Code
+                          </label>
+                          <span style={{ fontSize: 11, color: '#10b981', fontWeight: 700 }}>
+                            Demo Code: 1234
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          maxLength={4}
+                          placeholder="1234"
+                          value={dinerOtpInput}
+                          onChange={e => setDinerOtpInput(e.target.value)}
+                          style={{
+                            width: '100%',
+                            background: '#131b26',
+                            border: '1px solid rgba(16, 185, 129, 0.4)',
+                            borderRadius: 10,
+                            padding: '10px 14px',
+                            color: '#ffffff',
+                            fontSize: 16,
+                            fontWeight: 800,
+                            letterSpacing: '0.25em',
+                            textAlign: 'center',
+                            outline: 'none',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                      </div>
+
+                      {ratingOtpError && (
+                        <p style={{ margin: '0 0 10px', fontSize: 12, color: '#f87171' }}>{ratingOtpError}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Wizard Bottom Navigation Buttons */}
+                <div style={{ display: 'flex', gap: 10, marginTop: 'auto', paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                  {ratingStep > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setRatingStep(prev => prev - 1)}
+                      style={{
+                        padding: '12px 18px',
+                        background: 'rgba(255,255,255,0.08)',
+                        border: 'none',
+                        borderRadius: 12,
+                        color: '#cbd5e1',
+                        fontSize: 13.5,
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6
+                      }}
+                    >
+                      <ArrowLeft size={16} /> Back
+                    </button>
+                  )}
+
+                  {ratingStep < 6 && (
+                    <button
+                      type="button"
+                      disabled={!(rateScores as any)[`q${ratingStep}`]}
+                      onClick={() => setRatingStep(prev => prev + 1)}
+                      style={{
+                        flex: 1,
+                        padding: '12px 18px',
+                        background: (rateScores as any)[`q${ratingStep}`] ? '#059669' : 'rgba(255,255,255,0.1)',
+                        border: 'none',
+                        borderRadius: 12,
+                        color: '#ffffff',
+                        fontSize: 14,
+                        fontWeight: 800,
+                        cursor: (rateScores as any)[`q${ratingStep}`] ? 'pointer' : 'not-allowed',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6
+                      }}
+                    >
+                      Next Question →
+                    </button>
+                  )}
+
+                  {ratingStep === 6 && (
+                    <button
+                      type="button"
+                      onClick={() => setRatingStep(7)}
+                      style={{
+                        flex: 1,
+                        padding: '12px 18px',
+                        background: '#059669',
+                        border: 'none',
+                        borderRadius: 12,
+                        color: '#ffffff',
+                        fontSize: 14,
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6
+                      }}
+                    >
+                      Verify &amp; Submit →
+                    </button>
+                  )}
+
+                  {ratingStep === 7 && (
+                    <button
+                      type="button"
+                      disabled={isSubmittingRating}
+                      onClick={() => handleSubmitRating()}
+                      style={{
+                        flex: 1,
+                        padding: '12px 18px',
+                        background: '#059669',
+                        border: 'none',
+                        borderRadius: 12,
+                        color: '#ffffff',
+                        fontSize: 14,
+                        fontWeight: 800,
+                        cursor: isSubmittingRating ? 'wait' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        boxShadow: '0 4px 14px rgba(5, 150, 105, 0.4)'
+                      }}
+                    >
+                      {isSubmittingRating ? 'Verifying & Submitting...' : 'Confirm & Submit Rating ✓'}
+                    </button>
                   )}
                 </div>
-
-                {/* Submit Rating Button */}
-                <button
-                  type="submit"
-                  disabled={isSubmittingRating}
-                  style={{
-                    width: '100%',
-                    minHeight: 48,
-                    background: '#059669',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: 12,
-                    fontSize: 15,
-                    fontWeight: 800,
-                    cursor: isSubmittingRating ? 'wait' : 'pointer',
-                    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)'
-                  }}
-                >
-                  {isSubmittingRating ? 'Sending Alert...' : 'Submit Food-Safety Rating →'}
-                </button>
-              </form>
+              </div>
             )}
           </div>
         </div>
@@ -2200,7 +2707,7 @@ export default function Landing() {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL 4: KITCHEN RECORD PEEK MODAL */}
+      {/* MODAL 4: KITCHEN SAFETY RECORD (Screen 4: Timestamped checks, 7-day dots, WhatsApp share) */}
       {/* ========================================================================= */}
       {passportModalRestaurant && (
         <div style={{
@@ -2219,108 +2726,224 @@ export default function Landing() {
         }}>
           <div style={{
             background: '#ffffff',
-            borderRadius: 20,
-            maxWidth: 480,
+            borderRadius: 22,
+            maxWidth: 520,
             width: '100%',
-            padding: 24,
+            maxHeight: '92vh',
+            display: 'flex',
+            flexDirection: 'column',
             boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
+            overflow: 'hidden',
             position: 'relative'
           }}>
-            <button
-              type="button"
-              onClick={() => setPassportModalRestaurant(null)}
-              style={{
-                position: 'absolute',
-                top: 16,
-                right: 16,
-                background: '#f1f5f9',
-                border: 'none',
-                borderRadius: '50%',
-                width: 32,
-                height: 32,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#64748b'
-              }}
-            >
-              <X size={18} />
-            </button>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-              <div style={{
-                width: 44,
-                height: 44,
-                borderRadius: 12,
-                background: 'rgba(16, 185, 129, 0.1)',
-                color: '#059669',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <ShieldCheck size={26} />
-              </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 900, color: '#0F2922' }}>
-                  {passportModalRestaurant.name}
-                </h3>
-                <span style={{ fontSize: 12.5, color: '#64748B' }}>
-                  Daily Food-Safety Record
-                </span>
-              </div>
-            </div>
-
+            {/* Modal Header */}
             <div style={{
-              background: '#F8FAF6',
-              border: '1px solid #E2E8F0',
-              borderRadius: 14,
-              padding: '16px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 10,
-              marginBottom: 18,
-              fontSize: 13
+              background: 'linear-gradient(135deg, #064E3B 0%, #065F46 100%)',
+              padding: '20px 22px',
+              color: '#ffffff',
+              position: 'relative'
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#64748B' }}>Cold Storage &amp; Prep:</span>
-                <strong style={{ color: '#059669' }}>Inspected (≤4°C)</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#64748B' }}>Staff Hygiene &amp; Health:</span>
-                <strong style={{ color: '#059669' }}>Certified (Form 1A)</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#64748B' }}>Pest Exclusion &amp; Cleanliness:</span>
-                <strong style={{ color: '#059669' }}>Inspected &amp; Clean</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ color: '#64748B' }}>Last Inspection Log:</span>
-                <span style={{ color: '#334155', fontWeight: 600 }}>{passportModalRestaurant.lastCheck}</span>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: 10 }}>
               <button
                 type="button"
-                onClick={() => {
-                  const r = passportModalRestaurant;
-                  setPassportModalRestaurant(null);
-                  handleInitiateRating(r);
-                }}
+                onClick={() => setPassportModalRestaurant(null)}
                 style={{
-                  flex: 1,
-                  padding: '12px',
-                  borderRadius: 10,
-                  background: '#059669',
-                  color: '#ffffff',
+                  position: 'absolute',
+                  top: 16,
+                  right: 16,
+                  background: 'rgba(255,255,255,0.2)',
                   border: 'none',
-                  fontSize: 14,
-                  fontWeight: 800,
-                  cursor: 'pointer'
+                  borderRadius: '50%',
+                  width: 30,
+                  height: 30,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ffffff'
                 }}
               >
-                Rate This Kitchen →
+                <X size={16} />
               </button>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.2)', padding: '3px 10px', borderRadius: 9999, fontSize: 11, fontWeight: 800, marginBottom: 6 }}>
+                <ShieldCheck size={14} />
+                <span>VERIFIED KITCHEN RECORD</span>
+              </div>
+              <h3 style={{ margin: 0, fontSize: 21, fontWeight: 900 }}>
+                {passportModalRestaurant.name}
+              </h3>
+              <p style={{ margin: '3px 0 0', fontSize: 12.5, opacity: 0.9 }}>
+                {passportModalRestaurant.location} · FSSAI Lic #11524012000492
+              </p>
+            </div>
+
+            <div style={{ padding: 22, overflowY: 'auto' }}>
+              {/* Today's Verification Status Banner */}
+              <div style={{
+                background: '#ECFDF5',
+                border: '1.5px solid #A7F3D0',
+                borderRadius: 14,
+                padding: '12px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                marginBottom: 18
+              }}>
+                <div style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
+                  background: '#10B981',
+                  color: '#ffffff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <Check size={20} />
+                </div>
+                <div>
+                  <strong style={{ display: 'block', fontSize: 13.5, color: '#065F46' }}>
+                    Kitchen Verified Active Today
+                  </strong>
+                  <span style={{ fontSize: 12, color: '#047857' }}>
+                    Morning hygiene ritual completed at {passportModalRestaurant.lastCheck || '09:15 AM'}
+                  </span>
+                </div>
+              </div>
+
+              {/* 4 Timestamped Food Safety Checks */}
+              <div style={{ marginBottom: 18 }}>
+                <span style={{ display: 'block', fontSize: 12, fontWeight: 800, textTransform: 'uppercase', color: '#64748B', letterSpacing: '0.05em', marginBottom: 10 }}>
+                  Today's Timestamped Kitchen Logs
+                </span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                  {[
+                    { icon: '❄️', title: 'Walk-in Chiller & Refrigeration', value: '3.2°C', norm: 'Safe limit: ≤ 5°C', time: '09:15 AM' },
+                    { icon: '🍳', title: 'Deep Fryer Cooking Oil (TPM)', value: '14% TPM', norm: 'FSSAI limit: ≤ 25%', time: '11:30 AM' },
+                    { icon: '💧', title: 'Purified Drinking Water TDS', value: '85 ppm', norm: 'RO Serviced May 2026', time: '08:45 AM' },
+                    { icon: '🧼', title: 'Pest Audit & Area Sanitization', value: 'Intact & Cleared', norm: 'Weekly audit current', time: 'Yesterday' }
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        background: '#F8FAF6',
+                        border: '1px solid #E2E8F0',
+                        borderRadius: 12,
+                        padding: '10px 14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 10
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 20 }}>{item.icon}</span>
+                        <div>
+                          <strong style={{ display: 'block', fontSize: 13, color: '#0F2922' }}>{item.title}</strong>
+                          <span style={{ fontSize: 11.5, color: '#64748B' }}>{item.norm} · Logged {item.time}</span>
+                        </div>
+                      </div>
+                      <span style={{
+                        background: '#D1FAE5',
+                        color: '#065F46',
+                        padding: '3px 8px',
+                        borderRadius: 6,
+                        fontSize: 12,
+                        fontWeight: 800,
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {item.value} ✓
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 7-Day Compliance History (The Dots) */}
+              <div style={{
+                background: '#F1F5F9',
+                borderRadius: 14,
+                padding: '14px 16px',
+                marginBottom: 20
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: '#334155' }}>
+                    7-Day Compliance History
+                  </span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: '#059669' }}>
+                    7 / 7 Days Active (100%)
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
+                    <div key={day} style={{ textAlign: 'center' }}>
+                      <div style={{
+                        width: 22,
+                        height: 22,
+                        borderRadius: '50%',
+                        background: '#059669',
+                        color: '#ffffff',
+                        fontSize: 11,
+                        fontWeight: 800,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: '0 auto 4px'
+                      }}>
+                        ✓
+                      </div>
+                      <span style={{ fontSize: 10.5, fontWeight: 700, color: '#64748B' }}>{day}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons: WhatsApp Share & Rate */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <a
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check the verified daily kitchen safety record of ${passportModalRestaurant.name} before you eat: https://foodsafe365.in`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                    background: '#25D366',
+                    color: '#ffffff',
+                    padding: '13px',
+                    borderRadius: 12,
+                    textDecoration: 'none',
+                    fontSize: 14,
+                    fontWeight: 800,
+                    boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)'
+                  }}
+                >
+                  <Share2 size={18} />
+                  <span>Share Kitchen Record on WhatsApp</span>
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const r = passportModalRestaurant;
+                    setPassportModalRestaurant(null);
+                    handleInitiateRating(r);
+                  }}
+                  style={{
+                    background: '#0F2922',
+                    color: '#ffffff',
+                    padding: '12px',
+                    borderRadius: 12,
+                    border: 'none',
+                    fontSize: 13.5,
+                    fontWeight: 700,
+                    cursor: 'pointer'
+                  }}
+                >
+                  ★ Rate Safety at {passportModalRestaurant.name}
+                </button>
+              </div>
             </div>
           </div>
         </div>

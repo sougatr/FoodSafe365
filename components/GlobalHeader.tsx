@@ -156,7 +156,7 @@ export default function GlobalHeader() {
           </span>
         </Link>
 
-        {/* Clean Header Controls: Language Switch, Login, Menu */}
+        {/* Clean Header Controls: Learn Link, Language Switch, Login, Menu */}
         <div
           style={{
             display: 'flex',
@@ -165,6 +165,27 @@ export default function GlobalHeader() {
             flexShrink: 0
           }}
         >
+          {/* Direct Learn Link */}
+          <Link
+            href="/food-safety-why"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              padding: '6px 12px',
+              borderRadius: 8,
+              fontSize: 13,
+              fontWeight: 700,
+              color: '#059669',
+              background: 'rgba(5, 150, 105, 0.08)',
+              textDecoration: 'none',
+              border: '1px solid rgba(5, 150, 105, 0.2)'
+            }}
+          >
+            <BookOpen size={14} />
+            <span>Learn</span>
+          </Link>
+
           {/* Language Switch */}
           <LanguageSelector compact={true} />
 

@@ -216,6 +216,232 @@ export default function FoSTaCLearningHubPage() {
           </div>
         </div>
 
+        {/* ========================================================================= */}
+        {/* SECTION: 3 SHORT ESSENTIAL LESSONS (2-MINUTE READS) */}
+        {/* ========================================================================= */}
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 14 }}>
+            <div>
+              <span style={{ fontSize: 11.5, fontWeight: 800, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                BITE-SIZED ESSENTIALS
+              </span>
+              <h2 style={{ fontSize: 22, fontWeight: 900, color: '#0F2922', margin: '2px 0 0' }}>
+                3 Things Every Diner &amp; Kitchen Must Know
+              </h2>
+            </div>
+            <span style={{ fontSize: 12, color: '#64748B' }}>2-min reads</span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
+            {/* Lesson 1 */}
+            <div style={{
+              background: '#ffffff',
+              border: '1px solid #E2E8F0',
+              borderRadius: 16,
+              padding: '18px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <span style={{ fontSize: 24 }}>🌡️</span>
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#EA580C', background: '#FFF7ED', padding: '2px 8px', borderRadius: 9999 }}>
+                  COLD CHAIN
+                </span>
+              </div>
+              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0F2922', margin: '0 0 6px' }}>
+                The Danger Zone (5°C to 60°C)
+              </h3>
+              <p style={{ fontSize: 13, color: '#475569', margin: '0 0 12px', lineHeight: 1.45, flex: 1 }}>
+                In India's climate, food left between 5°C and 60°C allows bacteria like <em>Salmonella</em> and <em>E. coli</em> to double every 20 minutes. Milk, paneer, and poultry must stay refrigerated at ≤5°C.
+              </p>
+              <div style={{ background: '#F8FAF6', borderRadius: 8, padding: '8px 10px', fontSize: 11.5, color: '#047857', fontWeight: 600 }}>
+                💡 Key rule: Keep chilled food cold (≤5°C) and hot food steaming (≥65°C).
+              </div>
+            </div>
+
+            {/* Lesson 2 */}
+            <div style={{
+              background: '#ffffff',
+              border: '1px solid #E2E8F0',
+              borderRadius: 16,
+              padding: '18px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <span style={{ fontSize: 24 }}>🍳</span>
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#B45309', background: '#FEF3C7', padding: '2px 8px', borderRadius: 9999 }}>
+                  OIL TOXICITY
+                </span>
+              </div>
+              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0F2922', margin: '0 0 6px' }}>
+                Reused Oil &amp; The 25% TPM Limit
+              </h3>
+              <p style={{ fontSize: 13, color: '#475569', margin: '0 0 12px', lineHeight: 1.45, flex: 1 }}>
+                Heating cooking oil repeatedly past its smoke point generates Total Polar Materials (TPMs). When TPM exceeds 25%, oil turns dark, carcinogenic, and raises arterial inflammation.
+              </p>
+              <div style={{ background: '#F8FAF6', borderRadius: 8, padding: '8px 10px', fontSize: 11.5, color: '#047857', fontWeight: 600 }}>
+                💡 FSSAI mandates discarding frying oil once TPM crosses 25%.
+              </div>
+            </div>
+
+            {/* Lesson 3 */}
+            <div style={{
+              background: '#ffffff',
+              border: '1px solid #E2E8F0',
+              borderRadius: 16,
+              padding: '18px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <span style={{ fontSize: 24 }}>📋</span>
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#7C3AED', background: '#F5F3FF', padding: '2px 8px', borderRadius: 9999 }}>
+                  FDA CRACKDOWN
+                </span>
+              </div>
+              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0F2922', margin: '0 0 6px' }}>
+                What FDA Surprise Raids Look For
+              </h3>
+              <p style={{ fontSize: 13, color: '#475569', margin: '0 0 12px', lineHeight: 1.45, flex: 1 }}>
+                Surprise inspections by Tukaram Munde, IAS, focus on 4 uncompromised points: fridge temperatures, non-reused oil, medical fitness certs for cooks, and absence of synthetic food colorings.
+              </p>
+              <div style={{ background: '#F8FAF6', borderRadius: 8, padding: '8px 10px', fontSize: 11.5, color: '#047857', fontWeight: 600 }}>
+                💡 Clean kitchens log these daily and don't fear surprise audits.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* INTERACTIVE 60-SECOND FOOD SAFETY IQ QUIZ */}
+        {/* ========================================================================= */}
+        <div style={{
+          background: 'linear-gradient(135deg, #17231F 0%, #0F2922 100%)',
+          borderRadius: 20,
+          padding: '24px 28px',
+          color: '#ffffff',
+          marginBottom: 36,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+            <span style={{ background: '#10B981', color: '#0F2922', padding: '2px 8px', borderRadius: 9999, fontSize: 11, fontWeight: 800 }}>
+              TEST YOUR KNOWLEDGE
+            </span>
+            <span style={{ fontSize: 12, color: '#94A3B8' }}>60 Seconds · 3 Questions</span>
+          </div>
+          <h2 style={{ fontSize: 20, fontWeight: 900, margin: '0 0 6px' }}>
+            Interactive Food Safety IQ Quiz
+          </h2>
+          <p style={{ fontSize: 13, color: '#CBD5E1', margin: '0 0 20px', maxWidth: 640 }}>
+            Know your rights as a diner and learn the standards that protect your health before ordering.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            {/* Question 1 */}
+            <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 14, padding: '16px 18px', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <strong style={{ display: 'block', fontSize: 14, color: '#ffffff', marginBottom: 10 }}>
+                1. What is the maximum legal Total Polar Materials (TPM) allowed in cooking oil before it must be discarded?
+              </strong>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 8 }}>
+                {[
+                  { text: '10% TPM', correct: false },
+                  { text: '25% TPM (FSSAI Limit)', correct: true },
+                  { text: '50% TPM', correct: false },
+                  { text: 'No legal limit', correct: false }
+                ].map((opt, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    style={{
+                      background: opt.correct ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)',
+                      border: opt.correct ? '1.5px solid #10B981' : '1px solid rgba(255,255,255,0.15)',
+                      color: opt.correct ? '#10B981' : '#E2E8F0',
+                      padding: '10px 14px',
+                      borderRadius: 10,
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                  >
+                    {opt.text} {opt.correct && '✓ (Correct)'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Question 2 */}
+            <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 14, padding: '16px 18px', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <strong style={{ display: 'block', fontSize: 14, color: '#ffffff', marginBottom: 10 }}>
+                2. In the "Danger Zone" (5°C to 60°C), how fast do foodborne bacteria double?
+              </strong>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 8 }}>
+                {[
+                  { text: 'Every 24 hours', correct: false },
+                  { text: 'Every 4 hours', correct: false },
+                  { text: 'Every 20 minutes', correct: true },
+                  { text: 'Bacteria do not double', correct: false }
+                ].map((opt, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    style={{
+                      background: opt.correct ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)',
+                      border: opt.correct ? '1.5px solid #10B981' : '1px solid rgba(255,255,255,0.15)',
+                      color: opt.correct ? '#10B981' : '#E2E8F0',
+                      padding: '10px 14px',
+                      borderRadius: 10,
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                  >
+                    {opt.text} {opt.correct && '✓ (Correct)'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Question 3 */}
+            <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 14, padding: '16px 18px', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <strong style={{ display: 'block', fontSize: 14, color: '#ffffff', marginBottom: 10 }}>
+                3. Can a customer ask a restaurant to display or verify their FSSAI license?
+              </strong>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 8 }}>
+                {[
+                  { text: 'Yes, mandatory by law to display', correct: true },
+                  { text: 'No, only police can ask', correct: false },
+                  { text: 'Only at 5-star hotels', correct: false },
+                  { text: 'Only during FDA raids', correct: false }
+                ].map((opt, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    style={{
+                      background: opt.correct ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)',
+                      border: opt.correct ? '1.5px solid #10B981' : '1px solid rgba(255,255,255,0.15)',
+                      color: opt.correct ? '#10B981' : '#E2E8F0',
+                      padding: '10px 14px',
+                      borderRadius: 10,
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                  >
+                    {opt.text} {opt.correct && '✓ (Correct)'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* ACTIVITY-BASED FILTER TABS */}
         <div style={{
           display: 'flex',
