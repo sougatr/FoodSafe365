@@ -18,7 +18,8 @@ import {
   Send,
   Home,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  Trash2
 } from 'lucide-react';
 import { CONTROLLED_SERVICE_CATEGORIES } from '@/lib/service-provider-contracts';
 import GlobalHeader from '@/components/GlobalHeader';
@@ -195,18 +196,30 @@ export default function ProviderOnboardingPage() {
       <GlobalHeader />
 
       <div style={{ maxWidth: 760, margin: '28px auto 0', padding: '0 20px' }}>
-        {/* Breadcrumb / Back Link */}
-        <Link href="/" style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          color: '#64748b',
-          fontSize: 13,
-          textDecoration: 'none',
-          marginBottom: 16
-        }}>
-          <ChevronLeft size={16} /> Back to Home
-        </Link>
+        {/* Breadcrumb / Back Link & Reset Link */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <Link href="/" style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            color: '#64748b',
+            fontSize: 13,
+            textDecoration: 'none'
+          }}>
+            <ChevronLeft size={16} /> Back to Home
+          </Link>
+          <Link href="/reset" style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
+            color: '#dc2626',
+            fontSize: 12.5,
+            textDecoration: 'underline',
+            fontWeight: 600
+          }}>
+            <Trash2 size={13} /> Reset Test Data
+          </Link>
+        </div>
 
         {/* Hero Card */}
         <div style={{
