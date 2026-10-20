@@ -117,14 +117,14 @@ export const DICTIONARY: Record<string, Record<Language, string>> = {
 
   // Dynamic Hero Messages
   'landing.heroDiner.headline': {
-    en: 'Safe and wholesome food prevents your gut from diseases.',
-    hi: 'सुरक्षित और पौष्टिक भोजन आपके पेट को बीमारियों से बचाता है।',
-    mr: 'सुरक्षित आणि सकस अन्न तुमच्या पोटाला आजारांपासून वाचवते.'
+    en: 'Restaurant hygiene you can see, understand, and act upon.',
+    hi: 'रेस्तरां की स्वच्छता—जिसे आप देख सकें, समझ सकें और अमल कर सकें।',
+    mr: 'रेस्टॉरंटची स्वच्छता—जी आपण पाहू शकता, समजू शकता आणि त्यावर कृती करू शकता.'
   },
   'landing.heroDiner.subline': {
-    en: 'Understand food safety practices. Check verified kitchen hygiene logs, cold-storage checks, and real diner ratings before you eat.',
-    hi: 'खाद्य सुरक्षा नियमों को समझें। खाने से पहले रसोई की स्वच्छता, कोल्ड-स्टोरेज और ग्राहकों की लाइव रेटिंग देखें।',
-    mr: 'अन्न सुरक्षेचे नियम समजून घ्या. जेवणापूर्वी स्वयंपाकघर स्वच्छता, कोल्ड-स्टोरेज आणि ग्राहकांच्या थेट नोंदी पहा.'
+    en: 'Check verified kitchen hygiene logs, cold-storage checks, and real diner ratings before you eat.',
+    hi: 'खाने से पहले रसोई की स्वच्छता, कोल्ड-स्टोरेज और ग्राहकों की लाइव रेटिंग देखें।',
+    mr: 'जेवणापूर्वी स्वयंपाकघर स्वच्छता, कोल्ड-स्टोरेज आणि ग्राहकांच्या थेट नोंदी पहा.'
   },
   'landing.heroBiz.headline': {
     en: 'Turn food safety into your restaurant’s biggest advantage.',
@@ -137,14 +137,14 @@ export const DICTIONARY: Record<string, Record<Language, string>> = {
     mr: 'ग्राहक आणि अन्न सुरक्षा अधिकाऱ्यांना दाखवा की आपले स्वयंपाकघर प्रमाणित दैनंदिन नियमांचे पालन करते.'
   },
   'landing.headline': {
-    en: 'Safe and wholesome food prevents your gut from diseases.',
-    hi: 'सुरक्षित और पौष्टिक भोजन आपके पेट को बीमारियों से बचाता है।',
-    mr: 'सुरक्षित आणि सकस अन्न तुमच्या पोटाला आजारांपासून वाचवते.'
+    en: 'Restaurant hygiene you can see, understand, and act upon.',
+    hi: 'रेस्तरां की स्वच्छता—जिसे आप देख सकें, समझ सकें और अमल कर सकें।',
+    mr: 'रेस्टॉरंटची स्वच्छता—जी आपण पाहू शकता, समजू शकता आणि त्यावर कृती करू शकता.'
   },
   'landing.subline': {
-    en: 'Understand food safety practices. Check verified kitchen hygiene logs, cold-storage checks, and real diner ratings before you eat.',
-    hi: 'खाद्य सुरक्षा नियमों को समझें। खाने से पहले रसोई की स्वच्छता, कोल्ड-स्टोरेज और ग्राहकों की लाइव रेटिंग देखें।',
-    mr: 'अन्न सुरक्षेचे नियम समजून घ्या. जेवणापूर्वी स्वयंपाकघर स्वच्छता, कोल्ड-स्टोरेज आणि ग्राहकांच्या थेट नोंदी पहा.'
+    en: 'Check verified kitchen hygiene logs, cold-storage checks, and real diner ratings before you eat.',
+    hi: 'खाने से पहले रसोई की स्वच्छता, कोल्ड-स्टोरेज और ग्राहकों की लाइव रेटिंग देखें।',
+    mr: 'जेवणापूर्वी स्वयंपाकघर स्वच्छता, कोल्ड-स्टोरेज आणि ग्राहकांच्या थेट नोंदी पहा.'
   },
   'landing.eatingOut': {
     en: 'I’m eating out',
