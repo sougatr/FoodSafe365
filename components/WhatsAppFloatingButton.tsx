@@ -17,10 +17,11 @@ export default function WhatsAppFloatingButton() {
         rel="noopener noreferrer"
         aria-label="Chat on WhatsApp"
         title="Chat with FoodSafe365 on WhatsApp"
+        className="whatsapp-floating-btn"
         style={{
           position: 'fixed',
-          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 32px)',
-          left: 'max(env(safe-area-inset-left, 0px), 18px)',
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)',
+          left: 'max(env(safe-area-inset-left, 0px), 16px)',
           zIndex: 9998,
           display: 'flex',
           alignItems: 'center',
@@ -40,8 +41,9 @@ export default function WhatsAppFloatingButton() {
         onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1.0)')}
       >
         <span style={{ fontSize: 20, lineHeight: 1 }}>💬</span>
-        <span>WhatsApp</span>
+        <span className="whatsapp-floating-text">WhatsApp</span>
         <span
+          className="whatsapp-floating-dot"
           style={{
             width: 8,
             height: 8,

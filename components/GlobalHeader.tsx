@@ -259,6 +259,7 @@ export default function GlobalHeader() {
             target="_blank"
             rel="noopener noreferrer"
             title="Chat with FoodSafe365 on WhatsApp"
+            className="desktop-only-whatsapp-btn"
             style={{
               display: 'inline-flex',
               alignItems: 'center',

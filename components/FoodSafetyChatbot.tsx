@@ -125,8 +125,8 @@ export default function FoodSafetyChatbot() {
         aria-label="Ask Me (FoodSafe AI Assistant)"
         style={{
           position: 'fixed',
-          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 32px)',
-          right: 'max(env(safe-area-inset-right, 0px), 18px)',
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 24px)',
+          right: 'max(env(safe-area-inset-right, 0px), 16px)',
           zIndex: 9999,
           display: 'flex',
           alignItems: 'center',
@@ -153,14 +153,17 @@ export default function FoodSafetyChatbot() {
         }}>
           <Bot size={17} />
         </div>
-        <span>FoodSafe Help</span>
-        <span style={{
-          width: 8,
-          height: 8,
-          borderRadius: '50%',
-          background: '#6ee7b7',
-          display: 'inline-block'
-        }} />
+        <span className="chatbot-floating-text">FoodSafe Help</span>
+        <span
+          className="chatbot-floating-dot"
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            background: '#6ee7b7',
+            display: 'inline-block'
+          }}
+        />
       </button>
 
       {/* Chat Window Drawer / Modal styled like Clinevo Help */}

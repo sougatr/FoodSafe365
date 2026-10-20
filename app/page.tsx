@@ -602,7 +602,7 @@ export default function Landing() {
     : t('landing.heroBiz.subline');
 
   return (
-    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F8FAF6', width: '100%', maxWidth: '100vw', overflowX: 'hidden' }}>
+    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F8FAF6', width: '100%', maxWidth: '100vw', overflowX: 'clip' }}>
       {/* Clean Global Header */}
       <GlobalHeader />
 
@@ -904,7 +904,8 @@ export default function Landing() {
           maxWidth: 960,
           margin: '0 auto',
           width: '100%',
-          padding: '24px 16px 48px'
+          padding: '24px 16px 48px',
+          scrollMarginTop: 80
         }}>
           {/* Search Bar & Scan Button */}
           <form onSubmit={handleSearchSubmit} style={{
@@ -1059,7 +1060,8 @@ export default function Landing() {
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: 16
+              gap: 16,
+              scrollMarginTop: 80
             }}
           >
             {displayedRestaurants.map(r => {
@@ -1567,7 +1569,7 @@ export default function Landing() {
       <footer style={{
         borderTop: '1px solid #E2E8F0',
         background: '#FFFFFF',
-        padding: '24px 16px',
+        padding: '24px 16px calc(env(safe-area-inset-bottom, 0px) + 84px)',
         marginTop: 'auto'
       }}>
         <div style={{
