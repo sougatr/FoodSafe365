@@ -276,7 +276,7 @@ export default function AiCopilotPage() {
                 className="input"
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                placeholder={`Ask any food safety question in ${persona === 'supervisor' ? 'Supervisor' : 'Manager'} mode...`}
+                placeholder="Ask FoodSafe AI Assistant anything about food safety..."
                 style={{
                   flex: 1,
                   padding: '12px 18px',

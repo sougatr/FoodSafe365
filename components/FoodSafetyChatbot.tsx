@@ -44,16 +44,13 @@ export default function FoodSafetyChatbot() {
     let greetingText = '';
     if (lang === 'hi') {
       greetingText = `### 👋 नमस्ते! मैं आपका FoodSafe365 AI खाद्य सुरक्षा सहायक हूँ।\n\n` +
-        `मुझसे **FSSAI नियमों**, **तापमान सीमा (<5°C / ≥75°C)**, **पेस्ट नियंत्रण**, **स्टाफ मेडिकल/फॉर्म 1A**, या **दैनिक जांच** के बारे में कुछ भी पूछें।\n\n` +
-        `वर्तमान भूमिका: **${persona === 'supervisor' ? 'किचन सुपरवाइजर (तत्काल एक्शन)' : 'रेस्तरां प्रबंधक (ऑडिट एवं अनुपालन)'}**।`;
+        `मुझसे **FSSAI नियमों**, **तापमान सीमा (<5°C / ≥75°C)**, **पेस्ट नियंत्रण**, **स्टाफ मेडिकल/फॉर्म 1A**, या **दैनिक जांच** के बारे में कुछ भी पूछें।`;
     } else if (lang === 'mr') {
       greetingText = `### 👋 नमस्कार! मी आपला FoodSafe365 AI अन्न सुरक्षा सहाय्यक आहे.\n\n` +
-        `मला **FSSAI नियम**, **तापमान मर्यादा (<५°C / ≥७५°C)**, **कीटक नियंत्रण**, **कर्मचारी वैद्यकीय/फॉर्म 1A**, किंवा **दैनिक तपासणी** बद्दल काहीही विचारा.\n\n` +
-        `सध्याची भूमिका: **${persona === 'supervisor' ? 'किचन सुपरवायझर (त्वरित कृती)' : 'रेस्टॉरंट व्यवस्थापक (ऑडिट व अनुपालन)'}**।`;
+        `मला **FSSAI नियम**, **तापमान मर्यादा (<५°C / ≥७५°C)**, **कीटक नियंत्रण**, **कर्मचारी वैद्यकीय/फॉर्म 1A**, किंवा **दैनिक तपासणी** बद्दल काहीही विचारा।`;
     } else {
       greetingText = `### 👋 Hello! I am your FoodSafe365 AI Assistant.\n\n` +
-        `Ask me anything about **FSSAI regulations**, **temperature limits**, **pest emergencies**, **staff medicals**, or **HACCP critical limits**.\n\n` +
-        `Currently answering as: **${persona === 'supervisor' ? 'Kitchen Supervisor (Immediate Floor Action)' : 'Restaurant Manager (Audit & Compliance)'}**.`;
+        `Ask me anything about **FSSAI regulations**, **temperature limits**, **pest emergencies**, **staff medicals**, or **HACCP critical limits**.`;
     }
 
     setMessages([
@@ -408,7 +405,7 @@ export default function FoodSafetyChatbot() {
               className="input"
               value={input}
               onChange={e => setInput(e.target.value)}
-              placeholder={`Ask as ${persona === 'supervisor' ? 'Supervisor' : 'Manager'}...`}
+              placeholder={lang === 'hi' ? 'AI खाद्य सुरक्षा सहायक से कुछ भी पूछें...' : lang === 'mr' ? 'AI अन्न सुरक्षा सहाय्यकाला काहीही विचारा...' : 'Ask FoodSafe AI Assistant anything about food safety...'}
               style={{
                 flex: 1,
                 padding: '10px 14px',
