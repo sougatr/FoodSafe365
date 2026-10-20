@@ -194,17 +194,19 @@ export function queryFoodSafetyAI(query: string, persona: PersonaRole): ChatMess
   const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   if (bestTopic && maxScore > 0) {
-    const isSupervisor = persona === 'supervisor';
-    const steps = isSupervisor ? bestTopic.supervisorAction : bestTopic.managerAction;
-    const personaTitle = isSupervisor ? 'Kitchen Supervisor Action Plan' : 'Manager Compliance & Audit Directive';
-
     let text = `### 🛡️ ${bestTopic.title}\n\n`;
     text += `**Regulatory Standard:** ${bestTopic.standard}\n\n`;
     text += `**FSSAI Reference:** ${bestTopic.fssaiRef}\n\n`;
-    text += `#### 📋 ${personaTitle}:\n`;
-    steps.forEach((step, idx) => {
+    text += `#### 📋 AI Assistant Recommended Action Plan:\n`;
+    bestTopic.supervisorAction.forEach((step, idx) => {
       text += `${idx + 1}. ${step}\n`;
     });
+    if (bestTopic.managerAction && bestTopic.managerAction.length > 0) {
+      text += `\n**Audit & Verification Protocol:**\n`;
+      bestTopic.managerAction.forEach((step, idx) => {
+        text += `• ${step}\n`;
+      });
+    }
 
     return {
       id: `msg-${Date.now()}`,
@@ -214,7 +216,7 @@ export function queryFoodSafetyAI(query: string, persona: PersonaRole): ChatMess
       roleContext: persona,
       references: [bestTopic.fssaiRef, 'FoodSafe365 Safe Kitchen Protocol'],
       actionLinks: bestTopic.actionLink ? [bestTopic.actionLink] : undefined,
-      steps
+      steps: [...bestTopic.supervisorAction, ...bestTopic.managerAction]
     };
   }
 
@@ -229,7 +231,7 @@ export function queryFoodSafetyAI(query: string, persona: PersonaRole): ChatMess
       `3. **2h/4h Rule:** High-risk foods exposed between 5°C and 60°C must be used within 2 hours or discarded if over 4 hours.\n` +
       `4. **Medical Fitness:** 6-monthly Form 1A certificates and NABL stool cultures for enteric pathogens are required for all handlers.\n` +
       `5. **Pest Exclusion:** Only CIB&RC approved food-safe pest solutions permitted.\n\n` +
-      `*Tip: You can switch between **Supervisor** (floor containment) and **Manager** (audit & governance) mode above.*`,
+      `*Tip: All food safety guidance aligns with FSSAI Schedule 4 and international hygiene standards.*`,
     timestamp,
     roleContext: persona,
     references: ['FSSAI Schedule 4 General Hygienic Practices', 'HACCP Codex Alimentarius']

@@ -26,7 +26,7 @@ import { useLanguage } from '@/lib/vernacular';
 export default function FoodSafetyChatbot() {
   const { lang } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
-  const [persona, setPersona] = useState<PersonaRole>('supervisor');
+  const [persona] = useState<PersonaRole>('supervisor');
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -241,49 +241,44 @@ export default function FoodSafetyChatbot() {
             </div>
           </div>
 
-          {/* Persona Switcher Banner */}
+          {/* AI Assistant Answers Placeholder Banner */}
           <div style={{
             background: 'var(--surface-subtle)',
             borderBottom: '1px solid var(--border)',
-            padding: '8px 12px',
+            padding: '9px 14px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: 8
           }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>Persona Mode:</span>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <button
-                onClick={() => setPersona('supervisor')}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: 6,
-                  fontSize: 11,
-                  fontWeight: 700,
-                  border: persona === 'supervisor' ? '1px solid var(--green)' : '1px solid var(--border)',
-                  background: persona === 'supervisor' ? 'var(--green-surface)' : 'var(--card-bg)',
-                  color: persona === 'supervisor' ? 'var(--green)' : 'var(--muted)',
-                  cursor: 'pointer'
-                }}
-              >
-                👨‍🍳 Supervisor
-              </button>
-              <button
-                onClick={() => setPersona('manager')}
-                style={{
-                  padding: '4px 10px',
-                  borderRadius: 6,
-                  fontSize: 11,
-                  fontWeight: 700,
-                  border: persona === 'manager' ? '1px solid var(--green)' : '1px solid var(--border)',
-                  background: persona === 'manager' ? 'var(--green-surface)' : 'var(--card-bg)',
-                  color: persona === 'manager' ? 'var(--green)' : 'var(--muted)',
-                  cursor: 'pointer'
-                }}
-              >
-                👔 Manager
-              </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+              <div style={{
+                width: 22,
+                height: 22,
+                borderRadius: '50%',
+                background: 'var(--green-surface)',
+                display: 'grid',
+                placeItems: 'center',
+                color: 'var(--green)'
+              }}>
+                <Sparkles size={13} />
+              </div>
+              <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--text)' }}>
+                {lang === 'hi' ? 'AI सहायक उत्तर' : lang === 'mr' ? 'AI सहाय्यक उत्तरे' : 'AI Assistant Answers'}
+              </span>
             </div>
+            <span style={{
+              fontSize: 10.5,
+              fontWeight: 700,
+              padding: '3px 8px',
+              borderRadius: 999,
+              background: 'var(--green-surface)',
+              color: 'var(--green)',
+              border: '1px solid rgba(16,185,129,0.25)',
+              letterSpacing: '0.02em'
+            }}>
+              {lang === 'hi' ? 'FSSAI और स्वच्छता गाइड' : lang === 'mr' ? 'FSSAI आणि स्वच्छता मार्गदर्शक' : 'FSSAI & Hygiene Guidance'}
+            </span>
           </div>
 
           {/* Quick Prompts Bar */}
