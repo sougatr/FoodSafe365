@@ -228,6 +228,51 @@ export default function DinerDashboard() {
           </div>
         </div>
 
+        {/* WhatsApp Food Safety Concierge (No QR Code Needed) */}
+        <div style={{
+          background: '#ffffff',
+          border: '1.5px solid #bbf7d0',
+          borderRadius: 16,
+          padding: '20px 24px',
+          marginBottom: 28,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 16,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+        }}>
+          <div style={{ maxWidth: 560 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <span style={{ fontSize: 22 }}>💬</span>
+              <strong style={{ fontSize: 16, color: '#166534' }}>Don't have a QR code at your table? Use WhatsApp!</strong>
+            </div>
+            <p style={{ margin: 0, fontSize: 13, color: '#475569', lineHeight: 1.5 }}>
+              You don’t need a QR code to check or rate food safety. Search any restaurant below to see their verified hygiene score, or simply send the restaurant name to FoodSafe365 on WhatsApp to receive their official safety record.
+            </p>
+          </div>
+          <a
+            href="https://api.whatsapp.com/send?text=Hello%20FoodSafe365,%20I%20would%20like%20to%20check%20the%20verified%20food%20safety%20record%20of%20a%20restaurant."
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              background: '#15803d',
+              color: '#ffffff',
+              padding: '10px 18px',
+              borderRadius: 10,
+              fontSize: 13.5,
+              fontWeight: 700,
+              textDecoration: 'none',
+              boxShadow: '0 2px 6px rgba(21, 128, 61, 0.2)'
+            }}
+          >
+            <span>💬</span> Inquire via WhatsApp
+          </a>
+        </div>
+
         {/* Directory & Discovery of Food Businesses */}
         <section style={{ marginBottom: 32 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 14 }}>

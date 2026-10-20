@@ -422,6 +422,25 @@ export default function ProviderOnboardingPage() {
                 >
                   <Home size={15} /> Return to Home
                 </Link>
+                <a
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Hello FoodSafe365 Team, I have just registered as a service provider: ${submittedData.businessName} (${submittedData.city}). Please confirm our profile verification.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '10px 16px',
+                    borderRadius: 8,
+                    background: '#15803d',
+                    color: '#ffffff',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    textDecoration: 'none'
+                  }}
+                >
+                  <span>💬</span> Chat on WhatsApp
+                </a>
                 <Link
                   href="/providers"
                   style={{
@@ -534,14 +553,14 @@ export default function ProviderOnboardingPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 16 }}>
               <div>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#334155', marginBottom: 6 }}>
-                  Mobile / Phone Number
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: '#166534', marginBottom: 6 }}>
+                  <span>💬</span> WhatsApp / Phone Number
                 </label>
                 <div style={{ position: 'relative' }}>
-                  <Phone size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#94a3b8' }} />
+                  <Phone size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#15803d' }} />
                   <input
                     type="tel"
-                    placeholder="e.g. 9820012345"
+                    placeholder="e.g. +91 98200 12345"
                     value={mobile}
                     onChange={e => setMobile(e.target.value)}
                     style={{
@@ -554,6 +573,9 @@ export default function ProviderOnboardingPage() {
                     }}
                   />
                 </div>
+                <small style={{ fontSize: 11, color: '#15803d', marginTop: 4, display: 'block' }}>
+                  Client service leads and remediation inquiries will be dispatched to this WhatsApp number
+                </small>
               </div>
 
               <div>

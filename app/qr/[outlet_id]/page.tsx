@@ -351,17 +351,39 @@ export default function TableQrPage() {
                 <p className="muted" style={{ fontSize: 14, maxWidth: 440, margin: '0 auto 20px', lineHeight: 1.5 }}>
                   {confirmationMessage || `Your ${overallRating} / 5 Customer Food-Safety Feedback has been saved and shared with ${displayName} management.`}
                 </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRatingSubmitted(false);
-                    setConfirmationMessage('');
-                  }}
-                  className="btn secondary"
-                  style={{ fontSize: 13 }}
-                >
-                  Submit Another Rating
-                </button>
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 12 }}>
+                  <a
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`I just rated ${displayName} for food safety on FoodSafe365! Check their verified hygiene and daily safety record: https://foodsafe365.in/qr/${outletId}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn"
+                    style={{
+                      background: '#15803d',
+                      color: '#ffffff',
+                      fontSize: 13,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      textDecoration: 'none',
+                      borderRadius: 6,
+                      padding: '8px 16px',
+                      fontWeight: 700
+                    }}
+                  >
+                    <span>💬</span> Share on WhatsApp
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRatingSubmitted(false);
+                      setConfirmationMessage('');
+                    }}
+                    className="btn secondary"
+                    style={{ fontSize: 13 }}
+                  >
+                    Submit Another Rating
+                  </button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleRatingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -636,7 +658,7 @@ export default function TableQrPage() {
 
                   {responseRequested === 'yes' && (
                     <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10, borderTop: '1px solid #e2e8f0', paddingTop: 12 }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
                         <input
                           type="email"
                           className="input"
@@ -648,14 +670,14 @@ export default function TableQrPage() {
                         <input
                           type="tel"
                           className="input"
-                          placeholder="Your mobile number (optional)"
+                          placeholder="WhatsApp Number (e.g. +91 98200 12345)"
                           value={customerPhone}
                           onChange={e => setCustomerPhone(e.target.value)}
                           style={{ fontSize: 13 }}
                         />
                       </div>
-                      <p className="muted" style={{ fontSize: 11.5, margin: 0, color: '#64748b' }}>
-                        Your contact details will be shared with this food business only so that it can respond to your feedback.
+                      <p className="muted" style={{ fontSize: 11.5, margin: 0, color: '#15803d', fontWeight: 500 }}>
+                        💬 Management response &amp; safety verification will be sent to your WhatsApp number.
                       </p>
                     </div>
                   )}

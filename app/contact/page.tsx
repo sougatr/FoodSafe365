@@ -105,9 +105,34 @@ export default function ContactPage() {
               <span className="muted" style={{ fontSize: 13, color: '#64748b' }}>For existing FoodSafe365 kitchen supervisors, store managers, and diners.</span>
             </div>
 
-            <div className="contact-item" style={{ marginBottom: 20 }}>
+            <div className="contact-item" style={{ marginBottom: 16 }}>
               <strong style={{ display: 'block', fontSize: 14, color: 'var(--text, #0f172a)' }}>Official Administrator Desk</strong>
               <span style={{ fontSize: 13.5, color: '#059669', fontWeight: 600 }}>foodsafe365@gmail.com</span>
+            </div>
+
+            <div className="contact-item" style={{ marginBottom: 20 }}>
+              <strong style={{ display: 'block', fontSize: 14, color: 'var(--text, #0f172a)' }}>Instant WhatsApp Helpdesk</strong>
+              <a
+                href="https://api.whatsapp.com/send?text=Hello%20FoodSafe365,%20I%20have%20an%20inquiry%20regarding%20food%20safety%20services."
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginTop: 6,
+                  padding: '9px 16px',
+                  borderRadius: 8,
+                  background: '#15803d',
+                  color: '#ffffff',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  boxShadow: '0 2px 6px rgba(21, 128, 61, 0.2)'
+                }}
+              >
+                <span>💬</span> Chat on WhatsApp
+              </a>
             </div>
 
             <div style={{

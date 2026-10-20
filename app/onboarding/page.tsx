@@ -373,14 +373,22 @@ export default function Onboarding() {
                 </div>
 
                 <div className="field">
-                  <label style={{ fontSize: 12, fontWeight: 600, color: '#475569' }}>Alert Phone / WhatsApp</label>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: '#166534', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 14 }}>💬</span> Manager WhatsApp / Mobile Number
+                  </label>
                   <input
                     className="input"
-                    placeholder="e.g. 9820012345"
+                    placeholder="e.g. +91 98200 12345"
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
                   />
-                  <small style={{ fontSize: 11, color: '#64748b', marginTop: 3 }}>For instant deviation notifications</small>
+                  <small style={{ fontSize: 11, color: '#15803d', marginTop: 3, display: 'block' }}>
+                    Daily morning checklist reminders &amp; urgent temperature alerts are dispatched to this WhatsApp
+                  </small>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#334155', cursor: 'pointer', marginTop: 6 }}>
+                    <input type="checkbox" defaultChecked />
+                    <span>Receive daily 10 AM safety checklist &amp; diner audit reports on WhatsApp</span>
+                  </label>
                 </div>
 
                 <div className="field">

@@ -111,8 +111,9 @@ export default function GroceryOnboardingPage() {
   // Step 2: What do you sell?
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-  // Step 3: Daily check person
+  // Step 3: Daily check person & WhatsApp
   const [dailyCheckPerson, setDailyCheckPerson] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -159,7 +160,8 @@ export default function GroceryOnboardingPage() {
           city: city.trim() || 'Mumbai',
           selectedCategories: finalCats,
           dailyCheckPerson: assignedPerson,
-          managerName: assignedPerson
+          managerName: assignedPerson,
+          contactNumber: contactNumber.trim() || undefined
         })
       });
 
@@ -625,9 +627,9 @@ export default function GroceryOnboardingPage() {
                 Enter the name of the person responsible for store hygiene and daily checks.
               </p>
 
-              <div style={{ marginBottom: 28 }}>
+              <div style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
-                  Name
+                  Store Manager / Supervisor Name
                 </label>
                 <input
                   type="text"
@@ -641,7 +643,7 @@ export default function GroceryOnboardingPage() {
                     padding: '12px 14px',
                     borderRadius: 10,
                     border: '1.5px solid #CBD5E1',
-                    fontSize: 16,
+                    fontSize: 15,
                     boxSizing: 'border-box',
                     color: '#0F172A',
                     outline: 'none',
@@ -651,7 +653,36 @@ export default function GroceryOnboardingPage() {
                   onBlur={e => (e.currentTarget.style.borderColor = '#CBD5E1')}
                 />
                 <p style={{ margin: '6px 0 0', fontSize: 12.5, color: '#64748B' }}>
-                  This person will complete the daily food safety check.
+                  Responsible for store hygiene and daily checks.
+                </p>
+              </div>
+
+              <div style={{ marginBottom: 26 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: '#166534', marginBottom: 6 }}>
+                  <span>💬</span> WhatsApp / Mobile Number
+                </label>
+                <input
+                  type="tel"
+                  value={contactNumber}
+                  onChange={e => setContactNumber(e.target.value)}
+                  placeholder="e.g. +91 98200 12345"
+                  style={{
+                    width: '100%',
+                    minHeight: 48,
+                    padding: '12px 14px',
+                    borderRadius: 10,
+                    border: '1.5px solid #CBD5E1',
+                    fontSize: 15,
+                    boxSizing: 'border-box',
+                    color: '#0F172A',
+                    outline: 'none',
+                    transition: 'border-color 0.15s ease'
+                  }}
+                  onFocus={e => (e.currentTarget.style.borderColor = '#059669')}
+                  onBlur={e => (e.currentTarget.style.borderColor = '#CBD5E1')}
+                />
+                <p style={{ margin: '6px 0 0', fontSize: 12.5, color: '#15803d' }}>
+                  Daily morning cold-chain &amp; stock verification alerts will be sent to this WhatsApp number.
                 </p>
               </div>
 
