@@ -15,9 +15,9 @@ import { POPULAR_RESTAURANTS } from '../../../../../../lib/restaurantsData';
 
 const ClaimSchema = z.object({
   token: z.string().optional().default('DIRECT'),
-  managerName: z.string().min(1, 'Manager name is required').default('Restaurant Manager'),
-  managerEmail: z.string().email('Valid business email is required').optional(),
-  managerMobile: z.string().optional(),
+  managerName: z.string().min(1, 'Manager / Owner name is required').default('Restaurant Manager'),
+  managerMobile: z.string().optional().or(z.literal('')),
+  managerEmail: z.string().email('Valid business email is required').optional().or(z.literal('')),
   password: z.string().optional()
 });
 
@@ -59,7 +59,7 @@ export async function POST(
       return fail('VALIDATION_ERROR', msg, 400);
     }
 
-    const { token, managerName, managerEmail } = parseResult.data;
+    const { token, managerName, managerEmail, managerMobile } = parseResult.data;
 
     // Check existing restaurant entry and status
     let restaurant = await getRestaurantEntryAsync(restaurantId);
@@ -86,7 +86,7 @@ export async function POST(
     }
 
     // 1. Verify claim token cryptographically if supplied and not 'DIRECT'
-    const claimedBy = managerEmail || managerName;
+    const claimedBy = managerMobile || managerEmail || managerName;
     const cleanToken = token?.trim();
     if (cleanToken && cleanToken !== 'DIRECT') {
       const verification = await verifyClaimTokenAsync(cleanToken, restaurantId);
@@ -107,7 +107,8 @@ export async function POST(
         message: `Successfully claimed profile for ${updated.name}. Restaurant status is now CLAIMED.`,
         manager: {
           name: managerName,
-          email: managerEmail,
+          email: managerEmail || undefined,
+          mobile: managerMobile || undefined,
           outletId: restaurantId,
           role: 'outlet_manager'
         }
