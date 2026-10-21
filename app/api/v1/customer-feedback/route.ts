@@ -7,6 +7,10 @@ import { authorizeFeedbackAccess } from '../../../../lib/tenant';
 import { DinerSafetyRating } from '../../../../lib/foodsafety28';
 import { sendCustomerRatingAlert } from '../../../../lib/email-service';
 import { resolveRestaurantName } from '../../../../lib/restaurantsData';
+import {
+  ensureRestaurantDirectoryEntryAsync,
+  generateClaimTokenAsync
+} from '../../../../lib/unclaimed-restaurant-store';
 
 function maskDinerPhone(phone?: string): string | undefined {
   if (!phone) return undefined;
@@ -91,7 +95,29 @@ export async function POST(req: NextRequest) {
     const customerPhone = body.customerPhone || body.dinerMobile ? String(body.customerPhone || body.dinerMobile).trim() : undefined;
     const feedback = body.feedback ? String(body.feedback).trim() : '';
     const responseRequested = Boolean(body.responseRequested);
-    const isUnclaimed = typeof body.isUnclaimed === 'boolean' ? body.isUnclaimed : false;
+
+    // Auto-ensure restaurant is registered in FoodSafe365 directory
+    let directoryEntry: any = null;
+    try {
+      directoryEntry = await ensureRestaurantDirectoryEntryAsync(outletId, outletName);
+    } catch (dirErr) {
+      console.warn('[customer-feedback] Directory ensure warning:', dirErr);
+    }
+
+    const isUnclaimed = directoryEntry
+      ? (directoryEntry.status !== 'CLAIMED' && directoryEntry.status !== 'ACTIVE' && directoryEntry.status !== 'ONBOARDED')
+      : (typeof body.isUnclaimed === 'boolean' ? body.isUnclaimed : true);
+
+    let claimUrl: string | undefined = body.claimUrl;
+    if (isUnclaimed && !claimUrl) {
+      try {
+        const tokenRec = await generateClaimTokenAsync(outletId);
+        claimUrl = `https://foodsafe365.in/claim/${encodeURIComponent(outletId)}?token=${encodeURIComponent(tokenRec.token)}`;
+      } catch (tokenErr) {
+        console.warn('[customer-feedback] Claim token generation warning:', tokenErr);
+        claimUrl = `https://foodsafe365.in/claim/${encodeURIComponent(outletId)}`;
+      }
+    }
 
     const scores = {
       cleanliness: Number(body.scores?.cleanliness) || 5,
@@ -136,7 +162,7 @@ export async function POST(req: NextRequest) {
         customerPhone,
         responseRequested,
         isUnclaimed,
-        claimUrl: body.claimUrl || (isUnclaimed ? `https://foodsafe365.in/claim/${encodeURIComponent(outletId)}` : undefined)
+        claimUrl
       });
       console.log('[customer-feedback] sendCustomerRatingAlert completed:', alertResult);
     } catch (alertErr: any) {

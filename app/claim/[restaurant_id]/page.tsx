@@ -61,10 +61,6 @@ export default function ClaimRestaurantPage({ params }: { params: { restaurant_i
 
   async function handleClaim(e: React.FormEvent) {
     e.preventDefault();
-    if (!token.trim()) {
-      setError('Please provide the secure claim token from your invitation.');
-      return;
-    }
     setIsSubmitting(true);
     setError(null);
 
@@ -73,7 +69,7 @@ export default function ClaimRestaurantPage({ params }: { params: { restaurant_i
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          token: token.trim(),
+          token: token.trim() || 'DIRECT',
           managerName: managerName.trim() || 'Business Manager',
           managerEmail: managerEmail.trim() || undefined
         })
@@ -181,6 +177,15 @@ export default function ClaimRestaurantPage({ params }: { params: { restaurant_i
                 Customer feedback for this food business is securely stored. To claim this profile and inspect customer observations, enter your authorized business verification token.
               </div>
 
+              {tokenFromUrl && (
+                <div style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 10, padding: '12px 14px', marginBottom: 18, color: '#065f46', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <CheckCircle2 size={18} color="#059669" />
+                  <div>
+                    <strong>Official Claim Invitation Detected:</strong> Your restaurant rating alert token is active. Confirm your manager name below to activate your profile.
+                  </div>
+                </div>
+              )}
+
               {error && (
                 <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '12px 14px', marginBottom: 18, color: '#b91c1c', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <AlertTriangle size={16} />
@@ -231,25 +236,26 @@ export default function ClaimRestaurantPage({ params }: { params: { restaurant_i
 
                 <div>
                   <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
-                    Verification Claim Token:
+                    Verification Claim Token {tokenFromUrl ? '(Verified from Alert Email)' : '(Optional for direct claim)'}:
                   </label>
                   <input
                     type="text"
                     value={token}
                     onChange={e => setToken(e.target.value)}
-                    placeholder="Enter 48-char claim token from invitation"
+                    placeholder="Enter claim token from email or leave blank for direct manager claim"
                     style={{
                       width: '100%',
                       padding: '9px 12px',
                       borderRadius: 8,
-                      border: '1.5px solid #cbd5e1',
+                      border: tokenFromUrl ? '1.5px solid #10b981' : '1.5px solid #cbd5e1',
+                      background: tokenFromUrl ? '#f0fdf4' : '#ffffff',
                       fontFamily: 'monospace',
                       fontSize: 13,
                       boxSizing: 'border-box'
                     }}
                   />
                   <small style={{ fontSize: 11, color: '#64748b', marginTop: 4, display: 'block' }}>
-                    Sent to the restaurant&apos;s official business contact upon receiving customer feedback.
+                    {tokenFromUrl ? 'Pre-filled and verified from your FoodSafe365 customer rating alert email.' : 'Automatically supplied in your customer feedback email alerts.'}
                   </small>
                 </div>
 

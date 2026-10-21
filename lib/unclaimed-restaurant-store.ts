@@ -585,7 +585,8 @@ export async function getRestaurantEntryAsync(restaurantId: string): Promise<Res
                claimed_at "claimedAt", claimed_by_user_id "claimedByUserId",
                created_at "createdAt", updated_at "updatedAt"
         FROM unclaimed_directory_entries
-        WHERE id = $1
+        WHERE id = $1 OR lower(id) = lower($1) OR lower(name) = lower($1)
+        LIMIT 1
       `, [restaurantId]);
       if (rows[0]) return rows[0];
 
@@ -593,7 +594,8 @@ export async function getRestaurantEntryAsync(restaurantId: string): Promise<Res
       const outletRows = await query<any>(`
         SELECT id, name, city, status, created_at "createdAt", updated_at "updatedAt"
         FROM outlets
-        WHERE id::text = $1
+        WHERE id::text = $1 OR lower(name) = lower($1)
+        LIMIT 1
       `, [restaurantId]);
       if (outletRows[0]) {
         return {
@@ -616,6 +618,59 @@ export async function getRestaurantEntryAsync(restaurantId: string): Promise<Res
     }
   }
   return getRestaurantEntry(restaurantId);
+}
+
+export async function ensureRestaurantDirectoryEntryAsync(
+  restaurantId: string,
+  name?: string,
+  city = 'Mumbai',
+  location = 'Mumbai'
+): Promise<RestaurantDirectoryEntry> {
+  const cleanId = restaurantId.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-');
+  const cleanName = name?.trim() || cleanId.split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+  // 1. Try finding existing
+  const existing = await getRestaurantEntryAsync(cleanId);
+  if (existing) {
+    return existing;
+  }
+
+  // 2. Insert into PostgreSQL if available
+  if (process.env.DATABASE_URL) {
+    try {
+      const rows = await query<any>(`
+        INSERT INTO unclaimed_directory_entries(id, name, business_type, city, location, status, claimed_at, claimed_by_user_id, created_at, updated_at)
+        VALUES($1, $2, 'RESTAURANT', $3, $4, 'UNCLAIMED', NULL, NULL, now(), now())
+        ON CONFLICT (id) DO UPDATE
+        SET name = COALESCE(NULLIF(unclaimed_directory_entries.name, ''), EXCLUDED.name),
+            updated_at = now()
+        RETURNING id, name, business_type "businessType", city, location, status,
+                  claimed_at "claimedAt", claimed_by_user_id "claimedByUserId",
+                  created_at "createdAt", updated_at "updatedAt"
+      `, [cleanId, cleanName, city, location]);
+      if (rows[0]) {
+        getRestaurantsMap().set(cleanId, rows[0]);
+        return rows[0];
+      }
+    } catch (err) {
+      console.warn('[unclaimed-restaurant-store] ensureRestaurantDirectoryEntryAsync database warning:', err);
+    }
+  }
+
+  // 3. Fallback to in-memory map
+  const map = getRestaurantsMap();
+  const entry: RestaurantDirectoryEntry = {
+    id: cleanId,
+    name: cleanName,
+    businessType: 'RESTAURANT',
+    city,
+    location,
+    status: 'UNCLAIMED',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  map.set(cleanId, entry);
+  return entry;
 }
 
 export async function getAllRestaurantEntriesAsync(): Promise<RestaurantDirectoryEntry[]> {

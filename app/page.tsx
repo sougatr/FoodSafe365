@@ -1247,7 +1247,7 @@ export default function Landing() {
                     </button>
 
                     {/* Show "See Daily Record" ONLY if record actually exists! */}
-                    {hasRecords && (
+                    {hasRecords ? (
                       <div style={{ textAlign: 'center', marginTop: 8 }}>
                         <button
                           type="button"
@@ -1271,6 +1271,24 @@ export default function Landing() {
                           <ShieldCheck size={13} />
                           <span>See Verified Daily Record →</span>
                         </button>
+                      </div>
+                    ) : (
+                      <div style={{ textAlign: 'center', marginTop: 8 }}>
+                        <Link
+                          href={`/claim/${encodeURIComponent(r.id)}`}
+                          onClick={e => e.stopPropagation()}
+                          style={{
+                            color: '#64748B',
+                            fontSize: 11.5,
+                            fontWeight: 600,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4,
+                            textDecoration: 'none'
+                          }}
+                        >
+                          <span>Manage this outlet? Claim Profile →</span>
+                        </Link>
                       </div>
                     )}
                   </div>
@@ -1866,6 +1884,40 @@ export default function Landing() {
                     <span style={{ color: '#ffffff', fontWeight: 600 }}>{ratingConfirmation.table}</span>
                   </div>
                 </div>
+
+                {ratingConfirmation.isUnclaimed && (
+                  <div style={{
+                    background: 'rgba(5, 150, 105, 0.12)',
+                    border: '1px solid rgba(5, 150, 105, 0.35)',
+                    borderRadius: 12,
+                    padding: '14px 16px',
+                    maxWidth: 380,
+                    margin: '0 auto 18px',
+                    fontSize: 12.5,
+                    color: '#a7f3d0',
+                    textAlign: 'center'
+                  }}>
+                    <p style={{ margin: '0 0 8px', fontWeight: 600, color: '#ecfdf5' }}>
+                      Are you the owner or manager of {ratingConfirmation.restaurantName}?
+                    </p>
+                    <Link
+                      href={`/claim/${encodeURIComponent(ratingConfirmation.restaurantId)}`}
+                      style={{
+                        display: 'inline-block',
+                        background: '#059669',
+                        color: '#ffffff',
+                        fontSize: 12.5,
+                        fontWeight: 700,
+                        padding: '7px 16px',
+                        borderRadius: 8,
+                        textDecoration: 'none'
+                      }}
+                    >
+                      Claim Profile &amp; Control Plan →
+                    </Link>
+                  </div>
+                )}
+
                 <button
                   type="button"
                   onClick={() => {

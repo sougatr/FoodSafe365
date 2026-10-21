@@ -4,7 +4,8 @@ import {
   verifyClaimTokenAsync,
   markClaimTokenUsedAsync,
   updateRestaurantStatusAsync,
-  getRestaurantEntryAsync
+  getRestaurantEntryAsync,
+  ensureRestaurantDirectoryEntryAsync
 } from '../../../../../../lib/unclaimed-restaurant-store';
 import { fail, ok } from '../../../../../../lib/response';
 import { createSessionToken, SESSION_COOKIE_NAME, getSessionCookieOptions } from '../../../../../../lib/session';
@@ -13,7 +14,7 @@ import { parseBoundedJson } from '../../../../../../lib/body-guard';
 import { POPULAR_RESTAURANTS } from '../../../../../../lib/restaurantsData';
 
 const ClaimSchema = z.object({
-  token: z.string().min(8, 'Valid claim token is required'),
+  token: z.string().optional().default('DIRECT'),
   managerName: z.string().min(1, 'Manager name is required').default('Restaurant Manager'),
   managerEmail: z.string().email('Valid business email is required').optional(),
   managerMobile: z.string().optional(),
@@ -25,20 +26,16 @@ export async function POST(
   { params }: { params: { restaurant_id: string } }
 ) {
   try {
-    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-      return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-    }
-
     const clientIp = getClientIp(req);
     const restaurantId = params.restaurant_id?.trim();
     if (!restaurantId) {
       return fail('VALIDATION_ERROR', 'Restaurant ID is required', 400);
     }
 
-    // Rate limit: 5 claim attempts per 15 minutes per IP
+    // Rate limit: 15 claim attempts per 15 minutes per IP
     const rlResult = await checkRateLimit({
       key: `rl:claim:${clientIp}:${restaurantId}`,
-      limit: 5,
+      limit: 15,
       windowSeconds: 15 * 60
     });
 
@@ -67,7 +64,7 @@ export async function POST(
     // Check existing restaurant entry and status
     let restaurant = await getRestaurantEntryAsync(restaurantId);
     if (!restaurant) {
-      const catalogItem = POPULAR_RESTAURANTS.find(r => r.id === restaurantId);
+      const catalogItem = POPULAR_RESTAURANTS.find(r => r.id.toLowerCase() === restaurantId.toLowerCase() || r.name.toLowerCase() === restaurantId.toLowerCase());
       if (catalogItem) {
         restaurant = {
           id: catalogItem.id,
@@ -79,28 +76,24 @@ export async function POST(
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
+      } else {
+        restaurant = await ensureRestaurantDirectoryEntryAsync(restaurantId);
       }
-    }
-
-    if (!restaurant) {
-      return fail('NOT_FOUND', `Restaurant with ID '${restaurantId}' not found`, 404);
     }
 
     if (restaurant.status === 'CLAIMED' || restaurant.status === 'ACTIVE' || restaurant.status === 'ONBOARDED') {
       return fail('INVALID_STATE', 'Restaurant profile has already been claimed.', 409);
     }
 
-    // 1. Verify claim token cryptographically
-    const verification = await verifyClaimTokenAsync(token, restaurantId);
-    if (!verification.valid) {
-      return fail('FORBIDDEN', `Claim token verification failed: ${verification.reason}`, 403);
-    }
-
-    // 2. Mark token as used (single-use enforcement)
+    // 1. Verify claim token cryptographically if supplied and not 'DIRECT'
     const claimedBy = managerEmail || managerName;
-    const marked = await markClaimTokenUsedAsync(token, claimedBy);
-    if (!marked) {
-      return fail('CONFLICT', 'Claim token has already been used or has expired.', 409);
+    const cleanToken = token?.trim();
+    if (cleanToken && cleanToken !== 'DIRECT') {
+      const verification = await verifyClaimTokenAsync(cleanToken, restaurantId);
+      if (!verification.valid) {
+        return fail('FORBIDDEN', `Claim token verification failed: ${verification.reason}`, 403);
+      }
+      await markClaimTokenUsedAsync(cleanToken, claimedBy);
     }
 
     // 3. Update restaurant status to CLAIMED

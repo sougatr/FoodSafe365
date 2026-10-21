@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRestaurantEntryAsync } from '../../../../../lib/unclaimed-restaurant-store';
+import {
+  getRestaurantEntryAsync,
+  ensureRestaurantDirectoryEntryAsync
+} from '../../../../../lib/unclaimed-restaurant-store';
 import { POPULAR_RESTAURANTS } from '../../../../../lib/restaurantsData';
 import { ok, fail } from '../../../../../lib/response';
 
@@ -8,10 +11,6 @@ export async function GET(
   { params }: { params: { restaurant_id: string } }
 ) {
   try {
-    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-      return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-    }
-
     const restaurantId = params.restaurant_id?.trim();
     if (!restaurantId) {
       return fail('VALIDATION_ERROR', 'Restaurant ID is required', 400);
@@ -27,7 +26,7 @@ export async function GET(
     }
 
     // Check catalog fallback from POPULAR_RESTAURANTS if not found in database store
-    const catalogItem = POPULAR_RESTAURANTS.find(r => r.id === restaurantId);
+    const catalogItem = POPULAR_RESTAURANTS.find(r => r.id.toLowerCase() === restaurantId.toLowerCase() || r.name.toLowerCase() === restaurantId.toLowerCase());
     if (catalogItem) {
       return ok({
         restaurant: {
@@ -43,8 +42,22 @@ export async function GET(
       });
     }
 
-    return fail('NOT_FOUND', `Restaurant with ID '${restaurantId}' not found`, 404);
+    // If not in database or catalog yet, auto-ensure directory listing so any rated or custom restaurant is claimable
+    const ensuredEntry = await ensureRestaurantDirectoryEntryAsync(restaurantId);
+    return ok({
+      restaurant: ensuredEntry,
+      isUnclaimed: true
+    });
   } catch (err: any) {
-    return fail('DATABASE_ERROR', 'Failed to fetch restaurant status.', 500);
+    console.error('[API restaurants GET] Error:', err);
+    try {
+      const fallback = await ensureRestaurantDirectoryEntryAsync(params.restaurant_id?.trim() || 'unknown');
+      return ok({
+        restaurant: fallback,
+        isUnclaimed: true
+      });
+    } catch {
+      return fail('DATABASE_ERROR', 'Failed to fetch restaurant status.', 500);
+    }
   }
 }
