@@ -5,9 +5,9 @@ const config: CapacitorConfig = {
   appName: 'FoodSafe365',
   webDir: 'public',
   server: {
-    // Points directly to your production Vercel cloud app
+    // Points directly to your production cloud app
     // Any update pushed to GitHub/Vercel will be live in the mobile app instantly!
-    url: 'https://food-safe365.vercel.app',
+    url: 'https://foodsafe365.in',
     cleartext: false,
     androidScheme: 'https'
   },
