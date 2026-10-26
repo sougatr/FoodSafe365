@@ -12,10 +12,6 @@ export async function POST(req: Request, { params }: { params: { check_id: strin
   if (!auth) return fail('UNAUTHENTICATED', 'Authentication required', 401);
   if (!can(auth.role, 'checks:write')) return fail('FORBIDDEN', 'You do not have permission to start checks', 403);
 
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-  }
-
   if (!process.env.DATABASE_URL) return ok({ checkId: params.check_id, status: 'in_progress', startedAt: new Date().toISOString(), demo: true });
 
   try {

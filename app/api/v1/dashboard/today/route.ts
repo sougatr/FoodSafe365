@@ -13,10 +13,6 @@ export async function GET(req: Request) {
  const access = await requireOutletAccess(outletId, req);
   if (!access.ok) return fail((access as any).code || (access.status === 401 ? 'UNAUTHENTICATED' : access.status === 403 ? 'FORBIDDEN' : 'NOT_FOUND'), access.message, access.status);
 
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-  }
-
   if(!process.env.DATABASE_URL)return ok(demo.dashboard);
   try{
    const outlet=(await query<any>(`SELECT id,name FROM outlets WHERE id=$1 AND organisation_id=$2 AND status='active'`,[outletId,auth.organisationId]))[0]; if(!outlet)return fail('NOT_FOUND','Outlet not found',404);

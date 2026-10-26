@@ -34,10 +34,6 @@ export async function POST(req:Request){
  if(!b?.outlet_id||!b?.entity_type||!b?.entity_id||!b?.file_url||!b?.file_type||b?.file_size===undefined)return fail('VALIDATION_ERROR','outlet_id, entity_type, entity_id, file_url, file_type and file_size are required',400);
  if(!ALLOWED.includes(b.file_type))return fail('VALIDATION_ERROR','Unsupported file type. Use JPG, PNG or PDF',400);
  if(Number(b.file_size)>MAX_BYTES)return fail('VALIDATION_ERROR','Evidence file exceeds 10 MB limit',400);
-
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-  }
  if(!process.env.DATABASE_URL){ return ok({id:`demo-evidence-${Date.now()}`,outlet_id:b.outlet_id,entity_type:b.entity_type,entity_id:b.entity_id,file_url:b.file_url,file_name:b.file_name||null,file_type:b.file_type,file_size:Number(b.file_size),captured_by:auth.userId,captured_at:new Date().toISOString(),description:b.description||null,demo:true},201); }
   try {
     const outlet=(await query<any>(`SELECT id FROM outlets WHERE id=$1 AND organisation_id=$2 AND status='active'`,[b.outlet_id,auth.organisationId]))[0]; if(!outlet)return fail('FORBIDDEN','Outlet access denied',403);

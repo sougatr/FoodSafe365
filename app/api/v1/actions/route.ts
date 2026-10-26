@@ -13,10 +13,6 @@ export async function GET(req: Request) {
     return fail('FORBIDDEN', 'Account is not authorized for restaurant corrective actions', 403);
   }
 
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-  }
-
   const url = new URL(req.url);
   const status = url.searchParams.get('status');
   const requestedOutlet = url.searchParams.get('outletId');
@@ -105,10 +101,6 @@ export async function POST(req: Request) {
   if (!can(auth.role, 'actions:write')) return fail('FORBIDDEN', 'You do not have permission to create corrective actions', 403);
   if (auth.journey && auth.journey !== 'restaurant' && auth.journey !== 'platform' && !['platform_admin', 'admin', 'superadmin'].includes(auth.role)) {
     return fail('FORBIDDEN', 'Account is not authorized for restaurant corrective actions', 403);
-  }
-
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
   }
 
   let b: any;

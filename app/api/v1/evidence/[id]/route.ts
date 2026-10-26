@@ -14,10 +14,6 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   const evidenceId = params.id;
   if (!evidenceId) return fail('VALIDATION_ERROR', 'Evidence ID is required', 400);
 
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-  }
-
   if (!process.env.DATABASE_URL) {
     return ok({ id: evidenceId, status: 'confirmed', scan_status: 'cleared', demo: true }, 200);
   }
@@ -68,10 +64,6 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
   const evidenceId = params.id;
   if (!evidenceId) return fail('VALIDATION_ERROR', 'Evidence ID is required', 400);
-
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-  }
 
   if (!process.env.DATABASE_URL) {
     return ok({ id: evidenceId, status: 'deleted', deleted_at: new Date().toISOString(), demo: true }, 200);

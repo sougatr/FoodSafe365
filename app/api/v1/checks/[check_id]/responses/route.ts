@@ -16,10 +16,6 @@ export async function POST(req:Request,{params}:{params:{check_id:string}}){
   let body:any; try{body=await req.json();}catch{return fail('VALIDATION_ERROR','Invalid JSON body',400)}
   if(!body?.item_id) return fail('VALIDATION_ERROR','item_id is required',400);
   if(body.response_value===undefined) return fail('VALIDATION_ERROR','response_value is required',400);
-
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-  }
   const focusedNumericRules: Record<string, {max?: number; min?: number; unit: string; label: string}> = {
     'demo-focus-storage': {max: 5, unit: '°C', label: 'chilled-storage temperature'},
     'demo-focus-cooking': {min: 70, unit: '°C', label: 'cooking temperature'},

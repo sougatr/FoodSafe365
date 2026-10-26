@@ -17,10 +17,6 @@ export async function GET(req: NextRequest) {
       return fail('FORBIDDEN', 'Access denied. Administrative role required to access notification outbox.', 403);
     }
 
-    if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-      return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-    }
-
     const url = new URL(req.url);
     const restaurantId = url.searchParams.get('restaurantId') || undefined;
     const shouldClear = url.searchParams.get('clear') === 'true';

@@ -4,10 +4,6 @@ export async function GET(req: Request, { params }: { params: { outlet_id: strin
   const access = await requireOutletAccess(params.outlet_id, req);
   if (!access.ok) return fail((access as any).code || (access.status === 401 ? 'UNAUTHENTICATED' : access.status === 403 ? 'FORBIDDEN' : 'NOT_FOUND'), access.message, access.status);
 
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-  }
-
   if (!process.env.DATABASE_URL) return ok({ outletId: params.outlet_id, templates: [{ code: 'DAILY_FOOD_SAFETY', name: 'Daily Food Safety Check', frequency: 'daily', items: [] }] });
 
   try {

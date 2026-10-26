@@ -14,10 +14,6 @@ export async function POST(req: Request, { params }: { params: { action_id: stri
     return fail('FORBIDDEN', 'Account is not authorized for restaurant corrective actions', 403);
   }
 
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-  }
-
   let b: any;
   try {
     b = await req.json();

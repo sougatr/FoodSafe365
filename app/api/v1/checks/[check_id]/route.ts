@@ -8,10 +8,6 @@ export async function GET(req: Request, { params }: { params: { check_id: string
   const auth = await getAuthContext(req);
   if (!auth) return fail('UNAUTHENTICATED', 'Authentication required', 401);
 
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-  }
-
   if (!process.env.DATABASE_URL) return ok({
     id: params.check_id,
     templateCode: 'DAILY_FOOD_SAFETY',

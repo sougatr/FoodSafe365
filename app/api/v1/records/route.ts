@@ -24,10 +24,6 @@ export async function GET(req: Request) {
     return fail('FORBIDDEN', 'Account is not authorized for restaurant records', 403);
   }
 
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-  }
-
   const url = new URL(req.url);
   const requestedOutlet = url.searchParams.get('outlet_id') || url.searchParams.get('outletId') || auth.outletId;
 

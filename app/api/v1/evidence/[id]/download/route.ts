@@ -17,10 +17,6 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     return fail('VALIDATION_ERROR', 'Evidence ID is required', 400);
   }
 
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-  }
-
   if (!process.env.DATABASE_URL) {
     return new Response(null, {
       status: 307,

@@ -17,10 +17,6 @@ export async function GET(
     return fail('FORBIDDEN', 'Account is not authorized for restaurant HACCP operations', 403);
   }
 
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-  }
-
   const planId = params.plan_id?.trim();
   if (!planId) {
     return fail('VALIDATION_ERROR', 'Plan ID is required', 400);

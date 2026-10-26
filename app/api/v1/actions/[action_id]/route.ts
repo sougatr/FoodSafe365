@@ -12,10 +12,6 @@ export async function GET(req: Request, { params }: { params: { action_id: strin
     return fail('FORBIDDEN', 'Account is not authorized for restaurant corrective actions', 403);
   }
 
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-  }
-
   if (!process.env.DATABASE_URL) {
     const demo = getDemoAction(params.action_id, auth.userId);
     if (!demo) return fail('NOT_FOUND', 'Corrective action not found', 404);
@@ -94,10 +90,6 @@ export async function PATCH(req: Request, { params }: { params: { action_id: str
     if (!allowedStatuses.includes(b.status)) {
       return fail('VALIDATION_ERROR', `Invalid action status: ${b.status}`, 400);
     }
-  }
-
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
   }
 
   if (!process.env.DATABASE_URL) {

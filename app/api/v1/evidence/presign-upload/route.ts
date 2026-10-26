@@ -54,10 +54,6 @@ export async function POST(req: Request) {
     return fail('VALIDATION_ERROR', 'sha256_hash must be a 64-character hexadecimal string.', 400);
   }
 
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    return fail('CONFIGURATION_ERROR', 'Production configuration error: DATABASE_URL is required.', 500);
-  }
-
   // Verify outlet access
   if (auth.role !== 'platform_admin' && auth.role !== 'admin' && auth.role !== 'superadmin' && auth.role !== 'owner' && auth.role !== 'org_admin') {
     if (auth.outletId !== outlet_id) {

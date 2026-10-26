@@ -17,8 +17,15 @@ export async function requireOutletAccess(outletId: string, req?: Request) {
     return { ok: false as const, status: 403, message: 'Outlet access denied: account is not authorized for restaurant operations' };
   }
 
+  const isDemoSession =
+    auth.userId?.startsWith('demo-') ||
+    auth.organisationId === 'demo-org' ||
+    auth.userId?.startsWith('mgr-') ||
+    auth.userId?.startsWith('prov-') ||
+    auth.userId?.startsWith('diner-');
+
   const dbConfig = assertDatabaseConfigured();
-  if (!dbConfig.ok) {
+  if (!dbConfig.ok && !isDemoSession) {
     if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
       return { ok: false as const, status: 500, code: 'CONFIGURATION_ERROR', message: dbConfig.error };
     }
@@ -124,8 +131,15 @@ export async function authorizeFeedbackAccess(
     };
   }
 
+  const isDemoFeedback =
+    auth?.userId?.startsWith('demo-') ||
+    auth?.organisationId === 'demo-org' ||
+    auth?.userId?.startsWith('mgr-') ||
+    auth?.userId?.startsWith('prov-') ||
+    auth?.userId?.startsWith('diner-');
+
   const dbConfig = assertDatabaseConfigured();
-  if (!dbConfig.ok) {
+  if (!dbConfig.ok && !isDemoFeedback) {
     if (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'preview') {
       return {
         ok: false,
