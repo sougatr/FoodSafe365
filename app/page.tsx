@@ -858,8 +858,11 @@ export default function Landing() {
             <div
               onClick={() => {
                 setActiveMode('eating_out');
-                const grid = document.getElementById('restaurants-grid');
-                if (grid) grid.scrollIntoView({ behavior: 'smooth' });
+                const input = document.getElementById('search-input');
+                if (input) {
+                  input.focus();
+                  input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
               }}
               style={{
                 display: 'flex',
@@ -980,385 +983,434 @@ export default function Landing() {
             </button>
           </form>
 
-          {/* PAN-INDIA CITY FILTER BAR + ONE ADD RESTAURANT ACTION */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 10,
-            marginBottom: 20,
-            borderBottom: '1px solid #E2E8F0',
-            paddingBottom: 14
-          }}>
-            {/* Filter Pills */}
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {[
-                { id: 'all', label: t('landing.filter.allIndia') },
-                { id: 'mumbai', label: t('landing.filter.mumbai') },
-                { id: 'delhi', label: t('landing.filter.delhi') },
-                { id: 'bengaluru', label: t('landing.filter.bengaluru') },
-                { id: 'kolkata', label: t('landing.filter.kolkata') },
-                { id: 'other', label: t('landing.filter.otherCities') }
-              ].map(f => (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedArea(f.id as any);
-                    setShowAllCards(false);
-                  }}
-                  style={{
-                    minHeight: 36,
-                    padding: '6px 14px',
-                    borderRadius: 9999,
-                    fontSize: 12.5,
-                    fontWeight: selectedArea === f.id ? 800 : 600,
-                    border: selectedArea === f.id ? '2px solid #059669' : '1.5px solid #CBD5E1',
-                    background: selectedArea === f.id ? '#059669' : '#FFFFFF',
-                    color: selectedArea === f.id ? '#FFFFFF' : '#334155',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-
-            {/* ONE Add Restaurant Action */}
-            <button
-              type="button"
-              onClick={() => {
-                setNewRestName(searchQuery.trim());
-                setShowAddModal(true);
-              }}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5,
-                minHeight: 36,
-                padding: '6px 14px',
-                borderRadius: 9999,
-                fontSize: 12.5,
-                fontWeight: 700,
-                border: '1.5px dashed #059669',
-                background: 'rgba(16, 185, 129, 0.08)',
-                color: '#059669',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              <span>➕</span>
-              <span>{t('landing.addRestaurant')}</span>
-            </button>
-          </div>
-
-          {/* RESTAURANTS GRID: Tappable cards with 3 clean states and single button */}
-          <div
-            id="restaurants-grid"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-              gap: 16,
-              scrollMarginTop: 80
-            }}
-          >
-            {displayedRestaurants.map(r => {
-              const realRating = getRestaurantRealRating(r.id);
-              const hasRecords = hasVerifiedKitchenRecords(r);
-              const isChain = isChainBrand(r);
-              const isUnclaimed = r.status === 'UNCLAIMED' || (!hasRecords && !realRating.hasSufficientRatings);
-
-              return (
-                <div
-                  key={r.id}
-                  onClick={() => handleInitiateRating(r)}
-                  style={{
-                    background: '#FFFFFF',
-                    border: hasRecords ? '1.5px solid #A7F3D0' : '1px solid #E2E8F0',
-                    borderRadius: 16,
-                    padding: '18px 20px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)',
-                    cursor: 'pointer',
-                    transition: 'transform 0.15s ease, box-shadow 0.15s ease'
-                  }}
-                >
-                  <div>
-                    {/* Header info & Status Pill */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-                      <div style={{ maxWidth: '75%' }}>
-                        <h3 style={{ margin: '0 0 3px', fontSize: 17, fontWeight: 800, color: '#0F2922' }}>
-                          {r.name}
-                        </h3>
-                        <p style={{ margin: 0, fontSize: 12.5, color: '#64748B', display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <MapPin size={12} color="#059669" />
-                          <span>{r.location}</span>
-                        </p>
-                      </div>
-
-                      {/* State Badge */}
-                      {hasRecords ? (
-                        <span style={{
-                          background: 'rgba(16, 185, 129, 0.15)',
-                          color: '#047857',
-                          border: '1px solid rgba(16, 185, 129, 0.35)',
-                          padding: '3px 7px',
-                          borderRadius: 6,
-                          fontSize: 10.5,
-                          fontWeight: 800,
-                          flexShrink: 0
-                        }}>
-                          🛡️ VERIFIED
-                        </span>
-                      ) : realRating.hasSufficientRatings ? (
-                        <div style={{
-                          background: '#059669',
-                          color: '#FFFFFF',
-                          padding: '3px 8px',
-                          borderRadius: 6,
-                          fontSize: 11.5,
-                          fontWeight: 800,
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 3,
-                          flexShrink: 0
-                        }}>
-                          <Star size={11} fill="#FFFFFF" />
-                          <span>{realRating.score}★</span>
-                        </div>
-                      ) : (
-                        <span style={{
-                          fontSize: 10.5,
-                          fontWeight: 700,
-                          color: '#64748B',
-                          background: '#F1F5F9',
-                          padding: '3px 7px',
-                          borderRadius: 6,
-                          flexShrink: 0
-                        }}>
-                          NEW
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Cuisine tag */}
-                    <div style={{ marginBottom: 12 }}>
-                      <span style={{ fontSize: 11.5, color: '#64748B', background: '#F8FAF6', padding: '2px 8px', borderRadius: 4, border: '1px solid #E2E8F0' }}>
-                        {r.cuisine}
-                      </span>
-                    </div>
-
-                    {/* 3 VISIBLE STATES BODY */}
-                    {hasRecords ? (
-                      /* STATE 1: VERIFIED KITCHEN */
-                      <div style={{
-                        background: '#F0FDF4',
-                        border: '1px solid #BBF7D0',
-                        borderRadius: 10,
-                        padding: '10px 12px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 5,
-                        marginBottom: 16,
-                        fontSize: 12,
-                        color: '#166534'
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
-                          <Check size={14} color="#059669" />
-                          <span>Cold Storage: Inspected (≤4°C)</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
-                          <Check size={14} color="#059669" />
-                          <span>Staff Health: Form 1A Cleared</span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
-                          <Check size={14} color="#059669" />
-                          <span>Pest Defense: Inspected</span>
-                        </div>
-                        <div style={{ fontSize: 10.5, color: '#15803D', marginTop: 2 }}>
-                          Checked: {r.lastCheck}
-                        </div>
-                      </div>
-                    ) : realRating.hasSufficientRatings ? (
-                      /* STATE 2: RATED BY DINERS (≥10 verified submissions) */
-                      <div style={{
-                        background: '#F8FAF6',
-                        border: '1px solid #E2E8F0',
-                        borderRadius: 10,
-                        padding: '10px 12px',
-                        marginBottom: 16,
-                        fontSize: 12,
-                        color: '#475569'
-                      }}>
-                        <div style={{ fontWeight: 700, color: '#0F2922', marginBottom: 2 }}>
-                          ⭐ {realRating.score} / 5.0 Food Safety Score
-                        </div>
-                        <div style={{ fontSize: 11.5, color: '#64748B' }}>
-                          Verified across {realRating.reviewCount} customer dining observations.
-                        </div>
-                      </div>
-                    ) : (
-                      /* STATE 3: NOT YET VERIFIED ON FOODSAFE365 */
-                      <div style={{
-                        background: '#F8FAFC',
-                        border: '1px dashed #CBD5E1',
-                        borderRadius: 10,
-                        padding: '10px 12px',
-                        marginBottom: 16,
-                        fontSize: 11.5,
-                        color: '#64748B'
-                      }}>
-                        <span>No verified kitchen logs uploaded yet. Share your dining observation to verify this kitchen.</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* SINGLE PRIMARY ACTION BUTTON + CONDITIONAL RECORD LINK */}
-                  <div>
-                    <button
-                      type="button"
-                      onClick={e => {
-                        e.stopPropagation();
-                        handleInitiateRating(r);
-                      }}
-                      style={{
-                        width: '100%',
-                        minHeight: 44,
-                        background: '#059669',
-                        color: '#FFFFFF',
-                        border: 'none',
-                        borderRadius: 10,
-                        fontSize: 13.5,
-                        fontWeight: 700,
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 6,
-                        boxShadow: '0 2px 6px rgba(5, 150, 105, 0.22)'
-                      }}
-                    >
-                      <Star size={14} fill="#FFFFFF" />
-                      <span>{hasRecords ? 'Rate Safety' : 'Be First to Rate Safety'}</span>
-                    </button>
-
-                    {/* Show "See Daily Record" ONLY if record actually exists! */}
-                    {hasRecords ? (
-                      <div style={{ textAlign: 'center', marginTop: 8 }}>
-                        <button
-                          type="button"
-                          onClick={e => {
-                            e.stopPropagation();
-                            setPassportModalRestaurant(r);
-                          }}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#047857',
-                            fontSize: 12,
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 4,
-                            textDecoration: 'underline'
-                          }}
-                        >
-                          <ShieldCheck size={13} />
-                          <span>See Verified Daily Record →</span>
-                        </button>
-                      </div>
-                    ) : (
-                      <div style={{ textAlign: 'center', marginTop: 8 }}>
-                        <Link
-                          href={`/claim/${encodeURIComponent(r.id)}`}
-                          onClick={e => e.stopPropagation()}
-                          style={{
-                            color: '#64748B',
-                            fontSize: 11.5,
-                            fontWeight: 600,
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 4,
-                            textDecoration: 'none'
-                          }}
-                        >
-                          <span>Manage this outlet? Claim Profile →</span>
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* PAGINATION / SEE MORE BUTTON (Shows 6 initially) */}
-          {filteredRestaurants.length > 6 && (
-            <div style={{ textAlign: 'center', marginTop: 24 }}>
-              <button
-                type="button"
-                onClick={() => setShowAllCards(!showAllCards)}
-                style={{
-                  background: '#FFFFFF',
-                  border: '1.5px solid #CBD5E1',
-                  color: '#0F2922',
-                  padding: '10px 24px',
-                  borderRadius: 9999,
-                  fontSize: 13.5,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
-                }}
-              >
-                <span>
-                  {showAllCards
-                    ? t('landing.seeLess')
-                    : `${t('landing.seeMore')} (${filteredRestaurants.length - 6} more) ↓`}
-                </span>
-              </button>
-            </div>
-          )}
-
-          {filteredRestaurants.length === 0 && (
+          {/* If user has not typed in search, keep page clean at search bar without example restaurant cards */}
+          {!searchQuery.trim() ? (
             <div style={{
-              textAlign: 'center',
-              padding: '40px 20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 12,
+              padding: '16px 20px',
               background: '#FFFFFF',
-              borderRadius: 16,
-              border: '1px dashed #CBD5E1',
-              marginTop: 16
+              borderRadius: 14,
+              border: '1px solid #E2E8F0',
+              marginTop: 4,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
             }}>
-              <p style={{ fontSize: 16, color: '#475569', margin: '0 0 16px' }}>
-                No restaurants found matching &ldquo;{searchQuery}&rdquo;.
+              <p style={{ margin: 0, fontSize: 13.5, color: '#64748B', display: 'flex', alignItems: 'center', gap: 8, lineHeight: 1.5 }}>
+                <span style={{ fontSize: 18 }}>🔍</span>
+                <span>Type any restaurant name above or tap &ldquo;Scan QR&rdquo; to check verified hygiene audits and rate food safety.</span>
               </p>
               <button
                 type="button"
                 onClick={() => {
-                  setNewRestName(searchQuery.trim());
+                  setNewRestName('');
                   setShowAddModal(true);
                 }}
                 style={{
-                  background: '#059669',
-                  color: '#FFFFFF',
-                  padding: '10px 20px',
-                  borderRadius: 10,
-                  fontSize: 14,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '8px 16px',
+                  borderRadius: 9999,
+                  fontSize: 13,
                   fontWeight: 700,
-                  border: 'none',
-                  cursor: 'pointer'
+                  border: '1.5px dashed #059669',
+                  background: 'rgba(16, 185, 129, 0.08)',
+                  color: '#059669',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                  transition: 'all 0.15s ease'
                 }}
               >
-                ➕ Add &ldquo;{searchQuery}&rdquo; to FoodSafe365
+                <span>➕</span>
+                <span>{t('landing.addRestaurant')}</span>
               </button>
             </div>
+          ) : (
+            <>
+              {/* PAN-INDIA CITY FILTER BAR + ONE ADD RESTAURANT ACTION */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 10,
+                marginBottom: 20,
+                borderBottom: '1px solid #E2E8F0',
+                paddingBottom: 14
+              }}>
+                {/* Filter Pills */}
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {[
+                    { id: 'all', label: t('landing.filter.allIndia') },
+                    { id: 'mumbai', label: t('landing.filter.mumbai') },
+                    { id: 'delhi', label: t('landing.filter.delhi') },
+                    { id: 'bengaluru', label: t('landing.filter.bengaluru') },
+                    { id: 'kolkata', label: t('landing.filter.kolkata') },
+                    { id: 'other', label: t('landing.filter.otherCities') }
+                  ].map(f => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedArea(f.id as any);
+                        setShowAllCards(false);
+                      }}
+                      style={{
+                        minHeight: 36,
+                        padding: '6px 14px',
+                        borderRadius: 9999,
+                        fontSize: 12.5,
+                        fontWeight: selectedArea === f.id ? 800 : 600,
+                        border: selectedArea === f.id ? '2px solid #059669' : '1.5px solid #CBD5E1',
+                        background: selectedArea === f.id ? '#059669' : '#FFFFFF',
+                        color: selectedArea === f.id ? '#FFFFFF' : '#334155',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease'
+                      }}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* ONE Add Restaurant Action */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewRestName(searchQuery.trim());
+                    setShowAddModal(true);
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    minHeight: 36,
+                    padding: '6px 14px',
+                    borderRadius: 9999,
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    border: '1.5px dashed #059669',
+                    background: 'rgba(16, 185, 129, 0.08)',
+                    color: '#059669',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <span>➕</span>
+                  <span>{t('landing.addRestaurant')}</span>
+                </button>
+              </div>
+
+              {/* RESTAURANTS GRID: Tappable cards with 3 clean states and single button */}
+              <div
+                id="restaurants-grid"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                  gap: 16,
+                  scrollMarginTop: 80
+                }}
+              >
+                {displayedRestaurants.map(r => {
+                  const realRating = getRestaurantRealRating(r.id);
+                  const hasRecords = hasVerifiedKitchenRecords(r);
+                  const isChain = isChainBrand(r);
+                  const isUnclaimed = r.status === 'UNCLAIMED' || (!hasRecords && !realRating.hasSufficientRatings);
+
+                  return (
+                    <div
+                      key={r.id}
+                      onClick={() => handleInitiateRating(r)}
+                      style={{
+                        background: '#FFFFFF',
+                        border: hasRecords ? '1.5px solid #A7F3D0' : '1px solid #E2E8F0',
+                        borderRadius: 16,
+                        padding: '18px 20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)',
+                        cursor: 'pointer',
+                        transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+                      }}
+                    >
+                      <div>
+                        {/* Header info & Status Pill */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                          <div style={{ maxWidth: '75%' }}>
+                            <h3 style={{ margin: '0 0 3px', fontSize: 17, fontWeight: 800, color: '#0F2922' }}>
+                              {r.name}
+                            </h3>
+                            <p style={{ margin: 0, fontSize: 12.5, color: '#64748B', display: 'flex', alignItems: 'center', gap: 4 }}>
+                              <MapPin size={12} color="#059669" />
+                              <span>{r.location}</span>
+                            </p>
+                          </div>
+
+                          {/* State Badge */}
+                          {hasRecords ? (
+                            <span style={{
+                              background: 'rgba(16, 185, 129, 0.15)',
+                              color: '#047857',
+                              border: '1px solid rgba(16, 185, 129, 0.35)',
+                              padding: '3px 7px',
+                              borderRadius: 6,
+                              fontSize: 10.5,
+                              fontWeight: 800,
+                              flexShrink: 0
+                            }}>
+                              🛡️ VERIFIED
+                            </span>
+                          ) : realRating.hasSufficientRatings ? (
+                            <div style={{
+                              background: '#059669',
+                              color: '#FFFFFF',
+                              padding: '3px 8px',
+                              borderRadius: 6,
+                              fontSize: 11.5,
+                              fontWeight: 800,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 3,
+                              flexShrink: 0
+                            }}>
+                              <Star size={11} fill="#FFFFFF" />
+                              <span>{realRating.score}★</span>
+                            </div>
+                          ) : (
+                            <span style={{
+                              fontSize: 10.5,
+                              fontWeight: 700,
+                              color: '#64748B',
+                              background: '#F1F5F9',
+                              padding: '3px 7px',
+                              borderRadius: 6,
+                              flexShrink: 0
+                            }}>
+                              NEW
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Cuisine tag */}
+                        <div style={{ marginBottom: 12 }}>
+                          <span style={{ fontSize: 11.5, color: '#64748B', background: '#F8FAF6', padding: '2px 8px', borderRadius: 4, border: '1px solid #E2E8F0' }}>
+                            {r.cuisine}
+                          </span>
+                        </div>
+
+                        {/* 3 VISIBLE STATES BODY */}
+                        {hasRecords ? (
+                          /* STATE 1: VERIFIED KITCHEN */
+                          <div style={{
+                            background: '#F0FDF4',
+                            border: '1px solid #BBF7D0',
+                            borderRadius: 10,
+                            padding: '10px 12px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 5,
+                            marginBottom: 16,
+                            fontSize: 12,
+                            color: '#166534'
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
+                              <Check size={14} color="#059669" />
+                              <span>Cold Storage: Inspected (≤4°C)</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
+                              <Check size={14} color="#059669" />
+                              <span>Staff Health: Form 1A Cleared</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
+                              <Check size={14} color="#059669" />
+                              <span>Pest Defense: Inspected</span>
+                            </div>
+                            <div style={{ fontSize: 10.5, color: '#15803D', marginTop: 2 }}>
+                              Checked: {r.lastCheck}
+                            </div>
+                          </div>
+                        ) : realRating.hasSufficientRatings ? (
+                          /* STATE 2: RATED BY DINERS (≥10 verified submissions) */
+                          <div style={{
+                            background: '#F8FAF6',
+                            border: '1px solid #E2E8F0',
+                            borderRadius: 10,
+                            padding: '10px 12px',
+                            marginBottom: 16,
+                            fontSize: 12,
+                            color: '#475569'
+                          }}>
+                            <div style={{ fontWeight: 700, color: '#0F2922', marginBottom: 2 }}>
+                              ⭐ {realRating.score} / 5.0 Food Safety Score
+                            </div>
+                            <div style={{ fontSize: 11.5, color: '#64748B' }}>
+                              Verified across {realRating.reviewCount} customer dining observations.
+                            </div>
+                          </div>
+                        ) : (
+                          /* STATE 3: NOT YET VERIFIED ON FOODSAFE365 */
+                          <div style={{
+                            background: '#F8FAFC',
+                            border: '1px dashed #CBD5E1',
+                            borderRadius: 10,
+                            padding: '10px 12px',
+                            marginBottom: 16,
+                            fontSize: 11.5,
+                            color: '#64748B'
+                          }}>
+                            <span>No verified kitchen logs uploaded yet. Share your dining observation to verify this kitchen.</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* SINGLE PRIMARY ACTION BUTTON + CONDITIONAL RECORD LINK */}
+                      <div>
+                        <button
+                          type="button"
+                          onClick={e => {
+                            e.stopPropagation();
+                            handleInitiateRating(r);
+                          }}
+                          style={{
+                            width: '100%',
+                            minHeight: 44,
+                            background: '#059669',
+                            color: '#FFFFFF',
+                            border: 'none',
+                            borderRadius: 10,
+                            fontSize: 13.5,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 6,
+                            boxShadow: '0 2px 6px rgba(5, 150, 105, 0.22)'
+                          }}
+                        >
+                          <Star size={14} fill="#FFFFFF" />
+                          <span>{hasRecords ? 'Rate Safety' : 'Be First to Rate Safety'}</span>
+                        </button>
+
+                        {/* Show "See Daily Record" ONLY if record actually exists! */}
+                        {hasRecords ? (
+                          <div style={{ textAlign: 'center', marginTop: 8 }}>
+                            <button
+                              type="button"
+                              onClick={e => {
+                                e.stopPropagation();
+                                setPassportModalRestaurant(r);
+                              }}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#047857',
+                                fontSize: 12,
+                                fontWeight: 700,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 4,
+                                textDecoration: 'underline'
+                              }}
+                            >
+                              <ShieldCheck size={13} />
+                              <span>See Verified Daily Record →</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <div style={{ textAlign: 'center', marginTop: 8 }}>
+                            <Link
+                              href={`/claim/${encodeURIComponent(r.id)}`}
+                              onClick={e => e.stopPropagation()}
+                              style={{
+                                color: '#64748B',
+                                fontSize: 11.5,
+                                fontWeight: 600,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 4,
+                                textDecoration: 'none'
+                              }}
+                            >
+                              <span>Manage this outlet? Claim Profile →</span>
+                            </Link>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* PAGINATION / SEE MORE BUTTON (Shows 6 initially) */}
+              {filteredRestaurants.length > 6 && (
+                <div style={{ textAlign: 'center', marginTop: 24 }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowAllCards(!showAllCards)}
+                    style={{
+                      background: '#FFFFFF',
+                      border: '1.5px solid #CBD5E1',
+                      color: '#0F2922',
+                      padding: '10px 24px',
+                      borderRadius: 9999,
+                      fontSize: 13.5,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
+                    }}
+                  >
+                    <span>
+                      {showAllCards
+                        ? t('landing.seeLess')
+                        : `${t('landing.seeMore')} (${filteredRestaurants.length - 6} more) ↓`}
+                    </span>
+                  </button>
+                </div>
+              )}
+
+              {filteredRestaurants.length === 0 && (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '40px 20px',
+                  background: '#FFFFFF',
+                  borderRadius: 16,
+                  border: '1px dashed #CBD5E1',
+                  marginTop: 16
+                }}>
+                  <p style={{ fontSize: 16, color: '#475569', margin: '0 0 16px' }}>
+                    No restaurants found matching &ldquo;{searchQuery}&rdquo;.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewRestName(searchQuery.trim());
+                      setShowAddModal(true);
+                    }}
+                    style={{
+                      background: '#059669',
+                      color: '#FFFFFF',
+                      padding: '10px 20px',
+                      borderRadius: 10,
+                      fontSize: 14,
+                      fontWeight: 700,
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ➕ Add &ldquo;{searchQuery}&rdquo; to FoodSafe365
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </section>
       )}
