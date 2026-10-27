@@ -75,8 +75,9 @@ export async function sendOtpSms(payload: SendOtpPayload): Promise<SmsResult> {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        route: 'otp',
-        variables_values: payload.otp,
+        route: 'q',
+        message: `Your FoodSafe365 verification code is ${payload.otp}. Valid for 5 minutes.`,
+        language: 'english',
         numbers: cleanMobile
       })
     });
