@@ -95,6 +95,9 @@ export default function Landing() {
   const [dinerPhoneInput, setDinerPhoneInput] = useState('');
   const [dinerOtpInput, setDinerOtpInput] = useState('');
   const [otpSentState, setOtpSentState] = useState(false);
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpSentMessage, setOtpSentMessage] = useState('');
+  const [otpCountdown, setOtpCountdown] = useState(0);
   const [ratingOtpError, setRatingOtpError] = useState('');
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const [ratingConfirmation, setRatingConfirmation] = useState<{
@@ -125,6 +128,14 @@ export default function Landing() {
     }
     return () => clearInterval(interval);
   }, [showOtpModal, otpStep, otpTimer]);
+
+  useEffect(() => {
+    if (otpCountdown <= 0) return;
+    const interval = setInterval(() => {
+      setOtpCountdown(prev => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [otpCountdown]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -307,6 +318,36 @@ export default function Landing() {
     setRatingConfirmation(null);
   }
 
+  async function handleRatingSendOtp() {
+    const rawDigits = dinerPhoneInput.replace(/\D/g, '');
+    if (rawDigits.length < 10) {
+      setRatingOtpError('Please enter a valid 10-digit mobile number first.');
+      return;
+    }
+    setOtpSending(true);
+    setRatingOtpError('');
+    try {
+      const res = await fetch('/api/v1/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: rawDigits })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setOtpSentState(true);
+        setOtpSentMessage(data.message || 'OTP sent via SMS');
+        setOtpCountdown(30);
+        showToast('OTP code sent to your mobile phone!');
+      } else {
+        setRatingOtpError(data.error || 'Failed to send OTP code.');
+      }
+    } catch {
+      setRatingOtpError('Network error requesting OTP. (Test code: 1234)');
+    } finally {
+      setOtpSending(false);
+    }
+  }
+
   async function handleSubmitRating(e?: React.FormEvent) {
     if (e) e.preventDefault();
     if (!ratingModalRestaurant) return;
@@ -323,9 +364,30 @@ export default function Landing() {
       setRatingOtpError('Please enter your mobile number for verification.');
       return;
     }
-    if (!customerPhone && dinerOtpInput.trim() !== '1234' && dinerOtpInput.trim().length !== 4) {
-      setRatingOtpError('Please enter the 4-digit verification code (Demo: 1234).');
-      return;
+    if (!customerPhone) {
+      if (!dinerOtpInput.trim()) {
+        setRatingOtpError('Please request and enter your 4-digit verification code.');
+        return;
+      }
+
+      // Verify OTP via server
+      try {
+        const verifyRes = await fetch('/api/v1/auth/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: effectivePhone, otp: dinerOtpInput.trim() })
+        });
+        const verifyData = await verifyRes.json();
+        if (!verifyData.success) {
+          setRatingOtpError(verifyData.error || 'Invalid OTP code. Please enter the code sent to your phone or 1234.');
+          return;
+        }
+      } catch {
+        if (dinerOtpInput.trim() !== '1234') {
+          setRatingOtpError('Could not verify code. Please enter 1234 to proceed.');
+          return;
+        }
+      }
     }
 
     setIsSubmittingRating(true);
@@ -388,8 +450,8 @@ export default function Landing() {
           dinerName: 'Verified Diner',
           customerName: 'Verified Diner',
           customerEmail: wantsFeedback && dinerEmail.trim() ? dinerEmail.trim() : (customerEmail || undefined),
-          customerPhone: customerPhone ? `+91 ••••• •${customerPhone.replace(/\D/g, '').slice(-4)}` : undefined,
-          dinerMobile: customerPhone ? `+91 ••••• •${customerPhone.replace(/\D/g, '').slice(-4)}` : undefined,
+          customerPhone: effectivePhone || undefined,
+          dinerMobile: effectivePhone || undefined,
           responseRequested: wantsFeedback,
           isUnclaimed,
           claimUrl: isUnclaimed ? `https://foodsafe365.in/claim/${ratingModalRestaurant.id}` : undefined
@@ -2456,27 +2518,57 @@ export default function Landing() {
                     </p>
 
                     <div style={{ maxWidth: 320, margin: '0 auto', width: '100%' }}>
-                      <div style={{ marginBottom: 12, textAlign: 'left' }}>
+                      <div style={{ marginBottom: 14, textAlign: 'left' }}>
                         <label style={{ display: 'block', fontSize: 11.5, color: '#cbd5e1', fontWeight: 600, marginBottom: 4 }}>
                           Mobile Number
                         </label>
-                        <input
-                          type="tel"
-                          placeholder="9876543210"
-                          value={dinerPhoneInput}
-                          onChange={e => setDinerPhoneInput(e.target.value)}
-                          style={{
-                            width: '100%',
-                            background: '#131b26',
-                            border: '1px solid rgba(255,255,255,0.15)',
-                            borderRadius: 10,
-                            padding: '10px 14px',
-                            color: '#ffffff',
-                            fontSize: 14,
-                            outline: 'none',
-                            boxSizing: 'border-box'
-                          }}
-                        />
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <input
+                            type="tel"
+                            maxLength={10}
+                            placeholder="9876543210"
+                            value={dinerPhoneInput}
+                            onChange={e => {
+                              setDinerPhoneInput(e.target.value);
+                              setRatingOtpError('');
+                            }}
+                            style={{
+                              flex: 1,
+                              background: '#131b26',
+                              border: '1px solid rgba(255,255,255,0.15)',
+                              borderRadius: 10,
+                              padding: '10px 14px',
+                              color: '#ffffff',
+                              fontSize: 14,
+                              outline: 'none',
+                              boxSizing: 'border-box'
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={handleRatingSendOtp}
+                            disabled={otpSending || otpCountdown > 0}
+                            style={{
+                              background: otpCountdown > 0 ? 'rgba(255,255,255,0.1)' : '#059669',
+                              color: '#ffffff',
+                              border: 'none',
+                              borderRadius: 10,
+                              padding: '10px 14px',
+                              fontSize: 12,
+                              fontWeight: 700,
+                              cursor: (otpSending || otpCountdown > 0) ? 'not-allowed' : 'pointer',
+                              whiteSpace: 'nowrap',
+                              transition: 'all 0.15s ease'
+                            }}
+                          >
+                            {otpSending ? 'Sending...' : otpCountdown > 0 ? `Resend (${otpCountdown}s)` : (otpSentState ? 'Resend' : 'Get OTP')}
+                          </button>
+                        </div>
+                        {otpSentMessage && (
+                          <p style={{ margin: '6px 0 0', fontSize: 11, color: '#10b981', fontWeight: 600 }}>
+                            ✓ {otpSentMessage}
+                          </p>
+                        )}
                       </div>
 
                       <div style={{ marginBottom: 12, textAlign: 'left' }}>
@@ -2484,16 +2576,19 @@ export default function Landing() {
                           <label style={{ fontSize: 11.5, color: '#cbd5e1', fontWeight: 600 }}>
                             4-Digit OTP Code
                           </label>
-                          <span style={{ fontSize: 11, color: '#10b981', fontWeight: 700 }}>
-                            Demo Code: 1234
+                          <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>
+                            Test Code: 1234
                           </span>
                         </div>
                         <input
                           type="text"
                           maxLength={4}
-                          placeholder="1234"
+                          placeholder="e.g. 5821"
                           value={dinerOtpInput}
-                          onChange={e => setDinerOtpInput(e.target.value)}
+                          onChange={e => {
+                            setDinerOtpInput(e.target.value);
+                            setRatingOtpError('');
+                          }}
                           style={{
                             width: '100%',
                             background: '#131b26',

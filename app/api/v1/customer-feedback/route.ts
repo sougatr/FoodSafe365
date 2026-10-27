@@ -11,6 +11,7 @@ import {
   ensureRestaurantDirectoryEntryAsync,
   generateClaimTokenAsync
 } from '../../../../lib/unclaimed-restaurant-store';
+import { sendRatingAlertSms } from '../../../../lib/sms-service';
 
 function maskDinerPhone(phone?: string): string | undefined {
   if (!phone) return undefined;
@@ -168,6 +169,22 @@ export async function POST(req: NextRequest) {
     } catch (alertErr: any) {
       console.error('[customer-feedback] Alert dispatch error:', alertErr?.message || alertErr);
       alertResult = { success: false, error: alertErr?.message || String(alertErr) };
+    }
+
+    // 1b. Real-Time SMS Alert Dispatch to Admin (8390367279) via Fast2SMS
+    let smsAlertResult: any = null;
+    try {
+      smsAlertResult = await sendRatingAlertSms({
+        restaurantName: outletName,
+        overallScore,
+        customerName: dinerName,
+        customerPhone: customerPhone || dinerMobile,
+        feedback,
+        tableNumber
+      });
+      console.log('[customer-feedback] sendRatingAlertSms completed:', smsAlertResult);
+    } catch (smsErr: any) {
+      console.warn('[customer-feedback] SMS alert warning:', smsErr?.message || smsErr);
     }
 
     // 2. Storage Persistence (Non-blocking)
