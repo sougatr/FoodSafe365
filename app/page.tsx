@@ -771,55 +771,6 @@ export default function Landing() {
             </button>
           </div>
 
-          {/* Direct WhatsApp Quick Connect Bar */}
-          <div style={{
-            background: '#F0FDF4',
-            border: '1.5px solid #86EFAC',
-            borderRadius: 14,
-            padding: '12px 18px',
-            maxWidth: 540,
-            margin: '0 auto 20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
-            flexWrap: 'wrap'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, textAlign: 'left' }}>
-              <span style={{ fontSize: 24, lineHeight: 1 }}>💬</span>
-              <div>
-                <strong style={{ fontSize: 13.5, color: '#166534', display: 'block' }}>
-                  Connect with FoodSafe365 on WhatsApp
-                </strong>
-                <span style={{ fontSize: 12, color: '#15803D' }}>
-                  Ask safety questions, verify restaurant status, or get manager support
-                </span>
-              </div>
-            </div>
-            <a
-              href="https://api.whatsapp.com/send?text=Hello%20FoodSafe365%20Team!%20I%20have%20an%20inquiry%20regarding%20food%20safety%20services."
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                background: '#25D366',
-                color: '#ffffff',
-                fontSize: 12.5,
-                fontWeight: 800,
-                padding: '8px 16px',
-                borderRadius: 8,
-                textDecoration: 'none',
-                whiteSpace: 'nowrap',
-                boxShadow: '0 2px 6px rgba(37, 211, 102, 0.3)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5
-              }}
-            >
-              <span>Chat Now</span>
-              <span>→</span>
-            </a>
-          </div>
-
           {/* CATCHY DUAL PERSPECTIVE VALUE PROP: Customer & Restaurant Manager */}
           <div style={{
             background: 'linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%)',
