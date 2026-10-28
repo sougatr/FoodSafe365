@@ -109,7 +109,7 @@ export async function sendOtpSms(payload: SendOtpPayload): Promise<SmsResult> {
 }
 
 /**
- * Dispatches a real-time SMS alert to Admin Mobile (8390367279) and optionally to Restaurant
+ * Dispatches a real-time SMS alert to Admin Mobile (8356055834) and optionally to Restaurant
  * when a customer submits a food safety rating.
  */
 export async function sendRatingAlertSms(payload: RatingAlertSmsPayload): Promise<{
@@ -118,7 +118,7 @@ export async function sendRatingAlertSms(payload: RatingAlertSmsPayload): Promis
 }> {
   const apiKey = (process.env.FAST2SMS_API_KEY || '7WLJTI7jPC7jrUUoLkH61QTBipzNl8JSZGzp3SzJfLrKamxsO15hSPkfxZOrfRF2CHcHMrUO4YFy4mbu').trim();
   const targetAdminMobile = sanitizeIndianMobile(
-    payload.adminMobile || process.env.ADMIN_MOBILE || '8390367279'
+    payload.adminMobile || process.env.ADMIN_MOBILE || '8356055834'
   );
 
   const cleanScore = Math.min(5, Math.max(0, payload.overallScore)).toFixed(1);

@@ -35,9 +35,9 @@ export async function GET() {
         washroom: 4
       },
       feedback: 'good',
-      customerName: 'Customer (+91 83903...)',
+      customerName: 'Customer (+91 83560...)',
       customerEmail: 'sougatr@gmail.com',
-      customerPhone: '+91 8390367279',
+      customerPhone: '+91 8356055834',
       responseRequested: true,
       isUnclaimed: false,
       claimUrl: 'https://foodsafe365.in/claim/peter-cat-kolkata'

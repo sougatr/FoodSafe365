@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
       alertResult = { success: false, error: alertErr?.message || String(alertErr) };
     }
 
-    // 1b. Real-Time SMS Alert Dispatch to Admin (8390367279) via Fast2SMS
+    // 1b. Real-Time SMS Alert Dispatch to Admin (8356055834) via Fast2SMS
     let smsAlertResult: any = null;
     try {
       smsAlertResult = await sendRatingAlertSms({

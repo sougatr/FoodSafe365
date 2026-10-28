@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 
     let cleanMobile = typeof mobile === 'string' ? mobile.trim() : '';
     if (!cleanMobile) {
-      cleanMobile = '8390367199';
+      cleanMobile = '8356055834';
     }
 
     let cleanEmail = typeof email === 'string' ? email.trim() : '';
