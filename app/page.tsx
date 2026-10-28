@@ -820,103 +820,21 @@ export default function Landing() {
             </a>
           </div>
 
-          {/* INTERACTIVE 3-STEP STRIP: Each step is a direct clickable shortcut */}
+          {/* CATCHY DUAL PERSPECTIVE VALUE PROP: Customer & Restaurant Manager */}
           <div style={{
-            background: '#FFFFFF',
-            border: '1px solid #E2E8F0',
-            borderRadius: 16,
+            background: 'linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%)',
+            border: '1.5px solid #E2E8F0',
+            borderRadius: 18,
             padding: '14px 18px',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.03)',
-            maxWidth: 720,
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.04)',
+            maxWidth: 780,
             margin: '0 auto',
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: 12,
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: 14,
             textAlign: 'left'
           }}>
-            {/* Step 1: Click to Scan */}
-            <div
-              onClick={() => {
-                setShowQrScanModal(true);
-                setInputQrCode('');
-                setQrSearchError('');
-              }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                cursor: 'pointer',
-                padding: '4px 6px',
-                borderRadius: 10,
-                transition: 'background 0.15s ease'
-              }}
-              title="Click to scan table QR code"
-            >
-              <div style={{
-                width: 40,
-                height: 40,
-                borderRadius: 10,
-                background: 'rgba(16, 185, 129, 0.12)',
-                color: '#059669',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <QrCode size={20} />
-              </div>
-              <div>
-                <strong style={{ display: 'block', fontSize: 14, color: '#0F2922' }}>
-                  {t('landing.step1.title')}
-                </strong>
-                <span style={{ fontSize: 11.5, color: '#059669', fontWeight: 600 }}>
-                  Tap to scan table QR →
-                </span>
-              </div>
-            </div>
-
-            {/* Step 2: Click to Focus Search & Rate */}
-            <div
-              onClick={() => {
-                setActiveMode('eating_out');
-                const input = document.getElementById('search-input');
-                if (input) input.focus();
-              }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                cursor: 'pointer',
-                padding: '4px 6px',
-                borderRadius: 10,
-                transition: 'background 0.15s ease'
-              }}
-              title="Click to search and rate a restaurant"
-            >
-              <div style={{
-                width: 40,
-                height: 40,
-                borderRadius: 10,
-                background: 'rgba(245, 158, 11, 0.12)',
-                color: '#d97706',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <Star size={20} fill="#d97706" />
-              </div>
-              <div>
-                <strong style={{ display: 'block', fontSize: 14, color: '#0F2922' }}>
-                  {t('landing.step2.title')}
-                </strong>
-                <span style={{ fontSize: 11.5, color: '#64748B' }}>
-                  5 quick safety questions
-                </span>
-              </div>
-            </div>
-
-            {/* Step 3: Click to View Kitchen Records */}
+            {/* Perspective A: As Customer */}
             <div
               onClick={() => {
                 setActiveMode('eating_out');
@@ -929,33 +847,115 @@ export default function Landing() {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 12,
+                gap: 14,
                 cursor: 'pointer',
-                padding: '4px 6px',
-                borderRadius: 10,
-                transition: 'background 0.15s ease'
+                padding: '12px 14px',
+                borderRadius: 14,
+                background: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+                transition: 'all 0.15s ease'
               }}
-              title="Click to view daily kitchen records"
+              title="Click to search and rate restaurant hygiene"
             >
               <div style={{
-                width: 40,
-                height: 40,
-                borderRadius: 10,
-                background: 'rgba(59, 130, 246, 0.12)',
-                color: '#2563eb',
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                background: 'rgba(5, 150, 105, 0.12)',
+                color: '#059669',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                flexShrink: 0
+                flexShrink: 0,
+                fontSize: 22
               }}>
-                <ShieldCheck size={20} />
+                ⭐
               </div>
-              <div>
-                <strong style={{ display: 'block', fontSize: 14, color: '#0F2922' }}>
-                  {t('landing.step3.title')}
+              <div style={{ flex: 1 }}>
+                <span style={{
+                  display: 'inline-block',
+                  fontSize: 10.5,
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  color: '#059669',
+                  background: 'rgba(5, 150, 105, 0.1)',
+                  padding: '2px 8px',
+                  borderRadius: 6,
+                  marginBottom: 3
+                }}>
+                  As a Customer
+                </span>
+                <strong style={{ display: 'block', fontSize: 14.5, color: '#0F2922', fontWeight: 800, lineHeight: 1.25 }}>
+                  Rate the Hygiene Maintenance
                 </strong>
-                <span style={{ fontSize: 11.5, color: '#64748B' }}>
-                  Daily cold &amp; hygiene logs
+                <span style={{ fontSize: 11.5, color: '#64748B', display: 'block', marginTop: 2 }}>
+                  Check verified logs &amp; rate food safety in seconds →
+                </span>
+              </div>
+            </div>
+
+            {/* Perspective B: As Restaurant Manager */}
+            <div
+              onClick={() => {
+                setActiveMode('food_business');
+                const picker = document.getElementById('business-picker');
+                if (picker) {
+                  picker.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                  window.location.href = '/login';
+                }
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 14,
+                cursor: 'pointer',
+                padding: '12px 14px',
+                borderRadius: 14,
+                background: '#FFFFFF',
+                border: '1px solid #FEF08A',
+                boxShadow: '0 2px 8px rgba(234, 179, 8, 0.08)',
+                transition: 'all 0.15s ease'
+              }}
+              title="Click to manage kitchen and display the golden FoodSafe365 badge"
+            >
+              <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, #FEF08A 0%, #FDE047 100%)',
+                color: '#854D0E',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                fontSize: 22,
+                boxShadow: '0 2px 6px rgba(202, 138, 4, 0.2)'
+              }}>
+                🏆
+              </div>
+              <div style={{ flex: 1 }}>
+                <span style={{
+                  display: 'inline-block',
+                  fontSize: 10.5,
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  color: '#854D0E',
+                  background: '#FEF9C3',
+                  padding: '2px 8px',
+                  borderRadius: 6,
+                  marginBottom: 3
+                }}>
+                  As Restaurant Manager
+                </span>
+                <strong style={{ display: 'block', fontSize: 14.5, color: '#0F2922', fontWeight: 800, lineHeight: 1.25 }}>
+                  Display the Golden FoodSafe365 Badge
+                </strong>
+                <span style={{ fontSize: 11.5, color: '#64748B', display: 'block', marginTop: 2 }}>
+                  Run daily digital audits &amp; showcase verified trust →
                 </span>
               </div>
             </div>
