@@ -1,7 +1,6 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import FoodSafetyChatbot from '@/components/FoodSafetyChatbot';
-import WhatsAppFloatingButton from '@/components/WhatsAppFloatingButton';
 
 export const metadata: Metadata = {
   title: 'FoodSafe365 — Rate any Kitchen for Food Safety',
@@ -52,7 +51,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         {children}
-        <WhatsAppFloatingButton />
         <FoodSafetyChatbot />
       </body>
     </html>
