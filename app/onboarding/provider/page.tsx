@@ -423,9 +423,7 @@ export default function ProviderOnboardingPage() {
                   <Home size={15} /> Return to Home
                 </Link>
                 <a
-                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Hello FoodSafe365 Team, I have just registered as a service provider: ${submittedData.businessName} (${submittedData.city}). Please confirm our profile verification.`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="tel:+918356055834"
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -439,7 +437,7 @@ export default function ProviderOnboardingPage() {
                     textDecoration: 'none'
                   }}
                 >
-                  <span>💬</span> Chat on WhatsApp
+                  <span>📞</span> Call Helpline: 83560 55834
                 </a>
                 <Link
                   href="/providers"
@@ -560,7 +558,7 @@ export default function ProviderOnboardingPage() {
                   <Phone size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#15803d' }} />
                   <input
                     type="tel"
-                    placeholder="e.g. +91 98200 12345"
+                    placeholder="e.g. +91 83560 55834"
                     value={mobile}
                     onChange={e => setMobile(e.target.value)}
                     style={{

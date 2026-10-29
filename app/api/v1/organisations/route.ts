@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 const S = z.object({
   user: z.object({
     name: z.string().optional().default('Restaurant Admin'),
-    mobile: z.string().optional().default('9820012345'),
+    mobile: z.string().optional().default('8356055834'),
     email: z.string().optional().nullable(),
     password: z.string().optional().nullable()
   }),
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
     const finalCity = (b.outlet?.city || 'Mumbai').trim();
     const finalType = (b.outlet?.restaurantTypeId || 'restaurant').trim();
     const finalManager = (b.user?.name || 'Restaurant Admin').trim();
-    const finalMobile = (b.user?.mobile || '9820012345').trim();
+    const finalMobile = (b.user?.mobile || '8356055834').trim();
 
     let cleanEmail: string | undefined = undefined;
     if (b.user?.email && typeof b.user.email === 'string' && b.user.email.trim()) {

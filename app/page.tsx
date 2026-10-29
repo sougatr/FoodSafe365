@@ -543,6 +543,30 @@ export default function Landing() {
     return [...customRestaurants, ...POPULAR_RESTAURANTS];
   }, [customRestaurants]);
 
+  // Live Food Safety Audit & Rating Platform Metrics
+  const platformStats = useMemo(() => {
+    const totalRestaurantsCount = allRestaurants.length;
+
+    // Sum of catalog reviews plus any locally submitted ratings
+    const catalogReviews = allRestaurants.reduce((acc, r) => acc + (Number(r.reviews) || 0), 0);
+    const totalCustomerReviews = catalogReviews + storedRatings.length;
+
+    // Computed average score across all restaurants
+    const scoreSum = allRestaurants.reduce((acc, r) => acc + (parseFloat(r.score) || 4.8), 0);
+    const baseAvg = allRestaurants.length > 0 ? (scoreSum / allRestaurants.length).toFixed(1) : '4.8';
+
+    // Golden FoodSafe365 Compliance Badge count (restaurants with score >= 4.0)
+    const goldenBadgeCount = allRestaurants.filter(r => (parseFloat(r.score) || 0) >= 4.0).length;
+
+    return {
+      totalRestaurants: totalRestaurantsCount,
+      totalCustomers: totalCustomerReviews.toLocaleString('en-IN'),
+      presentRating: baseAvg,
+      goldenBadgeCount,
+      goldenBadgeStatus: 'Displayed on all verified kitchens'
+    };
+  }, [allRestaurants, storedRatings]);
+
   // Compute real ratings with ≥10 rating threshold
   function getRestaurantRealRating(restaurantId: string) {
     const matching = storedRatings.filter(r => r.outletId === restaurantId);
@@ -995,6 +1019,188 @@ export default function Landing() {
               <span>{t('landing.scanQr')}</span>
             </button>
           </form>
+
+          {/* LIVE AUDIT & RATING METRICS STRIP: Number of rated restaurants, customers, present rating, and Golden Badge status */}
+          <div style={{
+            marginTop: 4,
+            marginBottom: 16,
+            background: 'linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%)',
+            border: '1.5px solid #86EFAC',
+            borderRadius: 16,
+            padding: '16px 20px',
+            boxShadow: '0 4px 14px rgba(5, 150, 105, 0.06)'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 8,
+              borderBottom: '1px solid rgba(16, 185, 129, 0.2)',
+              paddingBottom: 10,
+              marginBottom: 12
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 18 }}>📊</span>
+                <span style={{ fontSize: 13, fontWeight: 800, color: '#065F46', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+                  Live Food-Safety Rating &amp; Compliance Audit Metrics
+                </span>
+              </div>
+              <span style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: '#059669',
+                background: 'rgba(16, 185, 129, 0.15)',
+                padding: '3px 8px',
+                borderRadius: 999
+              }}>
+                ● Updated Live
+              </span>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+              gap: 12,
+              textAlign: 'left'
+            }}>
+              {/* Metric 1: Restaurants Rated Till Date */}
+              <div style={{
+                background: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                borderRadius: 12,
+                padding: '10px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10
+              }}>
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: 'rgba(5, 150, 105, 0.12)',
+                  color: '#059669',
+                  display: 'grid',
+                  placeItems: 'center',
+                  fontSize: 18,
+                  flexShrink: 0
+                }}>
+                  🍽️
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+                    Restaurants Rated
+                  </div>
+                  <div style={{ fontSize: 17, fontWeight: 900, color: '#0F2922' }}>
+                    {platformStats.totalRestaurants} Outlets
+                  </div>
+                </div>
+              </div>
+
+              {/* Metric 2: Customers Rated Till Date */}
+              <div style={{
+                background: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                borderRadius: 12,
+                padding: '10px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10
+              }}>
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: 'rgba(59, 130, 246, 0.12)',
+                  color: '#2563eb',
+                  display: 'grid',
+                  placeItems: 'center',
+                  fontSize: 18,
+                  flexShrink: 0
+                }}>
+                  👥
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+                    Verified Customers
+                  </div>
+                  <div style={{ fontSize: 17, fontWeight: 900, color: '#0F2922' }}>
+                    {platformStats.totalCustomers} Diners
+                  </div>
+                </div>
+              </div>
+
+              {/* Metric 3: Present Rating */}
+              <div style={{
+                background: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                borderRadius: 12,
+                padding: '10px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10
+              }}>
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: 'rgba(245, 158, 11, 0.12)',
+                  color: '#d97706',
+                  display: 'grid',
+                  placeItems: 'center',
+                  fontSize: 18,
+                  flexShrink: 0
+                }}>
+                  ⭐
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+                    Present Rating
+                  </div>
+                  <div style={{ fontSize: 17, fontWeight: 900, color: '#0F2922', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span>{platformStats.presentRating}</span>
+                    <span style={{ fontSize: 13, color: '#f59e0b' }}>★★★★★</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Metric 4: Golden Badge 365 Display Status */}
+              <div style={{
+                background: '#FFFFFF',
+                border: '1.5px solid #FDE047',
+                borderRadius: 12,
+                padding: '10px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                boxShadow: '0 2px 8px rgba(234, 179, 8, 0.12)'
+              }}>
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: 'linear-gradient(135deg, #FEF08A 0%, #FDE047 100%)',
+                  color: '#854D0E',
+                  display: 'grid',
+                  placeItems: 'center',
+                  fontSize: 18,
+                  flexShrink: 0,
+                  boxShadow: '0 2px 4px rgba(202, 138, 4, 0.25)'
+                }}>
+                  🏆
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#854D0E', fontWeight: 800, textTransform: 'uppercase' }}>
+                    Golden Badge 365
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: '#059669', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span>✓ Displayed</span>
+                    <span style={{ fontSize: 11, color: '#64748B', fontWeight: 600 }}>({platformStats.goldenBadgeCount} Verified)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* If user has not typed in search, keep page clean at search bar without example restaurant cards */}
           {!searchQuery.trim() ? (

@@ -665,7 +665,7 @@ export default function GroceryOnboardingPage() {
                   type="tel"
                   value={contactNumber}
                   onChange={e => setContactNumber(e.target.value)}
-                  placeholder="e.g. +91 98200 12345"
+                  placeholder="e.g. +91 83560 55834"
                   style={{
                     width: '100%',
                     minHeight: 48,

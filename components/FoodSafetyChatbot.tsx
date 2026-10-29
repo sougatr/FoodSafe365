@@ -72,9 +72,9 @@ export default function FoodSafetyChatbot() {
       prompt: 'I operate a food business. How does FoodSafe365 help with daily kitchen checks, FSSAI compliance, and digital logs?'
     },
     {
-      id: 'whatsapp',
-      label: lang === 'hi' ? 'व्हाट्सएप पर बात करें' : lang === 'mr' ? 'व्हॉट्सॲपवर बोला' : 'Talk on WhatsApp',
-      prompt: 'How do I connect with FoodSafe365 on WhatsApp for instant support?'
+      id: 'contact',
+      label: lang === 'hi' ? 'हेल्पलाइन / संपर्क' : lang === 'mr' ? 'हेल्पलाईन / संपर्क' : 'Helpline & Contact',
+      prompt: 'How do I contact FoodSafe365 support desk via phone (+91 83560 55834) or email?'
     },
     {
       id: 'support',

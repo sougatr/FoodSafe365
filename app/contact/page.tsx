@@ -111,28 +111,28 @@ export default function ContactPage() {
             </div>
 
             <div className="contact-item" style={{ marginBottom: 20 }}>
-              <strong style={{ display: 'block', fontSize: 14, color: 'var(--text, #0f172a)' }}>Instant WhatsApp Helpdesk</strong>
-              <a
-                href="https://api.whatsapp.com/send?text=Hello%20FoodSafe365,%20I%20have%20an%20inquiry%20regarding%20food%20safety%20services."
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  marginTop: 6,
-                  padding: '9px 16px',
-                  borderRadius: 8,
-                  background: '#15803d',
-                  color: '#ffffff',
-                  fontSize: 13,
-                  fontWeight: 700,
-                  textDecoration: 'none',
-                  boxShadow: '0 2px 6px rgba(21, 128, 61, 0.2)'
-                }}
-              >
-                <span>💬</span> Chat on WhatsApp
-              </a>
+              <strong style={{ display: 'block', fontSize: 14, color: 'var(--text, #0f172a)' }}>Direct Support &amp; Hotline</strong>
+              <div style={{ marginTop: 6, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <a
+                  href="tel:+918356055834"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '8px 14px',
+                    borderRadius: 8,
+                    background: 'rgba(5, 150, 105, 0.1)',
+                    border: '1px solid rgba(5, 150, 105, 0.25)',
+                    color: '#059669',
+                    fontSize: 13.5,
+                    fontWeight: 800,
+                    textDecoration: 'none',
+                    width: 'fit-content'
+                  }}
+                >
+                  <span>📞</span> +91 83560 55834
+                </a>
+              </div>
             </div>
 
             <div style={{

@@ -670,7 +670,7 @@ export default function TableQrPage() {
                         <input
                           type="tel"
                           className="input"
-                          placeholder="WhatsApp Number (e.g. +91 98200 12345)"
+                          placeholder="WhatsApp Number (e.g. +91 83560 55834)"
                           value={customerPhone}
                           onChange={e => setCustomerPhone(e.target.value)}
                           style={{ fontSize: 13 }}

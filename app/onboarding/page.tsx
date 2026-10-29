@@ -102,7 +102,7 @@ export default function Onboarding() {
     const finalName = name.trim() || 'ABC Restaurant';
     const finalCity = city.trim() || 'Mumbai';
     const finalManager = managerName.trim() || 'Restaurant Admin';
-    const finalMobile = mobile.trim() || '9820012345';
+    const finalMobile = mobile.trim() || '8356055834';
 
     try {
       const res = await fetch('/api/v1/organisations', {
@@ -378,7 +378,7 @@ export default function Onboarding() {
                   </label>
                   <input
                     className="input"
-                    placeholder="e.g. +91 98200 12345"
+                    placeholder="e.g. +91 83560 55834"
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
                   />

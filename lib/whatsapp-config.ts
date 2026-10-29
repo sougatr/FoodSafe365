@@ -4,7 +4,7 @@
  */
 
 // Default support WhatsApp number (India +91). Can be overridden via NEXT_PUBLIC_WHATSAPP_SUPPORT
-export const DEFAULT_WHATSAPP_SUPPORT = process.env.NEXT_PUBLIC_WHATSAPP_SUPPORT || '919820012345';
+export const DEFAULT_WHATSAPP_SUPPORT = process.env.NEXT_PUBLIC_WHATSAPP_SUPPORT || '918356055834';
 
 /**
  * Returns a standard WhatsApp Click-to-Chat deep link

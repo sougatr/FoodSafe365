@@ -253,32 +253,6 @@ export default function GlobalHeader() {
             flexShrink: 0
           }}
         >
-          {/* WhatsApp Direct Chat */}
-          <a
-            href="https://api.whatsapp.com/send?text=Hello%20FoodSafe365%20Team!%20I%20have%20an%20inquiry%20regarding%20food%20safety%20services."
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Chat with FoodSafe365 on WhatsApp"
-            className="desktop-only-whatsapp-btn"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 5,
-              padding: '6px 11px',
-              borderRadius: 8,
-              fontSize: 12.5,
-              fontWeight: 800,
-              color: '#ffffff',
-              background: '#25D366',
-              textDecoration: 'none',
-              boxShadow: '0 2px 6px rgba(37, 211, 102, 0.25)',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            <span>💬</span>
-            <span>WhatsApp</span>
-          </a>
-
           {/* Language Switch */}
           <LanguageSelector compact={true} />
 
@@ -479,32 +453,6 @@ export default function GlobalHeader() {
                     );
                   })}
                 </nav>
-
-                <div style={{ marginTop: 8, padding: '0 4px' }}>
-                  <a
-                    href="https://api.whatsapp.com/send?text=Hello%20FoodSafe365%20Team!%20I%20have%20an%20inquiry%20regarding%20food%20safety%20services."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setMenuOpen(false)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 8,
-                      background: '#25D366',
-                      color: '#ffffff',
-                      padding: '10px 14px',
-                      borderRadius: 10,
-                      fontSize: 13.5,
-                      fontWeight: 800,
-                      textDecoration: 'none',
-                      boxShadow: '0 2px 6px rgba(37, 211, 102, 0.3)'
-                    }}
-                  >
-                    <span>💬</span>
-                    <span>Chat on WhatsApp</span>
-                  </a>
-                </div>
 
                 <div
                   style={{
