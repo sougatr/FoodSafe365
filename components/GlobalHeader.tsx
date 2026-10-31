@@ -344,30 +344,7 @@ export default function GlobalHeader() {
                 </div>
               )}
             </div>
-          ) : (
-            <Link
-              href="/login"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5,
-                fontSize: 13,
-                padding: '7px 14px',
-                borderRadius: 9999,
-                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                border: 'none',
-                color: '#ffffff',
-                fontWeight: 700,
-                textDecoration: 'none',
-                boxShadow: '0 2px 6px rgba(5, 150, 105, 0.25)',
-                whiteSpace: 'nowrap'
-              }}
-              title="Sign in to FoodSafe365"
-            >
-              <User size={14} />
-              <span>Login</span>
-            </Link>
-          )}
+          ) : null}
 
           {/* Unified Menu Toggle (About, Learning Hub, HACCP, Contact) */}
           <div ref={menuRef} style={{ position: 'relative' }}>

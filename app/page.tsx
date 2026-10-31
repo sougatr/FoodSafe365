@@ -35,6 +35,11 @@ import {
   DinerSafetyRating,
   AuditTrailEvent
 } from '@/lib/foodsafety28';
+import {
+  INITIAL_ACTUAL_RATINGS,
+  RATINGS_STORAGE_VERSION_KEY,
+  CURRENT_RATINGS_VERSION
+} from '@/lib/actualRatingsData';
 import { useLanguage } from '@/lib/vernacular';
 
 export default function Landing() {
@@ -67,7 +72,7 @@ export default function Landing() {
   const [otpStep, setOtpStep] = useState<'phone' | 'otp' | 'success'>('phone');
 
   // Real Stored Ratings for displaying authentic scores
-  const [storedRatings, setStoredRatings] = useState<DinerSafetyRating[]>([]);
+  const [storedRatings, setStoredRatings] = useState<DinerSafetyRating[]>(INITIAL_ACTUAL_RATINGS);
 
   // Custom User-Added Restaurants State
   const [customRestaurants, setCustomRestaurants] = useState<RestaurantItem[]>([]);
@@ -151,8 +156,25 @@ export default function Landing() {
       } catch {}
 
       try {
+        const seedVersion = localStorage.getItem(RATINGS_STORAGE_VERSION_KEY);
         const stored = localStorage.getItem('foodsafe365_diner_ratings');
-        if (stored) setStoredRatings(JSON.parse(stored));
+        if (seedVersion === CURRENT_RATINGS_VERSION && stored) {
+          setStoredRatings(JSON.parse(stored));
+        } else {
+          // Initialize with authoritative 5 rated restaurants and 7 ratings
+          let merged = [...INITIAL_ACTUAL_RATINGS];
+          if (stored) {
+            try {
+              const prev = JSON.parse(stored);
+              const seedIds = new Set(INITIAL_ACTUAL_RATINGS.map(s => s.id));
+              const userSubmitted = prev.filter((r: DinerSafetyRating) => !seedIds.has(r.id) && !r.id.startsWith('cfr_17'));
+              merged = [...userSubmitted, ...INITIAL_ACTUAL_RATINGS];
+            } catch {}
+          }
+          localStorage.setItem('foodsafe365_diner_ratings', JSON.stringify(merged));
+          localStorage.setItem(RATINGS_STORAGE_VERSION_KEY, CURRENT_RATINGS_VERSION);
+          setStoredRatings(merged);
+        }
       } catch {}
 
       const handleRatingUpdate = () => {
@@ -543,29 +565,94 @@ export default function Landing() {
     return [...customRestaurants, ...POPULAR_RESTAURANTS];
   }, [customRestaurants]);
 
+  // Actually Rated Restaurants list aggregated from live storedRatings
+  const actuallyRatedList = useMemo(() => {
+    const map = new Map<string, {
+      outletId: string;
+      name: string;
+      city: string;
+      location: string;
+      ratings: number[];
+      avgScore: string;
+      reviewCount: number;
+      latestComment?: string;
+      restaurantObj: RestaurantItem;
+    }>();
+
+    storedRatings.forEach(r => {
+      const oid = r.outletId || r.id;
+      const matched = allRestaurants.find(rest => rest.id === oid);
+      const fallbackObj: RestaurantItem = {
+        id: oid,
+        name: r.outletName || oid.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+        city: 'mumbai',
+        location: 'Mumbai',
+        tableCode: r.tableNumber || 'Table 01',
+        cuisine: 'Dine-In',
+        badge: 'FOODSAFE DINER RATED',
+        score: r.overallScore.toFixed(1),
+        reviews: 1,
+        lastCheck: 'Today',
+        signals: {
+          cold: { title: 'Chill Temp ≤ 4°C', subtitle: 'Refrigeration Checked' },
+          medical: { title: 'Staff Hygiene', subtitle: 'Grooming Standard' },
+          pest: { title: 'Pest Safe', subtitle: 'Kitchen Clean' }
+        }
+      };
+
+      const restaurantObj = matched || fallbackObj;
+      const name = r.outletName || matched?.name || fallbackObj.name;
+      const location = matched?.location || fallbackObj.location;
+      const city = matched?.city || 'mumbai';
+
+      if (!map.has(oid)) {
+        map.set(oid, {
+          outletId: oid,
+          name,
+          city,
+          location,
+          ratings: [r.overallScore],
+          avgScore: r.overallScore.toFixed(1),
+          reviewCount: 1,
+          latestComment: r.feedback,
+          restaurantObj
+        });
+      } else {
+        const item = map.get(oid)!;
+        item.ratings.push(r.overallScore);
+        const sum = item.ratings.reduce((a, b) => a + b, 0);
+        item.avgScore = (sum / item.ratings.length).toFixed(1);
+        item.reviewCount = item.ratings.length;
+        if (r.feedback) item.latestComment = r.feedback;
+      }
+    });
+
+    return Array.from(map.values());
+  }, [storedRatings, allRestaurants]);
+
   // Live Food Safety Audit & Rating Platform Metrics
   const platformStats = useMemo(() => {
-    const totalRestaurantsCount = allRestaurants.length;
+    const totalRatedOutlets = actuallyRatedList.length;
+    const totalCustomerReviews = storedRatings.length;
 
-    // Sum of catalog reviews plus any locally submitted ratings
-    const catalogReviews = allRestaurants.reduce((acc, r) => acc + (Number(r.reviews) || 0), 0);
-    const totalCustomerReviews = catalogReviews + storedRatings.length;
+    // Overall present rating calculated across all verified ratings
+    const totalScoreSum = storedRatings.reduce((sum, r) => sum + (Number(r.overallScore) || 0), 0);
+    const overallRating = totalCustomerReviews > 0 ? (totalScoreSum / totalCustomerReviews).toFixed(1) : '3.9';
 
-    // Computed average score across all restaurants
-    const scoreSum = allRestaurants.reduce((acc, r) => acc + (parseFloat(r.score) || 4.8), 0);
-    const baseAvg = allRestaurants.length > 0 ? (scoreSum / allRestaurants.length).toFixed(1) : '4.8';
-
-    // Golden FoodSafe365 Compliance Badge count (restaurants with score >= 4.0)
-    const goldenBadgeCount = allRestaurants.filter(r => (parseFloat(r.score) || 0) >= 4.0).length;
+    // Golden FoodSafe365 Compliance Badge count:
+    // "Golden Badge - Nil for all"
+    // Golden Badge is displayed ONLY when all 28 digital kitchen parameters
+    // and daily verification logs are maintained. None of the outlets have earned it yet.
+    const goldenBadgeCount = 0;
 
     return {
-      totalRestaurants: totalRestaurantsCount,
+      totalRestaurants: totalRatedOutlets,
       totalCustomers: totalCustomerReviews.toLocaleString('en-IN'),
-      presentRating: baseAvg,
+      presentRating: overallRating,
       goldenBadgeCount,
-      goldenBadgeStatus: 'Displayed on all verified kitchens'
+      goldenBadgeStatus: 'Nil for all'
     };
-  }, [allRestaurants, storedRatings]);
+  }, [actuallyRatedList, storedRatings]);
 
   // Compute real ratings with ≥10 rating threshold
   function getRestaurantRealRating(restaurantId: string) {
@@ -1159,7 +1246,7 @@ export default function Landing() {
                   </div>
                   <div style={{ fontSize: 17, fontWeight: 900, color: '#0F2922', display: 'flex', alignItems: 'center', gap: 4 }}>
                     <span>{platformStats.presentRating}</span>
-                    <span style={{ fontSize: 13, color: '#f59e0b' }}>★★★★★</span>
+                    <span style={{ fontSize: 13, color: '#f59e0b' }}>★★★★☆</span>
                   </div>
                 </div>
               </div>
@@ -1193,11 +1280,183 @@ export default function Landing() {
                   <div style={{ fontSize: 11, color: '#854D0E', fontWeight: 800, textTransform: 'uppercase' }}>
                     Golden Badge 365
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: '#059669', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <span>✓ Displayed</span>
-                    <span style={{ fontSize: 11, color: '#64748B', fontWeight: 600 }}>({platformStats.goldenBadgeCount} Verified)</span>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: '#DC2626', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span>Nil for all</span>
+                    <span style={{ fontSize: 11, color: '#64748B', fontWeight: 600 }}>(0 Verified)</span>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* ACTUALLY RATED RESTAURANTS FEED (Updates dynamically on any rating) */}
+            <div style={{
+              marginTop: 16,
+              paddingTop: 14,
+              borderTop: '1px solid rgba(16, 185, 129, 0.2)'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 8,
+                marginBottom: 12
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 15 }}>📋</span>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: '#0F2922' }}>
+                    Actually Rated Restaurants Till Date ({actuallyRatedList.length} Outlets)
+                  </span>
+                </div>
+                <span style={{ fontSize: 11.5, color: '#059669', fontWeight: 700, background: 'rgba(16, 185, 129, 0.1)', padding: '2px 8px', borderRadius: 6 }}>
+                  ● Live Diners Feed
+                </span>
+              </div>
+
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10
+              }}>
+                {actuallyRatedList.map((item) => {
+                  const numScore = parseFloat(item.avgScore) || 0;
+                  const isLow = numScore <= 2.5;
+                  const isMid = numScore > 2.5 && numScore < 4.0;
+
+                  return (
+                    <div
+                      key={item.outletId}
+                      style={{
+                        background: '#FFFFFF',
+                        border: isLow ? '1.5px solid #FECACA' : '1px solid #E2E8F0',
+                        borderRadius: 12,
+                        padding: '12px 16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: 12,
+                        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.02)'
+                      }}
+                    >
+                      {/* Left side: Restaurant name, location, ratings & badge */}
+                      <div style={{ flex: '1 1 240px', minWidth: 200 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                          <strong style={{ fontSize: 15, color: '#0F2922', fontWeight: 800 }}>
+                            {item.name}
+                          </strong>
+                          <span style={{
+                            fontSize: 11,
+                            color: '#64748B',
+                            background: '#F1F5F9',
+                            padding: '2px 8px',
+                            borderRadius: 6,
+                            fontWeight: 600
+                          }}>
+                            📍 {item.location}
+                          </span>
+                        </div>
+
+                        {/* Ratings pill & Golden Badge */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 5, flexWrap: 'wrap' }}>
+                          <span style={{
+                            fontSize: 12,
+                            fontWeight: 800,
+                            color: isLow ? '#DC2626' : isMid ? '#D97706' : '#059669',
+                            background: isLow ? '#FEF2F2' : isMid ? '#FEF3C7' : '#ECFDF5',
+                            border: `1px solid ${isLow ? '#FECACA' : isMid ? '#FDE68A' : '#A7F3D0'}`,
+                            padding: '3px 9px',
+                            borderRadius: 6,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 4
+                          }}>
+                            ★ {item.avgScore}
+                            <span style={{ fontSize: 11, fontWeight: 600, color: '#64748B' }}>
+                              ({item.reviewCount} {item.reviewCount === 1 ? 'rating' : 'ratings'}{item.ratings.length > 1 ? `: ${item.ratings.join('/')}` : ''})
+                            </span>
+                          </span>
+
+                          <span style={{
+                            fontSize: 11.5,
+                            fontWeight: 700,
+                            color: '#64748B',
+                            background: '#F8FAFC',
+                            border: '1px solid #E2E8F0',
+                            padding: '3px 9px',
+                            borderRadius: 6
+                          }}>
+                            🏆 Golden Badge: <span style={{ color: '#DC2626', fontWeight: 800 }}>Nil</span>
+                          </span>
+                        </div>
+
+                        {/* Customer feedback / comment if present */}
+                        {item.latestComment && (
+                          <div style={{
+                            marginTop: 6,
+                            fontSize: 12,
+                            color: isLow ? '#B91C1C' : '#475569',
+                            fontStyle: 'italic',
+                            background: isLow ? '#FEF2F2' : '#F8FAFC',
+                            padding: '4px 10px',
+                            borderRadius: 6,
+                            borderLeft: `3px solid ${isLow ? '#EF4444' : '#94A3B8'}`
+                          }}>
+                            {isLow ? '⚠️ ' : '💬 '}&ldquo;{item.latestComment}&rdquo;
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right side: Interactive action buttons */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenRating(item.restaurantObj)}
+                          style={{
+                            background: '#059669',
+                            color: '#FFFFFF',
+                            border: 'none',
+                            padding: '8px 14px',
+                            borderRadius: 8,
+                            fontSize: 12.5,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 5,
+                            boxShadow: '0 2px 6px rgba(5, 150, 105, 0.2)'
+                          }}
+                          title={`Rate food safety for ${item.name}`}
+                        >
+                          <span>⭐</span>
+                          <span>Rate</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setPassportModalRestaurant(item.restaurantObj)}
+                          style={{
+                            background: '#FFFFFF',
+                            color: '#0F2922',
+                            border: '1px solid #CBD5E1',
+                            padding: '8px 14px',
+                            borderRadius: 8,
+                            fontSize: 12.5,
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 5
+                          }}
+                          title={`View safety inspection log for ${item.name}`}
+                        >
+                          <span>🛡️</span>
+                          <span>Audit Log</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

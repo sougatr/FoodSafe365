@@ -31,13 +31,67 @@ export const POPULAR_RESTAURANTS: RestaurantItem[] = [
     cuisine: 'Modern European & Farm-to-Table Fine Dining',
     category: 'fine_dine',
     badge: 'FOODSAFE CUSTOMER OBSERVATION',
-    score: '4.9',
-    reviews: 320,
+    score: '4.7',
+    reviews: 3,
     lastCheck: 'Today, 09:30 AM',
     signals: {
       cold: { title: 'Cold < 5°C', subtitle: 'Refrigeration OK' },
       medical: { title: '100% Medical', subtitle: 'Stool Test Cleared' },
       pest: { title: 'Pest Safe', subtitle: 'Inspected Weekly' }
+    }
+  },
+  {
+    id: 'the-central-bistro-mumbai',
+    name: 'The Central Bistro',
+    city: 'mumbai',
+    location: 'Mumbai',
+    tableCode: 'Table QR #03',
+    cuisine: 'Bistro & Multi-Cuisine Dining',
+    category: 'cafe_dining',
+    badge: 'FOODSAFE DINER RATED',
+    score: '4.0',
+    reviews: 1,
+    lastCheck: 'Today, 12:00 PM',
+    signals: {
+      cold: { title: 'Chill Temp ≤ 4°C', subtitle: 'Refrigeration Checked' },
+      medical: { title: 'Staff Hygiene', subtitle: 'Grooming Standard' },
+      pest: { title: 'Pest Safe', subtitle: 'Kitchen Clean' }
+    }
+  },
+  {
+    id: 'coffee-island-mumbai',
+    name: 'Coffee Island',
+    city: 'mumbai',
+    location: 'Mumbai',
+    tableCode: 'Table QR #02',
+    cuisine: 'Specialty Coffee & Bakery',
+    category: 'cafe_dining',
+    badge: 'FOODSAFE DINER RATED',
+    score: '4.0',
+    reviews: 1,
+    lastCheck: 'Today, 02:30 PM',
+    signals: {
+      cold: { title: 'Milk Cooler ≤ 4°C', subtitle: 'Dairy Storage OK' },
+      medical: { title: 'Barista Hygiene', subtitle: 'Clean Aprons' },
+      pest: { title: 'Pest Safe', subtitle: 'Dry Storage Safe' }
+    }
+  },
+  {
+    id: 'the-spice-kitchen-mumbai',
+    name: 'The Spice Kitchen',
+    city: 'mumbai',
+    location: 'Mumbai',
+    tableCode: 'Table QR #05',
+    cuisine: 'North Indian & Spiced Delicacies',
+    category: 'casual_dining',
+    badge: 'FOODSAFE DINER OBSERVATION',
+    score: '2.0',
+    reviews: 1,
+    lastCheck: 'Today, 01:15 PM',
+    signals: {
+      cold: { title: 'Core Temp < 75°C', subtitle: 'Undercooked Report' },
+      medical: { title: 'Staff Hygiene', subtitle: 'Handwash Logged' },
+      pest: { title: 'Pest Safe', subtitle: 'Floor Clean' }
     }
   },
   {
@@ -151,15 +205,15 @@ export const POPULAR_RESTAURANTS: RestaurantItem[] = [
   },
   {
     id: 'bademiya-mumbai',
-    name: 'Bademiya',
+    name: 'BadeMiya',
     city: 'mumbai',
     location: 'Tulloch Road, Colaba, Mumbai',
     tableCode: 'Table QR #09',
     cuisine: 'Kebabs, Rolls & Mughlai Street Cuisine',
     category: 'swiggy_popular',
-    badge: 'FOODSAFE CUSTOMER OBSERVATION',
-    score: '4.6',
-    reviews: 740,
+    badge: 'FOODSAFE DINER RATED',
+    score: '3.0',
+    reviews: 1,
     lastCheck: 'Today, 11:30 AM',
     signals: {
       cold: { title: 'Core Temp ≥ 75°C', subtitle: 'Cooked Thoroughly' },
