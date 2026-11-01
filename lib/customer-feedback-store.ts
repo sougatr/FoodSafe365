@@ -231,8 +231,31 @@ function writeFileStore(ratings: DinerSafetyRating[]): void {
 }
 
 async function ensurePgTable(): Promise<boolean> {
-  // Schema is managed exclusively by migration 009_create_customer_feedback.sql. Dynamic runtime DDL is eliminated.
-  return true;
+  try {
+    await query(`
+      CREATE TABLE IF NOT EXISTS customer_feedback (
+        id VARCHAR(255) PRIMARY KEY,
+        outlet_id VARCHAR(255) NOT NULL,
+        outlet_name VARCHAR(255) NOT NULL,
+        overall_score NUMERIC(3, 1) NOT NULL,
+        cleanliness_score NUMERIC(3, 1),
+        staff_hygiene_score NUMERIC(3, 1),
+        food_freshness_score NUMERIC(3, 1),
+        safe_water_score NUMERIC(3, 1),
+        washroom_score NUMERIC(3, 1),
+        feedback TEXT,
+        diner_name VARCHAR(255),
+        diner_mobile VARCHAR(255),
+        table_number VARCHAR(100),
+        verified_dine_in BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+    return true;
+  } catch (err) {
+    console.warn('[customer-feedback-store] ensurePgTable note:', err);
+    return false;
+  }
 }
 
 function mapPgRowToRating(r: any): DinerSafetyRating {
