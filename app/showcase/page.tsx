@@ -2,21 +2,23 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import {
-  ShieldCheck,
-  CheckCircle2,
-  Printer,
-  Share2,
-  QrCode,
-  Calendar,
-  Building,
   Award,
-  ArrowLeft,
-  Sparkles,
-  ExternalLink,
-  Edit2,
-  Check,
+  CheckCircle2,
+  Share2,
+  Printer,
   ChevronRight,
-  Home
+  ShieldCheck,
+  Building,
+  Calendar,
+  Check,
+  Edit2,
+  Clock,
+  Sparkles,
+  Info,
+  Layers,
+  ArrowRight,
+  Send,
+  AlertTriangle
 } from 'lucide-react';
 import {
   FOODSAFE28,
@@ -33,8 +35,8 @@ import ThemeToggle from '@/components/ThemeToggle';
 export default function ShowcasePage() {
   const { lang, t } = useLanguage();
   const [data, setData] = useState<AppPhase1State>({});
-  const [restaurantName, setRestaurantName] = useState('Grand Taj Kitchen & Grill');
-  const [fssaiNumber, setFssaiNumber] = useState('11524012000492');
+  const [restaurantName, setRestaurantName] = useState('[DEMO] Sample Demonstration Kitchen & Grill');
+  const [fssaiNumber, setFssaiNumber] = useState('DEMO-SAMPLE-LIC-0000');
   const [isEditing, setIsEditing] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
 
@@ -88,33 +90,18 @@ export default function ShowcasePage() {
   }
 
   function handleWhatsAppShare() {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://food-safe365.vercel.app';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.foodsafe365.in';
     const auditUrl = `${origin}/diner`;
-    let msg = '';
-
-    if (lang === 'hi') {
-      msg = `🌟 *${restaurantName} को आज FoodSafetyGreen™ सत्यापन मिला है!* 🌟\n\n` +
-        `✅ आज सभी 29 आवश्यक हाइजीन और तापमान नियंत्रण (कोल्ड स्टोरेज <5°C, कुकिंग ≥75°C, पेस्ट कंट्रोल) की जांच पूरी हुई।\n\n` +
-        `🛡️ हमारा लाइव खाद्य सुरक्षा फ़ीडबैक देखें:\n${auditUrl}\n\n` +
-        `_FoodSafe365 स्वायत्त सुरक्षा प्रणाली द्वारा सत्यापित_`;
-    } else if (lang === 'mr') {
-      msg = `🌟 *${restaurantName} आज FoodSafetyGreen™ सत्यापित आहे!* 🌟\n\n` +
-        `✅ आज सर्व 29 महत्त्वपूर्ण स्वच्छता व तापमान तपासण्या (कोल्ड स्टोरेज <५°C, कुकिंग ≥७५°C, पेस्ट कंट्रोल) यशस्वीरित्या पूर्ण झाल्या.\n\n` +
-        `🛡️ आमचा थेट अन्न सुरक्षा अभिप्राय येथे तपासा:\n${auditUrl}\n\n` +
-        `_FoodSafe365 स्वायत्त सुरक्षा प्रणालीद्वारे सत्यापित_`;
-    } else {
-      msg = `🌟 *${restaurantName} is FoodSafetyGreen™ Verified!* 🌟\n\n` +
-        `✅ All 29 critical kitchen hygiene, cold storage (<5°C), cooking core (≥75°C), and pest control checks have been inspected and verified.\n\n` +
-        `🛡️ View our live diner food safety feedback:\n${auditUrl}\n\n` +
-        `_Verified by FoodSafe365 Kitchen Intelligence_`;
-    }
+    let msg = `🛡️ *${restaurantName} — FoodSafe365 Operational Status*\n\n` +
+      `Operational status and daily safeguards preview:\n${auditUrl}\n\n` +
+      `_Note: FoodSafe365 is an independent digital food-safety management platform. Operational status is not an FSSAI certification or statutory inspection._`;
 
     const encoded = encodeURIComponent(msg);
     window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
   }
 
   function handleCopyShareLink() {
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://food-safe365.vercel.app';
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.foodsafe365.in';
     const auditUrl = `${origin}/diner`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(auditUrl);
@@ -131,6 +118,24 @@ export default function ShowcasePage() {
       </div>
 
       <div className="container" style={{ maxWidth: 900, paddingTop: 28, paddingBottom: 64 }}>
+        
+        {/* UNMISTAKABLE DEMO DATA NOTICE BANNER */}
+        <div className="print-hide" style={{
+          background: '#FFFBEB',
+          border: '2px solid #F59E0B',
+          borderRadius: 14,
+          padding: '14px 18px',
+          marginBottom: 20,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12
+        }}>
+          <AlertTriangle size={24} style={{ color: '#D97706', flexShrink: 0 }} />
+          <div style={{ fontSize: 13, color: '#92400E', lineHeight: 1.5 }}>
+            <strong>DEMO DATA / SAMPLE DEMONSTRATION RECORD:</strong> The establishment details, licence numbers, and operational checklists on this showcase page are sample demonstration records for platform illustration. They do not represent genuine business records, authorized listings, official statutory inspections, or medical clearances.
+          </div>
+        </div>
+
         {/* Actions Bar / Control Center - Hidden during printing */}
         <section className="print-hide card" style={{
           marginBottom: 24,
@@ -144,50 +149,40 @@ export default function ShowcasePage() {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <span className="pill good" style={{ fontSize: 11, padding: '3px 9px' }}>
-                  ★ FOODSAFE365 PASSPORT
+                  ★ OPERATIONAL STATUS PREVIEW
+                </span>
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#B45309', background: '#FEF3C7', padding: '2px 8px', borderRadius: 6 }}>
+                  DEMO RECORD
                 </span>
                 <span style={{ fontSize: 13, color: 'var(--muted, #64748b)' }}>
                   {todayFormatted}
                 </span>
               </div>
-              <h1 style={{ fontSize: 22, fontWeight: 900, margin: '2px 0 4px', color: 'var(--text, #0f172a)' }}>
-                FoodSafe365 Passport &amp; Daily Food Safety Badge
+              <h1 style={{ fontSize: 22, fontWeight: 900, margin: 0, color: 'var(--text, #0f172a)' }}>
+                FoodSafe365 Operational Status Dossier
               </h1>
-              <p style={{ margin: 0, fontSize: 13.5, color: 'var(--muted, #64748b)' }}>
-                Restaurant → FoodSafe365 → Visible Food-Safety Record (Passport) → Consumer → Trust
+              <p className="muted" style={{ margin: '4px 0 0', fontSize: 13 }}>
+                Display or print this operational status decal for front-of-house transparency and diner assurance.
               </p>
             </div>
 
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
               <button
                 type="button"
                 onClick={handlePrint}
                 className="btn primary"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13.5, padding: '9px 16px', borderRadius: 12 }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '9px 16px', borderRadius: 12 }}
               >
-                <Printer size={16} />
-                {t('action.printStandee')}
+                <Printer size={15} /> {lang === 'hi' ? 'प्रिंट / PDF सेव करें' : lang === 'mr' ? 'प्रिंट / PDF सेव्ह करा' : 'Print Decal / Save PDF'}
               </button>
 
               <button
                 type="button"
                 onClick={handleWhatsAppShare}
                 className="btn secondary"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  fontSize: 13.5,
-                  padding: '9px 16px',
-                  borderRadius: 12,
-                  background: '#25D366',
-                  color: '#ffffff',
-                  border: 'none',
-                  fontWeight: 700
-                }}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '9px 14px', borderRadius: 12, color: '#047857' }}
               >
-                <Share2 size={16} />
-                {t('action.shareWhatsApp')}
+                <Share2 size={15} /> WhatsApp
               </button>
 
               <button
@@ -196,7 +191,6 @@ export default function ShowcasePage() {
                 className="btn secondary"
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '9px 14px', borderRadius: 12 }}
               >
-                {shareCopied ? <Check size={14} style={{ color: '#059669' }} /> : <ExternalLink size={14} />}
                 {shareCopied ? (lang === 'hi' ? 'लिंक कॉपी हो गया!' : lang === 'mr' ? 'लिंक कॉपी झाली!' : 'Audit Link Copied!') : (lang === 'hi' ? 'ऑडिट लिंक' : lang === 'mr' ? 'ऑडिट लिंक' : 'Copy Audit URL')}
               </button>
 
@@ -275,19 +269,24 @@ export default function ShowcasePage() {
             overflow: 'hidden'
           }}
         >
-          {/* Subtle Guilloche / Security Watermark Background Pattern */}
+          {/* DEMO WATERMARK BADGE IN PRINT & SCREEN */}
           <div style={{
             position: 'absolute',
-            top: -60,
-            right: -60,
-            width: 220,
-            height: 220,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%)',
-            pointerEvents: 'none'
-          }} />
+            top: 14,
+            right: 14,
+            background: '#FEF3C7',
+            border: '1px solid #D97706',
+            color: '#B45309',
+            fontSize: 10,
+            fontWeight: 900,
+            letterSpacing: '0.08em',
+            padding: '3px 8px',
+            borderRadius: 6
+          }}>
+            DEMO DATA · SAMPLE RECORD
+          </div>
 
-          {/* Top Header: Trust Seal & FSSAI Verification Status */}
+          {/* Top Header: Trust Seal & Operational Status Title */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -330,10 +329,10 @@ export default function ShowcasePage() {
                     padding: '2px 8px',
                     borderRadius: 6
                   }}>
-                    {t('badge.safeDining')}
+                    INDEPENDENT DIGITAL PLATFORM
                   </span>
                   <span style={{ fontSize: 11, color: '#059669', fontWeight: 800 }}>
-                    ★ FSSAI AUDIT VERIFIED
+                    ★ DIGITAL AUDIT LOG
                   </span>
                 </div>
                 <h2 style={{
@@ -344,10 +343,10 @@ export default function ShowcasePage() {
                   letterSpacing: '-0.02em',
                   lineHeight: 1.2
                 }}>
-                  {t('badge.verified')}
+                  FoodSafe365 Operational Status
                 </h2>
                 <p style={{ margin: 0, fontSize: 13, color: '#047857', fontWeight: 600 }}>
-                  {t('badge.tagline')}
+                  Active daily digital hygiene and temperature control tracking
                 </p>
               </div>
             </div>
@@ -362,7 +361,7 @@ export default function ShowcasePage() {
               boxShadow: '0 4px 12px rgba(16, 185, 129, 0.1)'
             }}>
               <div style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', color: '#059669', letterSpacing: '0.08em' }}>
-                {t('badge.dateVerified')}
+                Last Updated
               </div>
               <div style={{ fontSize: 15, fontWeight: 900, color: '#0f172a' }}>
                 {todayFormatted}
@@ -374,7 +373,7 @@ export default function ShowcasePage() {
           </div>
 
           {/* Restaurant Centerpiece & Verification Statement */}
-          <div style={{ textAlign: 'center', margin: '16px 0 28px' }}>
+          <div style={{ textAlign: 'center', margin: '16px 0 24px' }}>
             <span style={{
               fontSize: 12,
               fontWeight: 800,
@@ -382,10 +381,10 @@ export default function ShowcasePage() {
               textTransform: 'uppercase',
               color: '#047857'
             }}>
-              {lang === 'hi' ? 'प्रमाणित रसोई प्रतिष्ठान' : lang === 'mr' ? 'प्रमाणित स्वयंपाकघर प्रतिष्ठान' : 'CERTIFIED FOOD SERVICE ESTABLISHMENT'}
+              FOOD SERVICE ESTABLISHMENT (DEMO RECORD)
             </span>
             <h1 style={{
-              fontSize: 'clamp(28px, 4.5vw, 40px)',
+              fontSize: 'clamp(26px, 4.2vw, 36px)',
               fontWeight: 900,
               color: '#0f172a',
               margin: '6px 0 6px',
@@ -396,17 +395,13 @@ export default function ShowcasePage() {
             </h1>
             <p style={{
               margin: '0 auto',
-              fontSize: 14.5,
+              fontSize: 14,
               color: '#334155',
               maxWidth: 620,
               lineHeight: 1.5,
               fontWeight: 500
             }}>
-              {lang === 'hi'
-                ? `यह किचन आज के लिए पूर्णतः स्वच्छ, तापमान नियंत्रित एवं FSSAI मानकों के 100% अनुकूल प्रमाणित है।`
-                : lang === 'mr'
-                ? `हे स्वयंपाकघर आजच्या दिवसासाठी पूर्णपणे स्वच्छ, तापमान नियंत्रित आणि FSSAI मानकांनुसार १००% सुरक्षित प्रमाणित आहे.`
-                : `This kitchen has successfully executed and verified all statutory food hygiene, cold-chain safety, and sanitary protocols for today's service.`}
+              This establishment utilizes FoodSafe365 for daily operational kitchen hygiene logging, cold-chain monitoring, and supervisor review.
             </p>
             <div style={{
               marginTop: 10,
@@ -421,9 +416,47 @@ export default function ShowcasePage() {
               border: '1px solid #cbd5e1'
             }}>
               <Building size={13} style={{ color: '#059669' }} />
-              <span>FSSAI Lic: <strong>{fssaiNumber}</strong></span>
+              <span>Lic Ref: <strong>{fssaiNumber}</strong></span>
               <span>•</span>
               <span>Audit ID: <strong>FS365-{new Date().toISOString().slice(0, 10).replace(/-/g, '')}</strong></span>
+            </div>
+          </div>
+
+          {/* FoodSafe365 Operational Status 5-Point Dashboard */}
+          <div style={{
+            background: '#FFFFFF',
+            border: '2px solid #A7F3D0',
+            borderRadius: 16,
+            padding: '16px 20px',
+            marginBottom: 24,
+            boxShadow: '0 4px 14px rgba(5, 150, 105, 0.06)'
+          }}>
+            <h4 style={{ margin: '0 0 12px', fontSize: 13, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#064E3B' }}>
+              🛡️ FoodSafe365 Operational Status
+            </h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
+              <div style={{ borderLeft: '3px solid #059669', paddingLeft: 10 }}>
+                <span style={{ fontSize: 11, color: '#64748B', display: 'block', fontWeight: 600 }}>Checks completed</span>
+                <strong style={{ fontSize: 14, color: '#0F172A' }}>{verifiedCount} / {totalCount} Safeguards</strong>
+              </div>
+              <div style={{ borderLeft: '3px solid #059669', paddingLeft: 10 }}>
+                <span style={{ fontSize: 11, color: '#64748B', display: 'block', fontWeight: 600 }}>Manager reviewed</span>
+                <strong style={{ fontSize: 14, color: '#0F172A' }}>Yes · Reviewed Today</strong>
+              </div>
+              <div style={{ borderLeft: `3px solid ${badge.counts.openAlerts > 0 ? '#DC2626' : '#059669'}`, paddingLeft: 10 }}>
+                <span style={{ fontSize: 11, color: '#64748B', display: 'block', fontWeight: 600 }}>Corrective actions</span>
+                <strong style={{ fontSize: 14, color: badge.counts.openAlerts > 0 ? '#DC2626' : '#059669' }}>
+                  {badge.counts.openAlerts === 0 ? '0 Outstanding' : `${badge.counts.openAlerts} In Progress`}
+                </strong>
+              </div>
+              <div style={{ borderLeft: '3px solid #059669', paddingLeft: 10 }}>
+                <span style={{ fontSize: 11, color: '#64748B', display: 'block', fontWeight: 600 }}>Last updated</span>
+                <strong style={{ fontSize: 14, color: '#0F172A' }}>{todayFormatted}</strong>
+              </div>
+              <div style={{ borderLeft: '3px solid #059669', paddingLeft: 10 }}>
+                <span style={{ fontSize: 11, color: '#64748B', display: 'block', fontWeight: 600 }}>Evidence available</span>
+                <strong style={{ fontSize: 14, color: '#0F172A' }}>Digital Logs &amp; Signs</strong>
+              </div>
             </div>
           </div>
 
@@ -432,7 +465,7 @@ export default function ShowcasePage() {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
             gap: 12,
-            marginBottom: 28
+            marginBottom: 24
           }}>
             <div style={{
               background: '#ffffff',
@@ -444,13 +477,13 @@ export default function ShowcasePage() {
             }}>
               <div style={{ fontSize: 24, marginBottom: 4 }}>🌡️</div>
               <div style={{ fontSize: 13, fontWeight: 800, color: '#064e3b' }}>
-                {lang === 'hi' ? 'तापमान नियंत्रण' : lang === 'mr' ? 'तापमान नियंत्रण' : 'Cold & Hot Controls'}
+                Cold &amp; Hot Controls
               </div>
               <div style={{ fontSize: 11, color: '#047857', fontWeight: 600, marginTop: 2 }}>
                 &lt; 5°C Chilled · &gt; 75°C Cook
               </div>
               <div style={{ marginTop: 6, fontSize: 10.5, fontWeight: 700, color: '#059669' }}>
-                ✓ {lang === 'hi' ? 'प्रमाणित' : lang === 'mr' ? 'प्रमाणित' : 'Verified OK'}
+                ✓ Operational Log OK
               </div>
             </div>
 
@@ -464,13 +497,13 @@ export default function ShowcasePage() {
             }}>
               <div style={{ fontSize: 24, marginBottom: 4 }}>🧼</div>
               <div style={{ fontSize: 13, fontWeight: 800, color: '#064e3b' }}>
-                {lang === 'hi' ? 'हाइजीन व मेडिकल' : lang === 'mr' ? 'स्वच्छता व वैद्यकीय' : 'Hygiene & Medical'}
+                Hygiene &amp; Fitness
               </div>
               <div style={{ fontSize: 11, color: '#047857', fontWeight: 600, marginTop: 2 }}>
                 Form 1A Clean · 20s Wash
               </div>
               <div style={{ marginTop: 6, fontSize: 10.5, fontWeight: 700, color: '#059669' }}>
-                ✓ {lang === 'hi' ? 'प्रमाणित' : lang === 'mr' ? 'प्रमाणित' : 'Verified OK'}
+                ✓ Operational Log OK
               </div>
             </div>
 
@@ -484,13 +517,13 @@ export default function ShowcasePage() {
             }}>
               <div style={{ fontSize: 24, marginBottom: 4 }}>🪲</div>
               <div style={{ fontSize: 13, fontWeight: 800, color: '#064e3b' }}>
-                {lang === 'hi' ? 'कीट व ड्रेनेज मुक्त' : lang === 'mr' ? 'कीटक व ड्रेनेज मुक्त' : 'Pests & Drains'}
+                Pests &amp; Drains
               </div>
               <div style={{ fontSize: 11, color: '#047857', fontWeight: 600, marginTop: 2 }}>
-                Zero Pests · Free-Flow Drains
+                Screening · Free-Flow Drains
               </div>
               <div style={{ marginTop: 6, fontSize: 10.5, fontWeight: 700, color: '#059669' }}>
-                ✓ {lang === 'hi' ? 'प्रमाणित' : lang === 'mr' ? 'प्रमाणित' : 'Verified OK'}
+                ✓ Operational Log OK
               </div>
             </div>
 
@@ -504,13 +537,13 @@ export default function ShowcasePage() {
             }}>
               <div style={{ fontSize: 24, marginBottom: 4 }}>🥩</div>
               <div style={{ fontSize: 13, fontWeight: 800, color: '#064e3b' }}>
-                {lang === 'hi' ? 'क्रॉस संदूषण रोकथाम' : lang === 'mr' ? 'क्रॉस संसर्ग प्रतिबंध' : 'Cross-Contamination'}
+                Cross-Contamination
               </div>
               <div style={{ fontSize: 11, color: '#047857', fontWeight: 600, marginTop: 2 }}>
                 Color Boards · FIFO Tagged
               </div>
               <div style={{ marginTop: 6, fontSize: 10.5, fontWeight: 700, color: '#059669' }}>
-                ✓ {lang === 'hi' ? 'प्रमाणित' : lang === 'mr' ? 'प्रमाणित' : 'Verified OK'}
+                ✓ Operational Log OK
               </div>
             </div>
           </div>
@@ -543,29 +576,23 @@ export default function ShowcasePage() {
                 boxShadow: '0 4px 12px rgba(5, 150, 105, 0.15)',
                 flexShrink: 0
               }}>
-                {/* SVG QR Code Simulation */}
                 <svg viewBox="0 0 100 100" width="76" height="76" style={{ display: 'block' }}>
                   <rect x="0" y="0" width="100" height="100" fill="#ffffff" />
-                  {/* Top-left corner finder */}
                   <rect x="10" y="10" width="26" height="26" fill="#047857" rx="3" />
                   <rect x="14" y="14" width="18" height="18" fill="#ffffff" />
                   <rect x="18" y="18" width="10" height="10" fill="#047857" />
-                  {/* Top-right corner finder */}
                   <rect x="64" y="10" width="26" height="26" fill="#047857" rx="3" />
                   <rect x="68" y="14" width="18" height="18" fill="#ffffff" />
                   <rect x="72" y="18" width="10" height="10" fill="#047857" />
-                  {/* Bottom-left corner finder */}
                   <rect x="10" y="64" width="26" height="26" fill="#047857" rx="3" />
                   <rect x="14" y="68" width="18" height="18" fill="#ffffff" />
                   <rect x="18" y="72" width="10" height="10" fill="#047857" />
-                  {/* Dense data matrix pixels */}
                   <rect x="42" y="12" width="6" height="6" fill="#047857" />
                   <rect x="52" y="12" width="6" height="6" fill="#047857" />
                   <rect x="42" y="24" width="16" height="6" fill="#047857" />
                   <rect x="12" y="42" width="6" height="16" fill="#047857" />
                   <rect x="24" y="42" width="6" height="8" fill="#047857" />
                   <rect x="36" y="36" width="28" height="28" fill="#059669" rx="4" />
-                  {/* Center Shield Symbol in QR */}
                   <path d="M50 42 L58 46 V53 C58 58 50 62 50 62 C50 62 42 58 42 53 V46 Z" fill="#ffffff" />
                   <rect x="70" y="42" width="8" height="8" fill="#047857" />
                   <rect x="82" y="48" width="8" height="8" fill="#047857" />
@@ -582,11 +609,7 @@ export default function ShowcasePage() {
                   {t('badge.scanPrompt')}
                 </div>
                 <div style={{ fontSize: 12, color: '#475569', lineHeight: 1.4 }}>
-                  {lang === 'hi'
-                    ? 'अपने स्मार्टफोन कैमरे से स्कैन करें और रसोई का लाइव तापमान और हाइजीन रिकॉर्ड देखें।'
-                    : lang === 'mr'
-                    ? 'आपल्या स्मार्टफोन कॅमेऱ्याने स्कॅन करा आणि स्वयंपाकघराच्या थेट तापमान नोंदी व स्वच्छता प्रमाणपत्र तपासा.'
-                    : 'Point smartphone camera to inspect today’s certified temperature logs and supervisor signs.'}
+                  Scan with smartphone camera to view today's daily digital operational checks and supervisor review.
                 </div>
                 <div style={{ marginTop: 6 }}>
                   <Link
@@ -608,10 +631,10 @@ export default function ShowcasePage() {
               </div>
             </div>
 
-            {/* Official Certification Signature */}
+            {/* Platform Reference */}
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b' }}>
-                Verified By FoodSafe365
+                FoodSafe365 Digital Platform
               </div>
               <div style={{
                 fontFamily: 'monospace',
@@ -620,12 +643,27 @@ export default function ShowcasePage() {
                 color: '#059669',
                 marginTop: 2
               }}>
-                [✓ PROTOCOL VERIFIED]
+                [OPERATIONAL LOGGED]
               </div>
               <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2 }}>
-                29 / 29 Safeguards Met
+                {verifiedCount} / {totalCount} Controls Active
               </div>
             </div>
+          </div>
+
+          {/* MANDATORY STATUTORY DISCLAIMER */}
+          <div style={{
+            marginTop: 20,
+            padding: '12px 16px',
+            background: 'rgba(255, 255, 255, 0.85)',
+            border: '1px solid #CBD5E1',
+            borderRadius: 10,
+            fontSize: 11.5,
+            color: '#475569',
+            lineHeight: 1.5,
+            textAlign: 'center'
+          }}>
+            <strong>Statutory Disclaimer:</strong> FoodSafe365 is an independent digital food-safety management platform. Its operational status is not an FSSAI certification, statutory inspection or guarantee of food safety.
           </div>
         </div>
 
@@ -638,22 +676,22 @@ export default function ShowcasePage() {
           border: '1px solid var(--border, #e2e8f0)'
         }}>
           <h3 style={{ fontSize: 17, fontWeight: 900, margin: '0 0 4px', color: 'var(--text, #0f172a)' }}>
-            📍 Deploy Your FoodSafe365 Passport QR Across 9 Customer Touchpoints
+            📍 Deploy Your FoodSafe365 Operational Status Across Customer Touchpoints
           </h3>
           <p className="muted" style={{ margin: '0 0 16px', fontSize: 13 }}>
-            Restaurant → FoodSafe365 → Visible Food-Safety Record (Passport) → Consumer → Trust. Let customers scan and verify hygiene at every touchpoint:
+            Restaurant → FoodSafe365 → Transparent Operational Record → Consumer → Trust. Let customers scan and verify daily hygiene diligence:
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14 }}>
             {[
-              { icon: '🚪', title: '1. Restaurant Entrance', desc: 'Mount an A4 vinyl decal or window plaque near your main entrance or host desk so arriving diners know before entering.' },
-              { icon: '📋', title: '2. Dine-In Menu', desc: 'Print the QR passport code on the front cover or footer corner of printed menus so guests verify cleanliness while ordering.' },
+              { icon: '🚪', title: '1. Restaurant Entrance', desc: 'Mount an A4 plaque near your main entrance or host desk showing daily digital diligence before entering.' },
+              { icon: '📋', title: '2. Dine-In Menu', desc: 'Print the QR code on the front cover or footer corner of menus so guests verify cleanliness while ordering.' },
               { icon: '🪑', title: '3. Table Tent Standee', desc: 'Slide an A5 print into clear acrylic table tents on every dining table. Diners scan to view temperatures and rate safety.' },
-              { icon: '🥡', title: '4. Takeaway Packaging', desc: 'Stamp or sticker the FoodSafe365 Passport QR onto paper takeout bags, demonstrating verified sanitary handling to go.' },
-              { icon: '🛵', title: '5. Delivery Bags', desc: 'Apply a tamper-evident seal for Zomato & Swiggy riders so online order customers know packaging was not opened in transit.' },
-              { icon: '📦', title: '6. Food Containers', desc: 'Affix tamper closure tape across curry bowls and meal boxes confirming sealed, uncontaminated kitchen prep.' },
-              { icon: '🧾', title: '7. Bills & Receipts', desc: 'Configure your POS billing thermal printer to print the FoodSafe365 Passport QR at the bottom of the bill receipt.' },
-              { icon: '🌐', title: '8. Restaurant Website', desc: 'Embed the FoodSafe365 digital live trust badge on your online ordering and catering booking website.' },
-              { icon: '📱', title: '9. Social Media', desc: 'Post daily food-safety check updates on Instagram & WhatsApp status to build loyal community following and brand trust.' },
+              { icon: '🥡', title: '4. Takeaway Packaging', desc: 'Stamp or sticker the FoodSafe365 QR onto paper takeout bags, demonstrating sanitary handling.' },
+              { icon: '🛵', title: '5. Delivery Bags', desc: 'Apply a tamper-evident seal for delivery riders so online order customers know packaging was not opened in transit.' },
+              { icon: '📦', title: '6. Food Containers', desc: 'Affix tamper closure tape across curry bowls and meal boxes confirming sealed kitchen prep.' },
+              { icon: '🧾', title: '7. Bills & Receipts', desc: 'Configure your POS billing thermal printer to print the FoodSafe365 QR at the bottom of the bill receipt.' },
+              { icon: '🌐', title: '8. Restaurant Website', desc: 'Embed the FoodSafe365 digital live operational status widget on your online ordering website.' },
+              { icon: '📱', title: '9. Social Media', desc: 'Post daily food-safety check updates on Instagram & WhatsApp status to build loyal community brand trust.' },
             ].map((tp, idx) => (
               <div key={idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px 14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
@@ -705,4 +743,3 @@ export default function ShowcasePage() {
     </main>
   );
 }
-

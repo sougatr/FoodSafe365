@@ -250,19 +250,23 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     id: 8,
     code: 'FS28-09',
     category: 'Staff Hygiene & Health',
-    title: 'Are staff medical fitness certificates and 6-monthly stool test records current?',
-    target: 'Administrative check frequently targeted during surprise FDA/FSSAI inspections.',
+    title: 'Are staff medical fitness records (Form 1A) and health screenings current?',
+    target: 'FSSAI Schedule 4 statutory medical fitness examination and good practice health screening.',
     severity: 'Critical',
     frequency: 'Daily',
     shift: 'monthly_audit',
     shiftTitle: "The Manager's Monthly (Admin Audit)",
     timeEstimate: '5 mins',
     input: 'scale_1_5',
-    why: 'Food handlers carrying enteric pathogens (Salmonella Typhi, Hepatitis A, parasites) can silently transmit devastating waterborne and foodborne illnesses.',
-    what: ['Verify valid 6-monthly medical fitness certificates (Form 1A) for all food handlers, including laboratory stool examination.', 'Check valid vaccinations (Typhoid vaccine every 3 years, Hepatitis A).', 'Ensure staff with active diarrhea, vomiting, fever, or open infected skin lesions are strictly excluded from food handling.'],
-    standard: '100% of food handlers must hold active Form 1A medical fitness certificates with stool test clearance, up-to-date Typhoid & Hep A vaccinations, and daily symptom exclusion.',
-    risk: 'Asymptomatic typhoid or hepatitis carriers shedding massive viral/bacterial loads into salads, sauces, and drinks.',
-    action: 'Immediately exclude symptomatic or medically uncertified handlers from food contact; schedule certified diagnostic lab medical camp via service hub.',
+    why: 'Food handlers carrying enteric pathogens (Salmonella Typhi, Hepatitis A, parasites) can transmit foodborne illnesses if hygiene and fitness protocols lapse.',
+    what: [
+      'Verify valid annual medical fitness certificates (Form 1A) for all food handlers per FSSAI Schedule 4 statutory mandate.',
+      'Review recommended hygiene best practices (periodic enteric health checks and Typhoid/Hep A vaccinations).',
+      'Ensure staff with active diarrhea, vomiting, fever, or open infected skin lesions are strictly excluded from food handling.'
+    ],
+    standard: '100% of food handlers must hold active Form 1A medical fitness certification per FSSAI regulations, supplemented by recommended health screenings and daily symptom exclusion.',
+    risk: 'Asymptomatic illness carriers or uncertified handlers causing cross-contamination of ready-to-eat foods.',
+    action: 'Immediately exclude symptomatic handlers from food contact; schedule certified occupational health practitioner for Form 1A examinations.',
     outletType: 'all'
   },
 
@@ -946,9 +950,8 @@ export function isDailyFloorCheck(c: FoodSafeCheck): boolean {
 }
 
 export function isScheduledCheck(c: FoodSafeCheck): boolean {
-  // Operational floor checks + applicable specialized stations
-  // Manager's monthly admin audit (Items 7 & 8) is separated to avoid overwhelming floor supervisors
-  return c.shift !== 'monthly_audit';
+  // All 29 FoodSafe operational safeguards (shifts + specialized + admin audits) are scheduled and tracked
+  return true;
 }
 
 export function severityForCheck(code: string): 'critical' | 'attention' {

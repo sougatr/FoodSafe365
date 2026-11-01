@@ -68,9 +68,9 @@ export const KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
   },
   {
     keywords: ['medical', 'form 1a', 'doctor', 'stool test', 'typhoid', 'vaccine', 'health check', 'communicable', 'मेडिकल', 'फॉर्म 1a', 'डॉक्टर', 'स्टूल टेस्ट', 'मल परीक्षण', 'टाइफाइड', 'लसीकरण', 'लस'],
-    title: 'Mandatory Food Handler Medical Examinations & Vaccinations',
-    standard: 'All food handlers must undergo a registered medical examination every 6 months, receive Form 1A medical fitness certificates, clear laboratory stool testing for enteric pathogens, and maintain valid Typhoid (TCV) & Hepatitis A vaccinations.',
-    fssaiRef: 'FSSAI Licensing & Registration Regulations Section 3.1 & Schedule 4 Mandate',
+    title: 'Food Handler Medical Examinations & Health Records',
+    standard: 'All food handlers must undergo a registered medical examination for Form 1A medical fitness certification per FSSAI Schedule 4, supported by recommended enteric screenings and vaccinations.',
+    fssaiRef: 'FSSAI Licensing & Registration Regulations Schedule 4 (General Sanitary and Hygienic Requirements)',
     supervisorAction: [
       'Check daily for open cuts, skin rashes, eye discharge, or diarrhea/vomiting symptoms.',
       'Any staff member with active diarrhea, jaundice, or fever must be relieved from food handling immediately.',
@@ -78,12 +78,12 @@ export const KNOWLEDGE_TOPICS: KnowledgeTopic[] = [
       'Verify staff hygiene before opening shift.'
     ],
     managerAction: [
-      'Maintain Form 1A certificates and NABL stool test reports in the restaurant compliance dossier for all staff.',
-      'Verify Typhoid Conjugate Vaccine (TCV) validity (valid for 3 years) and Hepatitis A immunization.',
-      'Book an on-site FoodSafe Verified Medical Camp or NABL Stool Collection drive via the Marketplace.',
-      'Present valid certificates during annual FSSAI and municipal health audits to avoid hefty fines or closure.'
+      'Maintain Form 1A certificates in the restaurant compliance dossier for all staff.',
+      'Review recommended vaccinations (Typhoid, Hepatitis A) and hygiene screening records.',
+      'Book on-site medical check-up camps via registered medical practitioners.',
+      'Ensure compliance records are accessible during municipal and food safety inspections.'
     ],
-    actionLink: { label: 'Book Staff Medical Camp & Stool Tests', href: '/providers?category=medical' }
+    actionLink: { label: 'Book Staff Medical Camp & Screenings', href: '/providers?category=medical' }
   },
   {
     keywords: ['pest', 'cockroach', 'fly', 'rat', 'rodent', 'flies', 'insects', 'traps', 'कीट', 'तिलचट्टा', 'झुरळ', 'उंदीर', 'माशी', 'मक्खी', 'पेस्ट कंट्रोल', 'उंदरे'],
@@ -229,7 +229,7 @@ export function queryFoodSafetyAI(query: string, persona: PersonaRole): ChatMess
       `1. **Cold-Chain Threshold:** Maintain chilled food strictly between **1°C and 5°C**, frozen foods at **< -18°C**.\n` +
       `2. **Thermal Cooking:** Core temperatures must reach **≥ 75°C** (measured with needle probe thermometer).\n` +
       `3. **2h/4h Rule:** High-risk foods exposed between 5°C and 60°C must be used within 2 hours or discarded if over 4 hours.\n` +
-      `4. **Medical Fitness:** 6-monthly Form 1A certificates and NABL stool cultures for enteric pathogens are required for all handlers.\n` +
+      `4. **Medical Fitness:** Valid Form 1A medical fitness certificates per FSSAI Schedule 4, supported by periodic health screenings.\n` +
       `5. **Pest Exclusion:** Only CIB&RC approved food-safe pest solutions permitted.\n\n` +
       `*Tip: All food safety guidance aligns with FSSAI Schedule 4 and international hygiene standards.*`,
     timestamp,

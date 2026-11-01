@@ -345,19 +345,19 @@ export const SAFEGUARD_TRANSLATIONS: Record<string, Record<Language, SafeguardTr
   },
   'FS28-09': {
     en: {
-      title: 'Are staff medical fitness certificates and 6-monthly stool test records current?',
-      why: 'Carriers of typhoid or hepatitis can silently infect hundreds of diners.',
-      action: 'Exclude symptomatic staff; book medical check-up camp via providers.'
+      title: 'Are staff medical fitness records (Form 1A) and health screenings current?',
+      why: 'Food handlers carrying transmissible illnesses can infect diners if health screenings lapse.',
+      action: 'Exclude symptomatic staff; arrange medical fitness check-ups via registered medical practitioners.'
     },
     hi: {
-      title: 'क्या स्टाफ के मेडिकल फिटनेस सर्टिफिकेट और 6-मासिक स्टूल टेस्ट रिकॉर्ड वैध हैं?',
-      why: 'टाइफाइड या पीलिया से पीड़ित कर्मचारी ग्राहकों में गंभीर बीमारी फैला सकते हैं।',
-      action: 'अस्वस्थ कर्मचारियों को किचन से हटाएं; अधिकृत लैब से मेडिकल कैंप बुक करें।'
+      title: 'क्या स्टाफ के मेडिकल फिटनेस रिकॉर्ड (फॉर्म 1A) और स्वास्थ्य जांच वैध हैं?',
+      why: 'संक्रामक रोग से पीड़ित कर्मचारी भोजन के संपर्क में आने पर ग्राहकों को बीमार कर सकते हैं।',
+      action: 'अस्वस्थ कर्मचारियों को किचन से हटाएं; अधिकृत डॉक्टर से मेडिकल फिटनेस जांच कराएं।'
     },
     mr: {
-      title: 'कर्मचाऱ्यांचे वैद्यकीय प्रमाणपत्र आणि ६ महिन्यांचे स्टूल टेस्ट रेकॉर्ड वैध आहेत का?',
-      why: 'टायफॉइड किंवा काविळीचे रुग्ण कर्मचारी ग्राहकांमध्ये आजार पसरवू शकतात.',
-      action: 'आजारी कर्मचाऱ्यास तात्काळ बाजूला करा; लॅबकडून मेडिकल कॅम्प आयोजित करा.'
+      title: 'कर्मचाऱ्यांचे वैद्यकीय फिटनेस प्रमाणपत्र (फॉर्म 1A) आणि आरोग्य नोंदी वैध आहेत का?',
+      why: 'संसर्गजन्य आजार असलेले कर्मचारी जेवणाच्या संपर्कात आल्यास ग्राहकांना संसर्ग होऊ शकतो.',
+      action: 'आजारी कर्मचाऱ्यांना कामावरून दूर ठेवा; नोंदणीकृत डॉक्टरांकडून वैद्यकीय तपासणी पूर्ण करा.'
     }
   },
   'FS28-10': {

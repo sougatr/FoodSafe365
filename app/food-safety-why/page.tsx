@@ -253,7 +253,7 @@ export default function FoSTaCLearningHubPage() {
                 The Danger Zone (5°C to 60°C)
               </h3>
               <p style={{ fontSize: 13, color: '#475569', margin: '0 0 12px', lineHeight: 1.45, flex: 1 }}>
-                In India's climate, food left between 5°C and 60°C allows bacteria like <em>Salmonella</em> and <em>E. coli</em> to double every 20 minutes. Milk, paneer, and poultry must stay refrigerated at ≤5°C.
+                In warm climates, perishable food left in the temperature danger zone (5°C to 60°C) provides favorable conditions where certain foodborne bacteria such as <em>Salmonella</em> and <em>E. coli</em> can divide as rapidly as every 20 minutes under optimal moisture and nutrient conditions. Perishables like milk, paneer, and poultry must stay refrigerated at ≤5°C.
               </p>
               <div style={{ background: '#F8FAF6', borderRadius: 8, padding: '8px 10px', fontSize: 11.5, color: '#047857', fontWeight: 600 }}>
                 💡 Key rule: Keep chilled food cold (≤5°C) and hot food steaming (≥65°C).
@@ -277,13 +277,13 @@ export default function FoSTaCLearningHubPage() {
                 </span>
               </div>
               <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0F2922', margin: '0 0 6px' }}>
-                Reused Oil &amp; The 25% TPM Limit
+                Reused Oil &amp; The 25% TPC Limit
               </h3>
               <p style={{ fontSize: 13, color: '#475569', margin: '0 0 12px', lineHeight: 1.45, flex: 1 }}>
-                Heating cooking oil repeatedly past its smoke point generates Total Polar Materials (TPMs). When TPM exceeds 25%, oil turns dark, carcinogenic, and raises arterial inflammation.
+                Heating cooking oil repeatedly causes thermal degradation, forming Total Polar Compounds (TPC). Under FSSAI regulations, cooking oil exceeding 25% TPC must be safely discarded, as degraded oil contains polar breakdown products harmful to cardiovascular and metabolic health.
               </p>
               <div style={{ background: '#F8FAF6', borderRadius: 8, padding: '8px 10px', fontSize: 11.5, color: '#047857', fontWeight: 600 }}>
-                💡 FSSAI mandates discarding frying oil once TPM crosses 25%.
+                💡 FSSAI mandates discarding frying oil once TPC crosses 25%.
               </div>
             </div>
 
@@ -840,7 +840,7 @@ export default function FoSTaCLearningHubPage() {
                 </h4>
               </div>
               <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
-                Brings hot core temperature from 70°C to &lt;3°C within 90 minutes, swiftly passing through the microbial danger zone.
+                Brings hot core temperature from 70°C to &lt;3°C within 90 minutes, minimizing residence time in the microbial danger zone.
               </p>
             </div>
 

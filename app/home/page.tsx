@@ -598,7 +598,7 @@ export default function Home() {
               Best Practices Followed in 5-Star Kitchens
             </h2>
             <p style={{ color: '#475569', fontSize: 13.5, margin: 0, maxWidth: 780, lineHeight: 1.5 }}>
-              How luxury properties like Taj, Oberoi, Marriott, and Michelin-rated restaurants ensure zero risk of foodborne contamination:
+              Benchmark food-safety controls followed in leading commercial kitchens to rigorously mitigate contamination risks:
             </p>
           </div>
 
@@ -620,7 +620,7 @@ export default function Home() {
                 </h4>
               </div>
               <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
-                Crashes hot core temperature from 70°C to &lt;3°C within 90 minutes, completely bypassing the bacterial danger zone.
+                Rapidly cools hot food from 70°C to &lt;3°C within 90 minutes, minimizing time spent in the microbial danger zone (5°C to 60°C).
               </p>
             </div>
 
@@ -704,7 +704,7 @@ export default function Home() {
                 </h4>
               </div>
               <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
-                Twice-daily digital testing (Testo 270); discarded for biodiesel recycling the moment Total Polar Compounds hit 24%.
+                Digital testing of Total Polar Compounds (TPC); oil is discarded for recycling before reaching the statutory 25% FSSAI limit to avoid degraded polar compounds.
               </p>
             </div>
 
@@ -725,7 +725,7 @@ export default function Home() {
                 </h4>
               </div>
               <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
-                Mandatory 6-monthly stool cultures &amp; typhoid vaccines, plus chlorine test strips (100–200 PPM) for salad sinks.
+                FSSAI Schedule 4 annual Form 1A medical fitness certification paired with periodic health screenings, plus sanitizer test strips for salad sinks.
               </p>
             </div>
           </div>

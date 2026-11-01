@@ -571,13 +571,13 @@ export default function ManagerPage() {
                 </Link>
               </div>
               <h3 style={{ fontSize: 15.5, fontWeight: 800, color: '#0f172a', margin: '4px 0 6px' }}>
-                Staff Medical Fitness (Form 1A) &amp; 6-Monthly Stool Tests
+                Staff Medical Fitness (Form 1A) &amp; Health Screenings
               </h3>
               <p className="muted" style={{ fontSize: 13, lineHeight: 1.5, margin: '0 0 12px' }}>
-                Are staff medical fitness certificates and 6-monthly stool test records current? Administrative check frequently targeted during surprise FDA/FSSAI inspections.
+                Are staff medical fitness certificates (Form 1A) and health screening records current per FSSAI Schedule 4?
               </p>
               <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: '10px 12px', fontSize: 12, color: '#475569' }}>
-                <strong>Standard:</strong> 100% of active food handlers must hold active Form 1A certificates with stool pathogen clearance.
+                <strong>Standard:</strong> 100% of active food handlers must hold valid Form 1A certificates per FSSAI Schedule 4, supported by periodic health screenings.
               </div>
             </div>
           </div>

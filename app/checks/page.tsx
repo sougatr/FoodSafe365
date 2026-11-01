@@ -1259,7 +1259,7 @@ export default function Checks() {
                         {selected.code === 'FS28-08'
                           ? 'Book accredited training partners for certified on-site or online FoSTaC courses.'
                           : selected.code === 'FS28-09'
-                          ? 'Organize NABL-accredited diagnostic camp for food handler fitness, vaccinations, and stool pathogen testing.'
+                          ? 'Organize registered occupational health medical camp for food handler fitness (Form 1A) and health screenings.'
                           : 'Book FoodSafe verified partners for on-site calibration, pest treatments, or equipment repair.'}
                       </span>
                     </div>

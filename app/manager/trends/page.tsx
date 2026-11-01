@@ -17,7 +17,9 @@ import {
   Calendar,
   Activity,
   ChevronRight,
-  Bot
+  Bot,
+  Thermometer,
+  Info
 } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import GlobalHeader from '@/components/GlobalHeader';
@@ -51,17 +53,39 @@ export default function TrendsPage() {
           <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>AI Checklist Trends</span>
         </div>
 
+        {/* PROMINENT SIMULATION & METHODOLOGY NOTICE */}
+        <div style={{
+          background: '#FFFBEB',
+          border: '2px solid #F59E0B',
+          borderRadius: 16,
+          padding: '16px 20px',
+          marginBottom: 24,
+          display: 'flex',
+          gap: 14,
+          alignItems: 'flex-start'
+        }}>
+          <AlertTriangle size={24} style={{ color: '#D97706', flexShrink: 0, marginTop: 2 }} />
+          <div>
+            <strong style={{ color: '#92400E', fontSize: 14.5, display: 'block', marginBottom: 4 }}>
+              DEMONSTRATION &amp; SIMULATED PREDICTIVE MODEL PREVIEW
+            </strong>
+            <p style={{ margin: 0, fontSize: 13, color: '#78350F', lineHeight: 1.55 }}>
+              The predictive safety score (86/100), statistical confidence figure (94.8%), and equipment failure probabilities displayed below are <strong>simulated machine-learning models</strong> demonstrated on synthetic kitchen data. In production environments, FoodSafe365 begins with <strong>descriptive analytics</strong> (verified temperature deviations and shift completion rates), introducing predictive claims only after empirical sensor validation.
+            </p>
+          </div>
+        </div>
+
         {/* Header & Period Switcher */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 20, marginBottom: 28, flexWrap: 'wrap' }}>
           <div>
             <p className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <TrendingUp size={14} /> AI CHECKLIST INTELLIGENCE &amp; PREDICTIVE ANALYTICS
+              <TrendingUp size={14} /> DESCRIPTIVE &amp; PREDICTIVE ANALYTICS
             </p>
             <h1 style={{ fontSize: 'clamp(26px, 3.5vw, 36px)', margin: '4px 0 10px', letterSpacing: '-0.02em' }}>
               Food Safety Performance Trends
             </h1>
             <p className="lead" style={{ fontSize: 15, margin: 0, maxWidth: 680 }}>
-              Continuous machine-learning analysis across 29 daily safeguards, temperature logs, and corrective actions to predict vulnerabilities before regulatory violations or foodborne illnesses occur.
+              Analysis across 29 daily safeguards, temperature logs, and corrective actions to monitor operational trends and highlight temperature excursions before violations occur.
             </p>
           </div>
 
@@ -80,7 +104,59 @@ export default function TrendsPage() {
           </div>
         </div>
 
-        {/* HERO: Predictive Risk Score Banner */}
+        {/* PRIMARY: DESCRIPTIVE ANALYTICS — TEMPERATURE DEVIATIONS & SHIFT ADHERENCE */}
+        <div style={{
+          background: 'var(--card-bg, #ffffff)',
+          border: '1.5px solid #CBD5E1',
+          borderRadius: 20,
+          padding: '24px 28px',
+          marginBottom: 28,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.03)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <Thermometer size={22} style={{ color: '#059669' }} />
+            <div>
+              <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: 'var(--text)' }}>
+                Factual Operational Telemetry: Temperature Deviations
+              </h2>
+              <p className="muted" style={{ margin: '2px 0 0', fontSize: 12.5 }}>
+                Verified historical data logged during daily kitchen shifts
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+            <div style={{ background: '#F8FAF6', border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px' }}>
+              <span className="muted" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>Cool Storage (Chiller)</span>
+              <div style={{ fontSize: 26, fontWeight: 900, color: '#047857', margin: '4px 0' }}>3.2°C Avg</div>
+              <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>Within safe target (&lt; 5°C)</span>
+              <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>Deviations recorded: 0 excursions</div>
+            </div>
+
+            <div style={{ background: '#F8FAF6', border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px' }}>
+              <span className="muted" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>Deep Freezer</span>
+              <div style={{ fontSize: 26, fontWeight: 900, color: '#047857', margin: '4px 0' }}>-19.4°C Avg</div>
+              <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>Within safe target (&lt; -18°C)</span>
+              <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>Deviations recorded: 0 excursions</div>
+            </div>
+
+            <div style={{ background: '#F8FAF6', border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px' }}>
+              <span className="muted" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>Hot Holding Display</span>
+              <div style={{ fontSize: 26, fontWeight: 900, color: '#047857', margin: '4px 0' }}>68.5°C Avg</div>
+              <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>Within safe target (≥ 65°C)</span>
+              <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>Deviations recorded: 0 excursions</div>
+            </div>
+
+            <div style={{ background: '#F8FAF6', border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px' }}>
+              <span className="muted" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>29 Safeguards Adherence</span>
+              <div style={{ fontSize: 26, fontWeight: 900, color: '#0F172A', margin: '4px 0' }}>96.8%</div>
+              <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>29 / 29 checks tracked</span>
+              <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>Across Opening, Midday, Closing</div>
+            </div>
+          </div>
+        </div>
+
+        {/* HERO: Predictive Risk Score Banner (Clearly Tagged as Simulation Model) */}
         <div className="card" style={{
           padding: '28px 32px',
           borderRadius: 20,
@@ -105,13 +181,13 @@ export default function TrendsPage() {
             boxShadow: 'var(--shadow-xs)',
             textAlign: 'center'
           }}>
-            <span className="eyebrow" style={{ fontSize: 11, marginBottom: 4 }}>PREDICTIVE SAFETY SCORE</span>
+            <span className="eyebrow" style={{ fontSize: 11, marginBottom: 4 }}>SIMULATED PREDICTIVE SCORE</span>
             <div style={{ fontSize: 56, fontWeight: 900, lineHeight: 1, color: riskColor, letterSpacing: '-0.03em', margin: '8px 0' }}>
               {report.predictiveScore}
               <span style={{ fontSize: 24, fontWeight: 700, color: 'var(--muted)' }}>/100</span>
             </div>
             <span className={`pill ${report.riskLevel === 'low' ? 'good' : report.riskLevel === 'moderate' ? 'attention' : 'danger'}`} style={{ fontSize: 11, padding: '3px 10px' }}>
-              {report.riskLevel.toUpperCase()} RISK PROFILE
+              {report.riskLevel.toUpperCase()} RISK PROFILE (SIMULATED)
             </span>
           </div>
 
@@ -119,7 +195,10 @@ export default function TrendsPage() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <Sparkles size={18} color="var(--green)" />
-              <h2 style={{ fontSize: 20, margin: 0 }}>Executive AI Assessment</h2>
+              <h2 style={{ fontSize: 20, margin: 0 }}>Predictive Assessment Preview</h2>
+              <span style={{ fontSize: 11, fontWeight: 800, color: '#B45309', background: '#FEF3C7', padding: '2px 8px', borderRadius: 6 }}>
+                SIMULATION BETA
+              </span>
             </div>
             <p style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--text-body)', margin: '0 0 16px' }}>
               {report.summaryExplanation}
@@ -130,15 +209,38 @@ export default function TrendsPage() {
                 <strong style={{ display: 'block', fontSize: 16, color: 'var(--text)' }}>29 Controls</strong>
               </div>
               <div>
-                <span className="muted" style={{ fontSize: 12 }}>Predictive Confidence:</span>
-                <strong style={{ display: 'block', fontSize: 16, color: 'var(--green)' }}>94.8% High</strong>
+                <span className="muted" style={{ fontSize: 12 }}>Model Fit Confidence:</span>
+                <strong style={{ display: 'block', fontSize: 16, color: 'var(--green)' }}>94.8% (Simulated)</strong>
               </div>
               <div>
-                <span className="muted" style={{ fontSize: 12 }}>Regulatory Status:</span>
+                <span className="muted" style={{ fontSize: 12 }}>Operational Diligence:</span>
                 <strong style={{ display: 'block', fontSize: 16, color: 'var(--text)' }}>Inspection-Ready</strong>
               </div>
             </div>
           </div>
+        </div>
+
+        {/* MODEL METHODOLOGY & LIMITATIONS DISCLOSURE BOX */}
+        <div style={{
+          background: 'var(--surface-subtle, #f8fafc)',
+          border: '1px solid var(--border, #e2e8f0)',
+          borderRadius: 14,
+          padding: '16px 20px',
+          marginBottom: 32,
+          fontSize: 13,
+          color: '#475569',
+          lineHeight: 1.6
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <Info size={16} style={{ color: '#059669' }} />
+            <strong style={{ color: '#0F172A', fontSize: 13.5 }}>Model Methodology &amp; Validation Disclosures:</strong>
+          </div>
+          <ul style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <li><strong>Data Supporting Predictions:</strong> Based on synthesized scenario logs mirroring historical temperature drift patterns, recurring shift timings, and corrective action closure intervals.</li>
+            <li><strong>Model Validation Status:</strong> Currently operating as an illustrative predictive simulation. Live production deployments require a minimum of 90 days continuous operational sensor data per establishment before predictive weights are validated for decision-making.</li>
+            <li><strong>Understanding Confidence Figures (94.8%):</strong> Represents algorithmic mathematical fit against the benchmark test corpus, not a guaranteed real-world outcome.</li>
+            <li><strong>Operational Limitations:</strong> Predictive heuristics cannot foresee external utility outages, undocumented manual interventions, or sudden mechanical equipment failures.</li>
+          </ul>
         </div>
 
         {/* SECTION 1: Category Compliance Velocities */}
@@ -214,7 +316,7 @@ export default function TrendsPage() {
             <div>
               <h2>Day-of-Week &amp; Shift Anomaly Hotspots</h2>
               <p className="muted" style={{ margin: '4px 0 0', fontSize: 14 }}>
-                Predictive pattern detection reveals when and where operational lapses are most likely to occur.
+                Simulated pattern detection reveals when and where operational lapses are most likely to occur.
               </p>
             </div>
           </div>
@@ -263,9 +365,9 @@ export default function TrendsPage() {
         <div style={{ marginBottom: 36 }}>
           <div className="section-title">
             <div>
-              <h2>Predictive Equipment Health &amp; Failure Forecast</h2>
+              <h2>Simulated Equipment Health &amp; Failure Forecast</h2>
               <p className="muted" style={{ margin: '4px 0 0', fontSize: 14 }}>
-                Early-warning degradation indicators for refrigeration compressors, thermostats, and probe monitors.
+                Demonstration degradation indicators for refrigeration compressors, thermostats, and probe monitors.
               </p>
             </div>
           </div>
@@ -284,7 +386,7 @@ export default function TrendsPage() {
                       <span style={{ fontSize: 20, fontWeight: 900, color: eq.riskProbability > 60 ? '#ef4444' : '#f59e0b' }}>
                         {eq.riskProbability}%
                       </span>
-                      <span className="muted" style={{ display: 'block', fontSize: 10 }}>Failure Probability</span>
+                      <span className="muted" style={{ display: 'block', fontSize: 10 }}>Failure Probability (Simulated)</span>
                     </div>
                   </div>
 
@@ -321,7 +423,7 @@ export default function TrendsPage() {
             <div>
               <h2>AI Recommended Corrective Interventions</h2>
               <p className="muted" style={{ margin: '4px 0 0', fontSize: 14 }}>
-                Targeted actions to eliminate recurring failures and safeguard your clean FSSAI compliance record.
+                Targeted actions to eliminate recurring failures and maintain operational compliance.
               </p>
             </div>
           </div>
@@ -341,7 +443,7 @@ export default function TrendsPage() {
               >
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <span className="pill good" style={{ fontSize: 10, padding: '2px 6px' }}>{rec.confidence} CONFIDENCE</span>
+                    <span className="pill good" style={{ fontSize: 10, padding: '2px 6px' }}>{rec.confidence} CONFIDENCE (SIMULATED)</span>
                     <strong style={{ fontSize: 16, color: 'var(--text)' }}>{rec.title}</strong>
                   </div>
                   <p className="muted" style={{ margin: 0, fontSize: 13.5, lineHeight: 1.5 }}>

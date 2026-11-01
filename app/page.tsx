@@ -656,9 +656,9 @@ export default function Landing() {
     const totalScoreSum = storedRatings.reduce((sum, r) => sum + (Number(r.overallScore) || 0), 0);
     const overallRating = totalCustomerReviews > 0 ? (totalScoreSum / totalCustomerReviews).toFixed(1) : '3.9';
 
-    // Golden FoodSafe365 Compliance Badge count:
-    // "Golden Badge - Nil for all"
-    // Golden Badge is displayed ONLY when all 28 digital kitchen parameters
+    // FoodSafe365 Operational Status count:
+    // "Operational Status - Nil for all"
+    // Operational Status verification is displayed ONLY when all 29 digital kitchen parameters
     // and daily verification logs are maintained. None of the outlets have earned it yet.
     const goldenBadgeCount = 0;
 
@@ -1031,10 +1031,10 @@ export default function Landing() {
                   As Restaurant Manager
                 </span>
                 <strong style={{ display: 'block', fontSize: 14.5, color: '#0F2922', fontWeight: 800, lineHeight: 1.25 }}>
-                  Display the Golden FoodSafe365 Badge
+                  Display FoodSafe365 Operational Status
                 </strong>
                 <span style={{ fontSize: 11.5, color: '#64748B', display: 'block', marginTop: 2 }}>
-                  Run daily digital audits &amp; showcase verified trust →
+                  Run daily digital audits &amp; showcase verified operational status →
                 </span>
               </div>
             </div>
@@ -1317,47 +1317,61 @@ export default function Landing() {
                 </div>
               </div>
 
-              {/* Metric 4: Golden Badge 365 Display Status */}
+              {/* Metric 4: Operational Status Display */}
               <div style={{
                 background: '#FFFFFF',
-                border: '1.5px solid #FDE047',
+                border: '1.5px solid #CBD5E1',
                 borderRadius: 12,
                 padding: '10px 14px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 10,
-                boxShadow: '0 2px 8px rgba(234, 179, 8, 0.12)'
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
               }}>
                 <div style={{
                   width: 38,
                   height: 38,
                   borderRadius: 10,
-                  background: 'linear-gradient(135deg, #FEF08A 0%, #FDE047 100%)',
-                  color: '#854D0E',
+                  background: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)',
+                  color: '#065F46',
                   display: 'grid',
                   placeItems: 'center',
                   fontSize: 18,
                   flexShrink: 0,
-                  boxShadow: '0 2px 4px rgba(202, 138, 4, 0.25)'
+                  boxShadow: '0 2px 4px rgba(5, 150, 105, 0.15)'
                 }}>
-                  🏆
+                  🛡️
                 </div>
                 <div>
-                  <div style={{ fontSize: 11, color: '#854D0E', fontWeight: 800, textTransform: 'uppercase' }}>
-                    Golden Badge 365
+                  <div style={{ fontSize: 11, color: '#047857', fontWeight: 800, textTransform: 'uppercase' }}>
+                    Operational Status
                   </div>
                   <div style={{ fontSize: 14, fontWeight: 800, color: '#DC2626', display: 'flex', alignItems: 'center', gap: 4 }}>
                     <span>Nil for all</span>
-                    <span style={{ fontSize: 11, color: '#64748B', fontWeight: 600 }}>(0 Verified)</span>
+                    <span style={{ fontSize: 11, color: '#64748B', fontWeight: 600 }}>(0 Audits Logged)</span>
                   </div>
                 </div>
               </div>
             </div>
 
+            {/* MANDATORY STATUTORY DISCLAIMER */}
+            <div style={{
+              marginTop: 12,
+              padding: '8px 12px',
+              background: '#F8FAF6',
+              border: '1px solid #E2E8F0',
+              borderRadius: 8,
+              fontSize: 11.5,
+              color: '#64748B',
+              lineHeight: 1.45
+            }}>
+              <strong>Notice &amp; Disclaimer:</strong> Ratings are submitted directly by verified diners based on table/dining observations. FoodSafe365 is an independent digital food-safety management platform. Its operational status is not an FSSAI certification, statutory inspection or guarantee of food safety.
+            </div>
+
             {/* ACTUALLY RATED RESTAURANTS FEED (Updates dynamically on any rating) */}
             <div style={{
-              marginTop: 16,
-              paddingTop: 14,
+              marginTop: 14,
+              paddingTop: 12,
               borderTop: '1px solid rgba(16, 185, 129, 0.2)'
             }}>
               <div style={{
@@ -1452,7 +1466,7 @@ export default function Landing() {
                             padding: '3px 9px',
                             borderRadius: 6
                           }}>
-                            🏆 Golden Badge: <span style={{ color: '#DC2626', fontWeight: 800 }}>Nil</span>
+                            🛡️ Operational Status: <span style={{ color: '#DC2626', fontWeight: 800 }}>Nil</span>
                           </span>
                         </div>
 
