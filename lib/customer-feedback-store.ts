@@ -251,6 +251,39 @@ async function ensurePgTable(): Promise<boolean> {
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
     `);
+
+    // Auto-seed initial rated restaurants if table is empty
+    const checkCount = await query<{ count: string }>('SELECT COUNT(*) as count FROM customer_feedback');
+    const totalInDb = parseInt(checkCount[0]?.count || '0', 10);
+    if (totalInDb === 0) {
+      for (const r of DEFAULT_SEED_RATINGS) {
+        await query(
+          `INSERT INTO customer_feedback (
+            id, outlet_id, outlet_name, overall_score, cleanliness_score, staff_hygiene_score,
+            food_freshness_score, safe_water_score, washroom_score, feedback, diner_name,
+            diner_mobile, table_number, verified_dine_in, created_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+          ON CONFLICT (id) DO NOTHING`,
+          [
+            r.id,
+            r.outletId,
+            r.outletName,
+            r.overallScore,
+            r.scores.cleanliness,
+            r.scores.staffHygiene,
+            r.scores.foodFreshness,
+            r.scores.safeWater,
+            r.scores.washroom,
+            r.feedback || null,
+            r.dinerName || null,
+            r.dinerMobile || null,
+            r.tableNumber || null,
+            r.verifiedDineIn ?? true,
+            r.createdAt || new Date().toISOString()
+          ]
+        );
+      }
+    }
     return true;
   } catch (err) {
     console.warn('[customer-feedback-store] ensurePgTable note:', err);
