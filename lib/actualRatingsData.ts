@@ -142,8 +142,29 @@ export const INITIAL_ACTUAL_RATINGS: DinerSafetyRating[] = [
     overallScore: 2.0,
     feedback: 'undercooked food',
     verifiedDineIn: true
+  },
+
+  // 6. Irani Cafe, Mumbai (Rating: 3.4)
+  {
+    id: 'rating-irani-cafe-1',
+    outletId: 'irani-cafe',
+    outletName: 'Irani Cafe',
+    createdAt: new Date().toISOString(),
+    dinerName: 'Verified Diner',
+    dinerMobile: '+91 93241 ****6',
+    tableNumber: 'Table QR #01',
+    scores: {
+      cleanliness: 3,
+      staffHygiene: 3,
+      foodFreshness: 5,
+      safeWater: 3,
+      washroom: 3
+    },
+    overallScore: 3.4,
+    feedback: 'Food freshness & handling rated 5/5; table & cutlery hygiene verified.',
+    verifiedDineIn: true
   }
 ];
 
 export const RATINGS_STORAGE_VERSION_KEY = 'foodsafe365_ratings_seed_version';
-export const CURRENT_RATINGS_VERSION = 'v3_actual';
+export const CURRENT_RATINGS_VERSION = 'v4_actual';

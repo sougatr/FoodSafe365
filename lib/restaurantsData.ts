@@ -95,6 +95,25 @@ export const POPULAR_RESTAURANTS: RestaurantItem[] = [
     }
   },
   {
+    id: 'irani-cafe',
+    name: 'Irani Cafe',
+    city: 'mumbai',
+    location: 'Mumbai',
+    tableCode: 'Table QR #01',
+    cuisine: 'Irani Chai, Bun Maska & Parsi Bakery',
+    category: 'iconic_cafe',
+    badge: 'FOODSAFE DINER RATED',
+    score: '3.4',
+    reviews: 1,
+    lastCheck: 'Today, 03:00 PM',
+    status: 'UNCLAIMED',
+    signals: {
+      cold: { title: 'Cold Storage Verified', subtitle: 'Dairy Storage OK' },
+      medical: { title: 'Staff Hygiene', subtitle: 'Clean Uniforms' },
+      pest: { title: 'Pest Safe', subtitle: 'Bakery Inspected' }
+    }
+  },
+  {
     id: 'the-bombay-canteen',
     name: 'The Bombay Canteen',
     city: 'mumbai',
