@@ -264,7 +264,7 @@ export default function ProvidersPage() {
             </a>
 
             <a
-              href="tel:+919901912365"
+              href="tel:+918356055834"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -280,10 +280,385 @@ export default function ProvidersPage() {
               }}
             >
               <Phone size={16} />
-              <span>Support Desk</span>
+              <span>Support Desk: 8356055834</span>
             </a>
           </div>
         </div>
+
+        {/* Section: Verified Service Providers Directory */}
+        <section style={{ marginBottom: 44 }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 12,
+            marginBottom: 20
+          }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 20 }}>🏢</span>
+                <h2 style={{ fontSize: 24, fontWeight: 900, margin: 0, color: 'var(--text, #0F172A)' }}>
+                  Verified Food-Safety Service Providers
+                </h2>
+              </div>
+              <p style={{ margin: '6px 0 0', fontSize: 14.5, color: '#64748B' }}>
+                Accredited compliance partners providing HACCP training, pest control, water testing, and kitchen equipment services across India.
+              </p>
+            </div>
+            <span style={{
+              fontSize: 12,
+              fontWeight: 800,
+              color: '#059669',
+              background: '#ECFDF5',
+              border: '1px solid #A7F3D0',
+              padding: '4px 12px',
+              borderRadius: 999
+            }}>
+              ● Verified Network
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+            {/* FEATURED PARTNER 1: Innovative WELLNESS SCULPTORS PVT LTD */}
+            <div
+              style={{
+                background: 'linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%)',
+                border: '2px solid #86EFAC',
+                borderRadius: 16,
+                padding: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                boxShadow: '0 6px 20px rgba(5, 150, 105, 0.08)',
+                position: 'relative'
+              }}
+            >
+              <div style={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                background: '#059669',
+                color: '#ffffff',
+                fontSize: 11,
+                fontWeight: 800,
+                padding: '3px 9px',
+                borderRadius: 999,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4
+              }}>
+                <CheckCircle2 size={12} />
+                <span>VERIFIED PARTNER</span>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <div
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 12,
+                      background: 'rgba(5, 150, 105, 0.12)',
+                      color: '#059669',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 22,
+                      flexShrink: 0
+                    }}
+                  >
+                    🎓
+                  </div>
+                  <div>
+                    <span style={{
+                      display: 'inline-block',
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: '#059669',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em'
+                    }}>
+                      HACCP &amp; Food Safety Training
+                    </span>
+                    <h3 style={{ fontSize: 17, fontWeight: 900, margin: '2px 0 0', color: '#0F2922', lineHeight: 1.3 }}>
+                      Innovative WELLNESS SCULPTORS PVT LTD
+                    </h3>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: 13.5, color: '#334155', lineHeight: 1.55, margin: '0 0 14px' }}>
+                  Specialized simple video learning modules created for kitchen staff and supervisors to ensure practical HACCP compliance, food hygiene SOPs, and supervisor readiness.
+                </p>
+
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: 10,
+                  padding: '10px 14px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 6,
+                  fontSize: 12.5,
+                  color: '#475569',
+                  marginBottom: 16
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontWeight: 700, color: '#0F2922' }}>Contact:</span>
+                    <span>Dr Kishore P Madhwani</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontWeight: 700, color: '#0F2922' }}>Coverage:</span>
+                    <span>Mumbai &amp; Pan-India (Digital Video Modules)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <a
+                  href="tel:+919821086038"
+                  style={{
+                    flex: '1 1 auto',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    background: '#059669',
+                    color: '#ffffff',
+                    padding: '9px 14px',
+                    borderRadius: 8,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    boxShadow: '0 2px 6px rgba(5, 150, 105, 0.25)'
+                  }}
+                >
+                  <Phone size={14} />
+                  <span>Call / WhatsApp: 9821086038</span>
+                </a>
+
+                <a
+                  href="mailto:kishorepmadhwani@gmail.com?subject=FoodSafe365%20HACCP%20Video%20Training%20Inquiry"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    background: '#ffffff',
+                    color: '#059669',
+                    border: '1px solid #86EFAC',
+                    padding: '9px 14px',
+                    borderRadius: 8,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    textDecoration: 'none'
+                  }}
+                >
+                  <Mail size={14} />
+                  <span>Email</span>
+                </a>
+              </div>
+            </div>
+
+            {/* PARTNER 2: Apex Commercial Pest Control */}
+            <div
+              style={{
+                background: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                borderRadius: 16,
+                padding: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <div
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 12,
+                      background: 'rgba(220, 38, 38, 0.1)',
+                      color: '#DC2626',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 22,
+                      flexShrink: 0
+                    }}
+                  >
+                    🪲
+                  </div>
+                  <div>
+                    <span style={{
+                      display: 'inline-block',
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: '#DC2626',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em'
+                    }}>
+                      Commercial Pest Control
+                    </span>
+                    <h3 style={{ fontSize: 17, fontWeight: 900, margin: '2px 0 0', color: '#0F2922', lineHeight: 1.3 }}>
+                      Apex Commercial Pest Control
+                    </h3>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: 13.5, color: '#475569', lineHeight: 1.55, margin: '0 0 14px' }}>
+                  FSSAI Schedule 4 IPM compliance, quarterly rodent and cockroach gel baiting, insect light-trap installation, and verifiable audit certificates.
+                </p>
+
+                <div style={{
+                  background: '#F8FAFC',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: 10,
+                  padding: '10px 14px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 6,
+                  fontSize: 12.5,
+                  color: '#475569',
+                  marginBottom: 16
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontWeight: 700, color: '#0F2922' }}>Contact:</span>
+                    <span>Sunil Verma</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontWeight: 700, color: '#0F2922' }}>Coverage:</span>
+                    <span>Mumbai &amp; MMR</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <a
+                  href="tel:+918356055834"
+                  style={{
+                    flex: '1 1 auto',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    background: '#0F2922',
+                    color: '#ffffff',
+                    padding: '9px 14px',
+                    borderRadius: 8,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    textDecoration: 'none'
+                  }}
+                >
+                  <Phone size={14} />
+                  <span>Contact via Helpline</span>
+                </a>
+              </div>
+            </div>
+
+            {/* PARTNER 3: AquaPure NABL Water Testing Lab */}
+            <div
+              style={{
+                background: '#FFFFFF',
+                border: '1px solid #E2E8F0',
+                borderRadius: 16,
+                padding: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                  <div
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 12,
+                      background: 'rgba(37, 99, 235, 0.1)',
+                      color: '#2563EB',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 22,
+                      flexShrink: 0
+                    }}
+                  >
+                    💧
+                  </div>
+                  <div>
+                    <span style={{
+                      display: 'inline-block',
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: '#2563EB',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em'
+                    }}>
+                      NABL Potable Water Testing
+                    </span>
+                    <h3 style={{ fontSize: 17, fontWeight: 900, margin: '2px 0 0', color: '#0F2922', lineHeight: 1.3 }}>
+                      AquaPure NABL Water Testing Lab
+                    </h3>
+                  </div>
+                </div>
+
+                <p style={{ fontSize: 13.5, color: '#475569', lineHeight: 1.55, margin: '0 0 14px' }}>
+                  IS 10500 potable water quality testing, coliform/E. coli microbial test reports, surface swab testing, and sample collection for commercial kitchens.
+                </p>
+
+                <div style={{
+                  background: '#F8FAFC',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: 10,
+                  padding: '10px 14px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 6,
+                  fontSize: 12.5,
+                  color: '#475569',
+                  marginBottom: 16
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontWeight: 700, color: '#0F2922' }}>Contact:</span>
+                    <span>Dr. Meera Iyer</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontWeight: 700, color: '#0F2922' }}>Coverage:</span>
+                    <span>Mumbai &amp; Western Maharashtra</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 10 }}>
+                <a
+                  href="tel:+918356055834"
+                  style={{
+                    flex: '1 1 auto',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    background: '#0F2922',
+                    color: '#ffffff',
+                    padding: '9px 14px',
+                    borderRadius: 8,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    textDecoration: 'none'
+                  }}
+                >
+                  <Phone size={14} />
+                  <span>Contact via Helpline</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Section 1: Who Can Onboard (Examples + Open to Anyone) */}
         <section style={{ marginBottom: 40 }}>

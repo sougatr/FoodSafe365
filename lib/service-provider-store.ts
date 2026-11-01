@@ -24,6 +24,20 @@ export { CONTROLLED_SERVICE_CATEGORIES };
 
 const DEFAULT_SEED_PROVIDERS: ServiceProvider[] = [
   {
+    id: 'prov-wellness-sculptors',
+    businessName: 'Innovative WELLNESS SCULPTORS PVT LTD',
+    contactName: 'Dr Kishore P Madhwani',
+    mobile: '+91 98210 86038',
+    email: 'kishorepmadhwani@gmail.com',
+    city: 'Mumbai',
+    state: 'Maharashtra',
+    categories: ['training', 'other'],
+    description: 'HACCP & Food Safety Video Training Modules for kitchen staff and supervisors; FSSAI hygiene competency.',
+    verificationStatus: 'verified',
+    status: 'active',
+    createdAt: new Date().toISOString()
+  },
+  {
     id: 'prov-pest-apex',
     businessName: 'Apex Commercial Pest Control',
     contactName: 'Sunil Verma',
