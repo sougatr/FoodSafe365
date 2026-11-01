@@ -591,13 +591,13 @@ export default function Home() {
         {/* Luxury Hospitality Benchmarks: Best Practices Followed in 5-Star Kitchens (Replaces Old Workflow Card) */}
         <section style={{ marginBottom: 36, marginTop: 10 }}>
           <div style={{ marginBottom: 18 }}>
-            <span style={{ fontSize: 11.5, fontWeight: 800, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            <span style={{ fontSize: 11.5, fontWeight: 800, color: '#059669', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               LUXURY HOSPITALITY BENCHMARKS
             </span>
-            <h2 style={{ fontSize: 24, fontWeight: 900, color: '#ffffff', margin: '4px 0 6px' }}>
+            <h2 style={{ fontSize: 24, fontWeight: 900, color: '#0F2922', margin: '4px 0 6px' }}>
               Best Practices Followed in 5-Star Kitchens
             </h2>
-            <p style={{ color: '#fed7aa', fontSize: 13.5, margin: 0, maxWidth: 780, lineHeight: 1.5 }}>
+            <p style={{ color: '#475569', fontSize: 13.5, margin: 0, maxWidth: 780, lineHeight: 1.5 }}>
               How luxury properties like Taj, Oberoi, Marriott, and Michelin-rated restaurants ensure zero risk of foodborne contamination:
             </p>
           </div>
@@ -605,120 +605,126 @@ export default function Home() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
             {/* 1. Blast Chilling */}
             <div className="card" style={{
-              background: '#3a1306',
-              border: '1.5px solid rgba(251, 146, 60, 0.25)',
+              background: '#FFFFFF',
+              border: '1.5px solid #E2E8F0',
               borderRadius: 16,
-              padding: '18px 20px'
+              padding: '18px 20px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(5, 150, 105, 0.12)', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Clock size={18} />
                 </div>
-                <h4 style={{ margin: 0, fontSize: 15.5, fontWeight: 800, color: '#ffffff' }}>
+                <h4 style={{ margin: 0, fontSize: 15.5, fontWeight: 800, color: '#0F2922' }}>
                   1. Blast Chilling (&lt;90 Min Rule)
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
                 Crashes hot core temperature from 70°C to &lt;3°C within 90 minutes, completely bypassing the bacterial danger zone.
               </p>
             </div>
 
             {/* 2. 6-Color Chopping Matrix */}
             <div className="card" style={{
-              background: '#3a1306',
-              border: '1.5px solid rgba(251, 146, 60, 0.25)',
+              background: '#FFFFFF',
+              border: '1.5px solid #E2E8F0',
               borderRadius: 16,
-              padding: '18px 20px'
+              padding: '18px 20px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(37, 99, 235, 0.12)', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Layers size={18} />
                 </div>
-                <h4 style={{ margin: 0, fontSize: 15.5, fontWeight: 800, color: '#ffffff' }}>
+                <h4 style={{ margin: 0, fontSize: 15.5, fontWeight: 800, color: '#0F2922' }}>
                   2. 6-Color Chopping Matrix
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
                 Strict color segregation: Red (Meat), Yellow (Poultry), Blue (Fish), Green (Produce), White (Dairy), Brown (Cooked).
               </p>
             </div>
 
             {/* 3. FIFO & Day-Dot System */}
             <div className="card" style={{
-              background: '#3a1306',
-              border: '1.5px solid rgba(251, 146, 60, 0.25)',
+              background: '#FFFFFF',
+              border: '1.5px solid #E2E8F0',
               borderRadius: 16,
-              padding: '18px 20px'
+              padding: '18px 20px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(217, 119, 6, 0.12)', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Award size={18} />
                 </div>
-                <h4 style={{ margin: 0, fontSize: 15.5, fontWeight: 800, color: '#ffffff' }}>
+                <h4 style={{ margin: 0, fontSize: 15.5, fontWeight: 800, color: '#0F2922' }}>
                   3. FIFO &amp; Day-Dot System
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
                 Color-coded weekday dot stickers stamped with prep time, chef initials, and strict 48-hour discard deadlines.
               </p>
             </div>
 
             {/* 4. Core Temperature Probing */}
             <div className="card" style={{
-              background: '#3a1306',
-              border: '1.5px solid rgba(251, 146, 60, 0.25)',
+              background: '#FFFFFF',
+              border: '1.5px solid #E2E8F0',
               borderRadius: 16,
-              padding: '18px 20px'
+              padding: '18px 20px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(239, 68, 68, 0.2)', color: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(225, 29, 72, 0.12)', color: '#E11D48', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Thermometer size={18} />
                 </div>
-                <h4 style={{ margin: 0, fontSize: 15.5, fontWeight: 800, color: '#ffffff' }}>
+                <h4 style={{ margin: 0, fontSize: 15.5, fontWeight: 800, color: '#0F2922' }}>
                   4. Core Temperature Probing
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
                 Calibrated needle probes log internal cooking core (≥75°C), hot holding (≥63°C), and cold storage (&lt;4°C).
               </p>
             </div>
 
             {/* 5. Digital Oil TPC Meters */}
             <div className="card" style={{
-              background: '#3a1306',
-              border: '1.5px solid rgba(251, 146, 60, 0.25)',
+              background: '#FFFFFF',
+              border: '1.5px solid #E2E8F0',
               borderRadius: 16,
-              padding: '18px 20px'
+              padding: '18px 20px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(249, 115, 22, 0.2)', color: '#fb923c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(234, 88, 12, 0.12)', color: '#EA580C', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Droplets size={18} />
                 </div>
-                <h4 style={{ margin: 0, fontSize: 15.5, fontWeight: 800, color: '#ffffff' }}>
+                <h4 style={{ margin: 0, fontSize: 15.5, fontWeight: 800, color: '#0F2922' }}>
                   5. Digital Oil TPC Meters
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
                 Twice-daily digital testing (Testo 270); discarded for biodiesel recycling the moment Total Polar Compounds hit 24%.
               </p>
             </div>
 
             {/* 6. Medical Clearance (Form 1A) */}
             <div className="card" style={{
-              background: '#3a1306',
-              border: '1.5px solid rgba(251, 146, 60, 0.25)',
+              background: '#FFFFFF',
+              border: '1.5px solid #E2E8F0',
               borderRadius: 16,
-              padding: '18px 20px'
+              padding: '18px 20px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(168, 85, 247, 0.2)', color: '#c084fc', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(147, 51, 234, 0.12)', color: '#9333EA', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <HeartPulse size={18} />
                 </div>
-                <h4 style={{ margin: 0, fontSize: 15.5, fontWeight: 800, color: '#ffffff' }}>
+                <h4 style={{ margin: 0, fontSize: 15.5, fontWeight: 800, color: '#0F2922' }}>
                   6. Medical Clearance (Form 1A)
                 </h4>
               </div>
-              <p style={{ fontSize: 13, color: '#fed7aa', lineHeight: 1.45, margin: 0 }}>
+              <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.45, margin: 0 }}>
                 Mandatory 6-monthly stool cultures &amp; typhoid vaccines, plus chlorine test strips (100–200 PPM) for salad sinks.
               </p>
             </div>

@@ -86,10 +86,11 @@ export default function GlobalHeader() {
     ? `+91 ••••• •${customerPhone.replace(/\D/g, '').slice(-4) || '••••'}`
     : null;
 
-  // The 5 Core Navigation Pages (Always visible on top of every page)
+  // Core Navigation Pages (Always visible on top of every page)
   const CORE_NAV_PAGES = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/about', label: 'About', icon: Info },
+    { href: '/providers', label: 'Service Providers', icon: ShieldCheck },
     { href: '/food-safety-why', label: 'FoSTaC Learning Hub', icon: BookOpen },
     { href: '/haccp', label: 'HACCP Principles', icon: FileText },
     { href: '/contact', label: 'Contact Us', icon: Mail }
@@ -97,7 +98,6 @@ export default function GlobalHeader() {
 
   const NAV_ITEMS = [
     ...CORE_NAV_PAGES,
-    { href: '/providers', label: 'Service Providers', icon: ShieldCheck },
     { href: '/showcase', label: 'Food Safety Passport', icon: ShieldCheck }
   ];
 

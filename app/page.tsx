@@ -1022,6 +1022,55 @@ export default function Landing() {
               </div>
             </div>
           </div>
+
+          {/* Direct Pathway to Verified Service Providers */}
+          <div style={{
+            maxWidth: 780,
+            margin: '14px auto 0',
+            padding: '12px 18px',
+            background: 'linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%)',
+            border: '1.5px solid #A7F3D0',
+            borderRadius: 14,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 12,
+            boxShadow: '0 2px 8px rgba(5, 150, 105, 0.05)',
+            textAlign: 'left'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 22 }}>🏢</span>
+              <div>
+                <strong style={{ display: 'block', fontSize: 13.5, color: '#065F46', fontWeight: 800 }}>
+                  Need Accredited Hygiene &amp; Compliance Partners?
+                </strong>
+                <span style={{ fontSize: 12, color: '#475569' }}>
+                  Explore verified HACCP video training, NABL water testing labs, pest control, and cold-chain technicians.
+                </span>
+              </div>
+            </div>
+            <Link
+              href="/providers"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                background: '#059669',
+                color: '#ffffff',
+                fontSize: 12.5,
+                fontWeight: 800,
+                padding: '8px 14px',
+                borderRadius: 8,
+                textDecoration: 'none',
+                whiteSpace: 'nowrap',
+                boxShadow: '0 2px 6px rgba(5, 150, 105, 0.25)'
+              }}
+            >
+              <span>View Service Providers</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -2131,6 +2180,7 @@ export default function Landing() {
         }}>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 13 }}>
             <Link href="/about" style={{ color: '#475569', textDecoration: 'none', fontWeight: 600 }}>About</Link>
+            <Link href="/providers" style={{ color: '#059669', textDecoration: 'none', fontWeight: 700 }}>Service Providers</Link>
             <Link href="/food-safety-why" style={{ color: '#475569', textDecoration: 'none', fontWeight: 600 }}>Learning Hub</Link>
             <Link href="/haccp" style={{ color: '#475569', textDecoration: 'none', fontWeight: 600 }}>HACCP</Link>
             <Link href="/contact" style={{ color: '#475569', textDecoration: 'none', fontWeight: 600 }}>Contact</Link>
