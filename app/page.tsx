@@ -177,10 +177,27 @@ export default function Landing() {
         }
       } catch {}
 
+      // Fetch live ratings from authoritative server endpoint
+      const loadLiveServerRatings = async () => {
+        try {
+          const res = await fetch('/api/v1/public-ratings', { cache: 'no-store' });
+          if (!res.ok) return;
+          const json = await res.json();
+          if (json.data && Array.isArray(json.data.ratings) && json.data.ratings.length > 0) {
+            setStoredRatings(json.data.ratings);
+            localStorage.setItem('foodsafe365_diner_ratings', JSON.stringify(json.data.ratings));
+          }
+        } catch (fetchErr) {
+          console.warn('[Landing] Non-fatal public ratings sync error:', fetchErr);
+        }
+      };
+      loadLiveServerRatings();
+
       const handleRatingUpdate = () => {
         try {
           const stored = localStorage.getItem('foodsafe365_diner_ratings');
           if (stored) setStoredRatings(JSON.parse(stored));
+          loadLiveServerRatings();
         } catch {}
       };
 
