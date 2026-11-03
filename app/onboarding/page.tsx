@@ -16,7 +16,11 @@ import {
   Users,
   Hotel,
   UtensilsCrossed,
-  Wrench
+  Wrench,
+  ClipboardCheck,
+  Thermometer,
+  QrCode,
+  Sparkles
 } from 'lucide-react';
 import GlobalHeader from '@/components/GlobalHeader';
 import { apiFetch } from '@/lib/api';
@@ -188,6 +192,127 @@ export default function Onboarding() {
             <p className="lead muted" style={{ fontSize: 16, margin: 0 }}>
               Configure your outlet in under 60 seconds. Choose between our streamlined Critical Control Point (CCP) + General Hygiene workflow or full 29-point shift checks, with optional AI Agent check assistance and mandatory manager review.
             </p>
+
+            {/* A. Four small feature illustrations: What the restaurant gets immediately */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(175px, 1fr))',
+              gap: 12,
+              marginTop: 18
+            }}>
+              {[
+                {
+                  icon: ClipboardCheck,
+                  title: 'Daily safety checks',
+                  desc: 'Digital kitchen checklists and records.',
+                  bg: '#ecfdf5',
+                  border: '#a7f3d0',
+                  iconColor: '#059669'
+                },
+                {
+                  icon: Thermometer,
+                  title: 'Temperature monitoring',
+                  desc: 'Monitor refrigeration and food temperatures.',
+                  bg: '#f0f9ff',
+                  border: '#bae6fd',
+                  iconColor: '#0284c7'
+                },
+                {
+                  icon: QrCode,
+                  title: 'Diner QR feedback',
+                  desc: 'Understand customer hygiene feedback.',
+                  bg: '#fefce8',
+                  border: '#fde047',
+                  iconColor: '#ca8a04'
+                },
+                {
+                  icon: Wrench,
+                  title: 'Find service partners',
+                  desc: 'Connect with relevant food-safety services.',
+                  bg: '#fdf4ff',
+                  border: '#f5d0fe',
+                  iconColor: '#9333ea'
+                }
+              ].map((feat, idx) => {
+                const FeatIcon = feat.icon;
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 12,
+                      padding: '12px 14px',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      boxShadow: '0 1px 3px rgba(15, 23, 42, 0.03)'
+                    }}
+                  >
+                    <div style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: 9,
+                      background: feat.bg,
+                      border: `1px solid ${feat.border}`,
+                      color: feat.iconColor,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <FeatIcon size={17} />
+                    </div>
+                    <div>
+                      <strong style={{ fontSize: 13, color: '#0f172a', display: 'block', lineHeight: 1.25 }}>
+                        {feat.title}
+                      </strong>
+                      <span style={{ fontSize: 11.5, color: '#64748b', display: 'block', marginTop: 3, lineHeight: 1.35 }}>
+                        {feat.desc}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* C. Founding Restaurant Programme Offer */}
+          <div style={{
+            background: 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)',
+            border: '1.5px solid #f59e0b',
+            borderRadius: 14,
+            padding: '16px 20px',
+            marginBottom: 22,
+            boxShadow: '0 2px 10px rgba(245, 158, 11, 0.08)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: 260 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                  <span style={{
+                    fontSize: 10.5,
+                    fontWeight: 900,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    background: '#d97706',
+                    color: '#ffffff',
+                    padding: '2px 8px',
+                    borderRadius: 999
+                  }}>
+                    FOUNDING RESTAURANT PROGRAMME
+                  </span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: '#92400e' }}>
+                    Join the first 50 FoodSafe365 restaurants
+                  </span>
+                </div>
+                <p style={{ margin: '4px 0 8px', fontSize: 13.5, color: '#78350f', fontWeight: 600, lineHeight: 1.45 }}>
+                  Get guided onboarding, assistance with your initial food-safety setup and priority support during the introductory period.
+                </p>
+                <div style={{ fontSize: 11.5, color: '#92400e', lineHeight: 1.45 }}>
+                  <strong>Pilot Duration &amp; Commercial Terms:</strong> 90-day introductory pilot period with ₹0 setup fee and complimentary platform access for the first 50 participating outlets (no lock-in commitment; standard subscription optional after 90 days). <em>Note: Programme participation provides digital operational management tools and does not constitute FSSAI certification, statutory inspection, or regulatory endorsement.</em>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Service Provider Switcher Banner */}
@@ -553,6 +678,68 @@ export default function Onboarding() {
                 <span style={{ fontSize: 13, color: '#166534', fontWeight: 600 }}>
                   Includes immediate access to <strong>Critical Control Point (CCP) &amp; 29-Safeguard checklists</strong>, cold-chain logs (&lt; 5°C), tabletop Diner QR feedback, and verified service partners.
                 </span>
+              </div>
+            </div>
+
+            {/* B. "What happens next?" 4-Step Immediate Product Flow */}
+            <div style={{
+              background: '#f8fafc',
+              border: '1.5px solid #cbd5e1',
+              borderRadius: 14,
+              padding: '16px 20px',
+              marginBottom: 24
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 6 }}>
+                <strong style={{ fontSize: 14, color: '#0f172a' }}>
+                  What happens next? (Immediately after registration)
+                </strong>
+                <span style={{ fontSize: 11.5, fontWeight: 700, color: '#059669' }}>
+                  Instant product access — no waiting period
+                </span>
+              </div>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+                gap: 10
+              }}>
+                {[
+                  { step: '1', text: 'Set up your kitchen.' },
+                  { step: '2', text: 'Get your food-safety checklist.' },
+                  { step: '3', text: 'Start recording daily checks.' },
+                  { step: '4', text: 'Monitor deficiencies and corrective actions.' }
+                ].map((item) => (
+                  <div
+                    key={item.step}
+                    style={{
+                      background: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 10,
+                      padding: '10px 12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10
+                    }}
+                  >
+                    <span style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      background: '#059669',
+                      color: '#ffffff',
+                      fontSize: 12,
+                      fontWeight: 800,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      {item.step}
+                    </span>
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: '#1e293b', lineHeight: 1.35 }}>
+                      {item.text}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
 
