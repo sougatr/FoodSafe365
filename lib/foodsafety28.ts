@@ -19,6 +19,9 @@ export type FoodSafeCheck = {
   action: string;
   outletType?: 'all' | 'bar_brewery' | 'cloud_kitchen' | 'catering';
   complianceRequirement?: 'mandatory' | 'desirable';
+  isCriticalCCP?: boolean;
+  criticalGroupTitle?: string;
+  aiAgentCapability?: string;
 };
 
 export const SHIFT_DEFINITIONS: Record<OperationalShift, {
@@ -411,18 +414,18 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     code: 'FS28-18',
     category: 'Prep & Cross-Contamination',
     title: 'Is all prepped food covered with lids or wrap while waiting for service?',
-    target: 'Prevents physical and airborne contamination during kitchen service.',
+    target: 'Verify covered prep holding and check frying oil Total Polar Compounds (TPC ≤ 25% statutory limit).',
     severity: 'Critical',
     frequency: 'Process',
     shift: 'active',
     shiftTitle: 'Active Service (Prep & Cooking Stations)',
     timeEstimate: '2–3 mins',
     input: 'scale_1_5',
-    why: 'Exposed food bowls, garnishes, and intermediate prep items are vulnerable to airborne droplets, dust, overhead condensation, and accidental splashes.',
-    what: ['Inspect chef prep counters, pass counter, and intermediate holding stations.', 'Verify food containers are fitted with lids, clean plastic wrap, or food-grade covers when not in active use.', 'Ensure utensils are stored with handles extending outside food.'],
-    standard: 'All prepped foods, sauces, and ingredients awaiting cooking or plating must be covered and protected from contamination.',
-    risk: 'Airborne dust, sweat droplets, hair, and cross-contamination from adjacent prep activities falling into open food.',
-    action: 'Cover all open containers immediately; discard any exposed food with visible foreign matter or condensation dripping.',
+    why: 'Exposed food bowls are vulnerable to airborne droplets and physical contamination, while degraded cooking oil exceeding 25% Total Polar Compounds (TPC) violates FSSAI standards and forms harmful degradation products.',
+    what: ['Inspect chef prep counters, pass counter, and intermediate holding stations to ensure all containers are covered.', 'Measure active deep-frying oil with a calibrated digital TPC meter (must be ≤ 25% TPC) and verify used oil disposal in the RUCO log.', 'Ensure utensils are stored with handles extending outside food.'],
+    standard: 'All prepped foods awaiting cooking or plating must be covered; frying oil must not exceed the FSSAI statutory threshold of 25% Total Polar Compounds (TPC).',
+    risk: 'Airborne contamination of uncovered preps and chemical degradation products from overused cooking oil (> 25% TPC).',
+    action: 'Cover all open containers immediately; discard and replace any frying oil reading > 25% TPC and log disposal to authorized RUCO aggregator.',
     outletType: 'all'
   },
 
@@ -451,18 +454,18 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     code: 'FS28-20',
     category: 'Temperature Control',
     title: 'Are all freezers reading below -18°C?',
-    target: 'Core FSSAI requirement for deep cold storage.',
+    target: 'Core FSSAI requirement for deep cold storage (< −18°C) and controlled thawing inside chillers (≤ 4°C).',
     severity: 'Critical',
     frequency: 'Daily',
     shift: 'opening',
     shiftTitle: 'The Opening Shift (Pre-Service Readiness)',
     timeEstimate: '2–3 mins',
     input: 'temperature',
-    why: 'Deep freezing at < −18°C stops all microbial growth and halts enzymatic decomposition of frozen meats and raw stocks.',
-    what: ['Read the freezer display and verify with a calibrated temperature probe.', 'Check walk-in deep freezers, chest freezers, and ice-cream storage units.', 'Inspect for heavy ice build-up, frost encrustation, or door gasket leaks.'],
-    standard: 'Operational standard: Freezers and cold storage units must maintain continuous air and food temperatures at < −18°C.',
-    risk: 'Temperatures above −18°C cause thawing, surface microbial revival, loss of texture, and freezer burn.',
-    action: 'Defrost excess ice buildup, verify door seal gasket; transfer products to back-up freezer; log emergency technician service ticket.',
+    why: 'Deep freezing at < −18°C stops microbial growth, and thawing strictly inside a chiller (≤ 4°C) prevents outer food surfaces from entering the temperature danger zone.',
+    what: ['Read the freezer display and verify with a calibrated temperature probe (< −18°C).', 'Verify any frozen meat, poultry, or seafood being thawed is placed in dedicated drip-trays inside the refrigerator/chiller (≤ 4°C) or under cold running potable water—never thawed at ambient room temperature.', 'Inspect for heavy ice build-up or door gasket leaks.'],
+    standard: 'Operational standard: Freezers must maintain < −18°C; frozen rations must be thawed safely inside chillers at ≤ 4°C with date/time tags.',
+    risk: 'Temperatures above −18°C or ambient counter thawing cause surface microbial revival and rapid pathogen multiplication.',
+    action: 'Defrost excess ice buildup, move any room-temperature thawing items into the chiller immediately, or transfer stock to a backup freezer.',
     outletType: 'all'
   },
   {
@@ -489,18 +492,18 @@ export const FOODSAFE28: FoodSafeCheck[] = [
     code: 'FS28-22',
     category: 'Temperature Control',
     title: 'Are hot foods split into shallow pans or chilled in an ice bath before refrigeration?',
-    target: 'Cool to ≤ 21°C before placing in the fridge. Never place large hot pots directly into cold storage or leave food at room temperature.',
+    target: 'Maintain hot-holding at ≥ 65°C during service, and blast-chill / rapid-cool cooked batches to ≤ 21°C in 2h and ≤ 5°C in 4h.',
     severity: 'Major',
     frequency: 'Process',
     shift: 'closing',
     shiftTitle: 'The Closing Shift (Shutdown & Reset)',
     timeEstimate: '2–3 mins',
     input: 'temperature',
-    why: 'Slow cooling allows spore-forming bacteria (Clostridium perfringens, Bacillus cereus) to germinate and release heat-stable toxins.',
-    what: ['Track cooling batches of gravies, rice, lentils, and cooked meats.', 'Verify food cools from 60°C to 21°C within 2 hours, and reaches 5°C within a further 2 hours.', 'Check use of shallow pans, ice baths, or blast chillers.'],
-    standard: 'FSSAI 2-stage cooling protocol: Cool high-risk cooked food from 60°C to 21°C in ≤ 2 hours, and from 21°C to 5°C in ≤ 2 additional hours.',
-    risk: 'Spore germination and toxin production in slow-cooling warm food masses that cannot be made safe even by subsequent recooking.',
-    action: 'Divide large batches into shallow pans (depth < 5 cm); place in ice water bath or blast chiller; discard batches exceeding the 4-hour limit.',
+    why: 'Holding hot foods below 65°C or slow cooling allows spore-forming bacteria (Clostridium perfringens, Bacillus cereus) to germinate and release heat-stable toxins.',
+    what: ['Verify hot-holding bain-maries and pass cabinets maintain cooked food at ≥ 65°C during service.', 'Track blast chilling / rapid cooling of gravies, rice, lentils, and cooked meats: 60°C to ≤ 21°C within 2 hours, and to ≤ 5°C within a further 2 hours.', 'Check use of blast chillers, shallow pans (< 5 cm depth), or ice baths.'],
+    standard: 'Hot holding must remain ≥ 65°C; FSSAI 2-stage blast chilling / rapid cooling must bring cooked food from 60°C to ≤ 21°C in ≤ 2 hours and to ≤ 5°C in ≤ 2 additional hours.',
+    risk: 'Spore germination and toxin production in lukewarm holding (< 65°C) or slow-cooling food masses.',
+    action: 'Reheat hot-held food to ≥ 75°C if dropped below 65°C (< 2h); divide cooling batches into shallow pans or blast chiller; discard batches exceeding 4-hour cooling window.',
     outletType: 'all'
   },
 
@@ -694,6 +697,7 @@ export type CheckRecord = {
   time: string;
   reviewStatus: 'pending_manager' | 'approved' | 'alerted';
   managerNote?: string;
+  observationNote?: string;
   reviewedAt?: string;
   storageType?: string;
   processMode?: string;
@@ -944,6 +948,115 @@ export type AppPhase1State = {
 };
 
 export const PHASE1_STORAGE_KEY = 'foodsaf365_phase1';
+
+export type CriticalCCPItem = {
+  code: string;
+  ccpNumber: number;
+  shortTitle: string;
+  categoryTag: string;
+  criticalLimit: string;
+  aiSensorSource: string;
+  aiSampleValue: string;
+};
+
+export const CRITICAL_CCP_ITEMS: CriticalCCPItem[] = [
+  {
+    code: 'FS28-10',
+    ccpNumber: 1,
+    shortTitle: 'Receiving Fresh Ration & Cold-Chain Temp Control',
+    categoryTag: 'RECEIVING CCP',
+    criticalLimit: 'Chilled < 5°C · Frozen < −18°C · Intact Seals',
+    aiSensorSource: 'BLE Infrared / Probe + Invoice OCR Agent',
+    aiSampleValue: '5/5 — Excellent (Chilled 3.8°C, Frozen -19.2°C, Zero Spoilage)'
+  },
+  {
+    code: 'FS28-19',
+    ccpNumber: 2,
+    shortTitle: 'Cold Storage & Refrigerator Temperature Control',
+    categoryTag: 'COLD STORAGE CCP',
+    criticalLimit: '< 5°C (0°C to < 5°C)',
+    aiSensorSource: 'IoT Chiller Telemetry / BLE Probe Agent',
+    aiSampleValue: '3.4'
+  },
+  {
+    code: 'FS28-20',
+    ccpNumber: 3,
+    shortTitle: 'Deep Freezer (< −18°C) & Safe Chiller Thawing (≤ 4°C)',
+    categoryTag: 'FREEZER & THAWING CCP',
+    criticalLimit: 'Freezer < −18°C · Thawing in Chiller ≤ 4°C',
+    aiSensorSource: 'IoT Freezer Telemetry + Thawing Log Agent',
+    aiSampleValue: '-19.5'
+  },
+  {
+    code: 'FS28-21',
+    ccpNumber: 4,
+    shortTitle: 'Internal Cooking & Reheating Core Temperature',
+    categoryTag: 'THERMAL KILL CCP',
+    criticalLimit: 'Core ≥ 75°C (15s) / Reheat ≥ 75°C (2m)',
+    aiSensorSource: 'BLE Digital Needle Probe Agent',
+    aiSampleValue: 'cooking:nonveg:nonveg-75-15:78.2°C for 1m'
+  },
+  {
+    code: 'FS28-22',
+    ccpNumber: 5,
+    shortTitle: 'Hot Holding (≥ 65°C) & 2-Stage Blast Chilling',
+    categoryTag: 'HOLDING & BLAST CHILL CCP',
+    criticalLimit: 'Hot Hold ≥ 65°C · Blast Chill ≤ 21°C (2h) → ≤ 5°C (4h)',
+    aiSensorSource: 'Blast Chiller / Bain-Marie Telemetry Agent',
+    aiSampleValue: 'Stage 1: 18.5°C in 95m | Stage 2: 3.8°C in 90m (Hot Hold ≥ 67°C)'
+  },
+  {
+    code: 'FS28-13',
+    ccpNumber: 6,
+    shortTitle: 'FIFO / FEFO Stock Rotation & Zero Expired Stored Rations',
+    categoryTag: 'FIFO & EXPIRY CCP',
+    criticalLimit: '100% Date-Labeled · Zero Expired Rations',
+    aiSensorSource: 'Shelf Vision OCR & Inventory Expiry Agent',
+    aiSampleValue: '5/5 — Excellent (FIFO verified, 0 expired rations)'
+  },
+  {
+    code: 'FS28-18',
+    ccpNumber: 7,
+    shortTitle: 'Frying Oil TPC Meter (≤ 25% TPC) & Covered Holding',
+    categoryTag: 'TPC OIL METER & PREP CCP',
+    criticalLimit: 'Cooking Oil ≤ 25% TPC (FSSAI Limit) · Preps Covered',
+    aiSensorSource: 'Digital TPC Oil Tester + RUCO Log Agent',
+    aiSampleValue: '5/5 — Excellent (Frying Oil TPC: 16.5% ≤ 25% limit; preps covered)'
+  },
+  {
+    code: 'FS28-11',
+    ccpNumber: 8,
+    shortTitle: 'Raw vs. Cooked Segregation (Cross-Contamination Control)',
+    categoryTag: 'SEGREGATION CCP',
+    criticalLimit: 'Raw Meat Bottom Shelf · Color-Coded Prep',
+    aiSensorSource: 'Chiller Layout & Prep Station Audit Agent',
+    aiSampleValue: '5/5 — Excellent (Strict raw/cooked separation verified)'
+  },
+  {
+    code: 'FS28-26',
+    ccpNumber: 9,
+    shortTitle: 'Active Pest Control & Zero Infestation Evidence',
+    categoryTag: 'PEST CONTROL CCP',
+    criticalLimit: 'Zero Rodent/Cockroach Signs · Active Traps & Logs',
+    aiSensorSource: 'Trap Status & Pest Service Log Agent',
+    aiSampleValue: '5/5 — Excellent (Zero pest activity, traps active)'
+  },
+  {
+    code: 'FS28-09',
+    ccpNumber: 10,
+    shortTitle: 'Staff Medical Fitness (Form 1A) & Daily Illness Check',
+    categoryTag: 'MEDICAL FITNESS CCP',
+    criticalLimit: 'Active Annual Form 1A · Zero Symptomatic Handlers',
+    aiSensorSource: 'HR Compliance & Shift Symptom Screening Agent',
+    aiSampleValue: '5/5 — Excellent (Form 1A valid; 0 symptomatic staff on shift)'
+  }
+];
+
+export const CRITICAL_CCP_CODES = CRITICAL_CCP_ITEMS.map(i => i.code);
+
+export const GENERAL_HYGIENE_SWEEP_CODES = FOODSAFE28
+  .map(c => c.code)
+  .filter(code => !CRITICAL_CCP_CODES.includes(code));
 
 export function isDailyFloorCheck(c: FoodSafeCheck): boolean {
   return c.shift === 'opening' || c.shift === 'active' || c.shift === 'closing';

@@ -139,6 +139,26 @@ export default function AiCopilotPage() {
           </div>
         </div>
 
+        {/* AI Governance & Human-Review Requirement Banner */}
+        <div style={{
+          background: '#fffbeb',
+          border: '1.5px solid #f59e0b',
+          borderRadius: 12,
+          padding: '12px 16px',
+          marginBottom: 18,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          fontSize: 12.5,
+          color: '#92400e',
+          lineHeight: 1.45
+        }}>
+          <AlertTriangle size={18} style={{ color: '#d97706', flexShrink: 0 }} />
+          <div>
+            <strong>Human-in-the-Loop Governance &amp; DEMO DATA Notice:</strong> AI must assist the food-safety manager, not replace professional judgement or statutory responsibilities. Any illustrative risk scores or scenario examples referenced in advisory playbooks are <strong>DEMO DATA</strong>.
+          </div>
+        </div>
+
         {/* 2-Column Layout */}
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 320px) 1fr', gap: 20, flex: 1, alignItems: 'stretch' }}>
           {/* Left Column: Quick Regulatory Topics */}

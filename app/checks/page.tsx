@@ -19,7 +19,10 @@ import {
   RATING_DEFINITIONS,
   evaluateTemperature,
   OperationalShift,
-  SHIFT_DEFINITIONS
+  SHIFT_DEFINITIONS,
+  CRITICAL_CCP_ITEMS,
+  CRITICAL_CCP_CODES,
+  GENERAL_HYGIENE_SWEEP_CODES
 } from '@/lib/foodsafety28';
 import ThemeToggle from '@/components/ThemeToggle';
 import LanguageSelector from '@/components/LanguageSelector';
@@ -61,6 +64,10 @@ export default function Checks() {
   const [reheatMethodOK, setReheatMethodOK] = useState<'yes' | 'no' | ''>('');
   const [selectedFormat, setSelectedFormat] = useState<'all' | 'kitchen' | 'bar_brewery' | 'cloud_kitchen' | 'catering'>('all');
   const [selectedShift, setSelectedShift] = useState<OperationalShift | 'all'>('opening');
+  const [checklistViewMode, setChecklistViewMode] = useState<'critical_consolidated' | 'shift_granular'>('critical_consolidated');
+  const [executionMode, setExecutionMode] = useState<'ai_assisted' | 'manual'>('ai_assisted');
+  const [aiDraftApplied, setAiDraftApplied] = useState(false);
+  const [hygieneSweepExpanded, setHygieneSweepExpanded] = useState(false);
   const [feedbackSource, setFeedbackSource] = useState<{ from: string; area: string } | null>(null);
   const [actionTitle, setActionTitle] = useState('');
   const [actionIssue, setActionIssue] = useState('');
@@ -160,12 +167,21 @@ export default function Checks() {
 
     if (shift === 'opening' || shift === 'active' || shift === 'closing' || shift === 'specialized' || shift === 'monthly_audit' || shift === 'all') {
       setSelectedShift(shift as any);
+      setChecklistViewMode('shift_granular');
     } else {
       // Auto-detect shift based on time of day
       const hr = new Date().getHours();
       if (hr < 11) setSelectedShift('opening');
       else if (hr < 16) setSelectedShift('active');
       else setSelectedShift('closing');
+      const storedTier = localStorage.getItem('foodsafe365_checklist_tier');
+      if (storedTier === 'full_granular') {
+        setChecklistViewMode('shift_granular');
+      }
+      const storedExec = localStorage.getItem('foodsafe365_execution_mode');
+      if (storedExec === 'manual_only') {
+        setExecutionMode('manual');
+      }
     }
 
     if (id) {
@@ -553,6 +569,69 @@ export default function Checks() {
   }
 
   const pendingAttentionCount = today.filter(x => saved[x.code]?.reviewStatus === 'pending_manager' && saved[x.code]?.status === 'attention').length;
+
+  function runAiAgentDraftCapture() {
+    const nowIso = new Date().toISOString();
+    const nextChecks: Record<string, CheckRecord> = { ...(data.checks || {}) };
+    for (const ccp of CRITICAL_CCP_ITEMS) {
+      nextChecks[ccp.code] = {
+        status: 'good',
+        value: `[AI AGENT DRAFT · DEMO DATA] ${ccp.aiSampleValue}`,
+        time: nowIso,
+        reviewStatus: 'pending_manager',
+        observationNote: `Automated draft via ${ccp.aiSensorSource} (DEMO DATA — requires human supervisor & manager verification)`
+      };
+    }
+    const nextState: AppPhase1State = {
+      ...data,
+      checks: nextChecks,
+      timeline: [
+        {
+          id: `evt-ai-draft-${Date.now()}`,
+          at: nowIso,
+          type: 'ai_agent_draft',
+          detail: 'AI Agent Check Assistant populated 10 Critical CCP draft readings [DEMO DATA] for human supervisor & manager verification.',
+          status: 'pending_manager'
+        },
+        ...(data.timeline || [])
+      ]
+    };
+    setData(nextState);
+    saveState(nextState);
+    setAiDraftApplied(true);
+  }
+
+  function submitConsolidatedGeneralHygieneSweep() {
+    const nowIso = new Date().toISOString();
+    const nextChecks: Record<string, CheckRecord> = { ...(data.checks || {}) };
+    for (const code of GENERAL_HYGIENE_SWEEP_CODES) {
+      if (!nextChecks[code]) {
+        nextChecks[code] = {
+          status: 'good',
+          value: '5/5 — Excellent (Consolidated General Hygiene Sweep)',
+          time: nowIso,
+          reviewStatus: 'pending_manager',
+          observationNote: 'Verified via Consolidated General Hygiene Sweep'
+        };
+      }
+    }
+    const nextState: AppPhase1State = {
+      ...data,
+      checks: nextChecks,
+      timeline: [
+        {
+          id: `evt-hygiene-sweep-${Date.now()}`,
+          at: nowIso,
+          type: 'hygiene_sweep',
+          detail: `Supervisor completed Consolidated General Hygiene Sweep (${GENERAL_HYGIENE_SWEEP_CODES.length} general upkeep controls) for manager review.`,
+          status: 'pending_manager'
+        },
+        ...(data.timeline || [])
+      ]
+    };
+    setData(nextState);
+    saveState(nextState);
+  }
 
   if (selected) {
     const isQualitative = selected.input === 'scale_1_5' || selected.input === 'yes_no';
@@ -1647,6 +1726,322 @@ export default function Checks() {
             <h2 style={{ fontSize: 20 }}>{lang === 'hi' ? 'आज के लिए निर्धारित जांच' : lang === 'mr' ? 'आजसाठी नियोजित तपासण्या' : 'Scheduled checks for today'}</h2>
           </div>
         </div>
+
+        {/* TWO-TIER CHECKLIST MODE & AI AGENT AUTOMATION CONTROL PANEL */}
+        <div className="card" style={{
+          padding: '18px 20px',
+          borderRadius: 16,
+          marginBottom: 18,
+          background: '#f8fafc',
+          border: '1.5px solid #cbd5e1'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14, marginBottom: 14 }}>
+            <div>
+              <span style={{ fontSize: 11, fontWeight: 800, color: '#047857', background: '#d1fae5', padding: '2px 8px', borderRadius: 999, textTransform: 'uppercase' }}>
+                CHECKLIST ARCHITECTURE &amp; EXECUTION MODE
+              </span>
+              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: '6px 0 2px' }}>
+                Critical CCP Focus vs. Granular 29-Check View &amp; AI Agent Automation
+              </h3>
+              <p className="muted" style={{ fontSize: 12.5, margin: 0 }}>
+                Focus daily attention on the 10 high-risk Critical Control Points (Receiving temp, Cold storage, Freezer &amp; Thawing, Internal cooking, Hot holding &amp; Blast chilling, FIFO &amp; Expired rations, Oil TPC meter, Raw/Cooked segregation, Pest control, Medical fitness Form 1A) while consolidating general premises hygiene.
+              </p>
+            </div>
+
+            {/* View Mode Toggle */}
+            <div style={{ display: 'flex', gap: 6, background: '#e2e8f0', padding: 4, borderRadius: 10 }}>
+              <button
+                type="button"
+                onClick={() => setChecklistViewMode('critical_consolidated')}
+                style={{
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '8px 14px',
+                  fontSize: 12.5,
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  background: checklistViewMode === 'critical_consolidated' ? '#059669' : 'transparent',
+                  color: checklistViewMode === 'critical_consolidated' ? '#ffffff' : '#334155'
+                }}
+              >
+                ⚡ 10 Critical CCPs + General Hygiene
+              </button>
+              <button
+                type="button"
+                onClick={() => setChecklistViewMode('shift_granular')}
+                style={{
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '8px 14px',
+                  fontSize: 12.5,
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  background: checklistViewMode === 'shift_granular' ? '#059669' : 'transparent',
+                  color: checklistViewMode === 'shift_granular' ? '#ffffff' : '#334155'
+                }}
+              >
+                📑 All 29 Granular Shift Checks
+              </button>
+            </div>
+          </div>
+
+          {/* AI Agent Automation vs Manual Mode Row */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 12,
+            paddingTop: 12,
+            borderTop: '1px solid #e2e8f0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#334155' }}>Check Execution Mode:</span>
+              <button
+                type="button"
+                onClick={() => setExecutionMode('ai_assisted')}
+                style={{
+                  padding: '5px 12px',
+                  borderRadius: 999,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  border: executionMode === 'ai_assisted' ? '1.5px solid #0284c7' : '1px solid #cbd5e1',
+                  background: executionMode === 'ai_assisted' ? '#e0f2fe' : '#ffffff',
+                  color: executionMode === 'ai_assisted' ? '#0369a1' : '#475569',
+                  cursor: 'pointer'
+                }}
+              >
+                🤖 AI Agent-Assisted + Manual Mode
+              </button>
+              <button
+                type="button"
+                onClick={() => setExecutionMode('manual')}
+                style={{
+                  padding: '5px 12px',
+                  borderRadius: 999,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  border: executionMode === 'manual' ? '1.5px solid #059669' : '1px solid #cbd5e1',
+                  background: executionMode === 'manual' ? '#d1fae5' : '#ffffff',
+                  color: executionMode === 'manual' ? '#047857' : '#475569',
+                  cursor: 'pointer'
+                }}
+              >
+                ✍️ 100% Manual Supervisor Mode
+              </button>
+            </div>
+
+            {executionMode === 'ai_assisted' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={runAiAgentDraftCapture}
+                  className="btn primary"
+                  style={{
+                    fontSize: 12.5,
+                    padding: '8px 14px',
+                    background: '#0284c7',
+                    borderColor: '#0369a1',
+                    fontWeight: 800
+                  }}
+                >
+                  🤖 Auto-Draft 10 Critical CCPs via AI Agent (DEMO DATA)
+                </button>
+                {aiDraftApplied && (
+                  <span style={{ fontSize: 11.5, fontWeight: 800, color: '#b45309', background: '#fef3c7', padding: '4px 10px', borderRadius: 6, border: '1px solid #fde68a' }}>
+                    DEMO DATA · AI Draft Populated — Requires Manager Review
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div style={{
+            marginTop: 10,
+            padding: '8px 12px',
+            borderRadius: 8,
+            background: '#fffbeb',
+            border: '1px solid #fde68a',
+            fontSize: 12,
+            color: '#92400e',
+            fontWeight: 600
+          }}>
+            ⚖️ <strong>Statutory &amp; Professional Responsibility Notice:</strong> AI must assist the food-safety manager, not replace professional judgement or statutory responsibilities. Restaurants may perform any check manually or review/override AI-captured drafts before manager sign-off.
+          </div>
+        </div>
+
+        {checklistViewMode === 'critical_consolidated' && (
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+              <div>
+                <span className="eyebrow" style={{ color: '#dc2626', fontWeight: 800 }}>TIER 1 · 10 HIGH-RISK CRITICAL CONTROL POINTS (CCPs)</span>
+                <h3 style={{ fontSize: 18, margin: '2px 0 0', color: '#0f172a' }}>
+                  Mandatory Daily Temperature, Storage, Cooking, TPC, FIFO, Pest &amp; Medical Controls
+                </h3>
+              </div>
+              <span className="pill good" style={{ fontSize: 11.5 }}>
+                {CRITICAL_CCP_CODES.filter(code => Boolean(saved[code])).length} / {CRITICAL_CCP_CODES.length} Critical CCPs Recorded
+              </span>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+              {CRITICAL_CCP_ITEMS.map(ccp => {
+                const checkObj = FOODSAFE28.find(x => x.code === ccp.code);
+                if (!checkObj) return null;
+                const s = saved[ccp.code];
+                const isApproved = s?.reviewStatus === 'approved';
+                const isAlert = s?.reviewStatus === 'alerted';
+                const isPending = s?.reviewStatus === 'pending_manager';
+                return (
+                  <button
+                    key={ccp.code}
+                    type="button"
+                    className="card daily-check-row interactive"
+                    onClick={() => openCheck(checkObj)}
+                    style={{
+                      border: isApproved
+                        ? '1.5px solid #a7f3d0'
+                        : isAlert
+                        ? '1.5px solid #fecaca'
+                        : isPending
+                        ? '1.5px solid #fde68a'
+                        : '1.5px solid #cbd5e1',
+                      background: isApproved ? '#fbfdfc' : isAlert ? '#fffafa' : '#ffffff',
+                      boxShadow: 'var(--shadow-sm)',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <div
+                      className="library-number"
+                      style={{
+                        background: '#fef2f2',
+                        color: '#dc2626',
+                        borderColor: '#fecaca',
+                        fontWeight: 900
+                      }}
+                    >
+                      CCP {ccp.ccpNumber}
+                    </div>
+                    <div className="daily-check-main">
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 3 }}>
+                        <span style={{ fontSize: 10, fontWeight: 800, background: '#fee2e2', color: '#991b1b', padding: '1px 7px', borderRadius: 4 }}>
+                          {ccp.categoryTag}
+                        </span>
+                        <span style={{ fontSize: 10.5, fontWeight: 700, background: '#f0f9ff', color: '#0369a1', border: '1px solid #bae6fd', padding: '1px 7px', borderRadius: 4 }}>
+                          Target: {ccp.criticalLimit}
+                        </span>
+                        {executionMode === 'ai_assisted' && (
+                          <span style={{ fontSize: 10, fontWeight: 700, background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', padding: '1px 7px', borderRadius: 4 }}>
+                            🤖 {ccp.aiSensorSource}
+                          </span>
+                        )}
+                      </div>
+                      <h3 style={{ fontSize: 15.5, fontWeight: 800, color: '#0f172a', margin: '2px 0 3px' }}>
+                        {ccp.shortTitle}
+                      </h3>
+                      <p className="muted" style={{ fontSize: 12.5, margin: 0 }}>
+                        {checkObj.title}
+                        {s?.value && (
+                          <> · <strong style={{ color: '#0f172a' }}>{s.value}</strong></>
+                        )}
+                      </p>
+                    </div>
+                    <div className="daily-status" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      {!s ? (
+                        <span className="pill neutral" style={{ fontSize: 10.5 }}>RECORD CCP</span>
+                      ) : isPending ? (
+                        <span className="pill attention" style={{ fontSize: 10.5 }}>PENDING MANAGER REVIEW</span>
+                      ) : isApproved ? (
+                        <span className="pill good" style={{ fontSize: 10.5 }}>APPROVED</span>
+                      ) : (
+                        <span className="pill danger" style={{ fontSize: 10.5 }}>ALERT</span>
+                      )}
+                      <ChevronRight size={18} style={{ color: '#94a3b8' }} />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* TIER 2: CONSOLIDATED GENERAL HYGIENE SWEEP */}
+            <div className="card" style={{
+              padding: '20px 22px',
+              borderRadius: 16,
+              background: '#f0fdf4',
+              border: '1.5px solid #86efac'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14 }}>
+                <div style={{ flex: 1, minWidth: 260 }}>
+                  <span style={{ fontSize: 10.5, fontWeight: 800, background: '#059669', color: '#ffffff', padding: '2px 8px', borderRadius: 999 }}>
+                    TIER 2 · CONSOLIDATED GENERAL HYGIENE SWEEP ({GENERAL_HYGIENE_SWEEP_CODES.length} GENERAL CONTROLS)
+                  </span>
+                  <h3 style={{ fontSize: 17, fontWeight: 800, color: '#064e3b', margin: '6px 0 4px' }}>
+                    General Kitchen Cleanliness, Staff Grooming &amp; Facility Upkeep
+                  </h3>
+                  <p style={{ fontSize: 13, color: '#166534', margin: '0 0 10px', lineHeight: 1.5 }}>
+                    Consolidates general hygiene checks (clean counters/floors, free-flowing drains, closed fly-screens, handwashing &amp; stocked soap/towels, clean uniforms/hairnets, off-floor storage, produce washing, color-coded cutting boards, utensil/slicer sanitization, covered pedal dustbins, and conditional station upkeep).
+                  </p>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#047857' }}>
+                    Status: {GENERAL_HYGIENE_SWEEP_CODES.filter(code => Boolean(saved[code])).length} / {GENERAL_HYGIENE_SWEEP_CODES.length} General Hygiene items recorded
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+                  <button
+                    type="button"
+                    onClick={submitConsolidatedGeneralHygieneSweep}
+                    className="btn primary"
+                    style={{ fontSize: 13, padding: '10px 18px', fontWeight: 800 }}
+                  >
+                    ✓ Mark General Hygiene Sweep Satisfactory (5/5)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHygieneSweepExpanded(prev => !prev)}
+                    className="btn secondary"
+                    style={{ fontSize: 12, padding: '6px 14px', background: '#ffffff' }}
+                  >
+                    {hygieneSweepExpanded ? 'Hide Individual Hygiene Items' : `Inspect / Flag Individual Hygiene Items (${GENERAL_HYGIENE_SWEEP_CODES.length})`}
+                  </button>
+                </div>
+              </div>
+
+              {hygieneSweepExpanded && (
+                <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid #bbf7d0', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {FOODSAFE28.filter(x => GENERAL_HYGIENE_SWEEP_CODES.includes(x.code)).map(x => {
+                    const s = saved[x.code];
+                    return (
+                      <button
+                        key={x.code}
+                        type="button"
+                        onClick={() => openCheck(x)}
+                        className="card interactive"
+                        style={{
+                          padding: '10px 14px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          textAlign: 'left',
+                          background: '#ffffff',
+                          border: '1px solid #cbd5e1',
+                          borderRadius: 10
+                        }}
+                      >
+                        <div>
+                          <strong style={{ fontSize: 13.5, color: '#0f172a' }}>#{x.id} · {x.title}</strong>
+                          <span className="muted" style={{ display: 'block', fontSize: 11.5 }}>{x.category} · {x.shiftTitle}</span>
+                        </div>
+                        <span className={`pill ${s ? 'good' : 'neutral'}`} style={{ fontSize: 10.5 }}>
+                          {s ? s.value.slice(0, 18) : 'OPEN ITEM'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Time-Phased Operational Shift Tabs (White background, green active tabs, black fonts) */}
         <div className="shift-tabs-bar" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, marginBottom: 16 }}>

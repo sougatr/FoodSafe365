@@ -42,6 +42,8 @@ export default function GroceryDailyCheckFrontlinePage() {
   const [expandedWhy, setExpandedWhy] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [groceryViewMode, setGroceryViewMode] = useState<'critical_consolidated' | 'full_22'>('critical_consolidated');
+  const [aiDraftMode, setAiDraftMode] = useState(false);
 
   // Group the 22 checks into simple frontline sections mapping exactly to the existing 22 checks
   const SECTIONS: SectionDef[] = [
@@ -525,6 +527,137 @@ export default function GroceryDailyCheckFrontlinePage() {
                     minWidth: 200
                   }}
                 />
+              </div>
+            </div>
+
+            {/* GROCERY CHECKLIST MODE & AI AGENT AUTOMATION PANEL */}
+            <div style={{
+              background: '#ffffff',
+              border: '1.5px solid #cbd5e1',
+              borderRadius: 18,
+              padding: '18px 22px',
+              marginBottom: 24,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14, marginBottom: 12 }}>
+                <div style={{ flex: 1, minWidth: 260 }}>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: '#047857', background: '#d1fae5', padding: '2px 8px', borderRadius: 999 }}>
+                    STORE CHECKLIST RATIONALIZATION &amp; AI AGENT PROVISION
+                  </span>
+                  <h2 style={{ fontSize: 16.5, fontWeight: 800, color: '#0f172a', margin: '6px 0 3px' }}>
+                    Critical Retail CCPs (Receiving, Cold Chain, FIFO/Expiry, Pest, Medical) + General Store Hygiene
+                  </h2>
+                  <p style={{ fontSize: 12.5, color: '#475569', margin: 0, lineHeight: 1.45 }}>
+                    Prioritizes critical retail food-safety risks (receiving fresh rations, chiller &lt;5°C / freezer &lt;-18°C, FIFO &amp; expired rations removal, pest control, and staff Form 1A medical fitness) while grouping general aisle/floor cleanliness.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: 6, background: '#f1f5f9', padding: 4, borderRadius: 10 }}>
+                  <button
+                    type="button"
+                    onClick={() => setGroceryViewMode('critical_consolidated')}
+                    style={{
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '7px 13px',
+                      fontSize: 12,
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      background: groceryViewMode === 'critical_consolidated' ? '#059669' : 'transparent',
+                      color: groceryViewMode === 'critical_consolidated' ? '#ffffff' : '#334155'
+                    }}
+                  >
+                    ⚡ Critical CCPs + General Hygiene
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGroceryViewMode('full_22')}
+                    style={{
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '7px 13px',
+                      fontSize: 12,
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      background: groceryViewMode === 'full_22' ? '#059669' : 'transparent',
+                      color: groceryViewMode === 'full_22' ? '#ffffff' : '#334155'
+                    }}
+                  >
+                    📑 All 22 Store Checks
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, paddingTop: 12, borderTop: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAiDraftMode(true);
+                      const next: Record<string, { conforming: boolean; notes: string }> = {};
+                      for (const c of GROCERY_OPERATIONAL_CHECKS) {
+                        next[c.code] = {
+                          conforming: true,
+                          notes: '[AI AGENT DRAFT · DEMO DATA] Sensor/OCR pre-verified — awaiting supervisor & manager sign-off'
+                        };
+                      }
+                      setResponses(next);
+                    }}
+                    style={{
+                      background: '#0284c7',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '7px 14px',
+                      fontSize: 12,
+                      fontWeight: 800,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    🤖 Auto-Draft via AI Agent (BLE Chiller Sensors &amp; Shelf Expiry OCR · DEMO DATA)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAiDraftMode(false);
+                      const next: Record<string, { conforming: boolean; notes: string }> = {};
+                      for (const c of GROCERY_OPERATIONAL_CHECKS) {
+                        next[c.code] = { conforming: true, notes: '' };
+                      }
+                      setResponses(next);
+                    }}
+                    style={{
+                      background: '#f8fafc',
+                      color: '#334155',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: 8,
+                      padding: '7px 14px',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ✍️ Manual Store Walk Mode
+                  </button>
+                  {aiDraftMode && (
+                    <span style={{ fontSize: 11.5, fontWeight: 800, color: '#92400e', background: '#fef3c7', padding: '3px 9px', borderRadius: 6, border: '1px solid #fde68a' }}>
+                      DEMO DATA · AI Agent Draft Active — Requires Human Verification
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div style={{
+                marginTop: 10,
+                padding: '8px 12px',
+                borderRadius: 8,
+                background: '#fffbeb',
+                border: '1px solid #fde68a',
+                fontSize: 11.5,
+                color: '#92400e',
+                fontWeight: 600
+              }}>
+                ⚖️ <strong>Human-in-the-Loop Governance:</strong> AI must assist the food-safety manager, not replace professional judgement or statutory responsibilities.
               </div>
             </div>
 

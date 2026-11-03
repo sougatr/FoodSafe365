@@ -53,7 +53,7 @@ export default function TrendsPage() {
           <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>AI Checklist Trends</span>
         </div>
 
-        {/* PROMINENT SIMULATION & METHODOLOGY NOTICE */}
+        {/* PROMINENT DEMO DATA & HUMAN-IN-THE-LOOP GOVERNANCE NOTICE */}
         <div style={{
           background: '#FFFBEB',
           border: '2px solid #F59E0B',
@@ -66,11 +66,19 @@ export default function TrendsPage() {
         }}>
           <AlertTriangle size={24} style={{ color: '#D97706', flexShrink: 0, marginTop: 2 }} />
           <div>
-            <strong style={{ color: '#92400E', fontSize: 14.5, display: 'block', marginBottom: 4 }}>
-              DEMONSTRATION &amp; SIMULATED PREDICTIVE MODEL PREVIEW
-            </strong>
-            <p style={{ margin: 0, fontSize: 13, color: '#78350F', lineHeight: 1.55 }}>
-              The predictive safety score (86/100), statistical confidence figure (94.8%), and equipment failure probabilities displayed below are <strong>simulated machine-learning models</strong> demonstrated on synthetic kitchen data. In production environments, FoodSafe365 begins with <strong>descriptive analytics</strong> (verified temperature deviations and shift completion rates), introducing predictive claims only after empirical sensor validation.
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
+              <span style={{ background: '#D97706', color: '#ffffff', fontSize: 11, fontWeight: 900, padding: '2px 8px', borderRadius: 6, letterSpacing: '0.05em' }}>
+                DEMO DATA · SIMULATED SCENARIO
+              </span>
+              <strong style={{ color: '#92400E', fontSize: 14.5 }}>
+                DO NOT PRESENT SIMULATED AI OUTPUTS AS ACTUAL RESTAURANT INTELLIGENCE
+              </strong>
+            </div>
+            <p style={{ margin: '0 0 6px', fontSize: 13, color: '#78350F', lineHeight: 1.55 }}>
+              All figures on this page—including the predictive safety score (<strong>{report.predictiveScore}/100 — DEMO DATA</strong>), statistical confidence figure (<strong>94.8% — DEMO DATA</strong>), equipment failure probabilities (<strong>68% — DEMO DATA</strong>), and operational pattern counters—are <strong>simulated demonstration data</strong>.
+            </p>
+            <p style={{ margin: 0, fontSize: 12.5, color: '#92400E', fontWeight: 700 }}>
+              ⚖️ Human-Review Principle: AI must assist the food-safety manager, not replace professional judgement or statutory responsibilities.
             </p>
           </div>
         </div>
@@ -113,46 +121,129 @@ export default function TrendsPage() {
           marginBottom: 28,
           boxShadow: '0 4px 16px rgba(0,0,0,0.03)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-            <Thermometer size={22} style={{ color: '#059669' }} />
-            <div>
-              <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: 'var(--text)' }}>
-                Factual Operational Telemetry: Temperature Deviations
-              </h2>
-              <p className="muted" style={{ margin: '2px 0 0', fontSize: 12.5 }}>
-                Verified historical data logged during daily kitchen shifts
-              </p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Thermometer size={22} style={{ color: '#059669' }} />
+              <div>
+                <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: 'var(--text)' }}>
+                  Descriptive Operational Telemetry: Temperature &amp; Shift Summary
+                </h2>
+                <p className="muted" style={{ margin: '2px 0 0', fontSize: 12.5 }}>
+                  Sample descriptive telemetry summary (marked as DEMO DATA until live kitchen logs are accumulated)
+                </p>
+              </div>
             </div>
+            <span style={{ fontSize: 11, fontWeight: 800, color: '#92400E', background: '#FEF3C7', border: '1px solid #FDE68A', padding: '3px 10px', borderRadius: 999 }}>
+              DEMO DATA
+            </span>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
             <div style={{ background: '#F8FAF6', border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px' }}>
-              <span className="muted" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>Cool Storage (Chiller)</span>
+              <span className="muted" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>Cool Storage (Chiller · DEMO DATA)</span>
               <div style={{ fontSize: 26, fontWeight: 900, color: '#047857', margin: '4px 0' }}>3.2°C Avg</div>
-              <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>Within safe target (&lt; 5°C)</span>
-              <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>Deviations recorded: 0 excursions</div>
+              <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>Target: &lt; 5°C</span>
+              <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>Refrigerator #2: 3 excursions (DEMO DATA)</div>
             </div>
 
             <div style={{ background: '#F8FAF6', border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px' }}>
-              <span className="muted" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>Deep Freezer</span>
+              <span className="muted" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>Deep Freezer (DEMO DATA)</span>
               <div style={{ fontSize: 26, fontWeight: 900, color: '#047857', margin: '4px 0' }}>-19.4°C Avg</div>
-              <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>Within safe target (&lt; -18°C)</span>
-              <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>Deviations recorded: 0 excursions</div>
+              <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>Target: &lt; -18°C</span>
+              <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>Deviations recorded: 0 (DEMO DATA)</div>
             </div>
 
             <div style={{ background: '#F8FAF6', border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px' }}>
-              <span className="muted" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>Hot Holding Display</span>
+              <span className="muted" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>Hot Holding Display (DEMO DATA)</span>
               <div style={{ fontSize: 26, fontWeight: 900, color: '#047857', margin: '4px 0' }}>68.5°C Avg</div>
-              <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>Within safe target (≥ 65°C)</span>
-              <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>Deviations recorded: 0 excursions</div>
+              <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>Target: ≥ 65°C</span>
+              <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>Deviations recorded: 0 (DEMO DATA)</div>
             </div>
 
             <div style={{ background: '#F8FAF6', border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px' }}>
-              <span className="muted" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>29 Safeguards Adherence</span>
+              <span className="muted" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>29 Safeguards Adherence (DEMO DATA)</span>
               <div style={{ fontSize: 26, fontWeight: 900, color: '#0F172A', margin: '4px 0' }}>96.8%</div>
               <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>29 / 29 checks tracked</span>
-              <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>Across Opening, Midday, Closing</div>
+              <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>Simulated sample adherence</div>
             </div>
+          </div>
+        </div>
+
+        {/* NEW SECTION: 6 CORE OPERATIONAL RISK PATTERN TRACKERS */}
+        <div style={{ marginBottom: 32 }}>
+          <div className="section-title" style={{ marginBottom: 14 }}>
+            <div>
+              <span className="eyebrow" style={{ color: '#b45309', fontWeight: 800 }}>6 KEY OPERATIONAL PATTERN TRACKERS (DEMO DATA)</span>
+              <h2 style={{ fontSize: 22, margin: '4px 0 4px' }}>
+                Core Operational Deficiency &amp; Escalation Signals
+              </h2>
+              <p className="muted" style={{ margin: 0, fontSize: 14 }}>
+                Tracks the 6 foundational risk indicators required by food-safety managers. All sample figures below are clearly marked as <strong>DEMO DATA</strong>.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid2" style={{ gap: 14 }}>
+            {report.operationalPatterns.map(pat => (
+              <div
+                key={pat.id}
+                className="card"
+                style={{
+                  border: pat.severity === 'critical' ? '1.5px solid #fecaca' : '1.5px solid #fde68a',
+                  background: '#ffffff',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: 10
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 6 }}>
+                    <strong style={{ fontSize: 15.5, color: '#0f172a' }}>{pat.patternType}</strong>
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 900,
+                      background: '#FEF3C7',
+                      color: '#92400E',
+                      border: '1px solid #FDE68A',
+                      padding: '2px 7px',
+                      borderRadius: 4,
+                      whiteSpace: 'nowrap'
+                    }}>
+                      DEMO DATA
+                    </span>
+                  </div>
+                  <div style={{
+                    fontSize: 13,
+                    fontWeight: 800,
+                    color: pat.severity === 'critical' ? '#dc2626' : '#b45309',
+                    marginBottom: 6
+                  }}>
+                    {pat.metricValue}
+                  </div>
+                  <p style={{ fontSize: 13, color: '#334155', margin: '0 0 8px', lineHeight: 1.5 }}>
+                    {pat.finding}
+                  </p>
+                </div>
+
+                <div style={{
+                  paddingTop: 10,
+                  borderTop: '1px solid #f1f5f9',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 10,
+                  flexWrap: 'wrap'
+                }}>
+                  <span style={{ fontSize: 12, color: '#047857', fontWeight: 700, flex: 1 }}>
+                    Manager Review Action: {pat.recommendedManagerAction}
+                  </span>
+                  <Link href={pat.actionHref} className="btn secondary" style={{ fontSize: 11.5, padding: '5px 12px', whiteSpace: 'nowrap' }}>
+                    Inspect <ChevronRight size={13} />
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -181,23 +272,23 @@ export default function TrendsPage() {
             boxShadow: 'var(--shadow-xs)',
             textAlign: 'center'
           }}>
-            <span className="eyebrow" style={{ fontSize: 11, marginBottom: 4 }}>SIMULATED PREDICTIVE SCORE</span>
+            <span className="eyebrow" style={{ fontSize: 11, marginBottom: 4, color: '#B45309', fontWeight: 800 }}>DEMO DATA · PREDICTIVE SCORE</span>
             <div style={{ fontSize: 56, fontWeight: 900, lineHeight: 1, color: riskColor, letterSpacing: '-0.03em', margin: '8px 0' }}>
               {report.predictiveScore}
               <span style={{ fontSize: 24, fontWeight: 700, color: 'var(--muted)' }}>/100</span>
             </div>
             <span className={`pill ${report.riskLevel === 'low' ? 'good' : report.riskLevel === 'moderate' ? 'attention' : 'danger'}`} style={{ fontSize: 11, padding: '3px 10px' }}>
-              {report.riskLevel.toUpperCase()} RISK PROFILE (SIMULATED)
+              {report.riskLevel.toUpperCase()} RISK PROFILE (DEMO DATA)
             </span>
           </div>
 
           {/* AI Narrative Context */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
               <Sparkles size={18} color="var(--green)" />
-              <h2 style={{ fontSize: 20, margin: 0 }}>Predictive Assessment Preview</h2>
-              <span style={{ fontSize: 11, fontWeight: 800, color: '#B45309', background: '#FEF3C7', padding: '2px 8px', borderRadius: 6 }}>
-                SIMULATION BETA
+              <h2 style={{ fontSize: 20, margin: 0 }}>Future Predictive Assessment Preview</h2>
+              <span style={{ fontSize: 11, fontWeight: 900, color: '#92400E', background: '#FEF3C7', border: '1px solid #FDE68A', padding: '2px 8px', borderRadius: 6 }}>
+                DEMO DATA · SIMULATED OUTPUT
               </span>
             </div>
             <p style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--text-body)', margin: '0 0 16px' }}>
@@ -206,40 +297,40 @@ export default function TrendsPage() {
             <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', paddingTop: 14, borderTop: '1px solid var(--border)' }}>
               <div>
                 <span className="muted" style={{ fontSize: 12 }}>Evaluated Safeguards:</span>
-                <strong style={{ display: 'block', fontSize: 16, color: 'var(--text)' }}>29 Controls</strong>
+                <strong style={{ display: 'block', fontSize: 16, color: 'var(--text)' }}>29 Controls (DEMO DATA)</strong>
               </div>
               <div>
-                <span className="muted" style={{ fontSize: 12 }}>Model Fit Confidence:</span>
-                <strong style={{ display: 'block', fontSize: 16, color: 'var(--green)' }}>94.8% (Simulated)</strong>
+                <span className="muted" style={{ fontSize: 12 }}>Simulated Confidence Value:</span>
+                <strong style={{ display: 'block', fontSize: 16, color: '#B45309' }}>94.8% (DEMO DATA)</strong>
               </div>
               <div>
-                <span className="muted" style={{ fontSize: 12 }}>Operational Diligence:</span>
-                <strong style={{ display: 'block', fontSize: 16, color: 'var(--text)' }}>Inspection-Ready</strong>
+                <span className="muted" style={{ fontSize: 12 }}>Human Review Status:</span>
+                <strong style={{ display: 'block', fontSize: 16, color: 'var(--text)' }}>Mandatory Manager Verification</strong>
               </div>
             </div>
           </div>
         </div>
 
-        {/* MODEL METHODOLOGY & LIMITATIONS DISCLOSURE BOX */}
+        {/* 4 MANDATORY PREDICTIVE GOVERNANCE DISCLOSURES */}
         <div style={{
           background: 'var(--surface-subtle, #f8fafc)',
-          border: '1px solid var(--border, #e2e8f0)',
+          border: '1.5px solid #cbd5e1',
           borderRadius: 14,
-          padding: '16px 20px',
+          padding: '18px 22px',
           marginBottom: 32,
           fontSize: 13,
-          color: '#475569',
+          color: '#334155',
           lineHeight: 1.6
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             <Info size={16} style={{ color: '#059669' }} />
-            <strong style={{ color: '#0F172A', fontSize: 13.5 }}>Model Methodology &amp; Validation Disclosures:</strong>
+            <strong style={{ color: '#0F172A', fontSize: 14 }}>Future Predictive Feature Governance &amp; Mandatory Disclosures (DEMO DATA):</strong>
           </div>
-          <ul style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <li><strong>Data Supporting Predictions:</strong> Based on synthesized scenario logs mirroring historical temperature drift patterns, recurring shift timings, and corrective action closure intervals.</li>
-            <li><strong>Model Validation Status:</strong> Currently operating as an illustrative predictive simulation. Live production deployments require a minimum of 90 days continuous operational sensor data per establishment before predictive weights are validated for decision-making.</li>
-            <li><strong>Understanding Confidence Figures (94.8%):</strong> Represents algorithmic mathematical fit against the benchmark test corpus, not a guaranteed real-world outcome.</li>
-            <li><strong>Operational Limitations:</strong> Predictive heuristics cannot foresee external utility outages, undocumented manual interventions, or sudden mechanical equipment failures.</li>
+          <ul style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <li><strong>1. Explanation of the Prediction:</strong> {report.predictiveGovernance.predictionExplanation}</li>
+            <li><strong>2. Underlying Data Period:</strong> {report.predictiveGovernance.underlyingDataPeriod}</li>
+            <li><strong>3. Model Limitations:</strong> {report.predictiveGovernance.limitations}</li>
+            <li><strong>4. Mandatory Human-Review Requirement:</strong> {report.predictiveGovernance.humanReviewRequirement}</li>
           </ul>
         </div>
 
@@ -378,21 +469,28 @@ export default function TrendsPage() {
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                     <div>
-                      <span className="eyebrow" style={{ fontSize: 11 }}>EQUIPMENT MONITOR</span>
+                      <span className="eyebrow" style={{ fontSize: 11 }}>EQUIPMENT MONITOR · DEMO DATA</span>
                       <h3 style={{ fontSize: 16, margin: '2px 0' }}>{eq.equipment}</h3>
                       <span className="muted" style={{ fontSize: 12 }}>Location: {eq.location}</span>
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <span style={{ fontSize: 20, fontWeight: 900, color: eq.riskProbability > 60 ? '#ef4444' : '#f59e0b' }}>
-                        {eq.riskProbability}%
+                        {eq.riskProbability}% (DEMO DATA)
                       </span>
-                      <span className="muted" style={{ display: 'block', fontSize: 10 }}>Failure Probability (Simulated)</span>
+                      <span className="muted" style={{ display: 'block', fontSize: 10 }}>Simulated Failure Probability</span>
                     </div>
                   </div>
 
                   <p style={{ fontSize: 13.5, color: 'var(--text-body)', margin: '0 0 10px', lineHeight: 1.5 }}>
                     <strong>Observation:</strong> {eq.issue}
                   </p>
+
+                  <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 10, padding: '10px 12px', fontSize: 11.5, color: '#334155', marginBottom: 10, lineHeight: 1.45 }}>
+                    <div><strong>Explanation:</strong> {eq.predictionExplanation}</div>
+                    <div><strong>Data Period:</strong> {eq.underlyingDataPeriod}</div>
+                    <div><strong>Limitations:</strong> {eq.limitations}</div>
+                    <div><strong>Human Review:</strong> {eq.humanReviewRequirement}</div>
+                  </div>
 
                   <div style={{ background: 'var(--surface-subtle)', padding: '8px 12px', borderRadius: 8, fontSize: 12, color: 'var(--muted)', marginBottom: 8 }}>
                     <Clock size={12} style={{ display: 'inline', marginRight: 4 }} />
@@ -443,7 +541,7 @@ export default function TrendsPage() {
               >
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <span className="pill good" style={{ fontSize: 10, padding: '2px 6px' }}>{rec.confidence} CONFIDENCE (SIMULATED)</span>
+                    <span className="pill good" style={{ fontSize: 10, padding: '2px 6px' }}>{rec.confidence} CONFIDENCE (DEMO DATA)</span>
                     <strong style={{ fontSize: 16, color: 'var(--text)' }}>{rec.title}</strong>
                   </div>
                   <p className="muted" style={{ margin: 0, fontSize: 13.5, lineHeight: 1.5 }}>

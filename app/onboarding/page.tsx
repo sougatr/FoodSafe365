@@ -80,14 +80,16 @@ const OUTLET_TYPES: OutletTypeOption[] = [
 ];
 
 export default function Onboarding() {
-  const [name, setName] = useState('ABC Restaurant');
+  const [name, setName] = useState('');
   const [city, setCity] = useState('Mumbai');
   const [outletType, setOutletType] = useState('restaurant');
   const [fssaiLicense, setFssaiLicense] = useState('');
-  const [managerName, setManagerName] = useState('Restaurant Admin');
+  const [managerName, setManagerName] = useState('');
   const [mobile, setMobile] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [checklistTier, setChecklistTier] = useState<'critical_consolidated' | 'full_granular'>('critical_consolidated');
+  const [executionMode, setExecutionMode] = useState<'ai_assisted' | 'manual_only'>('ai_assisted');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -125,6 +127,8 @@ export default function Onboarding() {
       const createdOutletId = json.data?.outletId || finalName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       if (typeof window !== 'undefined') {
         localStorage.setItem('foodsafe365_outlet_id', createdOutletId);
+        localStorage.setItem('foodsafe365_checklist_tier', checklistTier);
+        localStorage.setItem('foodsafe365_execution_mode', executionMode);
       }
 
       // Dual-dispatch to contact alert to guarantee delivery to foodsafe365@gmail.com
@@ -179,10 +183,10 @@ export default function Onboarding() {
               RESTAURANT ONBOARDING
             </span>
             <h1 style={{ fontSize: 'clamp(28px, 4vw, 38px)', lineHeight: 1.2, margin: '12px 0 8px' }}>
-              Tell us about your restaurant
+              Make your restaurant food-safety ready
             </h1>
             <p className="lead muted" style={{ fontSize: 16, margin: 0 }}>
-              Set up your outlet in 30 seconds. Your kitchen team can immediately start today’s daily food safety protocol without cumbersome questionnaires.
+              Configure your outlet in under 60 seconds. Choose between our streamlined Critical Control Point (CCP) + General Hygiene workflow or full 29-point shift checks, with optional AI Agent check assistance and mandatory manager review.
             </p>
           </div>
 
@@ -417,6 +421,120 @@ export default function Onboarding() {
               </div>
             </div>
 
+            {/* Checklist Architecture & AI Agent Automation Provision */}
+            <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: 14, padding: '20px 22px', marginBottom: 24 }}>
+              <div style={{ marginBottom: 14 }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: '#047857', background: '#d1fae5', padding: '2px 8px', borderRadius: 999, textTransform: 'uppercase' }}>
+                  STEP 2 · CHECKLIST STRUCTURE &amp; AI AGENT AUTOMATION
+                </span>
+                <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: '6px 0 4px' }}>
+                  How should your kitchen team execute daily checks?
+                </h3>
+                <p className="muted" style={{ fontSize: 12.5, margin: 0 }}>
+                  You can switch between Critical CCP Focus and Full 29-Point View, or toggle AI Agent vs. Manual entry at any time on the Checks screen.
+                </p>
+              </div>
+
+              <div className="grid grid2" style={{ gap: 12, marginBottom: 16 }}>
+                <button
+                  type="button"
+                  onClick={() => setChecklistTier('critical_consolidated')}
+                  style={{
+                    padding: '14px 16px',
+                    borderRadius: 12,
+                    border: checklistTier === 'critical_consolidated' ? '2px solid #059669' : '1px solid #cbd5e1',
+                    background: checklistTier === 'critical_consolidated' ? '#f0fdf4' : '#ffffff',
+                    textAlign: 'left',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <strong style={{ fontSize: 13.5, color: '#0f172a' }}>⚡ 10 Critical CCPs + General Hygiene Sweep</strong>
+                    <span style={{ fontSize: 10, fontWeight: 800, background: '#059669', color: '#fff', padding: '2px 6px', borderRadius: 4 }}>RECOMMENDED</span>
+                  </div>
+                  <p style={{ fontSize: 12, color: '#475569', margin: 0, lineHeight: 1.45 }}>
+                    Focuses daily effort on high-risk critical controls (Receiving ration temp, Cold storage &lt;5°C, Freezer/Thawing, Core Cooking ≥75°C, Hot holding ≥65°C &amp; Blast chilling, FIFO &amp; Expired rations, Oil TPC ≤25%, Pest control, Medical fitness Form 1A) while consolidating general premises cleanliness into a single rapid hygiene sweep.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setChecklistTier('full_granular')}
+                  style={{
+                    padding: '14px 16px',
+                    borderRadius: 12,
+                    border: checklistTier === 'full_granular' ? '2px solid #059669' : '1px solid #cbd5e1',
+                    background: checklistTier === 'full_granular' ? '#f0fdf4' : '#ffffff',
+                    textAlign: 'left',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <strong style={{ fontSize: 13.5, color: '#0f172a' }}>📑 All 29 Granular Shift Safeguards</strong>
+                    <span style={{ fontSize: 10, fontWeight: 700, background: '#f1f5f9', color: '#475569', padding: '2px 6px', borderRadius: 4 }}>FULL AUDIT</span>
+                  </div>
+                  <p style={{ fontSize: 12, color: '#475569', margin: 0, lineHeight: 1.45 }}>
+                    Displays every individual FSSAI Schedule 4 item separately across Opening, Active Service, Closing, and Specialized shifts for comprehensive line-by-line inspection.
+                  </p>
+                </button>
+              </div>
+
+              <div className="grid grid2" style={{ gap: 12 }}>
+                <button
+                  type="button"
+                  onClick={() => setExecutionMode('ai_assisted')}
+                  style={{
+                    padding: '14px 16px',
+                    borderRadius: 12,
+                    border: executionMode === 'ai_assisted' ? '2px solid #0284c7' : '1px solid #cbd5e1',
+                    background: executionMode === 'ai_assisted' ? '#f0f9ff' : '#ffffff',
+                    textAlign: 'left',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <strong style={{ fontSize: 13.5, color: '#0f172a', display: 'block', marginBottom: 4 }}>
+                    🤖 AI Agent Check Automation + Manual Mode
+                  </strong>
+                  <p style={{ fontSize: 12, color: '#475569', margin: 0, lineHeight: 1.45 }}>
+                    Allows supervisors to use AI Agents (BLE temperature probes, digital TPC oil meters, invoice OCR &amp; smart pre-fill) alongside manual entry. All AI-drafted checks require human supervisor &amp; manager review.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setExecutionMode('manual_only')}
+                  style={{
+                    padding: '14px 16px',
+                    borderRadius: 12,
+                    border: executionMode === 'manual_only' ? '2px solid #0284c7' : '1px solid #cbd5e1',
+                    background: executionMode === 'manual_only' ? '#f0f9ff' : '#ffffff',
+                    textAlign: 'left',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <strong style={{ fontSize: 13.5, color: '#0f172a', display: 'block', marginBottom: 4 }}>
+                    ✍️ Manual Supervisor Entry Mode
+                  </strong>
+                  <p style={{ fontSize: 12, color: '#475569', margin: 0, lineHeight: 1.45 }}>
+                    Supervisors record every thermometer reading, oil check, and hygiene score manually on the kitchen floor before submitting for manager sign-off.
+                  </p>
+                </button>
+              </div>
+
+              <div style={{
+                marginTop: 12,
+                padding: '10px 14px',
+                background: '#fffbeb',
+                border: '1px solid #fde68a',
+                borderRadius: 10,
+                fontSize: 12,
+                color: '#92400e',
+                fontWeight: 600
+              }}>
+                ⚖️ <strong>Human-in-the-Loop Governance:</strong> AI must assist the food-safety manager, not replace professional judgement or statutory responsibilities.
+              </div>
+            </div>
+
             {/* Instant Benefits Preview */}
             <div style={{
               background: '#f0faf5',
@@ -433,7 +551,7 @@ export default function Onboarding() {
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                 <CheckCircle2 size={20} style={{ color: 'var(--green)', flexShrink: 0 }} />
                 <span style={{ fontSize: 13, color: '#166534', fontWeight: 600 }}>
-                  Includes immediate access to all <strong>29 Operational Safeguards</strong>, cold-chain logs (&lt; 5°C), tabletop Diner QR audits, and on-demand service partners.
+                  Includes immediate access to <strong>Critical Control Point (CCP) &amp; 29-Safeguard checklists</strong>, cold-chain logs (&lt; 5°C), tabletop Diner QR feedback, and verified service partners.
                 </span>
               </div>
             </div>
@@ -462,7 +580,7 @@ export default function Onboarding() {
                   fontWeight: 800
                 }}
               >
-                {saving ? 'Activating Outlet…' : 'Activate Outlet & Open Dashboard'} <ArrowRight size={17} />
+                {saving ? 'Creating Account…' : 'Create My Restaurant Account & Start'} <ArrowRight size={17} />
               </button>
             </div>
           </form>
@@ -519,7 +637,7 @@ export default function Onboarding() {
               { icon: '🪲', title: 'Pest Control Agencies', desc: 'Integrated pest management, numbered bait boxes & monthly service certificates.' },
               { icon: '🧪', title: 'Food-testing laboratories', desc: 'NABL accredited food & water pathogen screening, swab tests, and chemical assays.' },
               { icon: '❄️', title: 'Refrigeration/HVAC technicians', desc: '24/7 cold-chain repair, chiller thermostat calibration & kitchen exhaust maintenance.' },
-              { icon: '🩺', title: 'Occupational health providers', desc: 'Mandatory 6-monthly medical fitness checkups, Form 1A certificates & stool pathogen tests.' },
+              { icon: '🩺', title: 'Occupational health providers', desc: 'FSSAI Schedule 4 annual Form 1A medical fitness checkups & recommended food-handler health screenings.' },
             ].map((p, idx) => (
               <div
                 key={idx}
