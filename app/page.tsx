@@ -92,6 +92,7 @@ export default function Landing() {
   const [ratingModalRestaurant, setRatingModalRestaurant] = useState<RestaurantItem | null>(null);
   const [ratingStep, setRatingStep] = useState<number>(1);
   const [rateTableNum, setRateTableNum] = useState('Table 4');
+  const [rateVisitDate, setRateVisitDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [rateScores, setRateScores] = useState({ q1: 0, q2: 0, q3: 0, q4: 0, q5: 0 });
   const [rateRemarks, setRateRemarks] = useState('');
   const [ratingPhoto, setRatingPhoto] = useState<string | null>(null);
@@ -110,6 +111,7 @@ export default function Landing() {
     restaurantName: string;
     score: string;
     table: string;
+    visitDate?: string;
     wantsFeedback: boolean;
     email?: string;
     isUnclaimed?: boolean;
@@ -348,6 +350,7 @@ export default function Landing() {
     setRateRemarks('');
     setRatingPhoto(null);
     setRateTableNum(restaurant.tableCode || 'Table 4');
+    setRateVisitDate(new Date().toISOString().split('T')[0]);
     setWantsFeedback(false);
     setDinerEmail(customerEmail || '');
     setDinerPhoneInput(customerPhone || '');
@@ -447,6 +450,7 @@ export default function Landing() {
       outletId: ratingModalRestaurant.id,
       outletName: ratingModalRestaurant.name,
       createdAt: new Date().toISOString(),
+      visitDate: rateVisitDate,
       dinerName: 'Verified Diner',
       dinerMobile: customerPhone ? `+91 ••••• •${customerPhone.replace(/\D/g, '').slice(-4)}` : undefined,
       tableNumber: rateTableNum,
@@ -458,7 +462,7 @@ export default function Landing() {
         washroom: rateScores.q5
       },
       overallScore: parseFloat(avgScore),
-      feedback: rateRemarks.trim() || undefined,
+      feedback: rateRemarks.trim() ? `[Visit Date: ${rateVisitDate}] ${rateRemarks.trim()}` : `Visit Date: ${rateVisitDate}`,
       verifiedDineIn: true,
       responseRequested: wantsFeedback,
       customerEmail: wantsFeedback && dinerEmail.trim() ? dinerEmail.trim() : (customerEmail || undefined),
@@ -477,6 +481,7 @@ export default function Landing() {
           restaurantId: ratingModalRestaurant.id,
           restaurantName: ratingModalRestaurant.name,
           tableNumber: rateTableNum,
+          visitDate: rateVisitDate,
           scores: {
             cleanliness: rateScores.q1,
             staffHygiene: rateScores.q2,
@@ -485,7 +490,7 @@ export default function Landing() {
             washroom: rateScores.q5
           },
           overallScore: parseFloat(avgScore),
-          feedback: rateRemarks.trim() || undefined,
+          feedback: rateRemarks.trim() ? `[Visit Date: ${rateVisitDate}] ${rateRemarks.trim()}` : `Visit Date: ${rateVisitDate}`,
           dinerName: 'Verified Diner',
           customerName: 'Verified Diner',
           customerEmail: wantsFeedback && dinerEmail.trim() ? dinerEmail.trim() : (customerEmail || undefined),
@@ -533,6 +538,7 @@ export default function Landing() {
       restaurantName: ratingModalRestaurant.name,
       score: avgScore,
       table: rateTableNum,
+      visitDate: rateVisitDate,
       wantsFeedback,
       email: wantsFeedback && dinerEmail.trim() ? dinerEmail.trim() : (customerEmail || undefined),
       isUnclaimed
@@ -1945,7 +1951,7 @@ export default function Landing() {
                   marginTop: 16
                 }}>
                   <p style={{ fontSize: 16, color: '#475569', margin: '0 0 16px' }}>
-                    No restaurants found matching &ldquo;{searchQuery}&rdquo;.
+                    No restaurants or clubs found matching &ldquo;{searchQuery}&rdquo;.
                   </p>
                   <button
                     type="button"
@@ -2490,6 +2496,10 @@ export default function Landing() {
                     <span style={{ color: '#94A3B8' }}>Overall Score:</span>
                     <strong style={{ color: '#10b981' }}>{ratingConfirmation.score} / 5★</strong>
                   </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <span style={{ color: '#94A3B8' }}>Date of Visit:</span>
+                    <span style={{ color: '#ffffff', fontWeight: 600 }}>{ratingConfirmation.visitDate || rateVisitDate}</span>
+                  </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: '#94A3B8' }}>Table / Seat:</span>
                     <span style={{ color: '#ffffff', fontWeight: 600 }}>{ratingConfirmation.table}</span>
@@ -2572,33 +2582,127 @@ export default function Landing() {
                   </div>
                 </div>
 
-                {/* Table Attribution Chip */}
+                {/* Next-Day / Past Visit Notice + Date of Visit & Table Attribution */}
                 <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  background: '#131b26',
-                  padding: '6px 12px',
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  border: '1px solid rgba(16, 185, 129, 0.28)',
                   borderRadius: 10,
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  marginBottom: 16
+                  padding: '8px 12px',
+                  fontSize: 11.5,
+                  color: '#a7f3d0',
+                  marginBottom: 10,
+                  lineHeight: 1.4
                 }}>
-                  <span style={{ fontSize: 12, color: '#94A3B8' }}>Table / Counter:</span>
-                  <input
-                    type="text"
-                    value={rateTableNum}
-                    onChange={e => setRateTableNum(e.target.value)}
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      color: '#ffffff',
-                      fontSize: 12,
-                      fontWeight: 700,
-                      textAlign: 'right',
-                      outline: 'none',
-                      width: 120
-                    }}
-                  />
+                  🕒 <strong>Rate Today, the Next Day, or for Previously Eaten Food:</strong> You can rate right at the table, <strong>the next day</strong>, or regarding a <strong>previous visit to this restaurant or club</strong> (especially if you experienced stomach upset, loose motion, or vomiting hours later).
+                </div>
+
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: 8,
+                  marginBottom: 14
+                }}>
+                  {/* Date of Visit Selector */}
+                  <div style={{
+                    background: '#131b26',
+                    padding: '6px 10px',
+                    borderRadius: 10,
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 4
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600 }}>Date of Visit:</span>
+                      <div style={{ display: 'flex', gap: 4 }}>
+                        <button
+                          type="button"
+                          onClick={() => setRateVisitDate(new Date().toISOString().split('T')[0])}
+                          style={{
+                            background: rateVisitDate === new Date().toISOString().split('T')[0] ? '#059669' : 'rgba(255,255,255,0.08)',
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: 4,
+                            padding: '1px 5px',
+                            fontSize: 10,
+                            fontWeight: 700,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Today
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const y = new Date();
+                            y.setDate(y.getDate() - 1);
+                            setRateVisitDate(y.toISOString().split('T')[0]);
+                          }}
+                          style={{
+                            background: (() => {
+                              const y = new Date();
+                              y.setDate(y.getDate() - 1);
+                              return rateVisitDate === y.toISOString().split('T')[0] ? '#059669' : 'rgba(255,255,255,0.08)';
+                            })(),
+                            color: '#ffffff',
+                            border: 'none',
+                            borderRadius: 4,
+                            padding: '1px 5px',
+                            fontSize: 10,
+                            fontWeight: 700,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Yesterday
+                        </button>
+                      </div>
+                    </div>
+                    <input
+                      type="date"
+                      max={new Date().toISOString().split('T')[0]}
+                      value={rateVisitDate}
+                      onChange={e => setRateVisitDate(e.target.value)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#ffffff',
+                        fontSize: 12,
+                        fontWeight: 700,
+                        outline: 'none',
+                        width: '100%',
+                        colorScheme: 'dark'
+                      }}
+                    />
+                  </div>
+
+                  {/* Table / Counter Attribution */}
+                  <div style={{
+                    background: '#131b26',
+                    padding: '6px 10px',
+                    borderRadius: 10,
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    gap: 4
+                  }}>
+                    <span style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600 }}>Table / Counter / Hall:</span>
+                    <input
+                      type="text"
+                      value={rateTableNum}
+                      onChange={e => setRateTableNum(e.target.value)}
+                      placeholder="E.g. Table 4 / Club Lounge"
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#ffffff',
+                        fontSize: 12,
+                        fontWeight: 700,
+                        outline: 'none',
+                        width: '100%'
+                      }}
+                    />
+                  </div>
                 </div>
 
                 {/* STEP 1: CUTLERY & TABLE */}
@@ -2606,13 +2710,13 @@ export default function Landing() {
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center', padding: '10px 0 20px' }}>
                     <div style={{ fontSize: 32, marginBottom: 8 }}>🍽️</div>
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#10b981', textTransform: 'uppercase', marginBottom: 4 }}>
-                      Pillar 1 · Hygiene
+                      Pillar 1 · Visible Dining Hygiene
                     </span>
                     <h4 style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', margin: '0 0 8px' }}>
-                      Table &amp; Cutlery Hygiene
+                      Table, Plate &amp; Cutlery Hygiene
                     </h4>
                     <p style={{ fontSize: 13, color: '#94A3B8', margin: '0 0 24px', lineHeight: 1.4 }}>
-                      Are dining tables, water glasses, and cutlery clean? Check for oily film or residue.
+                      Were dining tables, plates, glasses, and cutlery clean, dry, and free from oily residue or flies?
                     </p>
                     
                     <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
@@ -2643,8 +2747,8 @@ export default function Landing() {
                       ))}
                     </div>
                     <span style={{ fontSize: 13, fontWeight: 700, color: rateScores.q1 > 0 ? '#10b981' : '#64748b', minHeight: 20 }}>
-                      {rateScores.q1 === 1 ? '1★ Unclean / Oily residue' :
-                       rateScores.q1 === 2 ? '2★ Sticky or stained' :
+                      {rateScores.q1 === 1 ? '1★ Unclean / Oily residue or flies' :
+                       rateScores.q1 === 2 ? '2★ Sticky table or stained cutlery' :
                        rateScores.q1 === 3 ? '3★ Acceptable cleanliness' :
                        rateScores.q1 === 4 ? '4★ Clean & well wiped' :
                        rateScores.q1 === 5 ? '5★ Spotless & sparkling' : 'Tap a star to rate'}
@@ -2652,18 +2756,18 @@ export default function Landing() {
                   </div>
                 )}
 
-                {/* STEP 2: STAFF GROOMING */}
+                {/* STEP 2: SERVER HYGIENE & HANDLING */}
                 {ratingStep === 2 && (
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center', padding: '10px 0 20px' }}>
                     <div style={{ fontSize: 32, marginBottom: 8 }}>🧑‍🍳</div>
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#10b981', textTransform: 'uppercase', marginBottom: 4 }}>
-                      Pillar 2 · Staff
+                      Pillar 2 · Server Hygiene &amp; Handling
                     </span>
                     <h4 style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', margin: '0 0 8px' }}>
-                      Staff Grooming &amp; Uniform
+                      Server Grooming &amp; Safe Food Service
                     </h4>
                     <p style={{ fontSize: 13, color: '#94A3B8', margin: '0 0 24px', lineHeight: 1.4 }}>
-                      Are staff wearing clean aprons, hair covers, and practicing good personal hygiene?
+                      Were servers wearing clean attire and serving food hygienically (not touching food or glass rims with bare fingers)?
                     </p>
                     
                     <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
@@ -2693,27 +2797,27 @@ export default function Landing() {
                       ))}
                     </div>
                     <span style={{ fontSize: 13, fontWeight: 700, color: rateScores.q2 > 0 ? '#10b981' : '#64748b', minHeight: 20 }}>
-                      {rateScores.q2 === 1 ? '1★ Untidy / No uniform' :
-                       rateScores.q2 === 2 ? '2★ Visible stains / lapses' :
-                       rateScores.q2 === 3 ? '3★ Basic aprons worn' :
-                       rateScores.q2 === 4 ? '4★ Clean & well-groomed' :
-                       rateScores.q2 === 5 ? '5★ Immaculate uniforms & hairnets' : 'Tap a star to rate'}
+                      {rateScores.q2 === 1 ? '1★ Unhygienic handling / untidy attire' :
+                       rateScores.q2 === 2 ? '2★ Visible stains / careless service' :
+                       rateScores.q2 === 3 ? '3★ Basic hygiene observed' :
+                       rateScores.q2 === 4 ? '4★ Clean attire & hygienic service' :
+                       rateScores.q2 === 5 ? '5★ Immaculate grooming & safe handling' : 'Tap a star to rate'}
                     </span>
                   </div>
                 )}
 
-                {/* STEP 3: FOOD FRESHNESS */}
+                {/* STEP 3: SERVED TEMPERATURE, FRESHNESS & OIL QUALITY (STORAGE & TEMP PROXY) */}
                 {ratingStep === 3 && (
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center', padding: '10px 0 20px' }}>
-                    <div style={{ fontSize: 32, marginBottom: 8 }}>🍲</div>
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>🌡️🍲</div>
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#10b981', textTransform: 'uppercase', marginBottom: 4 }}>
-                      Pillar 3 · Food Freshness
+                      Pillar 3 · Kitchen Storage &amp; Temp Proxy
                     </span>
                     <h4 style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', margin: '0 0 8px' }}>
-                      Food Freshness &amp; Handling
+                      Served Temperature, Freshness &amp; Oil Quality
                     </h4>
-                    <p style={{ fontSize: 13, color: '#94A3B8', margin: '0 0 24px', lineHeight: 1.4 }}>
-                      Was hot food served steaming, cold items crisp, and free from stale reheated odors?
+                    <p style={{ fontSize: 13, color: '#94A3B8', margin: '0 0 18px', lineHeight: 1.45 }}>
+                      Since diners can&apos;t see inside the kitchen: was hot food served piping hot, cold items properly chilled, and was the meal free from stale/sour odor or heavy, reused frying oil?
                     </p>
                     
                     <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
@@ -2743,11 +2847,11 @@ export default function Landing() {
                       ))}
                     </div>
                     <span style={{ fontSize: 13, fontWeight: 700, color: rateScores.q3 > 0 ? '#10b981' : '#64748b', minHeight: 20 }}>
-                      {rateScores.q3 === 1 ? '1★ Stale / Burnt oil odor' :
-                       rateScores.q3 === 2 ? '2★ Lukewarm / questionable' :
-                       rateScores.q3 === 3 ? '3★ Decent freshness' :
-                       rateScores.q3 === 4 ? '4★ Hot & freshly made' :
-                       rateScores.q3 === 5 ? '5★ Freshly prepared, steaming hot' : 'Tap a star to rate'}
+                      {rateScores.q3 === 1 ? '1★ Stale/sour odor, rancid oil, or unsafe temp' :
+                       rateScores.q3 === 2 ? '2★ Lukewarm food or heavy reused oil' :
+                       rateScores.q3 === 3 ? '3★ Acceptable temperature & freshness' :
+                       rateScores.q3 === 4 ? '4★ Freshly cooked & served at right temp' :
+                       rateScores.q3 === 5 ? '5★ Piping hot / crisp chilled & clean oil' : 'Tap a star to rate'}
                     </span>
                   </div>
                 )}
@@ -2757,13 +2861,13 @@ export default function Landing() {
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center', padding: '10px 0 20px' }}>
                     <div style={{ fontSize: 32, marginBottom: 8 }}>🚰</div>
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#10b981', textTransform: 'uppercase', marginBottom: 4 }}>
-                      Pillar 4 · Water &amp; Washroom
+                      Pillar 4 · Water, Ice &amp; Washbasin
                     </span>
                     <h4 style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', margin: '0 0 8px' }}>
-                      Safe Water &amp; Washrooms
+                      Safe Drinking Water &amp; Handwash Facility
                     </h4>
                     <p style={{ fontSize: 13, color: '#94A3B8', margin: '0 0 24px', lineHeight: 1.4 }}>
-                      Is safe purified drinking water provided? Are washbasins equipped with soap?
+                      Was drinking water/ice clean and odor-free, and was the customer washbasin stocked with soap and running water?
                     </p>
                     
                     <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
@@ -2793,28 +2897,40 @@ export default function Landing() {
                       ))}
                     </div>
                     <span style={{ fontSize: 13, fontWeight: 700, color: rateScores.q4 > 0 ? '#10b981' : '#64748b', minHeight: 20 }}>
-                      {rateScores.q4 === 1 ? '1★ No soap / dirty basin' :
-                       rateScores.q4 === 2 ? '2★ Poor water supply' :
+                      {rateScores.q4 === 1 ? '1★ No soap / dirty basin or questionable water' :
+                       rateScores.q4 === 2 ? '2★ Poor washroom hygiene' :
                        rateScores.q4 === 3 ? '3★ Functional wash area' :
-                       rateScores.q4 === 4 ? '4★ Clean basin with soap' :
-                       rateScores.q4 === 5 ? '5★ Sparkling with hand sanitizer & RO' : 'Tap a star to rate'}
+                       rateScores.q4 === 4 ? '4★ Clean basin with soap & safe water' :
+                       rateScores.q4 === 5 ? '5★ Sparkling basin, soap & purified water' : 'Tap a star to rate'}
                     </span>
                   </div>
                 )}
 
-                {/* STEP 5: OVERALL CONFIDENCE */}
+                {/* STEP 5: POST-MEAL STOMACH COMFORT & DIGESTIVE SAFETY (NEXT-DAY CHECK) */}
                 {ratingStep === 5 && (
-                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center', padding: '10px 0 20px' }}>
-                    <div style={{ fontSize: 32, marginBottom: 8 }}>🛡️</div>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#10b981', textTransform: 'uppercase', marginBottom: 4 }}>
-                      Pillar 5 · Trust
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center', padding: '8px 0 16px' }}>
+                    <div style={{ fontSize: 32, marginBottom: 6 }}>🩺🛡️</div>
+                    <span style={{ fontSize: 11.5, fontWeight: 800, color: '#10b981', textTransform: 'uppercase', marginBottom: 4 }}>
+                      Pillar 5 · Post-Meal Digestive Safety (Same / Next Day)
                     </span>
-                    <h4 style={{ fontSize: 18, fontWeight: 800, color: '#ffffff', margin: '0 0 8px' }}>
-                      Overall Food Safety Confidence
+                    <h4 style={{ fontSize: 17.5, fontWeight: 800, color: '#ffffff', margin: '0 0 8px' }}>
+                      Post-Meal Stomach Comfort (Loose Motion / Vomiting Check)
                     </h4>
-                    <p style={{ fontSize: 13, color: '#94A3B8', margin: '0 0 24px', lineHeight: 1.4 }}>
-                      Would you comfortably recommend this kitchen to your family and children?
+                    <p style={{ fontSize: 12.5, color: '#cbd5e1', margin: '0 0 12px', lineHeight: 1.45 }}>
+                      Poor kitchen hygiene, bad cold storage, or temperature abuse inside the kitchen often shows up <strong>hours later or the next day</strong>. Did the meal sit well with your stomach, or did anyone experience stomach upset, loose motion, or vomiting?
                     </p>
+                    <div style={{
+                      background: 'rgba(16, 185, 129, 0.1)',
+                      border: '1px solid rgba(16, 185, 129, 0.25)',
+                      borderRadius: 10,
+                      padding: '7px 11px',
+                      fontSize: 11.5,
+                      color: '#a7f3d0',
+                      marginBottom: 16,
+                      lineHeight: 1.35
+                    }}>
+                      💡 <strong>Still at the table?</strong> Rate <strong>4★–5★</strong> if your meal feels fresh and comfortable right now—you can always return later or the next day to report any stomach discomfort.
+                    </div>
                     
                     <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginBottom: 12 }}>
                       {[1, 2, 3, 4, 5].map(star => (
@@ -2823,8 +2939,12 @@ export default function Landing() {
                           type="button"
                           onClick={() => setRateScores(prev => ({ ...prev, q5: star }))}
                           style={{
-                            background: star <= rateScores.q5 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.05)',
-                            border: star <= rateScores.q5 ? '2px solid #10b981' : '1px solid rgba(255,255,255,0.1)',
+                            background: star <= rateScores.q5
+                              ? (rateScores.q5 <= 2 ? 'rgba(239, 68, 68, 0.25)' : 'rgba(16, 185, 129, 0.2)')
+                              : 'rgba(255,255,255,0.05)',
+                            border: star <= rateScores.q5
+                              ? (rateScores.q5 <= 2 ? '2px solid #ef4444' : '2px solid #10b981')
+                              : '1px solid rgba(255,255,255,0.1)',
                             borderRadius: 14,
                             width: 52,
                             height: 52,
@@ -2836,18 +2956,23 @@ export default function Landing() {
                         >
                           <Star
                             size={28}
-                            fill={star <= rateScores.q5 ? '#10b981' : 'transparent'}
-                            color={star <= rateScores.q5 ? '#10b981' : '#64748b'}
+                            fill={star <= rateScores.q5 ? (rateScores.q5 <= 2 ? '#ef4444' : '#10b981') : 'transparent'}
+                            color={star <= rateScores.q5 ? (rateScores.q5 <= 2 ? '#ef4444' : '#10b981') : '#64748b'}
                           />
                         </button>
                       ))}
                     </div>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: rateScores.q5 > 0 ? '#10b981' : '#64748b', minHeight: 20 }}>
-                      {rateScores.q5 === 1 ? '1★ High risk / would avoid' :
-                       rateScores.q5 === 2 ? '2★ Hesitant to return' :
-                       rateScores.q5 === 3 ? '3★ Average confidence' :
-                       rateScores.q5 === 4 ? '4★ High safety confidence' :
-                       rateScores.q5 === 5 ? '5★ 100% Trust & recommend to family' : 'Tap a star to rate'}
+                    <span style={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: rateScores.q5 > 0 ? (rateScores.q5 <= 2 ? '#f87171' : '#10b981') : '#64748b',
+                      minHeight: 20
+                    }}>
+                      {rateScores.q5 === 1 ? '1★ Severe: Loose motion or vomiting (same/next day)' :
+                       rateScores.q5 === 2 ? '2★ Stomach upset, cramps, acidity, or nausea after eating' :
+                       rateScores.q5 === 3 ? '3★ Mild heaviness, bloating, or oily after-effect' :
+                       rateScores.q5 === 4 ? '4★ Good — meal sat well, zero stomach discomfort' :
+                       rateScores.q5 === 5 ? '5★ 100% Comfortable — felt great next day, safe for family' : 'Tap a star to rate'}
                     </span>
                   </div>
                 )}
@@ -2857,18 +2982,51 @@ export default function Landing() {
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14, padding: '6px 0 16px' }}>
                     <div>
                       <h4 style={{ fontSize: 16, fontWeight: 800, color: '#ffffff', margin: '0 0 4px' }}>
-                        Observations &amp; Optional Photo
+                        Observations, Post-Meal Symptoms &amp; Optional Photo
                       </h4>
                       <p style={{ fontSize: 12.5, color: '#94A3B8', margin: 0 }}>
-                        Helpful specifics directly help the kitchen manager take action.
+                        Mention specific dishes, temperature/storage observations, or any post-meal stomach discomfort so kitchen management can investigate immediately.
                       </p>
+                    </div>
+
+                    {/* Quick Observation / Symptom Chips */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {[
+                        '✅ Meal felt fresh & sat well',
+                        '⚠️ Next-day loose motion after eating',
+                        '⚠️ Vomiting / nausea after meal',
+                        '⚠️ Stomach cramps / heavy reused oil',
+                        '🌡️ Food served lukewarm / poor storage smell'
+                      ].map((chip) => (
+                        <button
+                          key={chip}
+                          type="button"
+                          onClick={() => {
+                            if (!rateRemarks.includes(chip)) {
+                              setRateRemarks(prev => prev ? `${prev.trim()} · ${chip}` : chip);
+                            }
+                          }}
+                          style={{
+                            background: chip.startsWith('⚠️') ? 'rgba(239, 68, 68, 0.14)' : 'rgba(255, 255, 255, 0.07)',
+                            border: chip.startsWith('⚠️') ? '1px solid rgba(239, 68, 68, 0.35)' : '1px solid rgba(255, 255, 255, 0.15)',
+                            color: chip.startsWith('⚠️') ? '#fca5a5' : '#cbd5e1',
+                            fontSize: 11,
+                            fontWeight: 600,
+                            padding: '5px 10px',
+                            borderRadius: 9999,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {chip}
+                        </button>
+                      ))}
                     </div>
 
                     <textarea
                       rows={3}
                       value={rateRemarks}
                       onChange={e => setRateRemarks(e.target.value)}
-                      placeholder="E.g., spotless washbasin, stewards were polite, hot soup served fresh..."
+                      placeholder="E.g., Had paneer/chicken curry last night and experienced loose motion this morning, OR food was piping hot and felt completely comfortable..."
                       style={{
                         width: '100%',
                         background: '#131b26',
@@ -3380,19 +3538,19 @@ export default function Landing() {
               <X size={18} />
             </button>
             <h3 style={{ margin: '0 0 6px', fontSize: 20, fontWeight: 900, color: '#0F2922' }}>
-              Add a Restaurant
+              Add a Restaurant / Club
             </h3>
             <p style={{ margin: '0 0 18px', fontSize: 13, color: '#64748B' }}>
-              Can&apos;t find your dining spot? Add it to FoodSafe365 to start sharing safety feedback.
+              Can&apos;t find your restaurant, club, or dining spot? Add it to FoodSafe365 to start sharing safety feedback.
             </p>
             <form onSubmit={handleAddRestaurant}>
               <div style={{ marginBottom: 12 }}>
                 <label style={{ display: 'block', fontSize: 12.5, fontWeight: 700, color: '#334155', marginBottom: 4 }}>
-                  Restaurant Name
+                  Restaurant / Club Name
                 </label>
                 <input
                   type="text"
-                  placeholder="E.g. Mocambo or Biryani Blues"
+                  placeholder="E.g. Bombay Gymkhana, Mocambo, or Biryani Blues"
                   value={newRestName}
                   onChange={e => setNewRestName(e.target.value)}
                   style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1.5px solid #CBD5E1', fontSize: 14, boxSizing: 'border-box' }}
@@ -3448,7 +3606,7 @@ export default function Landing() {
                   cursor: 'pointer'
                 }}
               >
-                Add Restaurant &amp; Show Profile →
+                Add Restaurant / Club &amp; Show Profile →
               </button>
             </form>
           </div>

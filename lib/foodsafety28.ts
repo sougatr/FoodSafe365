@@ -759,15 +759,16 @@ export type DinerSafetyRating = {
   outletId: string;
   outletName: string;
   createdAt: string;
+  visitDate?: string;        // YYYY-MM-DD date of visit to the restaurant/club
   dinerName?: string;
   dinerMobile?: string;
   tableNumber?: string;
   scores: {
-    cleanliness: number;     // 1-5: Dining Area & Table Cleanliness
-    staffHygiene: number;    // 1-5: Server & Staff Hygiene
-    foodFreshness: number;   // 1-5: Food Freshness & Temperature (Food Handling)
-    safeWater: number;       // 1-5: Safe Drinking Water & Clean Glasses
-    washroom: number;        // 1-5: Washroom & Handwashing Station
+    cleanliness: number;     // 1-5: Table, Cutlery & Visible Dining Hygiene
+    staffHygiene: number;    // 1-5: Server Hygiene & Safe Food Handling
+    foodFreshness: number;   // 1-5: Served Temperature, Freshness & Oil Quality (Storage & Temp Proxy)
+    safeWater: number;       // 1-5: Safe Drinking Water, Ice Hygiene & Washbasin
+    washroom: number;        // 1-5: Post-Meal Stomach Comfort & Digestive Safety (No Loose Motion / Vomiting)
   };
   overallScore: number;      // Average of scores (e.g. 4.6)
   feedback?: string;
@@ -790,31 +791,31 @@ export const CUSTOMER_FEEDBACK_CONTROL_MAP: Record<string, ControlMapping> = {
     primaryCheckCode: 'FS28-05',
     primaryTitle: 'Did all staff wash their hands with soap before starting work?',
     secondaryCheckCodes: ['FS28-06', 'FS28-07'],
-    rationale: 'Customer observations of staff hygiene trigger verification of supervisor handwashing audits (FS28-05), sink supplies (FS28-06), and uniforms/hairnets (FS28-07).'
+    rationale: 'Customer observations of server hygiene trigger verification of supervisor handwashing audits (FS28-05), sink supplies (FS28-06), and uniforms/hairnets (FS28-07).'
   },
   foodHandling: {
     primaryCheckCode: 'FS28-19',
     primaryTitle: 'Are all fridges reading below 5°C?',
-    secondaryCheckCodes: ['FS28-21', 'FS28-18'],
-    rationale: 'Customer perceptions of food freshness and temperature trigger operational audits of refrigeration temps (FS28-19), core cooking temps (FS28-21), and holding protection (FS28-18).'
+    secondaryCheckCodes: ['FS28-21', 'FS28-18', 'FS28-22'],
+    rationale: 'Customer observations of served food temperature, freshness, and cooking oil quality trigger operational audits of cold storage temps (FS28-19), core cooking temps (FS28-21), hot holding/blast chilling (FS28-22), and frying oil TPC (FS28-18).'
   },
   cleanliness: {
     primaryCheckCode: 'FS28-01',
     primaryTitle: 'Are all counters, floors, and prep areas clean and clutter-free right now?',
     secondaryCheckCodes: ['FS28-03', 'FS28-28'],
-    rationale: 'Customer observations of dining and counter cleanliness correlate to operational sanitation of counters/floors (FS28-01), drains (FS28-03), and waste containment (FS28-28).'
+    rationale: 'Customer observations of dining and cutlery cleanliness correlate to operational sanitation of counters/floors (FS28-01), drains (FS28-03), and waste containment (FS28-28).'
   },
   safeWater: {
     primaryCheckCode: 'FS28-06',
     primaryTitle: 'Are all hand-wash sinks fully stocked with soap and drying towels/tissue?',
     secondaryCheckCodes: ['FS28-29', 'FS28-01'],
-    rationale: 'Customer water and washroom feedback is operationalized through verification of washroom handwash facilities (FS28-06) and ice machine/water hygiene (FS28-29).'
+    rationale: 'Customer water, ice, and washroom feedback is operationalized through verification of handwash facilities (FS28-06) and purified water/ice hygiene (FS28-29).'
   },
   overallConfidence: {
-    primaryCheckCode: 'FS28-01',
-    primaryTitle: 'Are all counters, floors, and prep areas clean and clutter-free right now?',
-    secondaryCheckCodes: ['FS28-05', 'FS28-19'],
-    rationale: 'Overall dining confidence reflects fundamental foundational hygiene controls across kitchen cleanliness and handler discipline.'
+    primaryCheckCode: 'FS28-21',
+    primaryTitle: 'Did cooked and reheated food reach a safe internal temperature of 75°C?',
+    secondaryCheckCodes: ['FS28-19', 'FS28-22', 'FS28-13', 'FS28-09'],
+    rationale: 'Post-meal stomach comfort (absence of next-day loose motion, stomach cramps, or vomiting) directly reflects hidden kitchen controls: thermal cooking/reheating (FS28-21), cold storage <5°C (FS28-19), hot holding/blast chilling (FS28-22), FIFO/expired ration checks (FS28-13), and handler medical fitness (FS28-09).'
   }
 };
 
@@ -846,11 +847,11 @@ export function calculateCustomerVoiceSummary(ratings: DinerSafetyRating[] = [])
       totalRatings: 0,
       overallScore: 0,
       isEarlyFeedback: false,
-      cleanliness: { key: 'cleanliness', label: 'Cleanliness', score: 0, checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.cleanliness.primaryCheckCode, checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.cleanliness.primaryTitle },
-      staffHygiene: { key: 'staffHygiene', label: 'Staff hygiene', score: 0, checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.staffHygiene.primaryCheckCode, checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.staffHygiene.primaryTitle },
-      foodHandling: { key: 'foodHandling', label: 'Food handling', score: 0, checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.foodHandling.primaryCheckCode, checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.foodHandling.primaryTitle },
-      overallConfidence: { key: 'overallConfidence', label: 'Overall confidence', score: 0, checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.overallConfidence.primaryCheckCode, checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.overallConfidence.primaryTitle },
-      safeWater: { key: 'safeWater', label: 'Safe water & washroom', score: 0, checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.safeWater.primaryCheckCode, checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.safeWater.primaryTitle },
+      cleanliness: { key: 'cleanliness', label: 'Table & cutlery hygiene', score: 0, checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.cleanliness.primaryCheckCode, checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.cleanliness.primaryTitle },
+      staffHygiene: { key: 'staffHygiene', label: 'Server hygiene & handling', score: 0, checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.staffHygiene.primaryCheckCode, checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.staffHygiene.primaryTitle },
+      foodHandling: { key: 'foodHandling', label: 'Served temp, freshness & oil', score: 0, checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.foodHandling.primaryCheckCode, checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.foodHandling.primaryTitle },
+      overallConfidence: { key: 'overallConfidence', label: 'Post-meal stomach comfort', score: 0, checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.overallConfidence.primaryCheckCode, checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.overallConfidence.primaryTitle },
+      safeWater: { key: 'safeWater', label: 'Safe water & washbasin', score: 0, checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.safeWater.primaryCheckCode, checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.safeWater.primaryTitle },
       weakerArea: null,
       recentObservations: []
     };
@@ -859,52 +860,54 @@ export function calculateCustomerVoiceSummary(ratings: DinerSafetyRating[] = [])
   const sumCleanliness = ratings.reduce((acc, r) => acc + (r.scores?.cleanliness || 5), 0);
   const sumStaff = ratings.reduce((acc, r) => acc + (r.scores?.staffHygiene || 5), 0);
   const sumFood = ratings.reduce((acc, r) => acc + (r.scores?.foodFreshness || 5), 0);
-  const sumSafeWater = ratings.reduce((acc, r) => acc + (r.scores?.safeWater || r.scores?.washroom || 5), 0);
+  const sumSafeWater = ratings.reduce((acc, r) => acc + (r.scores?.safeWater || 5), 0);
+  const sumPostMealComfort = ratings.reduce((acc, r) => acc + (r.scores?.washroom || r.overallScore || 5), 0);
   const sumOverall = ratings.reduce((acc, r) => acc + (r.overallScore || 5), 0);
 
   const cleanScore = Number((sumCleanliness / total).toFixed(1));
   const staffScore = Number((sumStaff / total).toFixed(1));
   const foodScore = Number((sumFood / total).toFixed(1));
   const safeWaterScore = Number((sumSafeWater / total).toFixed(1));
+  const postMealScore = Number((sumPostMealComfort / total).toFixed(1));
   const overallAvg = Number((sumOverall / total).toFixed(1));
 
   const catClean: CustomerVoiceCategory = {
     key: 'cleanliness',
-    label: 'Cleanliness',
+    label: 'Table & cutlery hygiene',
     score: cleanScore,
     checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.cleanliness.primaryCheckCode,
     checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.cleanliness.primaryTitle
   };
   const catStaff: CustomerVoiceCategory = {
     key: 'staffHygiene',
-    label: 'Staff hygiene',
+    label: 'Server hygiene & handling',
     score: staffScore,
     checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.staffHygiene.primaryCheckCode,
     checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.staffHygiene.primaryTitle
   };
   const catFood: CustomerVoiceCategory = {
     key: 'foodHandling',
-    label: 'Food handling',
+    label: 'Served temp, freshness & oil',
     score: foodScore,
     checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.foodHandling.primaryCheckCode,
     checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.foodHandling.primaryTitle
   };
   const catOverall: CustomerVoiceCategory = {
     key: 'overallConfidence',
-    label: 'Overall confidence',
-    score: overallAvg,
+    label: 'Post-meal stomach comfort',
+    score: postMealScore,
     checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.overallConfidence.primaryCheckCode,
     checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.overallConfidence.primaryTitle
   };
   const catWater: CustomerVoiceCategory = {
     key: 'safeWater',
-    label: 'Safe water & washroom',
+    label: 'Safe water & washbasin',
     score: safeWaterScore,
     checkCode: CUSTOMER_FEEDBACK_CONTROL_MAP.safeWater.primaryCheckCode,
     checkTitle: CUSTOMER_FEEDBACK_CONTROL_MAP.safeWater.primaryTitle
   };
 
-  const actionableCategories = [catClean, catStaff, catFood, catWater];
+  const actionableCategories = [catClean, catStaff, catFood, catWater, catOverall];
   actionableCategories.sort((a, b) => a.score - b.score);
   const weaker = actionableCategories[0];
 
@@ -927,10 +930,11 @@ export type DinerIncidentReport = {
   outletId: string;
   outletName: string;
   createdAt: string;
+  visitDate?: string;
   dinerName: string;
   dinerPhone: string;
   tableNumber?: string;
-  category: 'undercooked_food' | 'foreign_object' | 'bad_odor_taste' | 'dirty_cutlery' | 'pest_sighting' | 'hygiene_violation' | 'other';
+  category: 'post_meal_illness' | 'undercooked_food' | 'foreign_object' | 'bad_odor_taste' | 'dirty_cutlery' | 'pest_sighting' | 'hygiene_violation' | 'other';
   severity: 'high' | 'critical';
   description: string;
   status: 'received' | 'investigating' | 'resolved';

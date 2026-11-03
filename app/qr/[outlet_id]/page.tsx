@@ -42,6 +42,7 @@ export default function TableQrPage() {
 
   const [activeTab, setActiveTab] = useState<'rate' | 'complain'>('rate');
   const [tableNumber, setTableNumber] = useState('Table 4');
+  const [visitDate, setVisitDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [dinerName, setDinerName] = useState('');
   const [dinerPhone, setDinerPhone] = useState('');
 
@@ -63,7 +64,7 @@ export default function TableQrPage() {
   const [ratingSubmitted, setRatingSubmitted] = useState(false);
 
   // Complaint / Grievance State
-  const [grievanceCategory, setGrievanceCategory] = useState<'undercooked_food' | 'foreign_object' | 'bad_odor_taste' | 'dirty_cutlery' | 'pest_sighting' | 'hygiene_violation'>('undercooked_food');
+  const [grievanceCategory, setGrievanceCategory] = useState<'post_meal_illness' | 'undercooked_food' | 'foreign_object' | 'bad_odor_taste' | 'dirty_cutlery' | 'pest_sighting' | 'hygiene_violation'>('post_meal_illness');
   const [grievanceDesc, setGrievanceDesc] = useState('');
   const [grievanceSuccess, setGrievanceSuccess] = useState<string | null>(null);
 
@@ -101,6 +102,7 @@ export default function TableQrPage() {
       outletId,
       outletName: `${displayName} — ${displayLocation}`,
       createdAt: new Date().toISOString(),
+      visitDate,
       dinerName: responseRequested === 'yes' ? (dinerName.trim() || undefined) : undefined,
       dinerMobile: responseRequested === 'yes' ? (customerPhone.trim() || dinerPhone.trim() || undefined) : undefined,
       tableNumber,
@@ -112,7 +114,7 @@ export default function TableQrPage() {
         washroom
       },
       overallScore: parseFloat(overallRating),
-      feedback: feedback.trim() || undefined,
+      feedback: feedback.trim() ? `[Visit Date: ${visitDate}] ${feedback.trim()}` : `Visit Date: ${visitDate}`,
       verifiedDineIn: true,
       responseRequested: responseRequested === 'yes',
       consentToShareContact: responseRequested === 'yes',
@@ -171,18 +173,19 @@ export default function TableQrPage() {
       outletId,
       outletName: `${displayName} — ${displayLocation}`,
       createdAt: new Date().toISOString(),
+      visitDate,
       dinerName: dinerName.trim() || undefined,
       dinerMobile: dinerPhone.trim() || undefined,
       tableNumber: tableNumber.trim() || undefined,
       scores: {
         cleanliness: (grievanceCategory === 'dirty_cutlery' || grievanceCategory === 'pest_sighting') ? 1 : 2,
         staffHygiene: (grievanceCategory === 'hygiene_violation') ? 1 : 2,
-        foodFreshness: (grievanceCategory === 'undercooked_food' || grievanceCategory === 'bad_odor_taste' || grievanceCategory === 'foreign_object') ? 1 : 2,
+        foodFreshness: (grievanceCategory === 'post_meal_illness' || grievanceCategory === 'undercooked_food' || grievanceCategory === 'bad_odor_taste' || grievanceCategory === 'foreign_object') ? 1 : 2,
         safeWater: 2,
-        washroom: 2
+        washroom: grievanceCategory === 'post_meal_illness' ? 1 : 2
       },
       overallScore: 1,
-      feedback: `[GRIEVANCE: ${grievanceCategory.toUpperCase()}] ${grievanceDesc.trim()}`,
+      feedback: `[GRIEVANCE: ${grievanceCategory.toUpperCase()} | Visit Date: ${visitDate}] ${grievanceDesc.trim()}`,
       verifiedDineIn: true,
       responseRequested: Boolean(dinerPhone.trim()),
       consentToShareContact: Boolean(dinerPhone.trim()),
@@ -388,12 +391,100 @@ export default function TableQrPage() {
             ) : (
               <form onSubmit={handleRatingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <div>
-                  <h2 style={{ fontSize: 18, margin: '0 0 4px' }}>Customer Food-Safety Rating</h2>
-                  <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+                  <h2 style={{ fontSize: 18, margin: '0 0 4px' }}>Customer Food-Safety &amp; Post-Meal Comfort Rating</h2>
+                  <p className="muted" style={{ fontSize: 13, margin: 0, lineHeight: 1.45 }}>
                     {isGrocery
-                      ? 'Share your observations regarding store hygiene, product freshness, cold-chain integrity, and retail standards.'
-                      : 'Share your observation of table cleanliness, staff hygiene, food handling & temperature, and washroom standards.'}
+                      ? 'Share your observations regarding store hygiene, product freshness, cold-chain integrity, and post-consumption safety.'
+                      : 'Since diners cannot enter the kitchen, we combine visible dining hygiene with sensory checks on the plate (temperature, freshness, cooking oil) and post-meal stomach comfort (same-day or next-day loose motion / vomiting).'}
                   </p>
+                </div>
+
+                {/* Next-Day / Previous Visit Notice + Date of Visit Selector */}
+                <div style={{
+                  background: '#ecfdf5',
+                  border: '1px solid #a7f3d0',
+                  borderRadius: 10,
+                  padding: '12px 14px'
+                }}>
+                  <div style={{ fontSize: 12.5, color: '#065f46', marginBottom: 10, lineHeight: 1.45 }}>
+                    🕒 <strong>Rate Today, the Next Day, or Regarding Previously Eaten Food:</strong> You can submit a rating right at the table, <strong>the next day</strong>, or for a <strong>previous visit to this restaurant or club</strong> (especially if you experienced stomach upset, loose motion, or vomiting after returning home).
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <label style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>
+                          Date of Visit to Restaurant / Club:
+                        </label>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          <button
+                            type="button"
+                            onClick={() => setVisitDate(new Date().toISOString().split('T')[0])}
+                            style={{
+                              background: visitDate === new Date().toISOString().split('T')[0] ? '#059669' : '#ffffff',
+                              color: visitDate === new Date().toISOString().split('T')[0] ? '#ffffff' : '#334155',
+                              border: '1px solid #059669',
+                              borderRadius: 4,
+                              padding: '2px 6px',
+                              fontSize: 10.5,
+                              fontWeight: 700,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Today
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const y = new Date();
+                              y.setDate(y.getDate() - 1);
+                              setVisitDate(y.toISOString().split('T')[0]);
+                            }}
+                            style={{
+                              background: (() => {
+                                const y = new Date();
+                                y.setDate(y.getDate() - 1);
+                                return visitDate === y.toISOString().split('T')[0] ? '#059669' : '#ffffff';
+                              })(),
+                              color: (() => {
+                                const y = new Date();
+                                y.setDate(y.getDate() - 1);
+                                return visitDate === y.toISOString().split('T')[0] ? '#ffffff' : '#334155';
+                              })(),
+                              border: '1px solid #059669',
+                              borderRadius: 4,
+                              padding: '2px 6px',
+                              fontSize: 10.5,
+                              fontWeight: 700,
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Yesterday
+                          </button>
+                        </div>
+                      </div>
+                      <input
+                        type="date"
+                        className="input"
+                        max={new Date().toISOString().split('T')[0]}
+                        value={visitDate}
+                        onChange={e => setVisitDate(e.target.value)}
+                        style={{ fontSize: 13, background: '#ffffff' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>
+                        Table / Counter / Club Lounge:
+                      </label>
+                      <input
+                        type="text"
+                        className="input"
+                        value={tableNumber}
+                        onChange={e => setTableNumber(e.target.value)}
+                        placeholder="e.g. Table 4 / Dining Hall"
+                        style={{ fontSize: 13, background: '#ffffff' }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* Score Item 1: Cleanliness / Store Hygiene */}
@@ -401,10 +492,10 @@ export default function TableQrPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                     <div>
                       <strong style={{ fontSize: 14, color: '#0f172a' }}>
-                        {isGrocery ? '1. Store & Surface Hygiene' : '1. Dining Area & Table Cleanliness'}
+                        {isGrocery ? '1. Store & Surface Hygiene' : '1. Table, Plate & Cutlery Hygiene'}
                       </strong>
                       <p className="muted" style={{ margin: 0, fontSize: 12 }}>
-                        {isGrocery ? 'Aisles clean, shelves dusted, checkout counters sanitized' : 'Tables sanitized, odorless, clean cutlery & napkins'}
+                        {isGrocery ? 'Aisles clean, shelves dusted, checkout counters sanitized' : 'Dining table, plates, glasses, and cutlery clean, dry & free of oily film or flies'}
                       </p>
                     </div>
                     <span style={{ fontWeight: 800, color: cleanliness > 0 ? '#059669' : '#94a3b8', fontSize: 15 }}>
@@ -439,10 +530,10 @@ export default function TableQrPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                     <div>
                       <strong style={{ fontSize: 14, color: '#0f172a' }}>
-                        {isGrocery ? '2. Staff Hygiene & Handling' : '2. Server & Staff Hygiene'}
+                        {isGrocery ? '2. Staff Hygiene & Handling' : '2. Server Grooming & Safe Food Service'}
                       </strong>
                       <p className="muted" style={{ margin: 0, fontSize: 12 }}>
-                        {isGrocery ? 'Clean attire, hair restrained, clean hands/gloves when packing' : 'Clean uniforms, hair secured, clean fingernails/gloves'}
+                        {isGrocery ? 'Clean attire, hair restrained, clean hands/gloves when packing' : 'Clean attire, hair covered, and serving food hygienically without bare-finger contact'}
                       </p>
                     </div>
                     <span style={{ fontWeight: 800, color: staffHygiene > 0 ? '#059669' : '#94a3b8', fontSize: 15 }}>
@@ -472,15 +563,17 @@ export default function TableQrPage() {
                   </div>
                 </div>
 
-                {/* Score Item 3: Food Freshness & Temp / Product Freshness */}
-                <div style={{ background: '#f8fafc', padding: 14, borderRadius: 10 }}>
+                {/* Score Item 3: Served Temperature, Freshness & Oil Quality (Kitchen Storage & Temp Proxy) */}
+                <div style={{ background: '#f8fafc', padding: 14, borderRadius: 10, borderLeft: '3px solid #0284c7' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                     <div>
                       <strong style={{ fontSize: 14, color: '#0f172a' }}>
-                        {isGrocery ? '3. Product Freshness & Temperature Control' : '3. Food Freshness & Proper Temperature'}
+                        {isGrocery ? '3. Product Freshness & Cold-Chain Temperature' : '3. Served Temperature, Freshness & Cooking Oil Quality'}
                       </strong>
                       <p className="muted" style={{ margin: 0, fontSize: 12 }}>
-                        {isGrocery ? 'Chilled dairy/meats kept cold, fresh produce, no expired packs' : 'Hot dishes served hot, salads cold, fresh taste & aroma'}
+                        {isGrocery
+                          ? 'Chilled dairy/meats kept cold (<5°C), fresh produce, no thawed/refrozen or expired packs'
+                          : 'Storage & temp proxy on your plate: Was hot food served piping hot, cold food properly chilled, and free from stale/sour odor or heavy reused frying oil?'}
                       </p>
                     </div>
                     <span style={{ fontWeight: 800, color: foodFreshness > 0 ? '#059669' : '#94a3b8', fontSize: 15 }}>
@@ -508,17 +601,26 @@ export default function TableQrPage() {
                       </button>
                     ))}
                   </div>
+                  {foodFreshness > 0 && (
+                    <div style={{ fontSize: 11.5, fontWeight: 600, color: foodFreshness <= 2 ? '#dc2626' : '#047857', marginTop: 6 }}>
+                      {foodFreshness === 1 ? '1★ Stale/sour odor, rancid oil, or unsafe lukewarm temp' :
+                       foodFreshness === 2 ? '2★ Lukewarm food or heavy reused oil' :
+                       foodFreshness === 3 ? '3★ Acceptable temperature & freshness' :
+                       foodFreshness === 4 ? '4★ Freshly cooked & served at right temperature' :
+                       '5★ Piping hot / crisp chilled, fresh aroma & clean oil'}
+                    </div>
+                  )}
                 </div>
 
-                {/* Score Item 4: Safe Drinking Water / Packaging & Expiry */}
+                {/* Score Item 4: Safe Drinking Water & Washbasin */}
                 <div style={{ background: '#f8fafc', padding: 14, borderRadius: 10 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                     <div>
                       <strong style={{ fontSize: 14, color: '#0f172a' }}>
-                        {isGrocery ? '4. Packaging & Expiry Integrity' : '4. Safe Drinking Water & Clean Glasses'}
+                        {isGrocery ? '4. Packaging & Expiry Integrity' : '4. Safe Drinking Water, Ice & Handwash Facility'}
                       </strong>
                       <p className="muted" style={{ margin: 0, fontSize: 12 }}>
-                        {isGrocery ? 'Clear labels, intact seals, visible Use By / Best Before dates' : 'Clear odorless water, spotless glasses, sealed ice hygiene'}
+                        {isGrocery ? 'Clear labels, intact seals, visible Use By / Best Before dates' : 'Clean odor-free water/ice and washbasin stocked with soap & clean water'}
                       </p>
                     </div>
                     <span style={{ fontWeight: 800, color: safeWater > 0 ? '#059669' : '#94a3b8', fontSize: 15 }}>
@@ -548,18 +650,34 @@ export default function TableQrPage() {
                   </div>
                 </div>
 
-                {/* Score Item 5: Washroom Sanitation / Overall Food-Safety Confidence */}
-                <div style={{ background: '#f8fafc', padding: 14, borderRadius: 10 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                {/* Score Item 5: Post-Meal Stomach Comfort & Digestive Safety (Same Day / Next Day Loose Motion or Vomiting Check) */}
+                <div style={{ background: '#f0fdf4', padding: 14, borderRadius: 10, border: '1px solid #bbf7d0', borderLeft: '4px solid #059669' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6, gap: 8 }}>
                     <div>
-                      <strong style={{ fontSize: 14, color: '#0f172a' }}>
-                        {isGrocery ? '5. Overall Food-Safety Confidence' : '5. Washroom & Handwash Cleanliness'}
+                      <span style={{
+                        display: 'inline-block',
+                        fontSize: 10,
+                        fontWeight: 800,
+                        textTransform: 'uppercase',
+                        background: '#059669',
+                        color: '#ffffff',
+                        padding: '2px 7px',
+                        borderRadius: 999,
+                        marginBottom: 4
+                      }}>
+                        HIDDEN KITCHEN HYGIENE &amp; STORAGE CHECK
+                      </span>
+                      <strong style={{ fontSize: 14, color: '#0f172a', display: 'block' }}>
+                        5. Post-Meal Stomach Comfort (Same Day / Next Day Loose Motion or Vomiting Check)
                       </strong>
-                      <p className="muted" style={{ margin: 0, fontSize: 12 }}>
-                        {isGrocery ? 'Pest-free environment, pleasant odor, trustworthy food storage' : 'Hand soap available, clean basin, dry paper/hand-dryer'}
+                      <p className="muted" style={{ margin: '3px 0 6px', fontSize: 12, color: '#334155', lineHeight: 1.4 }}>
+                        Poor kitchen hygiene, bad storage, or temperature abuse inside the kitchen often causes <strong>loose motion, stomach cramps, or vomiting hours later or the next day</strong>. How did your stomach feel after eating here?
                       </p>
+                      <div style={{ fontSize: 11, color: '#065f46', background: '#dcfce7', padding: '5px 8px', borderRadius: 6, marginBottom: 6 }}>
+                        💡 <strong>Rating right at the table?</strong> Select <strong>4★ or 5★</strong> if your meal feels fresh and comfortable now—you can always scan or visit again tomorrow if you experience any next-day stomach upset!
+                      </div>
                     </div>
-                    <span style={{ fontWeight: 800, color: washroom > 0 ? '#059669' : '#94a3b8', fontSize: 15 }}>
+                    <span style={{ fontWeight: 800, color: washroom > 0 ? (washroom <= 2 ? '#dc2626' : '#059669') : '#94a3b8', fontSize: 15, flexShrink: 0 }}>
                       {washroom > 0 ? `${washroom}★` : '—'}
                     </span>
                   </div>
@@ -572,9 +690,9 @@ export default function TableQrPage() {
                         style={{
                           flex: 1,
                           padding: '6px 0',
-                          border: washroom >= star ? '1px solid #059669' : '1px solid #cbd5e1',
-                          background: washroom >= star ? '#ecfdf5' : '#ffffff',
-                          color: washroom >= star ? '#047857' : '#94a3b8',
+                          border: washroom >= star ? (washroom <= 2 ? '1.5px solid #dc2626' : '1px solid #059669') : '1px solid #cbd5e1',
+                          background: washroom >= star ? (washroom <= 2 ? '#fef2f2' : '#ecfdf5') : '#ffffff',
+                          color: washroom >= star ? (washroom <= 2 ? '#b91c1c' : '#047857') : '#94a3b8',
                           borderRadius: 6,
                           fontWeight: 700,
                           cursor: 'pointer'
@@ -584,12 +702,21 @@ export default function TableQrPage() {
                       </button>
                     ))}
                   </div>
+                  {washroom > 0 && (
+                    <div style={{ fontSize: 11.5, fontWeight: 700, color: washroom <= 2 ? '#dc2626' : '#047857', marginTop: 6 }}>
+                      {washroom === 1 ? '1★ Severe: Loose motion or vomiting (same day / next day)' :
+                       washroom === 2 ? '2★ Stomach upset, cramps, acidity, or nausea after eating' :
+                       washroom === 3 ? '3★ Mild heaviness, bloating, or oily after-effect' :
+                       washroom === 4 ? '4★ Good — meal sat well, zero stomach discomfort' :
+                       '5★ 100% Comfortable — felt great next day, safe for family'}
+                    </div>
+                  )}
                 </div>
 
                 {/* 100-Word Additional Remarks Column */}
                 <label className="field">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <span style={{ fontWeight: 600, fontSize: 13.5 }}>Additional Remarks (Max 100 words)</span>
+                    <span style={{ fontWeight: 600, fontSize: 13.5 }}>Observations or Post-Meal Symptoms (Max 100 words)</span>
                     <span style={{
                       fontSize: 12,
                       fontWeight: 700,
@@ -601,6 +728,36 @@ export default function TableQrPage() {
                       {feedback.trim() ? feedback.trim().split(/\s+/).length : 0} / 100 words
                     </span>
                   </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                    {[
+                      '✅ Food served hot & sat well',
+                      '⚠️ Next-day loose motion after meal',
+                      '⚠️ Vomiting / stomach upset after eating',
+                      '🌡️ Lukewarm food / questionable cold storage'
+                    ].map(tag => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => {
+                          if (!feedback.includes(tag)) {
+                            setFeedback(prev => prev ? `${prev.trim()} · ${tag}` : tag);
+                          }
+                        }}
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 600,
+                          padding: '4px 9px',
+                          borderRadius: 999,
+                          cursor: 'pointer',
+                          border: tag.startsWith('⚠️') ? '1px solid #fecaca' : '1px solid #cbd5e1',
+                          background: tag.startsWith('⚠️') ? '#fef2f2' : '#f8fafc',
+                          color: tag.startsWith('⚠️') ? '#b91c1c' : '#334155'
+                        }}
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
                   <textarea
                     className="input textarea"
                     style={{
@@ -608,8 +765,8 @@ export default function TableQrPage() {
                       borderColor: (feedback.trim() ? feedback.trim().split(/\s+/).length : 0) > 100 ? '#dc2626' : undefined
                     }}
                     placeholder={isGrocery
-                      ? "Share specific observations regarding display hygiene, product expiry, dairy chiller temp, or handling habits (up to 100 words)..."
-                      : "Share specific observations regarding table hygiene, cutlery cleanliness, food temperature, or staff habits (up to 100 words)..."}
+                      ? "Share specific observations regarding display hygiene, product expiry, dairy chiller temp, or post-consumption comfort (up to 100 words)..."
+                      : "Share specific observations regarding dishes eaten, food temperature, or any next-day loose motion / stomach discomfort (up to 100 words)..."}
                     value={feedback}
                     onChange={e => {
                       const val = e.target.value;
@@ -758,26 +915,38 @@ export default function TableQrPage() {
 
                 <div className="grid grid2" style={{ gap: 12 }}>
                   <label className="field">
-                    <span>Your Table / Seat</span>
+                    <span>Date of Visit to Restaurant / Club</span>
                     <input
+                      type="date"
                       className="input"
-                      value={tableNumber}
-                      onChange={e => setTableNumber(e.target.value)}
-                      placeholder="e.g. Table 4"
+                      max={new Date().toISOString().split('T')[0]}
+                      value={visitDate}
+                      onChange={e => setVisitDate(e.target.value)}
                       required
                     />
                   </label>
 
                   <label className="field">
-                    <span>Your Name (for manager to greet)</span>
+                    <span>Your Table / Seat / Hall</span>
                     <input
                       className="input"
-                      value={dinerName}
-                      onChange={e => setDinerName(e.target.value)}
-                      placeholder="e.g. Priya"
+                      value={tableNumber}
+                      onChange={e => setTableNumber(e.target.value)}
+                      placeholder="e.g. Table 4 / Club Dining Room"
+                      required
                     />
                   </label>
                 </div>
+
+                <label className="field">
+                  <span>Your Name (Optional)</span>
+                  <input
+                    className="input"
+                    value={dinerName}
+                    onChange={e => setDinerName(e.target.value)}
+                    placeholder="e.g. Priya"
+                  />
+                </label>
 
                 <label className="field">
                   <span>Nature of Food-Safety Concern</span>
@@ -786,9 +955,10 @@ export default function TableQrPage() {
                     value={grievanceCategory}
                     onChange={e => setGrievanceCategory(e.target.value as any)}
                   >
+                    <option value="post_meal_illness">🩺 Post-Meal Loose Motion, Vomiting or Stomach Upset (Same / Next Day)</option>
                     <option value="undercooked_food">🥩 Undercooked / Raw Meat or Poultry</option>
                     <option value="foreign_object">🔍 Foreign Object in Food (Hair, Insect, Plastic, Stone)</option>
-                    <option value="bad_odor_taste">👃 Bad Odor / Sour / Stale Food</option>
+                    <option value="bad_odor_taste">👃 Bad Odor / Sour / Stale Food or Rancid Oil</option>
                     <option value="dirty_cutlery">🍽️ Dirty Cutlery / Stained Glasses / Sticky Table</option>
                     <option value="pest_sighting">🪳 Pest Sighting in Dining Area (Flies, Cockroach)</option>
                     <option value="hygiene_violation">🧼 Server Hygiene Violation (Coughing, No handwashing)</option>
@@ -800,7 +970,7 @@ export default function TableQrPage() {
                   <textarea
                     className="input textarea"
                     style={{ minHeight: 90 }}
-                    placeholder="Provide details (e.g. Chicken tikka served raw inside, foul sour smell from raita, fly on dining table...)"
+                    placeholder="Provide details (e.g. Experienced loose motion / vomiting the next morning after eating paneer/chicken dish, chicken tikka served raw inside, foul sour smell...)"
                     value={grievanceDesc}
                     onChange={e => setGrievanceDesc(e.target.value)}
                     required

@@ -31,7 +31,7 @@ import GlobalHeader from '@/components/GlobalHeader';
 export interface FoodBusinessCard {
   id: string;
   name: string;
-  businessType: 'Restaurant' | 'Grocery Store' | 'Supermarket' | 'Café' | 'Bakery' | 'Other';
+  businessType: 'Restaurant' | 'Restaurant / Club' | 'Club' | 'Grocery Store' | 'Supermarket' | 'Café' | 'Bakery' | 'Other';
   location: string;
   category: string;
   status: 'ACTIVE' | 'UNCLAIMED' | 'DISCOVERED';
@@ -236,7 +236,7 @@ export default function DinerDashboard() {
                 Food Businesses in {dinerUser.city || 'Mumbai'}
               </h2>
               <p className="muted" style={{ fontSize: 13, margin: 0, maxWidth: 640 }}>
-                Find restaurants, grocery stores, cafés and supermarkets. Rate your experience or provide customer food-safety feedback.
+                Find restaurants, clubs, grocery stores, cafés and supermarkets. Rate your dining experience, served food temperature, or post-meal stomach comfort.
               </p>
             </div>
 
@@ -410,8 +410,9 @@ export default function DinerDashboard() {
                   <div style={{ fontSize: 11, color: '#334155', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <span>Cleanliness: {item.scores.cleanliness}★</span>
                     <span>Staff: {item.scores.staffHygiene}★</span>
-                    <span>Freshness: {item.scores.foodFreshness}★</span>
-                    <span>Water/Facilities: {item.scores.safeWater}★</span>
+                    <span>Temp &amp; Freshness: {item.scores.foodFreshness}★</span>
+                    <span>Water/Basin: {item.scores.safeWater}★</span>
+                    <span>Post-Meal Stomach Comfort: {item.scores.washroom}★</span>
                   </div>
                   {item.feedback && (
                     <p style={{ margin: '8px 0 0', fontSize: 12, fontStyle: 'italic', color: '#475569' }}>

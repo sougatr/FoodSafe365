@@ -90,6 +90,7 @@ export async function POST(req: NextRequest) {
     const outletId = String(rawOutletId || 'the-table').trim();
     const outletName = resolveRestaurantName(outletId, rawOutletName);
     const tableNumber = body.tableNumber || body.tableCode ? String(body.tableNumber || body.tableCode).trim() : 'Table QR';
+    const visitDate = body.visitDate ? String(body.visitDate).trim() : new Date().toISOString().split('T')[0];
     const dinerName = body.dinerName || body.customerName ? String(body.dinerName || body.customerName).trim() : 'Verified Diner';
     const dinerMobile = body.dinerMobile || body.customerPhone ? String(body.dinerMobile || body.customerPhone).trim() : undefined;
     const customerEmail = body.customerEmail || body.dinerEmail ? String(body.customerEmail || body.dinerEmail).trim() : undefined;
@@ -135,6 +136,7 @@ export async function POST(req: NextRequest) {
       outletId,
       outletName,
       createdAt: new Date().toISOString(),
+      visitDate,
       dinerName,
       dinerMobile,
       tableNumber,
@@ -155,6 +157,7 @@ export async function POST(req: NextRequest) {
         restaurantId: outletId,
         restaurantName: outletName,
         tableNumber,
+        visitDate,
         overallScore,
         scores,
         feedback,

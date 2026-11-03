@@ -163,7 +163,7 @@ export const DICTIONARY: Record<string, Record<Language, string>> = {
   'landing.filter.bengaluru': { en: 'Bengaluru', hi: 'बेंगलुरु', mr: 'बंगळुरू' },
   'landing.filter.kolkata': { en: 'Kolkata', hi: 'कोलकाता', mr: 'कोलकाता' },
   'landing.filter.otherCities': { en: 'Other Cities', hi: 'अन्य शहर', mr: 'इतर शहरे' },
-  'landing.seeMore': { en: 'See more restaurants', hi: 'और रेस्तरां देखें', mr: 'आणखी रेस्टॉरंट्स पहा' },
+  'landing.seeMore': { en: 'See more restaurants & clubs', hi: 'और रेस्तरां व क्लब देखें', mr: 'आणखी रेस्टॉरंट्स आणि क्लब पहा' },
   'landing.seeLess': { en: 'Show fewer', hi: 'कम दिखाएं', mr: 'कमी दाखवा' },
   'landing.step1.title': { en: '1. Scan', hi: '1. स्कैन', mr: '1. स्कॅन' },
   'landing.step1.desc': {
@@ -173,9 +173,9 @@ export const DICTIONARY: Record<string, Record<Language, string>> = {
   },
   'landing.step2.title': { en: '2. Rate', hi: '2. रेट करें', mr: '2. रेट करा' },
   'landing.step2.desc': {
-    en: '5 quick food-safety questions',
-    hi: '5 आसान खाद्य सुरक्षा प्रश्न',
-    mr: '5 सोपे अन्न सुरक्षा प्रश्न'
+    en: '5 quick food-safety & stomach-comfort questions',
+    hi: '5 आसान खाद्य सुरक्षा और पाचन-स्वास्थ्य प्रश्न',
+    mr: '5 सोपे अन्न सुरक्षा आणि पचन आरोग्य प्रश्न'
   },
   'landing.step3.title': { en: '3. See the record', hi: '3. रिकॉर्ड देखें', mr: '3. नोंदी पहा' },
   'landing.step3.desc': {
@@ -183,11 +183,11 @@ export const DICTIONARY: Record<string, Record<Language, string>> = {
     hi: 'दैनिक रसोई जांच और स्वच्छता रिकॉर्ड',
     mr: 'दैनंदिन स्वयंपाकघर तपासणी आणि स्वच्छता नोंदी'
   },
-  'landing.role.restaurant': { en: 'Restaurant', hi: 'रेस्तरां', mr: 'रेस्टॉरंट' },
+  'landing.role.restaurant': { en: 'Restaurant / Club', hi: 'रेस्तरां / क्लब', mr: 'रेस्टॉरंट / क्लब' },
   'landing.role.restaurant.desc': {
-    en: 'Daily kitchen checks, temperature logs, and direct diner feedback.',
-    hi: 'दैनिक रसोई जांच, तापमान लॉग और सीधी ग्राहक प्रतिक्रिया।',
-    mr: 'दैनंदिन स्वयंपाकघर तपासणी, तापमान नोंदी आणि थेट ग्राहक अभिप्राय.'
+    en: 'For restaurants, clubs & gymkhanas: daily kitchen checks, temperature logs, and direct diner feedback.',
+    hi: 'रेस्तरां और क्लब के लिए: दैनिक रसोई जांच, तापमान लॉग और सीधी ग्राहक प्रतिक्रिया।',
+    mr: 'रेस्टॉरंट आणि क्लबसाठी: दैनंदिन स्वयंपाकघर तपासणी, तापमान नोंदी आणि थेट ग्राहक अभिप्राय.'
   },
   'landing.role.grocery': { en: 'Grocery', hi: 'किराना / ग्रॉसरी', mr: 'किराणा दुकान' },
   'landing.role.grocery.desc': {
@@ -203,15 +203,15 @@ export const DICTIONARY: Record<string, Record<Language, string>> = {
   },
   'landing.getStarted': { en: 'Get started', hi: 'शुरू करें', mr: 'सुरू करा' },
   'landing.searchPlaceholder': {
-    en: 'Search restaurant or cafe (e.g. Peter Cat, The Table)...',
-    hi: 'रेस्तरां या कैफे खोजें (जैसे Peter Cat, The Table)...',
-    mr: 'रेस्टॉरंट किंवा कॅफे शोधा (उदा. Peter Cat, The Table)...'
+    en: 'Search restaurant, club or cafe (e.g. Peter Cat, The Table, Gymkhana)...',
+    hi: 'रेस्तरां, क्लब या कैफे खोजें (जैसे Peter Cat, The Table)...',
+    mr: 'रेस्टॉरंट, क्लब किंवा कॅफे शोधा (उदा. Peter Cat, The Table)...'
   },
   'landing.scanQr': { en: 'Scan QR', hi: 'QR स्कैन करें', mr: 'QR स्कॅन करा' },
   'landing.filter.all': { en: 'All Places', hi: 'सभी स्थान', mr: 'सर्व ठिकाणे' },
   'landing.filter.dinein': { en: 'Dine-In', hi: 'डाइन-इन', mr: 'डाइन-इन' },
   'landing.filter.delivery': { en: 'Quick Bites & Delivery', hi: 'क्विक बाइट्स और डिलीवरी', mr: 'डिलिव्हरी आणि क्विक बाईट्स' },
-  'landing.addRestaurant': { en: 'Add Restaurant', hi: 'रेस्तरां जोड़ें', mr: 'रेस्टॉरंट जोडा' },
+  'landing.addRestaurant': { en: 'Add Restaurant / Club', hi: 'रेस्तरां / क्लब जोड़ें', mr: 'रेस्टॉरंट / क्लब जोडा' },
   'landing.rateNow': { en: 'Rate Safety', hi: 'सुरक्षा रेट करें', mr: 'सुरक्षा रेट करा' },
   'landing.viewRecord': { en: 'See Record', hi: 'रिकॉर्ड देखें', mr: 'नोंदी पहा' },
   'landing.newOnPlatform': { en: 'Be first to rate', hi: 'पहले रेट करें', mr: 'पहिले रेट करा' }

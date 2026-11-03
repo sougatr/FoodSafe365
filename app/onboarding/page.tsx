@@ -35,9 +35,15 @@ interface OutletTypeOption {
 const OUTLET_TYPES: OutletTypeOption[] = [
   {
     code: 'restaurant',
-    name: 'Restaurant / Dine-In',
-    description: 'Fine dine, casual dining, bistro or family restaurant',
+    name: 'Restaurant / Club (Dine-In)',
+    description: 'Fine dine, casual dining, bistro, family restaurant or dining club',
     icon: UtensilsCrossed
+  },
+  {
+    code: 'club',
+    name: 'Club / Gymkhana & Members’ Lounge',
+    description: 'Sports clubs, social clubs, gymkhanas, member dining halls & bars',
+    icon: ShieldCheck
   },
   {
     code: 'cafe',
@@ -184,13 +190,13 @@ export default function Onboarding() {
           
           <div style={{ marginBottom: 20 }}>
             <span className="pill good" style={{ fontSize: 11, padding: '4px 10px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              RESTAURANT ONBOARDING
+              RESTAURANT / CLUB ONBOARDING
             </span>
             <h1 style={{ fontSize: 'clamp(28px, 4vw, 38px)', lineHeight: 1.2, margin: '12px 0 8px' }}>
               Make your restaurant food-safety ready
             </h1>
             <p className="lead muted" style={{ fontSize: 16, margin: 0 }}>
-              Configure your outlet in under 60 seconds. Choose between our streamlined Critical Control Point (CCP) + General Hygiene workflow or full 29-point shift checks, with optional AI Agent check assistance and mandatory manager review.
+              Configure your restaurant or club in under 60 seconds. Choose between our streamlined Critical Control Point (CCP) + General Hygiene workflow or full 29-point shift checks, with optional AI Agent check assistance and mandatory manager review.
             </p>
 
             {/* A. Four small feature illustrations: What the restaurant gets immediately */}
@@ -399,10 +405,10 @@ export default function Onboarding() {
             {/* Basic Information */}
             <div className="grid grid2" style={{ gap: 18, marginBottom: 26 }}>
               <div className="field">
-                <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Restaurant / Outlet Name</label>
+                <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Restaurant / Club / Outlet Name</label>
                 <input
                   className="input"
-                  placeholder="e.g. The Bombay Canteen (or your kitchen name)"
+                  placeholder="e.g. The Bombay Canteen, Bombay Gymkhana, or your kitchen name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                 />

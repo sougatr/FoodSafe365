@@ -257,6 +257,7 @@ export interface RatingNotificationPayload {
   restaurantId: string;
   restaurantName: string;
   tableNumber?: string;
+  visitDate?: string;
   overallScore: number;
   scores: {
     cleanliness: number;
@@ -306,18 +307,19 @@ export async function sendCustomerRatingAlert(payload: RatingNotificationPayload
   const emailBodyText = `FoodSafe365 Customer Food-Safety Rating Alert
 ==================================================
 
-Restaurant: ${cleanRestName}
+Restaurant / Club: ${cleanRestName}
+Date of Visit: ${payload.visitDate || new Date().toISOString().split('T')[0]}
 Table / Seat: ${payload.tableNumber || 'Dine-In QR'}
 Overall Score: ${cleanScore} / 5.0 ★
-Status: ${payload.isUnclaimed ? 'UNCLAIMED DIRECTORY LISTING' : 'REGISTERED RESTAURANT'}
+Status: ${payload.isUnclaimed ? 'UNCLAIMED DIRECTORY LISTING' : 'REGISTERED RESTAURANT / CLUB'}
 Timestamp: ${new Date().toISOString()}
 
 Category Breakdown:
   1. Table & Cutlery Hygiene: ${payload.scores.cleanliness} ★
-  2. Staff Grooming & Uniform: ${payload.scores.staffHygiene} ★
-  3. Food Freshness & Temp (Food Handling): ${payload.scores.foodFreshness} ★
+  2. Server Hygiene & Safe Food Handling: ${payload.scores.staffHygiene} ★
+  3. Served Temp, Freshness & Oil Quality (Storage & Temp Proxy): ${payload.scores.foodFreshness} ★
   4. Safe Drinking Water & Washrooms: ${payload.scores.safeWater} ★
-  5. Overall Food Safety Confidence: ${payload.scores.washroom} ★
+  5. Post-Meal Stomach Comfort (Same/Next Day Digestive Safety): ${payload.scores.washroom} ★
 
 Customer Observations / Comments:
 ${payload.feedback ? `"${sanitizeBody(payload.feedback, 2000)}"` : '(No written observations provided)'}
@@ -373,6 +375,10 @@ https://foodsafe365.in/manager
         <span class="stat-value" style="color: #059669; font-size: 18px; font-weight: 800;">${cleanScore} / 5.0 ★</span>
       </div>
       <div class="stat-row">
+        <span class="stat-label">Date of Visit:</span>
+        <span class="stat-value">${payload.visitDate || new Date().toISOString().split('T')[0]}</span>
+      </div>
+      <div class="stat-row">
         <span class="stat-label">Table / Seat:</span>
         <span class="stat-value">${payload.tableNumber || 'Dine-In QR'}</span>
       </div>
@@ -399,13 +405,13 @@ https://foodsafe365.in/manager
         <span class="stat-value" style="color: ${payload.responseRequested ? '#dc2626' : '#64748b'}; font-weight: 700;">${payload.responseRequested ? 'YES (Customer requested response/resolution)' : 'No'}</span>
       </div>
 
-      <div class="breakdown-title">Food Safety Category Ratings</div>
+      <div class="breakdown-title">Food Safety &amp; Post-Meal Digestive Comfort Ratings</div>
       <div class="score-bar">
-        <div class="score-row"><span>1. Table & Cutlery Hygiene:</span><strong>${payload.scores.cleanliness} ★</strong></div>
-        <div class="score-row"><span>2. Staff Grooming & Uniform:</span><strong>${payload.scores.staffHygiene} ★</strong></div>
-        <div class="score-row"><span>3. Food Freshness & Handling:</span><strong>${payload.scores.foodFreshness} ★</strong></div>
-        <div class="score-row"><span>4. Safe Water & Washrooms:</span><strong>${payload.scores.safeWater} ★</strong></div>
-        <div class="score-row"><span>5. Overall Food Safety Confidence:</span><strong>${payload.scores.washroom} ★</strong></div>
+        <div class="score-row"><span>1. Table &amp; Cutlery Hygiene:</span><strong>${payload.scores.cleanliness} ★</strong></div>
+        <div class="score-row"><span>2. Server Hygiene &amp; Safe Handling:</span><strong>${payload.scores.staffHygiene} ★</strong></div>
+        <div class="score-row"><span>3. Served Temp, Freshness &amp; Oil Quality:</span><strong>${payload.scores.foodFreshness} ★</strong></div>
+        <div class="score-row"><span>4. Safe Water &amp; Washrooms:</span><strong>${payload.scores.safeWater} ★</strong></div>
+        <div class="score-row"><span>5. Post-Meal Stomach Comfort (No Loose Motion/Vomiting):</span><strong>${payload.scores.washroom} ★</strong></div>
       </div>
 
       ${payload.feedback ? `
