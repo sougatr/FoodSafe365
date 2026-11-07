@@ -274,6 +274,7 @@ export interface RatingNotificationPayload {
   isUnclaimed?: boolean;
   claimUrl?: string;
   recipientEmail?: string;
+  restaurantPhone?: string;
 }
 
 /**
@@ -287,6 +288,7 @@ export async function sendCustomerRatingAlert(payload: RatingNotificationPayload
   resendStatus?: number;
   resendData?: any;
   recipient?: string;
+  restaurantEmailDispatched?: boolean;
   subject?: string;
 }> {
   const adminEmail = process.env.ADMIN_EMAIL || 'foodsafe365@gmail.com';
@@ -296,9 +298,42 @@ export async function sendCustomerRatingAlert(payload: RatingNotificationPayload
 
   const recipientList = new Set<string>();
   recipientList.add(adminEmail);
-  if (payload.recipientEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.recipientEmail)) {
-    recipientList.add(payload.recipientEmail.trim());
+  const validRestaurantEmail =
+    payload.recipientEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.recipientEmail.trim())
+      ? payload.recipientEmail.trim()
+      : undefined;
+  if (validRestaurantEmail) {
+    recipientList.add(validRestaurantEmail);
   }
+
+  const effectiveClaimUrl =
+    payload.claimUrl || `https://www.foodsafe365.in/claim/${encodeURIComponent(payload.restaurantId || 'outlet')}`;
+
+  const cleanPhoneDigits = (payload.restaurantPhone || '').replace(/\D/g, '');
+  const whatsappNumber =
+    cleanPhoneDigits.length === 10
+      ? `91${cleanPhoneDigits}`
+      : cleanPhoneDigits.length === 12 && cleanPhoneDigits.startsWith('91')
+      ? cleanPhoneDigits
+      : '';
+
+  const outreachMessageText = `Hello ${cleanRestName} Management,\n\nA diner who visited your establishment on ${
+    payload.visitDate || new Date().toISOString().split('T')[0]
+  } submitted a ${cleanScore}/5.0 ★ Food-Safety & Hygiene rating on FoodSafe365 (Post-Meal Digestive Comfort: ${
+    payload.scores.washroom
+  }★, Served Temp & Freshness: ${payload.scores.foodFreshness}★).\n\n${
+    payload.feedback ? `Diner Observation: "${sanitizeBody(payload.feedback, 400)}"\n\n` : ''
+  }View the feedback and claim/onboard your official FoodSafe365 kitchen profile here:\n${effectiveClaimUrl}\n\n— FoodSafe365 Platform (foodsafe365@gmail.com)`;
+
+  const whatsappOutreachUrl = whatsappNumber
+    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(outreachMessageText)}`
+    : '';
+
+  const mailtoOutreachUrl = validRestaurantEmail
+    ? `mailto:${encodeURIComponent(validRestaurantEmail)}?subject=${encodeURIComponent(
+        `[FoodSafe365] Diner Food-Safety Feedback for ${cleanRestName} (${cleanScore}★) & Onboarding Invitation`
+      )}&body=${encodeURIComponent(outreachMessageText)}`
+    : '';
 
   const emailSubject = payload.isUnclaimed
     ? `[FoodSafe365] Customer Food-Safety Feedback for ${cleanRestName} (${cleanScore}★)`
@@ -312,6 +347,8 @@ Date of Visit: ${payload.visitDate || new Date().toISOString().split('T')[0]}
 Table / Seat: ${payload.tableNumber || 'Dine-In QR'}
 Overall Score: ${cleanScore} / 5.0 ★
 Status: ${payload.isUnclaimed ? 'UNCLAIMED DIRECTORY LISTING' : 'REGISTERED RESTAURANT / CLUB'}
+Restaurant Business Email: ${validRestaurantEmail || 'Not on file'}
+Restaurant Business Phone: ${payload.restaurantPhone || 'Not on file'}
 Timestamp: ${new Date().toISOString()}
 
 Category Breakdown:
@@ -330,10 +367,10 @@ Customer Attribution & Response Request:
   ${payload.customerPhone ? `- Customer Phone: ${sanitizeHeader(payload.customerPhone, 50)}` : ''}
   - Direct Response Requested: ${payload.responseRequested ? 'YES (Customer requested response/resolution)' : 'No'}
 
-${payload.claimUrl ? `--------------------------------------------------
-Claim Profile Link for Restaurant:
-${payload.claimUrl}
---------------------------------------------------` : ''}
+--------------------------------------------------
+Claim & Onboard Profile Link for Restaurant:
+${effectiveClaimUrl}
+--------------------------------------------------
 
 Log in to the FoodSafe365 Manager Portal to view full records:
 https://foodsafe365.in/manager
@@ -386,6 +423,16 @@ https://foodsafe365.in/manager
         <span class="stat-label">Listing Status:</span>
         <span class="stat-value">${payload.isUnclaimed ? 'Unclaimed Directory Listing' : 'Registered Restaurant'}</span>
       </div>
+      ${validRestaurantEmail ? `
+      <div class="stat-row">
+        <span class="stat-label">Restaurant Business Email:</span>
+        <span class="stat-value">${sanitizeHeader(validRestaurantEmail, 120)}</span>
+      </div>` : ''}
+      ${payload.restaurantPhone ? `
+      <div class="stat-row">
+        <span class="stat-label">Restaurant Phone:</span>
+        <span class="stat-value">${sanitizeHeader(payload.restaurantPhone, 50)}</span>
+      </div>` : ''}
       <div class="stat-row">
         <span class="stat-label">Diner Attribution:</span>
         <span class="stat-value">${payload.customerName || 'Verified Diner'}</span>
@@ -418,13 +465,11 @@ https://foodsafe365.in/manager
       <div class="breakdown-title">Diner Observations</div>
       <div class="comment-box">"${sanitizeBody(payload.feedback, 2000)}"</div>` : ''}
 
-      ${payload.claimUrl ? `
       <div style="text-align: center; margin-top: 20px;">
-        <a href="${payload.claimUrl}" class="btn" style="color: #ffffff;">Claim Restaurant Profile & Control Plan</a>
-      </div>` : `
-      <div style="text-align: center; margin-top: 20px;">
-        <a href="https://foodsafe365.in/manager" class="btn" style="color: #ffffff;">Open Manager Portal & Audit Logs</a>
-      </div>`}
+        <a href="${effectiveClaimUrl}" class="btn" style="color: #ffffff; margin: 4px;">Claim &amp; Onboard Restaurant Profile</a>
+        ${whatsappOutreachUrl ? `<a href="${whatsappOutreachUrl}" class="btn" style="background: #16a34a; color: #ffffff; margin: 4px;">📲 1-Click WhatsApp to Restaurant</a>` : ''}
+        ${mailtoOutreachUrl ? `<a href="${mailtoOutreachUrl}" class="btn" style="background: #2563eb; color: #ffffff; margin: 4px;">✉️ 1-Click Email to Restaurant</a>` : ''}
+      </div>
     </div>
     <div class="footer">
       FoodSafe365 — India's Standard for Food Safety Transparency & Verification.<br/>
@@ -482,6 +527,33 @@ https://foodsafe365.in/manager
         resendJson = { raw: await resendRes.text().catch(() => '') };
       }
 
+      // If validRestaurantEmail is present and wasn't already in targetRecipients,
+      // attempt a direct dispatch to the restaurant's business email as well.
+      let restaurantEmailDispatched = isCustomSender && Boolean(validRestaurantEmail);
+      if (!isCustomSender && validRestaurantEmail && validRestaurantEmail !== adminEmail) {
+        try {
+          const directRes = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${process.env.RESEND_API_KEY.trim()}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              from: process.env.EMAIL_FROM || 'FoodSafe365 <onboarding@resend.dev>',
+              to: [validRestaurantEmail],
+              subject: emailSubject,
+              text: emailBodyText,
+              html: emailHtmlBody
+            })
+          });
+          if (directRes.ok) {
+            restaurantEmailDispatched = true;
+          }
+        } catch {
+          // Non-fatal if Resend account is in single-recipient sandbox mode
+        }
+      }
+
       if (resendRes.ok) {
         providerUsed = 'RESEND';
         status = 'DELIVERED_EXTERNAL';
@@ -493,6 +565,7 @@ https://foodsafe365.in/manager
           resendStatus: resendRes.status,
           resendData: resendJson,
           recipient: targetRecipients[0],
+          restaurantEmailDispatched,
           subject: emailSubject
         };
       } else {

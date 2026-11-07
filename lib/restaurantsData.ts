@@ -13,6 +13,8 @@ export interface RestaurantItem {
   reviews: number;
   lastCheck: string;
   status?: RestaurantStatus;
+  contactEmail?: string;
+  contactPhone?: string;
   signals: {
     cold: { title: string; subtitle: string };
     medical: { title: string; subtitle: string };
@@ -34,6 +36,8 @@ export const POPULAR_RESTAURANTS: RestaurantItem[] = [
     score: '4.7',
     reviews: 3,
     lastCheck: 'Today, 09:30 AM',
+    contactEmail: 'communications@foodmatters.in',
+    contactPhone: '7045111880',
     signals: {
       cold: { title: 'Cold < 5°C', subtitle: 'Refrigeration OK' },
       medical: { title: '100% Medical', subtitle: 'Stool Test Cleared' },
@@ -125,6 +129,8 @@ export const POPULAR_RESTAURANTS: RestaurantItem[] = [
     score: '4.8',
     reviews: 410,
     lastCheck: 'Today, 10:15 AM',
+    contactEmail: 'reservations@thebombaycanteen.com',
+    contactPhone: '8880802424',
     signals: {
       cold: { title: 'Cold < 5°C', subtitle: 'Chilled Storage' },
       medical: { title: '100% Medical', subtitle: 'Form 1A Certified' },
@@ -161,6 +167,8 @@ export const POPULAR_RESTAURANTS: RestaurantItem[] = [
     score: '4.7',
     reviews: 580,
     lastCheck: 'Today, 08:30 AM',
+    contactEmail: 'feedback@impresario.in',
+    contactPhone: '7506394240',
     signals: {
       cold: { title: 'Chillers < 5°C', subtitle: 'Refrigeration OK' },
       medical: { title: '100% Medical', subtitle: 'All Staff Screened' },
@@ -180,6 +188,8 @@ export const POPULAR_RESTAURANTS: RestaurantItem[] = [
     reviews: 620,
     lastCheck: 'Today, 07:45 AM',
     status: 'UNCLAIMED',
+    contactEmail: 'info@leopoldcafe.com',
+    contactPhone: '02222020131',
     signals: {
       cold: { title: 'Cold Storage < 5°C', subtitle: 'Chilled OK' },
       medical: { title: '100% Medical', subtitle: 'Form 1A Current' },
@@ -216,6 +226,8 @@ export const POPULAR_RESTAURANTS: RestaurantItem[] = [
     score: '4.8',
     reviews: 350,
     lastCheck: 'Today, 10:00 AM',
+    contactEmail: 'contact@mars-world.com',
+    contactPhone: '7718838749',
     signals: {
       cold: { title: 'Cheese < 4°C', subtitle: 'Cold Chain OK' },
       medical: { title: '100% Medical', subtitle: 'Staff Certified' },
@@ -252,6 +264,8 @@ export const POPULAR_RESTAURANTS: RestaurantItem[] = [
     score: '4.8',
     reviews: 380,
     lastCheck: 'Today, 10:45 AM',
+    contactEmail: 'order@maheshlunchhome.com',
+    contactPhone: '9004655559',
     signals: {
       cold: { title: 'Fresh Catch < 2°C', subtitle: 'Daily Inspection' },
       medical: { title: '100% Medical', subtitle: 'Form 1A Cleared' },
@@ -288,10 +302,264 @@ export const POPULAR_RESTAURANTS: RestaurantItem[] = [
     score: '4.8',
     reviews: 280,
     lastCheck: 'Today, 10:20 AM',
+    contactEmail: 'reservations@thebombaycanteen.com',
+    contactPhone: '7506525554',
     signals: {
       cold: { title: 'Cold Room < 4°C', subtitle: 'Refrigeration OK' },
       medical: { title: '100% Medical', subtitle: 'Certified Cooks' },
       pest: { title: 'Pest Safe', subtitle: 'Bait Boxes Intact' }
+    }
+  },
+  {
+    id: 'copper-chimney-mumbai',
+    name: 'Copper Chimney',
+    city: 'mumbai',
+    location: 'Worli / Bandra / Ghatkopar, Mumbai',
+    tableCode: 'Table QR #12',
+    cuisine: 'Iconic North-West Frontier, Kebabs & Dum Biryani',
+    category: 'fine_dine',
+    badge: 'FOODSAFE DIRECTORY LISTING',
+    score: '4.7',
+    reviews: 410,
+    lastCheck: 'Today, 10:00 AM',
+    status: 'UNCLAIMED',
+    contactEmail: 'marketing@copperchimney.in',
+    contactPhone: '8657592606',
+    signals: {
+      cold: { title: 'Tandoor Core ≥ 75°C', subtitle: 'Cooked Thoroughly' },
+      medical: { title: '100% Medical', subtitle: 'Staff Screened' },
+      pest: { title: 'Pest Safe', subtitle: 'Weekly Pest Control' }
+    }
+  },
+  {
+    id: 'cream-centre-mumbai',
+    name: 'Cream Centre',
+    city: 'mumbai',
+    location: 'Girgaon Chowpatty & Multiple Outlets, Mumbai',
+    tableCode: 'Table QR #07',
+    cuisine: 'Iconic Channa Bhatura, Nachos, Sizzlers & Vegetarian Dining',
+    category: 'casual_dining',
+    badge: 'FOODSAFE DIRECTORY LISTING',
+    score: '4.7',
+    reviews: 520,
+    lastCheck: 'Today, 10:15 AM',
+    status: 'UNCLAIMED',
+    contactEmail: 'cc@creamcentre.com',
+    contactPhone: '02266008888',
+    signals: {
+      cold: { title: 'Dairy & Cheese < 4°C', subtitle: 'Cold Chain Verified' },
+      medical: { title: '100% Medical', subtitle: 'Staff Screened' },
+      pest: { title: 'Pest Safe', subtitle: 'Sanitized Kitchen' }
+    }
+  },
+  {
+    id: 'candies-bandra',
+    name: 'Candies',
+    city: 'mumbai',
+    location: 'Pali Hill, Bandra West, Mumbai',
+    tableCode: 'Table QR #05',
+    cuisine: 'All-Day Cafe, Sandwiches, Bakery & Continental',
+    category: 'iconic_cafe',
+    badge: 'FOODSAFE DIRECTORY LISTING',
+    score: '4.7',
+    reviews: 640,
+    lastCheck: 'Today, 09:30 AM',
+    status: 'UNCLAIMED',
+    contactEmail: 'marketing@candiescafe.in',
+    contactPhone: '9820426296',
+    signals: {
+      cold: { title: 'Display Chiller < 5°C', subtitle: 'Fresh Bakery Stock' },
+      medical: { title: '100% Medical', subtitle: 'Staff Hygiene Checked' },
+      pest: { title: 'Pest Safe', subtitle: 'Multi-Level Sanitized' }
+    }
+  },
+  {
+    id: 'gajalee-mumbai',
+    name: 'Gajalee',
+    city: 'mumbai',
+    location: 'Vile Parle East & Juhu, Mumbai',
+    tableCode: 'Table QR #04',
+    cuisine: 'Legendary Malvani Seafood, Bombil Fry & Crab Curry',
+    category: 'fine_dine',
+    badge: 'FOODSAFE DIRECTORY LISTING',
+    score: '4.7',
+    reviews: 390,
+    lastCheck: 'Today, 11:00 AM',
+    status: 'UNCLAIMED',
+    contactEmail: 'gajalee@vsnl.com',
+    contactPhone: '02226114093',
+    signals: {
+      cold: { title: 'Fresh Catch < 2°C', subtitle: 'Chilled Seafood' },
+      medical: { title: '100% Medical', subtitle: 'Kitchen Crew Cleared' },
+      pest: { title: 'Pest Safe', subtitle: 'Daily Sanitized' }
+    }
+  },
+  {
+    id: 'smoke-house-deli-mumbai',
+    name: 'Smoke House Deli',
+    city: 'mumbai',
+    location: 'Colaba / BKC / Lower Parel, Mumbai',
+    tableCode: 'Table QR #08',
+    cuisine: 'European Cafe, Artisanal Pastas, Burgers & Healthy Bowls',
+    category: 'casual_dining',
+    badge: 'FOODSAFE DIRECTORY LISTING',
+    score: '4.7',
+    reviews: 310,
+    lastCheck: 'Today, 10:00 AM',
+    status: 'UNCLAIMED',
+    contactEmail: 'smokehousedeli2020@gmail.com',
+    contactPhone: '8657970804',
+    signals: {
+      cold: { title: 'Cold Prep < 4°C', subtitle: 'Refrigeration Checked' },
+      medical: { title: '100% Medical', subtitle: 'Staff Screened' },
+      pest: { title: 'Pest Safe', subtitle: 'Weekly Pest Control' }
+    }
+  },
+  {
+    id: 'status-nariman-point',
+    name: 'Status Restaurant',
+    city: 'mumbai',
+    location: 'Nariman Point, Mumbai',
+    tableCode: 'Table QR #09',
+    cuisine: 'Pure Vegetarian Gujarati Thali, South Indian & North Indian',
+    category: 'casual_dining',
+    badge: 'FOODSAFE DIRECTORY LISTING',
+    score: '4.7',
+    reviews: 450,
+    lastCheck: 'Today, 10:30 AM',
+    status: 'UNCLAIMED',
+    contactEmail: 'info@statusrestaurant.com',
+    contactPhone: '02240318700',
+    signals: {
+      cold: { title: 'Hot Holding ≥ 65°C', subtitle: 'Fresh Thali Prep' },
+      medical: { title: '100% Medical', subtitle: 'Staff Hygiene Checked' },
+      pest: { title: 'Pest Safe', subtitle: 'Kitchen Pest Shield' }
+    }
+  },
+  {
+    id: 'persian-darbar-mumbai',
+    name: 'Persian Darbar',
+    city: 'mumbai',
+    location: 'Byculla & Andheri Lokhandwala, Mumbai',
+    tableCode: 'Table QR #11',
+    cuisine: 'Mughlai, Raan Biryani, Kebabs & Persian Delicacies',
+    category: 'casual_dining',
+    badge: 'FOODSAFE DIRECTORY LISTING',
+    score: '4.6',
+    reviews: 510,
+    lastCheck: 'Today, 11:15 AM',
+    status: 'UNCLAIMED',
+    contactEmail: 'marketing@persiandarbar.co.in',
+    contactPhone: '9320082162',
+    signals: {
+      cold: { title: 'Meat Storage < 4°C', subtitle: 'Core Cooking ≥ 75°C' },
+      medical: { title: '100% Medical', subtitle: 'Staff Screened' },
+      pest: { title: 'Pest Safe', subtitle: 'Nightly Sanitization' }
+    }
+  },
+  {
+    id: 'gaylord-churchgate',
+    name: 'Gaylord',
+    city: 'mumbai',
+    location: 'Churchgate, Mumbai',
+    tableCode: 'Table QR #03',
+    cuisine: 'Heritage Continental, North Indian & Artisanal Bakery',
+    category: 'fine_dine',
+    badge: 'FOODSAFE DIRECTORY LISTING',
+    score: '4.7',
+    reviews: 420,
+    lastCheck: 'Today, 09:45 AM',
+    status: 'UNCLAIMED',
+    contactEmail: 'gaylordmumbai@gmail.com',
+    contactPhone: '8657280340',
+    signals: {
+      cold: { title: 'Pastry Chiller < 4°C', subtitle: 'Cold Chain Verified' },
+      medical: { title: '100% Medical', subtitle: 'Staff Certified' },
+      pest: { title: 'Pest Safe', subtitle: 'Bakery Pest Control' }
+    }
+  },
+  {
+    id: 'mirchi-and-mime-powai',
+    name: 'Mirchi & Mime',
+    city: 'mumbai',
+    location: 'Powai, Mumbai',
+    tableCode: 'Table QR #06',
+    cuisine: 'Modern Indian Dining & Inclusive Hospitality',
+    category: 'fine_dine',
+    badge: 'FOODSAFE DIRECTORY LISTING',
+    score: '4.8',
+    reviews: 470,
+    lastCheck: 'Today, 10:30 AM',
+    status: 'UNCLAIMED',
+    contactEmail: 'interact@mirchiandmime.com',
+    contactPhone: '9820050011',
+    signals: {
+      cold: { title: 'Cold Storage < 4°C', subtitle: 'Daily Temp Logs' },
+      medical: { title: '100% Medical', subtitle: 'Staff Certified' },
+      pest: { title: 'Pest Safe', subtitle: 'Weekly Audit' }
+    }
+  },
+  {
+    id: 'bombay-gymkhana-club',
+    name: 'Bombay Gymkhana (Club Dining)',
+    city: 'mumbai',
+    location: 'MG Road, Fort, Mumbai',
+    tableCode: 'Club QR #01',
+    cuisine: 'Heritage Club Dining Room, Pavilion & Verandah',
+    category: 'fine_dine',
+    badge: 'FOODSAFE DIRECTORY LISTING',
+    score: '4.8',
+    reviews: 210,
+    lastCheck: 'Today, 09:00 AM',
+    status: 'UNCLAIMED',
+    contactEmail: 'bombaygym@bombaygymkhana.com',
+    contactPhone: '02243223400',
+    signals: {
+      cold: { title: 'Cold Room < 4°C', subtitle: 'Club Kitchen Checked' },
+      medical: { title: '100% Medical', subtitle: 'Stewards Screened' },
+      pest: { title: 'Pest Safe', subtitle: 'Weekly Club Audit' }
+    }
+  },
+  {
+    id: 'cci-club-mumbai',
+    name: 'The Cricket Club of India (CCI Club)',
+    city: 'mumbai',
+    location: 'Brabourne Stadium, Churchgate, Mumbai',
+    tableCode: 'Club QR #02',
+    cuisine: 'Members Club Dining, Continental, Indian & Bakery',
+    category: 'fine_dine',
+    badge: 'FOODSAFE DIRECTORY LISTING',
+    score: '4.8',
+    reviews: 195,
+    lastCheck: 'Today, 09:15 AM',
+    status: 'UNCLAIMED',
+    contactEmail: 'info@cciclub.in',
+    contactPhone: '02267853600',
+    signals: {
+      cold: { title: 'Cold Storage < 4°C', subtitle: 'Chillers Checked' },
+      medical: { title: '100% Medical', subtitle: 'Staff Screened' },
+      pest: { title: 'Pest Safe', subtitle: 'Scheduled Pest Control' }
+    }
+  },
+  {
+    id: 'otters-club-bandra',
+    name: 'Otters Club',
+    city: 'mumbai',
+    location: 'Carter Road, Bandra West, Mumbai',
+    tableCode: 'Club QR #03',
+    cuisine: 'Sea-View Members Lounge, Multi-Cuisine & Cafe',
+    category: 'fine_dine',
+    badge: 'FOODSAFE DIRECTORY LISTING',
+    score: '4.7',
+    reviews: 175,
+    lastCheck: 'Today, 09:30 AM',
+    status: 'UNCLAIMED',
+    contactEmail: 'helpdesk@ottersclub.com',
+    contactPhone: '02262393900',
+    signals: {
+      cold: { title: 'Cold Storage < 4°C', subtitle: 'Refrigeration Checked' },
+      medical: { title: '100% Medical', subtitle: 'Staff Screened' },
+      pest: { title: 'Pest Safe', subtitle: 'Pest Control Active' }
     }
   },
 
@@ -1764,4 +2032,84 @@ export function resolveRestaurantName(id?: string, fallbackName?: string): strin
   }
 
   return cleanFallback || 'The Table';
+}
+
+export const MUMBAI_BUSINESS_CONTACTS: Record<
+  string,
+  { name: string; contactEmail?: string; contactPhone?: string }
+> = {
+  'the-table': { name: 'The Table', contactEmail: 'communications@foodmatters.in', contactPhone: '7045111880' },
+  'the-bombay-canteen': { name: 'The Bombay Canteen', contactEmail: 'reservations@thebombaycanteen.com', contactPhone: '8880802424' },
+  'leopold-cafe': { name: 'Leopold Cafe & Bar', contactEmail: 'info@leopoldcafe.com', contactPhone: '02222020131' },
+  'social-mumbai': { name: 'Colaba Social', contactEmail: 'feedback@impresario.in', contactPhone: '7506394240' },
+  'pizza-by-the-bay': { name: 'Pizza By The Bay', contactEmail: 'contact@mars-world.com', contactPhone: '7718838749' },
+  'mahesh-lunch-home': { name: 'Mahesh Lunch Home', contactEmail: 'order@maheshlunchhome.com', contactPhone: '9004655559' },
+  'o-pedro-mumbai': { name: 'O Pedro', contactEmail: 'reservations@thebombaycanteen.com', contactPhone: '7506525554' },
+  'copper-chimney-mumbai': { name: 'Copper Chimney', contactEmail: 'marketing@copperchimney.in', contactPhone: '8657592606' },
+  'cream-centre-mumbai': { name: 'Cream Centre', contactEmail: 'cc@creamcentre.com', contactPhone: '02266008888' },
+  'candies-bandra': { name: 'Candies', contactEmail: 'marketing@candiescafe.in', contactPhone: '9820426296' },
+  'gajalee-mumbai': { name: 'Gajalee', contactEmail: 'gajalee@vsnl.com', contactPhone: '02226114093' },
+  'smoke-house-deli-mumbai': { name: 'Smoke House Deli', contactEmail: 'smokehousedeli2020@gmail.com', contactPhone: '8657970804' },
+  'prithvi-cafe-juhu': { name: 'Prithvi Cafe', contactEmail: 'feedback@impresario.in', contactPhone: '7045940218' },
+  'cafe-mondegar-colaba': { name: 'Cafe Mondegar', contactPhone: '9833322277' },
+  'bhagat-tarachand-mumbai': { name: 'Bhagat Tarachand', contactEmail: 'contact@kbhagattarachand.com', contactPhone: '9004702004' },
+  'status-nariman-point': { name: 'Status Restaurant', contactEmail: 'info@statusrestaurant.com', contactPhone: '02240318700' },
+  'persian-darbar-mumbai': { name: 'Persian Darbar', contactEmail: 'marketing@persiandarbar.co.in', contactPhone: '9320082162' },
+  'delhi-darbar-mumbai': { name: "Jaffer Bhai's Delhi Darbar", contactEmail: 'info@jafferbhaiscatering.com', contactPhone: '9100367373' },
+  'global-fusion-mumbai': { name: 'Global Fusion', contactPhone: '9167666751' },
+  'gaylord-churchgate': { name: 'Gaylord', contactEmail: 'gaylordmumbai@gmail.com', contactPhone: '8657280340' },
+  'khyber-fort': { name: 'Khyber', contactEmail: 'khyberfort@gmail.com', contactPhone: '02240396666' },
+  'mirchi-and-mime-powai': { name: 'Mirchi & Mime', contactEmail: 'interact@mirchiandmime.com', contactPhone: '9820050011' },
+  'lucky-restaurant-bandra': { name: 'Lucky Restaurant', contactEmail: 'info@luckyhotels.in', contactPhone: '9820066471' },
+  'shalimar-mumbai': { name: 'Shalimar', contactEmail: 'info@theshalimarhotel.com', contactPhone: '9930141126' },
+  'shiv-sagar-mumbai': { name: 'Shiv Sagar', contactEmail: 'contact@shivsagarrestaurant.com', contactPhone: '02222045829' },
+  'barbeque-nation-mumbai': { name: 'Barbeque Nation', contactEmail: 'feedback@barbequenation.com', contactPhone: '9071788854' },
+  'bombay-gymkhana-club': { name: 'Bombay Gymkhana (Club Dining)', contactEmail: 'bombaygym@bombaygymkhana.com', contactPhone: '02243223400' },
+  'cci-club-mumbai': { name: 'The Cricket Club of India (CCI Club)', contactEmail: 'info@cciclub.in', contactPhone: '02267853600' },
+  'willingdon-club-mumbai': { name: 'The Willingdon Sports Club', contactEmail: 'secretary@willingdonclub.com', contactPhone: '02235148600' },
+  'otters-club-bandra': { name: 'Otters Club', contactEmail: 'helpdesk@ottersclub.com', contactPhone: '02262393900' },
+};
+
+/**
+ * Resolves public business email and phone/mobile number for a restaurant or club
+ * by outlet ID or restaurant name so customer feedback can be emailed/SMSed directly.
+ */
+export function getRestaurantContactInfo(
+  id?: string,
+  restaurantName?: string
+): { contactEmail?: string; contactPhone?: string } {
+  const normId = (id || '').trim().toLowerCase();
+  const normName = (restaurantName || '').trim().toLowerCase();
+
+  if (normId && MUMBAI_BUSINESS_CONTACTS[normId]) {
+    return {
+      contactEmail: MUMBAI_BUSINESS_CONTACTS[normId].contactEmail,
+      contactPhone: MUMBAI_BUSINESS_CONTACTS[normId].contactPhone,
+    };
+  }
+
+  const byId = POPULAR_RESTAURANTS.find(r => r.id.toLowerCase() === normId);
+  if (byId && (byId.contactEmail || byId.contactPhone)) {
+    return { contactEmail: byId.contactEmail, contactPhone: byId.contactPhone };
+  }
+
+  if (normName) {
+    const byName = POPULAR_RESTAURANTS.find(
+      r => r.name.toLowerCase() === normName || normName.includes(r.name.toLowerCase())
+    );
+    if (byName && (byName.contactEmail || byName.contactPhone)) {
+      return { contactEmail: byName.contactEmail, contactPhone: byName.contactPhone };
+    }
+    const directoryMatch = Object.values(MUMBAI_BUSINESS_CONTACTS).find(
+      c => c.name.toLowerCase() === normName || normName.includes(c.name.toLowerCase())
+    );
+    if (directoryMatch) {
+      return {
+        contactEmail: directoryMatch.contactEmail,
+        contactPhone: directoryMatch.contactPhone,
+      };
+    }
+  }
+
+  return {};
 }

@@ -6,10 +6,11 @@ import { getCustomerFeedback, saveCustomerFeedback } from '../../../../lib/custo
 import { authorizeFeedbackAccess } from '../../../../lib/tenant';
 import { DinerSafetyRating } from '../../../../lib/foodsafety28';
 import { sendCustomerRatingAlert } from '../../../../lib/email-service';
-import { resolveRestaurantName } from '../../../../lib/restaurantsData';
+import { resolveRestaurantName, getRestaurantContactInfo } from '../../../../lib/restaurantsData';
 import {
   ensureRestaurantDirectoryEntryAsync,
-  generateClaimTokenAsync
+  generateClaimTokenAsync,
+  getRestaurantBusinessContacts
 } from '../../../../lib/unclaimed-restaurant-store';
 import { sendRatingAlertSms } from '../../../../lib/sms-service';
 
@@ -150,7 +151,21 @@ export async function POST(req: NextRequest) {
       customerPhone,
     };
 
-    // 1. P0 Real-Time Alert Dispatch directly via Resend
+    // Resolve verified business email & phone for the restaurant / club
+    const dirContacts = getRestaurantContactInfo(outletId, outletName);
+    const storedContacts = getRestaurantBusinessContacts(outletId);
+    const storedEmail = storedContacts.find(c => c.contactType === 'EMAIL')?.contactValue;
+    const storedPhone = storedContacts.find(c => c.contactType === 'PHONE')?.contactValue;
+    const restaurantEmail =
+      (body.restaurantEmail && String(body.restaurantEmail).trim()) ||
+      dirContacts.contactEmail ||
+      storedEmail;
+    const restaurantPhone =
+      (body.restaurantPhone && String(body.restaurantPhone).trim()) ||
+      dirContacts.contactPhone ||
+      storedPhone;
+
+    // 1. P0 Real-Time Alert Dispatch directly via Resend (to Admin + Restaurant Business Email)
     let alertResult: any = null;
     try {
       alertResult = await sendCustomerRatingAlert({
@@ -166,7 +181,9 @@ export async function POST(req: NextRequest) {
         customerPhone,
         responseRequested,
         isUnclaimed,
-        claimUrl
+        claimUrl,
+        recipientEmail: restaurantEmail,
+        restaurantPhone
       });
       console.log('[customer-feedback] sendCustomerRatingAlert completed:', alertResult);
     } catch (alertErr: any) {
@@ -174,7 +191,7 @@ export async function POST(req: NextRequest) {
       alertResult = { success: false, error: alertErr?.message || String(alertErr) };
     }
 
-    // 1b. Real-Time SMS Alert Dispatch to Admin (8356055834) via Fast2SMS
+    // 1b. Real-Time SMS Alert Dispatch to Admin (8356055834) + Restaurant Mobile via Fast2SMS
     let smsAlertResult: any = null;
     try {
       smsAlertResult = await sendRatingAlertSms({
@@ -183,7 +200,8 @@ export async function POST(req: NextRequest) {
         customerName: dinerName,
         customerPhone: customerPhone || dinerMobile,
         feedback,
-        tableNumber
+        tableNumber,
+        restaurantMobile: restaurantPhone
       });
       console.log('[customer-feedback] sendRatingAlertSms completed:', smsAlertResult);
     } catch (smsErr: any) {
