@@ -115,20 +115,24 @@ export const FOODSAFE28: FoodSafeCheck[] = [
   {
     id: 1,
     code: 'FS28-01',
-    category: 'Premises & Environment',
-    title: 'Are all counters, floors, and prep areas clean and clutter-free right now?',
-    target: 'Maintain continuous upkeep. Minor lapses must be managed immediately.',
+    category: 'General Kitchen Hygiene',
+    title: 'Are kitchen counters, floors, drains, handwash stations, staff uniforms/hairnets, and sanitized utensils in clean working order?',
+    target: 'Consolidated general hygiene check covering surfaces, drains, handwashing soap/towels, staff grooming, utensil sanitization, and covered pedal bins.',
     severity: 'Major',
-    frequency: 'Opening',
+    frequency: 'Daily',
     shift: 'opening',
     shiftTitle: 'The Opening Shift (Pre-Service Readiness)',
     timeEstimate: '2–3 mins',
     input: 'scale_1_5',
-    why: 'Clean food preparation zones, counters, and floors prevent physical and microbial cross-contamination into ingredients and ready-to-eat dishes.',
-    what: ['Inspect food prep tables, cutting areas, floors, and surrounding walls before starting food prep.', 'Verify no dirt, chemical residues, or debris on working food surfaces.'],
-    standard: 'All food premises and food-contact preparation surfaces must be clean, sanitized, and maintained in an orderly condition.',
-    risk: 'Accumulated grease, food residues, and soil harbor bacteria that transfer directly to foods.',
-    action: 'Halt preparation on affected counters; thoroughly sweep, wash, sanitize, and verify surfaces before resumption.',
+    why: 'Consolidates everyday kitchen cleanliness, staff handwashing/grooming, utensil sanitization, drain flow, and covered waste bins into one fast daily hygiene sweep so supervisors can focus on critical temperature and safety controls.',
+    what: [
+      'Inspect food prep counters, floors, and drains (free-flowing, no standing water or odor).',
+      'Verify handwash sink has soap/towels and kitchen staff wear clean uniforms, aprons, and hairnets.',
+      'Confirm knives/slicers/utensils are sanitized and waste bins have closed foot-pedal lids.'
+    ],
+    standard: 'All food-contact surfaces, floors, drains, handwash stations, staff attire, and waste bins must be clean, sanitized, and properly maintained.',
+    risk: 'Unclean surfaces, blocked drains, unwashed hands, or uncovered garbage directly contaminate food and attract pests.',
+    action: 'Clean and sanitize affected counters/utensils immediately, restock handwash soap/towels, clear drains, or replace soiled aprons before service.',
     outletType: 'all'
   },
   {
@@ -1037,8 +1041,17 @@ export const CRITICAL_CCP_ITEMS: CriticalCCPItem[] = [
     aiSampleValue: '5/5 — Excellent (Strict raw/cooked separation verified)'
   },
   {
-    code: 'FS28-26',
+    code: 'FS28-29',
     ccpNumber: 9,
+    shortTitle: 'Safe Potable Water, RO Filtration & Clean Ice Control',
+    categoryTag: 'POTABLE WATER & ICE CCP',
+    criticalLimit: 'Purified RO/UV Water · Food-Grade Ice & Clean Scoop',
+    aiSensorSource: 'TDS/Filter Telemetry & Water Quality Log Agent',
+    aiSampleValue: '5/5 — Excellent (RO/UV active, clean ice scoop stored outside bin)'
+  },
+  {
+    code: 'FS28-26',
+    ccpNumber: 10,
     shortTitle: 'Active Pest Control & Zero Infestation Evidence',
     categoryTag: 'PEST CONTROL CCP',
     criticalLimit: 'Zero Rodent/Cockroach Signs · Active Traps & Logs',
@@ -1047,12 +1060,21 @@ export const CRITICAL_CCP_ITEMS: CriticalCCPItem[] = [
   },
   {
     code: 'FS28-09',
-    ccpNumber: 10,
+    ccpNumber: 11,
     shortTitle: 'Staff Medical Fitness (Form 1A) & Daily Illness Check',
     categoryTag: 'MEDICAL FITNESS CCP',
     criticalLimit: 'Active Annual Form 1A · Zero Symptomatic Handlers',
     aiSensorSource: 'HR Compliance & Shift Symptom Screening Agent',
     aiSampleValue: '5/5 — Excellent (Form 1A valid; 0 symptomatic staff on shift)'
+  },
+  {
+    code: 'FS28-01',
+    ccpNumber: 12,
+    shortTitle: 'General Kitchen Hygiene, Handwash & Sanitization Sweep',
+    categoryTag: 'GENERAL HYGIENE SWEEP',
+    criticalLimit: 'Clean Counters/Drains · Handwash Soap · Clean Uniforms & Utensils',
+    aiSensorSource: 'Shift Hygiene Checklist & Photo Verification Agent',
+    aiSampleValue: '5/5 — Excellent (Counters, drains, handwash, uniforms & utensils verified)'
   }
 ];
 
@@ -1063,12 +1085,12 @@ export const GENERAL_HYGIENE_SWEEP_CODES = FOODSAFE28
   .filter(code => !CRITICAL_CCP_CODES.includes(code));
 
 export function isDailyFloorCheck(c: FoodSafeCheck): boolean {
-  return c.shift === 'opening' || c.shift === 'active' || c.shift === 'closing';
+  return CRITICAL_CCP_CODES.includes(c.code);
 }
 
 export function isScheduledCheck(c: FoodSafeCheck): boolean {
-  // All 29 FoodSafe operational safeguards (shifts + specialized + admin audits) are scheduled and tracked
-  return true;
+  // Only the 12 Critical Daily Checks (11 Critical CCPs + 1 Consolidated General Hygiene Check) are scheduled
+  return CRITICAL_CCP_CODES.includes(c.code);
 }
 
 export function severityForCheck(code: string): 'critical' | 'attention' {

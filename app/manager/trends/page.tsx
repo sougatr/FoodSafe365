@@ -93,7 +93,7 @@ export default function TrendsPage() {
               Food Safety Performance Trends
             </h1>
             <p className="lead" style={{ fontSize: 15, margin: 0, maxWidth: 680 }}>
-              Analysis across 29 daily safeguards, temperature logs, and corrective actions to monitor operational trends and highlight temperature excursions before violations occur.
+              Analysis across 12 critical daily kitchen checks, temperature logs, and corrective actions to monitor operational trends and highlight temperature excursions before violations occur.
             </p>
           </div>
 
@@ -161,9 +161,9 @@ export default function TrendsPage() {
             </div>
 
             <div style={{ background: '#F8FAF6', border: '1px solid #E2E8F0', borderRadius: 14, padding: '16px' }}>
-              <span className="muted" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>29 Safeguards Adherence (DEMO DATA)</span>
+              <span className="muted" style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>12 Critical Checks Adherence (DEMO DATA)</span>
               <div style={{ fontSize: 26, fontWeight: 900, color: '#0F172A', margin: '4px 0' }}>96.8%</div>
-              <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>29 / 29 checks tracked</span>
+              <span style={{ fontSize: 12, color: '#059669', fontWeight: 600 }}>12 / 12 checks tracked</span>
               <div style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>Simulated sample adherence</div>
             </div>
           </div>
@@ -297,7 +297,7 @@ export default function TrendsPage() {
             <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', paddingTop: 14, borderTop: '1px solid var(--border)' }}>
               <div>
                 <span className="muted" style={{ fontSize: 12 }}>Evaluated Safeguards:</span>
-                <strong style={{ display: 'block', fontSize: 16, color: 'var(--text)' }}>29 Controls (DEMO DATA)</strong>
+                <strong style={{ display: 'block', fontSize: 16, color: 'var(--text)' }}>12 Critical Controls (DEMO DATA)</strong>
               </div>
               <div>
                 <span className="muted" style={{ fontSize: 12 }}>Simulated Confidence Value:</span>

@@ -590,7 +590,7 @@ export default function Checks() {
           id: `evt-ai-draft-${Date.now()}`,
           at: nowIso,
           type: 'ai_agent_draft',
-          detail: 'AI Agent Check Assistant populated 10 Critical CCP draft readings [DEMO DATA] for human supervisor & manager verification.',
+          detail: 'AI Agent Check Assistant populated 12 Critical Daily Check draft readings [DEMO DATA] for human supervisor & manager verification.',
           status: 'pending_manager'
         },
         ...(data.timeline || [])
@@ -695,7 +695,7 @@ export default function Checks() {
           <div className="checks-header">
             <div>
               <p className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span>CHECK {selected.id} OF {FOODSAFE28.length} · DAILY FOOD SAFETY CHECK</span>
+                <span>CRITICAL CHECK {CRITICAL_CCP_ITEMS.find(c => c.code === selected.code)?.ccpNumber || selected.id} OF {CRITICAL_CCP_ITEMS.length} · DAILY FOOD SAFETY CHECK</span>
                 {selected.severity && (
                   <span style={{
                     fontSize: 10,
@@ -1727,7 +1727,7 @@ export default function Checks() {
           </div>
         </div>
 
-        {/* TWO-TIER CHECKLIST MODE & AI AGENT AUTOMATION CONTROL PANEL */}
+        {/* 12 CRITICAL DAILY CHECKS & AI AGENT AUTOMATION CONTROL PANEL */}
         <div className="card" style={{
           padding: '18px 20px',
           borderRadius: 16,
@@ -1738,50 +1738,14 @@ export default function Checks() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14, marginBottom: 14 }}>
             <div>
               <span style={{ fontSize: 11, fontWeight: 800, color: '#047857', background: '#d1fae5', padding: '2px 8px', borderRadius: 999, textTransform: 'uppercase' }}>
-                CHECKLIST ARCHITECTURE &amp; EXECUTION MODE
+                STREAMLINED 12 CRITICAL DAILY KITCHEN CHECKS
               </span>
               <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: '6px 0 2px' }}>
-                Critical CCP Focus vs. Granular 29-Check View &amp; AI Agent Automation
+                12 Essential Kitchen Controls · AI Agent-Assisted or Manual Entry
               </h3>
               <p className="muted" style={{ fontSize: 12.5, margin: 0 }}>
-                Focus daily attention on the 10 high-risk Critical Control Points (Receiving temp, Cold storage, Freezer &amp; Thawing, Internal cooking, Hot holding &amp; Blast chilling, FIFO &amp; Expired rations, Oil TPC meter, Raw/Cooked segregation, Pest control, Medical fitness Form 1A) while consolidating general premises hygiene.
+                Designed for real busy kitchens: covers only the 12 critical daily checks (Receiving fresh ration temp, Cold storage &lt;5°C, Deep freezer &lt;−18°C &amp; Thawing, Internal cooking ≥75°C, Hot holding ≥65°C &amp; Blast chilling, FIFO &amp; Expired rations, Cooking oil TPC ≤25%, Raw/Cooked segregation, Potable water/ice, Pest control, Medical fitness Form 1A, and Consolidated General Kitchen Hygiene).
               </p>
-            </div>
-
-            {/* View Mode Toggle */}
-            <div style={{ display: 'flex', gap: 6, background: '#e2e8f0', padding: 4, borderRadius: 10 }}>
-              <button
-                type="button"
-                onClick={() => setChecklistViewMode('critical_consolidated')}
-                style={{
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '8px 14px',
-                  fontSize: 12.5,
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  background: checklistViewMode === 'critical_consolidated' ? '#059669' : 'transparent',
-                  color: checklistViewMode === 'critical_consolidated' ? '#ffffff' : '#334155'
-                }}
-              >
-                ⚡ 10 Critical CCPs + General Hygiene
-              </button>
-              <button
-                type="button"
-                onClick={() => setChecklistViewMode('shift_granular')}
-                style={{
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '8px 14px',
-                  fontSize: 12.5,
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  background: checklistViewMode === 'shift_granular' ? '#059669' : 'transparent',
-                  color: checklistViewMode === 'shift_granular' ? '#ffffff' : '#334155'
-                }}
-              >
-                📑 All 29 Granular Shift Checks
-              </button>
             </div>
           </div>
 
@@ -1845,7 +1809,7 @@ export default function Checks() {
                     fontWeight: 800
                   }}
                 >
-                  🤖 Auto-Draft 10 Critical CCPs via AI Agent (DEMO DATA)
+                  🤖 Auto-Draft 12 Critical Checks via AI Agent (DEMO DATA)
                 </button>
                 {aiDraftApplied && (
                   <span style={{ fontSize: 11.5, fontWeight: 800, color: '#b45309', background: '#fef3c7', padding: '4px 10px', borderRadius: 6, border: '1px solid #fde68a' }}>
@@ -1870,448 +1834,113 @@ export default function Checks() {
           </div>
         </div>
 
-        {checklistViewMode === 'critical_consolidated' && (
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
-              <div>
-                <span className="eyebrow" style={{ color: '#dc2626', fontWeight: 800 }}>TIER 1 · 10 HIGH-RISK CRITICAL CONTROL POINTS (CCPs)</span>
-                <h3 style={{ fontSize: 18, margin: '2px 0 0', color: '#0f172a' }}>
-                  Mandatory Daily Temperature, Storage, Cooking, TPC, FIFO, Pest &amp; Medical Controls
-                </h3>
-              </div>
-              <span className="pill good" style={{ fontSize: 11.5 }}>
-                {CRITICAL_CCP_CODES.filter(code => Boolean(saved[code])).length} / {CRITICAL_CCP_CODES.length} Critical CCPs Recorded
-              </span>
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+            <div>
+              <span className="eyebrow" style={{ color: '#dc2626', fontWeight: 800 }}>12 CRITICAL DAILY KITCHEN CHECKS</span>
+              <h3 style={{ fontSize: 18, margin: '2px 0 0', color: '#0f172a' }}>
+                Temperature, Storage, Cooking, TPC Oil Meter, FIFO, Water, Pest, Medical &amp; General Hygiene
+              </h3>
             </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-              {CRITICAL_CCP_ITEMS.map(ccp => {
-                const checkObj = FOODSAFE28.find(x => x.code === ccp.code);
-                if (!checkObj) return null;
-                const s = saved[ccp.code];
-                const isApproved = s?.reviewStatus === 'approved';
-                const isAlert = s?.reviewStatus === 'alerted';
-                const isPending = s?.reviewStatus === 'pending_manager';
-                return (
-                  <button
-                    key={ccp.code}
-                    type="button"
-                    className="card daily-check-row interactive"
-                    onClick={() => openCheck(checkObj)}
-                    style={{
-                      border: isApproved
-                        ? '1.5px solid #a7f3d0'
-                        : isAlert
-                        ? '1.5px solid #fecaca'
-                        : isPending
-                        ? '1.5px solid #fde68a'
-                        : '1.5px solid #cbd5e1',
-                      background: isApproved ? '#fbfdfc' : isAlert ? '#fffafa' : '#ffffff',
-                      boxShadow: 'var(--shadow-sm)',
-                      textAlign: 'left'
-                    }}
-                  >
-                    <div
-                      className="library-number"
-                      style={{
-                        background: '#fef2f2',
-                        color: '#dc2626',
-                        borderColor: '#fecaca',
-                        fontWeight: 900
-                      }}
-                    >
-                      CCP {ccp.ccpNumber}
-                    </div>
-                    <div className="daily-check-main">
-                      <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 3 }}>
-                        <span style={{ fontSize: 10, fontWeight: 800, background: '#fee2e2', color: '#991b1b', padding: '1px 7px', borderRadius: 4 }}>
-                          {ccp.categoryTag}
-                        </span>
-                        <span style={{ fontSize: 10.5, fontWeight: 700, background: '#f0f9ff', color: '#0369a1', border: '1px solid #bae6fd', padding: '1px 7px', borderRadius: 4 }}>
-                          Target: {ccp.criticalLimit}
-                        </span>
-                        {executionMode === 'ai_assisted' && (
-                          <span style={{ fontSize: 10, fontWeight: 700, background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', padding: '1px 7px', borderRadius: 4 }}>
-                            🤖 {ccp.aiSensorSource}
-                          </span>
-                        )}
-                      </div>
-                      <h3 style={{ fontSize: 15.5, fontWeight: 800, color: '#0f172a', margin: '2px 0 3px' }}>
-                        {ccp.shortTitle}
-                      </h3>
-                      <p className="muted" style={{ fontSize: 12.5, margin: 0 }}>
-                        {checkObj.title}
-                        {s?.value && (
-                          <> · <strong style={{ color: '#0f172a' }}>{s.value}</strong></>
-                        )}
-                      </p>
-                    </div>
-                    <div className="daily-status" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      {!s ? (
-                        <span className="pill neutral" style={{ fontSize: 10.5 }}>RECORD CCP</span>
-                      ) : isPending ? (
-                        <span className="pill attention" style={{ fontSize: 10.5 }}>PENDING MANAGER REVIEW</span>
-                      ) : isApproved ? (
-                        <span className="pill good" style={{ fontSize: 10.5 }}>APPROVED</span>
-                      ) : (
-                        <span className="pill danger" style={{ fontSize: 10.5 }}>ALERT</span>
-                      )}
-                      <ChevronRight size={18} style={{ color: '#94a3b8' }} />
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* TIER 2: CONSOLIDATED GENERAL HYGIENE SWEEP */}
-            <div className="card" style={{
-              padding: '20px 22px',
-              borderRadius: 16,
-              background: '#f0fdf4',
-              border: '1.5px solid #86efac'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14 }}>
-                <div style={{ flex: 1, minWidth: 260 }}>
-                  <span style={{ fontSize: 10.5, fontWeight: 800, background: '#059669', color: '#ffffff', padding: '2px 8px', borderRadius: 999 }}>
-                    TIER 2 · CONSOLIDATED GENERAL HYGIENE SWEEP ({GENERAL_HYGIENE_SWEEP_CODES.length} GENERAL CONTROLS)
-                  </span>
-                  <h3 style={{ fontSize: 17, fontWeight: 800, color: '#064e3b', margin: '6px 0 4px' }}>
-                    General Kitchen Cleanliness, Staff Grooming &amp; Facility Upkeep
-                  </h3>
-                  <p style={{ fontSize: 13, color: '#166534', margin: '0 0 10px', lineHeight: 1.5 }}>
-                    Consolidates general hygiene checks (clean counters/floors, free-flowing drains, closed fly-screens, handwashing &amp; stocked soap/towels, clean uniforms/hairnets, off-floor storage, produce washing, color-coded cutting boards, utensil/slicer sanitization, covered pedal dustbins, and conditional station upkeep).
-                  </p>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#047857' }}>
-                    Status: {GENERAL_HYGIENE_SWEEP_CODES.filter(code => Boolean(saved[code])).length} / {GENERAL_HYGIENE_SWEEP_CODES.length} General Hygiene items recorded
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
-                  <button
-                    type="button"
-                    onClick={submitConsolidatedGeneralHygieneSweep}
-                    className="btn primary"
-                    style={{ fontSize: 13, padding: '10px 18px', fontWeight: 800 }}
-                  >
-                    ✓ Mark General Hygiene Sweep Satisfactory (5/5)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setHygieneSweepExpanded(prev => !prev)}
-                    className="btn secondary"
-                    style={{ fontSize: 12, padding: '6px 14px', background: '#ffffff' }}
-                  >
-                    {hygieneSweepExpanded ? 'Hide Individual Hygiene Items' : `Inspect / Flag Individual Hygiene Items (${GENERAL_HYGIENE_SWEEP_CODES.length})`}
-                  </button>
-                </div>
-              </div>
-
-              {hygieneSweepExpanded && (
-                <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid #bbf7d0', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {FOODSAFE28.filter(x => GENERAL_HYGIENE_SWEEP_CODES.includes(x.code)).map(x => {
-                    const s = saved[x.code];
-                    return (
-                      <button
-                        key={x.code}
-                        type="button"
-                        onClick={() => openCheck(x)}
-                        className="card interactive"
-                        style={{
-                          padding: '10px 14px',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          textAlign: 'left',
-                          background: '#ffffff',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: 10
-                        }}
-                      >
-                        <div>
-                          <strong style={{ fontSize: 13.5, color: '#0f172a' }}>#{x.id} · {x.title}</strong>
-                          <span className="muted" style={{ display: 'block', fontSize: 11.5 }}>{x.category} · {x.shiftTitle}</span>
-                        </div>
-                        <span className={`pill ${s ? 'good' : 'neutral'}`} style={{ fontSize: 10.5 }}>
-                          {s ? s.value.slice(0, 18) : 'OPEN ITEM'}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <span className="pill good" style={{ fontSize: 11.5 }}>
+              {CRITICAL_CCP_CODES.filter(code => Boolean(saved[code])).length} / {CRITICAL_CCP_CODES.length} Critical Checks Recorded
+            </span>
           </div>
-        )}
 
-        {/* Time-Phased Operational Shift Tabs (White background, green active tabs, black fonts) */}
-        <div className="shift-tabs-bar" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, marginBottom: 16 }}>
-          {[
-            { id: 'opening', icon: '🌅', label: 'Opening Shift', time: '2–3m', count: 7 },
-            { id: 'active', icon: '🍳', label: 'Active Service', time: '2–3m', count: 6 },
-            { id: 'closing', icon: '🌙', label: 'Closing Shift', time: '2–3m', count: 8 },
-            { id: 'specialized', icon: '🏢', label: 'Specialized Stations', time: '1–2m', count: 6 },
-            { id: 'monthly_audit', icon: '📋', label: "Manager's Audit", time: '5m', count: 2 },
-            { id: 'all', icon: '📑', label: 'All 29 Checks', time: '', count: 29 },
-          ].map(s => {
-            const isActive = selectedShift === s.id;
-            const shiftItems = s.id === 'all' ? FOODSAFE28 : FOODSAFE28.filter(x => x.shift === s.id);
-            const completedCount = shiftItems.filter(x => Boolean(saved[x.code])).length;
-            return (
-              <button
-                key={s.id}
-                type="button"
-                className={`shift-tab-btn ${isActive ? 'active' : ''}`}
-                onClick={() => {
-                  setSelectedShift(s.id as any);
-                  const url = new URL(window.location.href);
-                  url.searchParams.set('shift', s.id);
-                  history.replaceState(null, '', url.toString());
-                }}
-              >
-                <span>{s.icon}</span>
-                <span>{s.label}</span>
-                {s.time && (
-                  <span style={{
-                    fontSize: 10.5,
-                    padding: '1px 6px',
-                    borderRadius: 6,
-                    background: isActive ? 'rgba(255,255,255,0.25)' : '#e0f2fe',
-                    color: isActive ? '#ffffff' : '#0369a1',
-                    fontWeight: 700
-                  }}>
-                    {s.time}
-                  </span>
-                )}
-                <span className="tab-badge">
-                  {completedCount}/{shiftItems.length}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Current Operational Shift Header Banner */}
-        {selectedShift !== 'all' && SHIFT_DEFINITIONS[selectedShift] && (
-          <div style={{
-            background: '#ffffff',
-            border: '1.5px solid #a7f3d0',
-            borderRadius: 14,
-            padding: '14px 18px',
-            marginBottom: 16,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 14,
-            boxShadow: '0 2px 8px rgba(5, 150, 105, 0.06)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{
-                width: 44,
-                height: 44,
-                borderRadius: 12,
-                background: '#ecfdf5',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 22,
-                flexShrink: 0
-              }}>
-                {SHIFT_DEFINITIONS[selectedShift].icon}
-              </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  <h3 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: '#0f172a' }}>
-                    {SHIFT_DEFINITIONS[selectedShift].name} — {SHIFT_DEFINITIONS[selectedShift].subtitle}
-                  </h3>
-                  <span style={{
-                    fontSize: 11,
-                    background: '#059669',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    padding: '2px 8px',
-                    borderRadius: 9999
-                  }}>
-                    ⏱️ {SHIFT_DEFINITIONS[selectedShift].duration}
-                  </span>
-                  <span style={{
-                    fontSize: 11,
-                    background: '#f1f5f9',
-                    color: '#475569',
-                    fontWeight: 600,
-                    padding: '2px 8px',
-                    borderRadius: 9999
-                  }}>
-                    🕒 {SHIFT_DEFINITIONS[selectedShift].timing}
-                  </span>
-                </div>
-                <p style={{ margin: '3px 0 0', fontSize: 13, color: '#475569' }}>
-                  {SHIFT_DEFINITIONS[selectedShift].description}
-                </p>
-              </div>
-            </div>
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <div style={{
-                fontSize: 18,
-                fontWeight: 800,
-                color: shiftChecks.filter(x => Boolean(saved[x.code])).length === shiftChecks.length ? '#059669' : '#0f172a'
-              }}>
-                {shiftChecks.filter(x => Boolean(saved[x.code])).length} / {shiftChecks.length}
-              </div>
-              <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>
-                {shiftChecks.filter(x => Boolean(saved[x.code])).length === shiftChecks.length ? '✓ Completed' : 'In Progress'}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Specialized Stations Sub-Filter Tabs (visible when specialized shift is selected) */}
-        {selectedShift === 'specialized' && (
-          <div style={{
-            display: 'flex',
-            gap: 8,
-            marginBottom: 16,
-            overflowX: 'auto',
-            paddingBottom: 4
-          }}>
-            {[
-              { id: 'all', label: 'All Stations (6)', count: 6 },
-              { id: 'bar_brewery', label: '🍻 Bar / Draught Beer (2)', count: 2 },
-              { id: 'cloud_kitchen', label: '🛵 Cloud Kitchen Dispatch (2)', count: 2 },
-              { id: 'catering', label: '🍱 Catering & Outdoor Events (2)', count: 2 },
-            ].map(f => (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setSelectedFormat(f.id as any)}
-                style={{
-                  border: selectedFormat === f.id ? '2px solid #059669' : '1.5px solid #e2e8f0',
-                  background: selectedFormat === f.id ? '#059669' : '#ffffff',
-                  color: selectedFormat === f.id ? '#ffffff' : '#0f172a',
-                  fontWeight: selectedFormat === f.id ? 700 : 600,
-                  fontSize: 12.5,
-                  borderRadius: 20,
-                  padding: '6px 14px',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                <span>{f.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div className="checklist-library" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {filteredChecks.map(x => {
-            const s = saved[x.code];
-            const isApproved = s?.reviewStatus === 'approved';
-            const isAlert = s?.reviewStatus === 'alerted';
-            const isPending = s?.reviewStatus === 'pending_manager';
-            const itemTr = getCheckText(x.code);
-            const itemTitle = itemTr?.title || x.title;
-            return (
-              <button
-                key={x.id}
-                className="card daily-check-row interactive"
-                onClick={() => openCheck(x)}
-                style={{
-                  border: isApproved
-                    ? '1.5px solid #a7f3d0'
-                    : isAlert
-                    ? '1.5px solid #fecaca'
-                    : isPending
-                    ? (s?.status === 'na' ? '1.5px solid #cbd5e1' : '1.5px solid #fde68a')
-                    : '1px solid #e2e8f0',
-                  background: isApproved ? '#fbfdfc' : isAlert ? '#fffafa' : s?.status === 'na' ? '#f8fafc' : '#ffffff',
-                  boxShadow: 'var(--shadow-sm)'
-                }}
-              >
-                <div
-                  className="library-number"
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+            {CRITICAL_CCP_ITEMS.map(ccp => {
+              const checkObj = FOODSAFE28.find(x => x.code === ccp.code);
+              if (!checkObj) return null;
+              const s = saved[ccp.code];
+              const isApproved = s?.reviewStatus === 'approved';
+              const isAlert = s?.reviewStatus === 'alerted';
+              const isPending = s?.reviewStatus === 'pending_manager';
+              const isGeneralSweep = ccp.code === 'FS28-01';
+              return (
+                <button
+                  key={ccp.code}
+                  type="button"
+                  className="card daily-check-row interactive"
+                  onClick={() => openCheck(checkObj)}
                   style={{
-                    background: isApproved ? '#ecfdf5' : isAlert ? '#fef2f2' : s?.status === 'na' ? '#f1f5f9' : '#f1f5f9',
-                    color: isApproved ? '#059669' : isAlert ? '#dc2626' : s?.status === 'na' ? '#64748b' : '#334155',
-                    borderColor: isApproved ? '#a7f3d0' : isAlert ? '#fecaca' : s?.status === 'na' ? '#cbd5e1' : '#e2e8f0'
+                    border: isApproved
+                      ? '1.5px solid #a7f3d0'
+                      : isAlert
+                      ? '1.5px solid #fecaca'
+                      : isPending
+                      ? '1.5px solid #fde68a'
+                      : isGeneralSweep
+                      ? '1.5px solid #86efac'
+                      : '1.5px solid #cbd5e1',
+                    background: isApproved
+                      ? '#fbfdfc'
+                      : isAlert
+                      ? '#fffafa'
+                      : isGeneralSweep
+                      ? '#f0fdf4'
+                      : '#ffffff',
+                    boxShadow: 'var(--shadow-sm)',
+                    textAlign: 'left'
                   }}
                 >
-                  {x.id}
-                </div>
-                <div className="daily-check-main">
-                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 2 }}>
-                    <span className="eyebrow" style={{ margin: 0, fontSize: 10.5 }}>{x.category}</span>
-                    {x.severity && (
-                      <span style={{
-                        fontSize: 9.5,
-                        background: x.severity === 'Critical' ? '#fef2f2' : x.severity === 'Major' ? '#fffbeb' : '#f0fdf4',
-                        color: x.severity === 'Critical' ? '#dc2626' : x.severity === 'Major' ? '#b45309' : '#16a34a',
-                        border: `1px solid ${x.severity === 'Critical' ? '#fecaca' : x.severity === 'Major' ? '#fde68a' : '#bbf7d0'}`,
-                        padding: '1px 6px',
-                        borderRadius: 4,
-                        fontWeight: 700
-                      }}>
-                        [{x.severity}]
-                      </span>
-                    )}
-                    {x.complianceRequirement === 'desirable' && (
-                      <span style={{ fontSize: 9.5, background: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe', padding: '1px 6px', borderRadius: 4, fontWeight: 700 }}>
-                        DESIRABLE (OPTIONAL)
-                      </span>
-                    )}
-                    {x.outletType === 'bar_brewery' && (
-                      <span style={{ fontSize: 10, background: '#fef3c7', color: '#92400e', padding: '1px 7px', borderRadius: 6, fontWeight: 700 }}>
-                        🍻 BAR / BREWERY
-                      </span>
-                    )}
-                    {x.outletType === 'cloud_kitchen' && (
-                      <span style={{ fontSize: 10, background: '#ede9fe', color: '#5b21b6', padding: '1px 7px', borderRadius: 6, fontWeight: 700 }}>
-                        🛵 CLOUD KITCHEN
-                      </span>
-                    )}
-                    {x.outletType === 'catering' && (
-                      <span style={{ fontSize: 10, background: '#e0f2fe', color: '#0369a1', padding: '1px 7px', borderRadius: 6, fontWeight: 700 }}>
-                        🍱 CATERING &amp; EVENTS
-                      </span>
-                    )}
-                    {x.timeEstimate && (
-                      <span style={{ fontSize: 9.5, background: '#f8fafc', color: '#334155', border: '1px solid #e2e8f0', padding: '1px 6px', borderRadius: 4, fontWeight: 700 }}>
-                        ⏱️ {x.timeEstimate}
-                      </span>
-                    )}
+                  <div
+                    className="library-number"
+                    style={{
+                      background: isGeneralSweep ? '#dcfce7' : '#fef2f2',
+                      color: isGeneralSweep ? '#047857' : '#dc2626',
+                      borderColor: isGeneralSweep ? '#86efac' : '#fecaca',
+                      fontWeight: 900
+                    }}
+                  >
+                    #{ccp.ccpNumber}
                   </div>
-                  <h3 style={{ fontSize: 15.5, fontWeight: 800, color: 'var(--text, #0f172a)', margin: '2px 0 4px' }}>{itemTitle}</h3>
-                  {lang !== 'en' && itemTitle !== x.title && (
-                    <p style={{ fontSize: 12, color: 'var(--muted, #64748b)', margin: '0 0 4px', fontStyle: 'italic' }}>
-                      {x.title}
+                  <div className="daily-check-main">
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 3 }}>
+                      <span style={{
+                        fontSize: 10,
+                        fontWeight: 800,
+                        background: isGeneralSweep ? '#d1fae5' : '#fee2e2',
+                        color: isGeneralSweep ? '#065f46' : '#991b1b',
+                        padding: '1px 7px',
+                        borderRadius: 4
+                      }}>
+                        {ccp.categoryTag}
+                      </span>
+                      <span style={{ fontSize: 10.5, fontWeight: 700, background: '#f0f9ff', color: '#0369a1', border: '1px solid #bae6fd', padding: '1px 7px', borderRadius: 4 }}>
+                        Target: {ccp.criticalLimit}
+                      </span>
+                      {executionMode === 'ai_assisted' && (
+                        <span style={{ fontSize: 10, fontWeight: 700, background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0', padding: '1px 7px', borderRadius: 4 }}>
+                          🤖 {ccp.aiSensorSource}
+                        </span>
+                      )}
+                    </div>
+                    <h3 style={{ fontSize: 15.5, fontWeight: 800, color: '#0f172a', margin: '2px 0 3px' }}>
+                      {ccp.shortTitle}
+                    </h3>
+                    <p className="muted" style={{ fontSize: 12.5, margin: 0 }}>
+                      {checkObj.title}
+                      {s?.value && (
+                        <> · <strong style={{ color: '#0f172a' }}>{s.value}</strong></>
+                      )}
                     </p>
-                  )}
-                  <p className="muted" style={{ fontSize: 12.5, margin: 0 }}>
-                    Daily · {x.input === 'temperature' ? (lang === 'hi' ? 'तापमान माप' : lang === 'mr' ? 'तापमान मोजमाप' : 'Temperature measurement') : (lang === 'hi' ? '1–5 गुणात्मक रेटिंग' : lang === 'mr' ? '१–५ गुणात्मक रेटिंग' : '1–5 Qualitative Rating')}
-                    {s?.value && <> · <strong style={{ color: '#0f172a' }}>{s.value}</strong></>}
-                  </p>
-                </div>
-                <div className="daily-status" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  {!s ? (
-                    <span className="pill neutral" style={{ fontSize: 10.5 }}>TO DO</span>
-                  ) : isPending ? (
-                    <span className={`pill ${s.status === 'na' ? 'neutral' : 'attention'}`} style={{ fontSize: 10.5 }}>
-                      {s.status === 'na' ? 'N/A · PENDING' : 'PENDING REVIEW'}
-                    </span>
-                  ) : isApproved ? (
-                    <span className="pill good" style={{ fontSize: 10.5 }}>
-                      {s.status === 'na' ? 'N/A · APPROVED' : 'APPROVED'}
-                    </span>
-                  ) : (
-                    <span className="pill danger" style={{ fontSize: 10.5 }}>ALERT CONFIRMED</span>
-                  )}
-                  <ChevronRight size={18} style={{ color: '#94a3b8' }} />
-                </div>
-              </button>
-            );
-          })}
+                  </div>
+                  <div className="daily-status" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    {!s ? (
+                      <span className="pill neutral" style={{ fontSize: 10.5 }}>RECORD CHECK</span>
+                    ) : isPending ? (
+                      <span className="pill attention" style={{ fontSize: 10.5 }}>PENDING MANAGER REVIEW</span>
+                    ) : isApproved ? (
+                      <span className="pill good" style={{ fontSize: 10.5 }}>APPROVED</span>
+                    ) : (
+                      <span className="pill danger" style={{ fontSize: 10.5 }}>ALERT</span>
+                    )}
+                    <ChevronRight size={18} style={{ color: '#94a3b8' }} />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <section className="section-block">
@@ -2348,7 +1977,7 @@ export default function Checks() {
 
         <div style={{ display: 'flex', gap: 12, marginTop: 24, flexWrap: 'wrap' }}>
           <Link href="/checklist" className="btn secondary">
-            View all {FOODSAFE28.length} controls <ArrowRight size={17} />
+            View all {CRITICAL_CCP_ITEMS.length} critical controls <ArrowRight size={17} />
           </Link>
           <Link href="/records" className="btn secondary">
             View check records & history <ArrowRight size={17} />

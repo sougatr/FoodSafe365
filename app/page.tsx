@@ -125,8 +125,19 @@ export default function Landing() {
   // Passport / Kitchen Record Quick-Peek Modal State
   const [passportModalRestaurant, setPassportModalRestaurant] = useState<RestaurantItem | null>(null);
 
+  // 5-Slide Welcome / Intro Walkthrough State (shown on first visit / app launch, with Skip option)
+  const [showIntroSlides, setShowIntroSlides] = useState(false);
+  const [introSlideIndex, setIntroSlideIndex] = useState(0);
+
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  function dismissIntroSlides() {
+    setShowIntroSlides(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('foodsafe365_intro_slides_seen_v1', 'true');
+    }
+  }
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -146,6 +157,11 @@ export default function Landing() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const seenSlides = localStorage.getItem('foodsafe365_intro_slides_seen_v1');
+      if (!seenSlides) {
+        setShowIntroSlides(true);
+      }
+
       const p = localStorage.getItem('foodsafe365_customer_phone');
       if (p) setCustomerPhone(p);
 
@@ -664,7 +680,7 @@ export default function Landing() {
 
     // FoodSafe365 Operational Status count:
     // "Operational Status - Nil for all"
-    // Operational Status verification is displayed ONLY when all 29 digital kitchen parameters
+    // Operational Status verification is displayed ONLY when all 12 critical daily kitchen checks
     // and daily verification logs are maintained. None of the outlets have earned it yet.
     const goldenBadgeCount = 0;
 
@@ -797,10 +813,397 @@ export default function Landing() {
     ? t('landing.heroDiner.subline')
     : t('landing.heroBiz.subline');
 
+  const INTRO_SLIDES = [
+    {
+      step: 1,
+      badge: 'WELCOME TO FOODSAFE365',
+      icon: '🛡️',
+      accent: '#059669',
+      title: 'How Do You Know a Kitchen Is Safe Without Going Inside?',
+      subtitle: 'Bridging Diners, Commercial Kitchens & Verified Service Partners',
+      points: [
+        'A customer sitting at a table cannot see inside a closed restaurant kitchen — so customers never guess internal kitchen hygiene.',
+        'Instead, Customers rate what they directly experience at the table and how their stomach feels the same day or the next day.',
+        'Inside the kitchen, Restaurants & Clubs log 12 Critical Daily Checks (cold storage, cooking temp, oil TPC, FIFO & pest control) — and any customer illness report automatically flags those internal checks!'
+      ]
+    },
+    {
+      step: 2,
+      badge: 'FOR CUSTOMERS & DINERS',
+      icon: '🍽️',
+      accent: '#0284c7',
+      title: 'Rate a Restaurant or Club — Same Day or the Next Day',
+      subtitle: 'Your real dining & post-meal digestive feedback goes straight to the restaurant',
+      points: [
+        'Rate at the Table: Clean cutlery/plates, server hygiene, whether hot food arrived piping hot & fresh without reused-oil smell, and safe drinking water.',
+        'Rate the Next Day (with Date of Visit): Often stomach upset, loose motion, or vomiting happens the next day due to poor storage or temperature abuse. Select your Date of Visit and log it anytime.',
+        'Direct Dispatch: Your rating is immediately emailed & SMSed to the restaurant/club management to trigger corrective action.'
+      ]
+    },
+    {
+      step: 3,
+      badge: 'FOR RESTAURANTS, CLUBS & GROCERY STORES',
+      icon: '🌡️',
+      accent: '#047857',
+      title: '12 Critical Daily Checks for FSSAI Schedule 4 Readiness',
+      subtitle: 'Built for busy kitchens — only the 12 critical checks, zero 29-check bloat',
+      points: [
+        '12 Critical Daily Checks: Receiving fresh ration temp, Cold storage (<5°C), Deep freezer (<−18°C) & Thawing, Cooking core temp (≥75°C), Hot holding (≥65°C) & Blast chilling, FIFO & Expired rations, Cooking oil TPC meter (≤25%), Raw/Cooked segregation, Potable water/ice, Pest control, Medical fitness (Form 1A), and General Hygiene.',
+        'AI Agent + Manual Flexibility: Record checks manually or auto-draft via BLE probes, oil TPC meters & OCR — always with human manager sign-off.',
+        'Public Operational Status: Showcase completed checks, manager reviews, and resolved actions transparently.'
+      ]
+    },
+    {
+      step: 4,
+      badge: 'FOR SERVICE PROVIDERS',
+      icon: '🛠️',
+      accent: '#7c3aed',
+      title: 'Help Restaurants & Stores Resolve Food-Safety Gaps',
+      subtitle: 'Connect directly with kitchens when maintenance or compliance needs arise',
+      points: [
+        'Direct Kitchen Demand: When a kitchen check flags a warm chiller, pest sighting, water filter issue, or deep-cleaning need, managers can request a verified partner in 1 click.',
+        '8 Specialized Categories: Commercial refrigeration repair, pest control, NABL water & food testing labs, RUCO used cooking oil collection, deep cleaning, equipment calibration, medical camps (Form 1A), and FoSTaC training.',
+        'Zero Middlemen: Receive direct service inquiries from restaurants, clubs, and grocery stores in your city.'
+      ]
+    },
+    {
+      step: 5,
+      badge: 'GET STARTED IN 30 SECONDS',
+      icon: '🚀',
+      accent: '#059669',
+      title: 'Choose How You Want to Use FoodSafe365 Today',
+      subtitle: 'One independent platform for Diners, Food Businesses & Service Partners',
+      points: [
+        '🍽️ Customers: Search any restaurant or club in Mumbai & across India to rate today’s meal or a previous visit.',
+        '🏪 Restaurants, Clubs & Grocery Stores: Onboard in 60 seconds and start your 12 Critical Daily Checks.',
+        '🛠️ Service Providers: Register your company to support restaurants with refrigeration, pest control, testing & audits.'
+      ]
+    }
+  ];
+
   return (
     <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#F8FAF6', width: '100%', maxWidth: '100vw', overflowX: 'clip' }}>
       {/* Clean Global Header */}
       <GlobalHeader />
+
+      {/* ========================================================================= */}
+      {/* 5-SLIDE WELCOME / INTRO CAROUSEL MODAL (App & Web Launch + Skip Button)   */}
+      {/* ========================================================================= */}
+      {showIntroSlides && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.78)',
+            backdropFilter: 'blur(6px)',
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 16
+          }}
+        >
+          <div
+            style={{
+              background: '#ffffff',
+              borderRadius: 24,
+              maxWidth: 580,
+              width: '100%',
+              overflow: 'hidden',
+              boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.55)',
+              border: '1.5px solid #cbd5e1',
+              display: 'flex',
+              flexDirection: 'column',
+              maxHeight: '92vh'
+            }}
+          >
+            {/* Top Bar with Slide Count & Prominent SKIP Button */}
+            <div
+              style={{
+                background: 'linear-gradient(135deg, #0F2922 0%, #064E3B 100%)',
+                padding: '16px 22px',
+                color: '#ffffff',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span
+                  style={{
+                    background: 'rgba(16, 185, 129, 0.25)',
+                    color: '#6ee7b7',
+                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    padding: '3px 10px',
+                    borderRadius: 999,
+                    fontSize: 11,
+                    fontWeight: 800,
+                    letterSpacing: '0.05em'
+                  }}
+                >
+                  SLIDE {introSlideIndex + 1} OF {INTRO_SLIDES.length}
+                </span>
+                <span style={{ fontSize: 12, color: '#cbd5e1', fontWeight: 600 }}>
+                  {INTRO_SLIDES[introSlideIndex].badge}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={dismissIntroSlides}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.16)',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  borderRadius: 999,
+                  padding: '5px 14px',
+                  fontSize: 12.5,
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4
+                }}
+              >
+                <span>Skip</span>
+                <ArrowRight size={13} />
+              </button>
+            </div>
+
+            {/* Slide Body */}
+            <div style={{ padding: '26px 26px 20px', overflowY: 'auto', flex: 1 }}>
+              <div
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 16,
+                  background: '#ecfdf5',
+                  border: '1.5px solid #a7f3d0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 28,
+                  marginBottom: 14
+                }}
+              >
+                {INTRO_SLIDES[introSlideIndex].icon}
+              </div>
+
+              <h2
+                style={{
+                  fontSize: 'clamp(20px, 3.5vw, 24px)',
+                  fontWeight: 900,
+                  color: '#0F2922',
+                  margin: '0 0 6px',
+                  lineHeight: 1.25
+                }}
+              >
+                {INTRO_SLIDES[introSlideIndex].title}
+              </h2>
+              <p
+                style={{
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: INTRO_SLIDES[introSlideIndex].accent,
+                  margin: '0 0 18px',
+                  lineHeight: 1.4
+                }}
+              >
+                {INTRO_SLIDES[introSlideIndex].subtitle}
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {INTRO_SLIDES[introSlideIndex].points.map((pt, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      background: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: 12,
+                      padding: '12px 14px',
+                      fontSize: 13.5,
+                      color: '#1e293b',
+                      lineHeight: 1.5
+                    }}
+                  >
+                    <CheckCircle2
+                      size={18}
+                      style={{ color: INTRO_SLIDES[introSlideIndex].accent, flexShrink: 0, marginTop: 2 }}
+                    />
+                    <span>{pt}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Quick Role Buttons on Final Slide (Slide 5) */}
+              {introSlideIndex === INTRO_SLIDES.length - 1 && (
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                    gap: 10,
+                    marginTop: 18
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveMode('eating_out');
+                      dismissIntroSlides();
+                    }}
+                    style={{
+                      padding: '11px 12px',
+                      borderRadius: 10,
+                      border: '1.5px solid #059669',
+                      background: '#ecfdf5',
+                      color: '#065f46',
+                      fontWeight: 800,
+                      fontSize: 12.5,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    🍽️ Rate a Restaurant / Club
+                  </button>
+                  <Link
+                    href="/onboarding"
+                    onClick={dismissIntroSlides}
+                    style={{
+                      padding: '11px 12px',
+                      borderRadius: 10,
+                      border: '1.5px solid #0284c7',
+                      background: '#f0f9ff',
+                      color: '#0369a1',
+                      fontWeight: 800,
+                      fontSize: 12.5,
+                      textDecoration: 'none',
+                      textAlign: 'center'
+                    }}
+                  >
+                    🏪 Onboard Restaurant / Club
+                  </Link>
+                  <Link
+                    href="/providers"
+                    onClick={dismissIntroSlides}
+                    style={{
+                      padding: '11px 12px',
+                      borderRadius: 10,
+                      border: '1.5px solid #7c3aed',
+                      background: '#f5f3ff',
+                      color: '#5b21b6',
+                      fontWeight: 800,
+                      fontSize: 12.5,
+                      textDecoration: 'none',
+                      textAlign: 'center'
+                    }}
+                  >
+                    🛠️ Service Providers
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Navigation Bar: Dots + Back / Next / Start */}
+            <div
+              style={{
+                padding: '14px 24px',
+                background: '#f8fafc',
+                borderTop: '1px solid #e2e8f0',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 12
+              }}
+            >
+              {/* Slide Dots */}
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                {INTRO_SLIDES.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    aria-label={`Go to slide ${idx + 1}`}
+                    onClick={() => setIntroSlideIndex(idx)}
+                    style={{
+                      width: introSlideIndex === idx ? 24 : 8,
+                      height: 8,
+                      borderRadius: 999,
+                      border: 'none',
+                      background: introSlideIndex === idx ? '#059669' : '#cbd5e1',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      padding: 0
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Back & Next / Get Started Buttons */}
+              <div style={{ display: 'flex', gap: 8 }}>
+                {introSlideIndex > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setIntroSlideIndex(prev => prev - 1)}
+                    style={{
+                      padding: '9px 16px',
+                      borderRadius: 10,
+                      border: '1px solid #cbd5e1',
+                      background: '#ffffff',
+                      color: '#334155',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ← Back
+                  </button>
+                )}
+
+                {introSlideIndex < INTRO_SLIDES.length - 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => setIntroSlideIndex(prev => prev + 1)}
+                    style={{
+                      padding: '9px 20px',
+                      borderRadius: 10,
+                      border: 'none',
+                      background: '#059669',
+                      color: '#ffffff',
+                      fontSize: 13.5,
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6
+                    }}
+                  >
+                    <span>Next</span>
+                    <ArrowRight size={15} />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={dismissIntroSlides}
+                    style={{
+                      padding: '9px 22px',
+                      borderRadius: 10,
+                      border: 'none',
+                      background: '#059669',
+                      color: '#ffffff',
+                      fontSize: 13.5,
+                      fontWeight: 800,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Enter FoodSafe365 →
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* HERO SECTION: Understandable in 5 seconds */}
       <section style={{
@@ -812,6 +1215,31 @@ export default function Landing() {
         paddingRight: 16
       }}>
         <div style={{ maxWidth: 780, margin: '0 auto', textAlign: 'center' }}>
+          {/* Quick Re-open Pill for the 5-Slide Product Tour */}
+          <div style={{ marginBottom: 12 }}>
+            <button
+              type="button"
+              onClick={() => {
+                setIntroSlideIndex(0);
+                setShowIntroSlides(true);
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                background: '#ecfdf5',
+                color: '#047857',
+                border: '1px solid #a7f3d0',
+                borderRadius: 999,
+                padding: '5px 14px',
+                fontSize: 12,
+                fontWeight: 800,
+                cursor: 'pointer'
+              }}
+            >
+              <span>▶ How FoodSafe365 Works for Customers, Restaurants &amp; Service Providers (5 Slides)</span>
+            </button>
+          </div>
           {/* Dynamic Main Headline */}
           <h1 style={{
             fontSize: 'clamp(26px, 5.2vw, 40px)',
@@ -2449,7 +2877,7 @@ export default function Landing() {
                 display: 'inline-block',
                 marginBottom: 4
               }}>
-                FOOD-SAFETY RATING
+                DINER EXPERIENCE &amp; POST-MEAL COMFORT RATING
               </span>
               <h3 style={{ margin: 0, fontSize: 19, fontWeight: 900 }}>
                 {ratingModalRestaurant.name}
@@ -2582,7 +3010,7 @@ export default function Landing() {
                   </div>
                 </div>
 
-                {/* Next-Day / Past Visit Notice + Date of Visit & Table Attribution */}
+                {/* Next-Day / Past Visit Notice + How Diner Rating Works Without Seeing the Kitchen */}
                 <div style={{
                   background: 'rgba(16, 185, 129, 0.1)',
                   border: '1px solid rgba(16, 185, 129, 0.28)',
@@ -2593,7 +3021,7 @@ export default function Landing() {
                   marginBottom: 10,
                   lineHeight: 1.4
                 }}>
-                  🕒 <strong>Rate Today, the Next Day, or for Previously Eaten Food:</strong> You can rate right at the table, <strong>the next day</strong>, or regarding a <strong>previous visit to this restaurant or club</strong> (especially if you experienced stomach upset, loose motion, or vomiting hours later).
+                  💡 <strong>No Kitchen Access Needed — Rate Today or the Next Day:</strong> Since diners cannot see inside a closed kitchen, you only rate <strong>what you experience at your table</strong> (served food temp, oil freshness, table &amp; server hygiene) and <strong>how your stomach felt afterwards (same day or next day loose motion/vomiting)</strong>. Inside-the-kitchen controls (12 Critical Daily Checks) are logged separately by the restaurant &amp; flagged automatically if you report an issue.
                 </div>
 
                 <div style={{

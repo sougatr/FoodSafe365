@@ -987,7 +987,7 @@ Management Contact:
   ${cleanEmail ? `  - Email: ${cleanEmail}` : ''}
 
 Operational Safeguards Enabled:
-  ✓ 29 Statutory Food-Safety Checklist Tasks
+  ✓ 12 Critical Daily Kitchen Checks (Cold Storage, Cooking Core Temp, Hot Holding, Oil TPC, FIFO & Pest Control)
   ✓ Cold Storage & Refrigeration Monitoring (< 5°C, < -18°C)
   ✓ Tabletop Diner QR Code Audits & Public Safety Verification
 
@@ -1017,7 +1017,7 @@ https://foodsafe365.in/qr/${encodeURIComponent(payload.outletId)}
       </table>
 
       <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 14px; margin-bottom: 20px; font-size: 13.5px; color: #065f46;">
-        <strong>Active Food-Safety Protocols:</strong> Includes immediate access to all 29 Operational Safeguards, digital temperature logs (&lt; 5°C), tabletop Diner QR audits, and accredited on-demand service partners.
+        <strong>Active Food-Safety Protocols:</strong> Includes immediate access to all 12 Critical Daily Kitchen Checks, digital temperature logs (&lt; 5°C), tabletop Diner QR feedback, and accredited on-demand service partners.
       </div>
 
       <div style="text-align: center; margin-top: 24px;">

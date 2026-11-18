@@ -165,7 +165,7 @@ export default function Onboarding() {
             `Mobile: ${finalMobile}\n` +
             `Admin Login Email: ${email.trim() || 'Not specified'}\n` +
             `FSSAI License: ${fssaiLicense.trim() || 'Pending verification'}\n\n` +
-            `Operational Safeguards active: 29 Daily Checklist Controls, Cold-Chain monitoring (< 5°C), Tabletop Diner QR audits.`
+            `Operational Safeguards active: 12 Critical Daily Kitchen Checks, Cold-Chain monitoring (< 5°C), Tabletop Diner QR audits.`
         })
       }).catch(err => console.warn('[Onboarding dual-dispatch warning]:', err));
 
@@ -196,7 +196,7 @@ export default function Onboarding() {
               Make your restaurant food-safety ready
             </h1>
             <p className="lead muted" style={{ fontSize: 16, margin: 0 }}>
-              Configure your restaurant or club in under 60 seconds. Choose between our streamlined Critical Control Point (CCP) + General Hygiene workflow or full 29-point shift checks, with optional AI Agent check assistance and mandatory manager review.
+              Configure your restaurant or club in under 60 seconds with our streamlined 12 Critical Daily Kitchen Checks, optional AI Agent check assistance, and manager review.
             </p>
 
             {/* A. Four small feature illustrations: What the restaurant gets immediately */}
@@ -556,58 +556,14 @@ export default function Onboarding() {
             <div style={{ background: '#ffffff', border: '1.5px solid #cbd5e1', borderRadius: 14, padding: '20px 22px', marginBottom: 24 }}>
               <div style={{ marginBottom: 14 }}>
                 <span style={{ fontSize: 11, fontWeight: 800, color: '#047857', background: '#d1fae5', padding: '2px 8px', borderRadius: 999, textTransform: 'uppercase' }}>
-                  STEP 2 · CHECKLIST STRUCTURE &amp; AI AGENT AUTOMATION
+                  STEP 2 · 12 CRITICAL DAILY KITCHEN CHECKS &amp; AI AGENT PROVISION
                 </span>
                 <h3 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a', margin: '6px 0 4px' }}>
-                  How should your kitchen team execute daily checks?
+                  Streamlined 12 Critical Kitchen Controls (No 29-Check Bloat)
                 </h3>
                 <p className="muted" style={{ fontSize: 12.5, margin: 0 }}>
-                  You can switch between Critical CCP Focus and Full 29-Point View, or toggle AI Agent vs. Manual entry at any time on the Checks screen.
+                  Your kitchen team only logs the 12 critical checks that directly prevent foodborne illness: Receiving fresh ration temp, Cold storage (&lt;5°C), Deep freezer (&lt;−18°C) &amp; Thawing, Internal cooking (≥75°C), Hot holding (≥65°C) &amp; Blast chilling, FIFO &amp; Expired rations, Frying oil TPC meter (≤25%), Raw/Cooked segregation, Potable water/ice, Pest control, Staff medical fitness (Form 1A), and Consolidated General Hygiene.
                 </p>
-              </div>
-
-              <div className="grid grid2" style={{ gap: 12, marginBottom: 16 }}>
-                <button
-                  type="button"
-                  onClick={() => setChecklistTier('critical_consolidated')}
-                  style={{
-                    padding: '14px 16px',
-                    borderRadius: 12,
-                    border: checklistTier === 'critical_consolidated' ? '2px solid #059669' : '1px solid #cbd5e1',
-                    background: checklistTier === 'critical_consolidated' ? '#f0fdf4' : '#ffffff',
-                    textAlign: 'left',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <strong style={{ fontSize: 13.5, color: '#0f172a' }}>⚡ 10 Critical CCPs + General Hygiene Sweep</strong>
-                    <span style={{ fontSize: 10, fontWeight: 800, background: '#059669', color: '#fff', padding: '2px 6px', borderRadius: 4 }}>RECOMMENDED</span>
-                  </div>
-                  <p style={{ fontSize: 12, color: '#475569', margin: 0, lineHeight: 1.45 }}>
-                    Focuses daily effort on high-risk critical controls (Receiving ration temp, Cold storage &lt;5°C, Freezer/Thawing, Core Cooking ≥75°C, Hot holding ≥65°C &amp; Blast chilling, FIFO &amp; Expired rations, Oil TPC ≤25%, Pest control, Medical fitness Form 1A) while consolidating general premises cleanliness into a single rapid hygiene sweep.
-                  </p>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setChecklistTier('full_granular')}
-                  style={{
-                    padding: '14px 16px',
-                    borderRadius: 12,
-                    border: checklistTier === 'full_granular' ? '2px solid #059669' : '1px solid #cbd5e1',
-                    background: checklistTier === 'full_granular' ? '#f0fdf4' : '#ffffff',
-                    textAlign: 'left',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <strong style={{ fontSize: 13.5, color: '#0f172a' }}>📑 All 29 Granular Shift Safeguards</strong>
-                    <span style={{ fontSize: 10, fontWeight: 700, background: '#f1f5f9', color: '#475569', padding: '2px 6px', borderRadius: 4 }}>FULL AUDIT</span>
-                  </div>
-                  <p style={{ fontSize: 12, color: '#475569', margin: 0, lineHeight: 1.45 }}>
-                    Displays every individual FSSAI Schedule 4 item separately across Opening, Active Service, Closing, and Specialized shifts for comprehensive line-by-line inspection.
-                  </p>
-                </button>
               </div>
 
               <div className="grid grid2" style={{ gap: 12 }}>
@@ -682,7 +638,7 @@ export default function Onboarding() {
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                 <CheckCircle2 size={20} style={{ color: 'var(--green)', flexShrink: 0 }} />
                 <span style={{ fontSize: 13, color: '#166534', fontWeight: 600 }}>
-                  Includes immediate access to <strong>Critical Control Point (CCP) &amp; 29-Safeguard checklists</strong>, cold-chain logs (&lt; 5°C), tabletop Diner QR feedback, and verified service partners.
+                  Includes immediate access to <strong>12 Critical Daily Kitchen Checks</strong>, cold-chain logs (&lt; 5°C), tabletop Diner QR feedback, and verified service partners.
                 </span>
               </div>
             </div>

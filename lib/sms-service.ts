@@ -188,7 +188,7 @@ export async function sendRatingAlertSms(payload: RatingAlertSmsPayload): Promis
   if (payload.restaurantMobile) {
     const cleanRestMobile = sanitizeIndianMobile(payload.restaurantMobile);
     if (cleanRestMobile && cleanRestMobile.length === 10 && cleanRestMobile !== targetAdminMobile) {
-      const restMsg = `FoodSafe365: Your kitchen ${cleanRest} received a new hygiene rating: ${cleanScore}* from a diner. View feedback: foodsafe365.in/claim`;
+      const restMsg = `FoodSafe365: ${cleanRest} received a ${cleanScore}* Diner Experience & Post-Meal Comfort rating. View feedback & onboard: foodsafe365.in/claim`;
       try {
         const rRes = await fetch(FAST2SMS_ENDPOINT, {
           method: 'POST',

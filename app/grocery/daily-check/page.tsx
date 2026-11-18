@@ -42,74 +42,53 @@ export default function GroceryDailyCheckFrontlinePage() {
   const [expandedWhy, setExpandedWhy] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<any>(null);
-  const [groceryViewMode, setGroceryViewMode] = useState<'critical_consolidated' | 'full_22'>('critical_consolidated');
+  const [groceryViewMode, setGroceryViewMode] = useState<'critical_consolidated'>('critical_consolidated');
   const [aiDraftMode, setAiDraftMode] = useState(false);
 
-  // Group the 22 checks into simple frontline sections mapping exactly to the existing 22 checks
+  const CRITICAL_GROCERY_CODES = [
+    'GR22-09',
+    'GR22-10',
+    'GR22-20',
+    'GR22-11',
+    'GR22-12',
+    'GR22-14',
+    'GR22-17',
+    'GR22-02'
+  ];
+
+  // Streamlined 8 Critical Store Checks grouped into 4 clear operational sections
   const SECTIONS: SectionDef[] = [
     {
-      id: 'receiving',
+      id: 'receiving_temp',
       number: 1,
-      title: 'RECEIVING',
-      subtitle: 'Deliveries received safely from approved suppliers',
-      icon: Truck,
-      codes: ['GR22-08', 'GR22-09']
-    },
-    {
-      id: 'storage',
-      number: 2,
-      title: 'STORAGE & SEPARATION',
-      subtitle: 'Food stored off the floor, raw separated from ready-to-eat',
-      icon: Layers,
-      codes: ['GR22-05', 'GR22-13', 'GR22-14', 'GR22-16', 'GR22-18']
-    },
-    {
-      id: 'temperature',
-      number: 3,
-      title: 'TEMPERATURE',
-      subtitle: 'Chillers and freezers checked and operating within safe limits',
+      title: 'RECEIVING & COLD-CHAIN TEMPERATURE CONTROL',
+      subtitle: 'Incoming fresh ration inspection, chillers (≤5°C) & deep freezers (≤−18°C)',
       icon: Thermometer,
-      codes: ['GR22-06', 'GR22-10', 'GR22-20']
+      codes: ['GR22-09', 'GR22-10', 'GR22-20']
     },
     {
-      id: 'hygiene',
-      number: 4,
-      title: 'HYGIENE & PREMISES',
-      subtitle: 'Store cleanliness, observable staff hygiene & health, lighting and ventilation',
-      icon: Sparkles,
-      codes: ['GR22-02', 'GR22-03', 'GR22-04']
-    },
-    {
-      id: 'cleaning',
-      number: 5,
-      title: 'CLEANING & CHEMICALS',
-      subtitle: 'Waste bins pedal-closed and cleaning chemicals locked',
-      icon: ShieldCheck,
-      codes: ['GR22-07', 'GR22-19']
-    },
-    {
-      id: 'pest',
-      number: 6,
-      title: 'PEST PREVENTION',
-      subtitle: 'Zero signs of pests; traps and monitoring active',
-      icon: Bug,
-      codes: ['GR22-17']
-    },
-    {
-      id: 'stock',
-      number: 7,
-      title: 'STOCK & PACKAGING',
-      subtitle: 'No expired food, intact packaging, category-applicable labels, and FEFO stock rotation',
+      id: 'stock_fifo',
+      number: 2,
+      title: 'FIFO ROTATION & ZERO EXPIRED STORED RATIONS',
+      subtitle: 'Strict First-Expiry-First-Out rotation and zero expired products on shelves',
       icon: RotateCw,
-      codes: ['GR22-11', 'GR22-12', 'GR22-15']
+      codes: ['GR22-11', 'GR22-12']
     },
     {
-      id: 'records',
-      number: 8,
-      title: 'RECORDS & STATUTORY',
-      subtitle: 'FSSAI certificate displayed, daily logs and action follow-up',
-      icon: FileText,
-      codes: ['GR22-01', 'GR22-21', 'GR22-22']
+      id: 'segregation_pest',
+      number: 3,
+      title: 'SEGREGATION & ACTIVE PEST CONTROL',
+      subtitle: 'Raw/ready-to-eat & chemical separation, and zero rodent/cockroach activity',
+      icon: Bug,
+      codes: ['GR22-14', 'GR22-17']
+    },
+    {
+      id: 'general_hygiene',
+      number: 4,
+      title: 'GENERAL STORE HYGIENE & STAFF FITNESS SWEEP',
+      subtitle: 'Consolidated store cleanliness, waste bins, and staff hygiene / illness screening',
+      icon: Sparkles,
+      codes: ['GR22-02']
     }
   ];
 
@@ -188,12 +167,14 @@ export default function GroceryDailyCheckFrontlinePage() {
     }
   };
 
-  const totalChecks = GROCERY_OPERATIONAL_CHECKS.length;
-  const okCount = Object.values(responses).filter(r => r.conforming).length;
-  const issueCount = Object.values(responses).filter(r => !r.conforming).length;
+  const totalChecks = CRITICAL_GROCERY_CODES.length;
+  const okCount = CRITICAL_GROCERY_CODES.filter(code => responses[code]?.conforming ?? true).length;
+  const issueCount = CRITICAL_GROCERY_CODES.filter(code => responses[code] && !responses[code].conforming).length;
 
   // Gather flagged items for result presentation
-  const flaggedChecks = GROCERY_OPERATIONAL_CHECKS.filter(chk => responses[chk.code] && !responses[chk.code].conforming);
+  const flaggedChecks = GROCERY_OPERATIONAL_CHECKS.filter(
+    chk => CRITICAL_GROCERY_CODES.includes(chk.code) && responses[chk.code] && !responses[chk.code].conforming
+  );
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg, #f8fafc)', display: 'flex', flexDirection: 'column' }}>
@@ -237,7 +218,7 @@ export default function GroceryDailyCheckFrontlinePage() {
                   Everything looks good today.
                 </h1>
                 <p style={{ fontSize: 15, color: '#64748B', maxWidth: 520, margin: '0 auto 24px', lineHeight: 1.5 }}>
-                  All 22 routine checks verified by <strong>{supervisorName}</strong> today. Verified and saved to your store records.
+                  All {totalChecks} critical store checks verified by <strong>{supervisorName}</strong> today. Verified and saved to your store records.
                 </p>
 
                 <div style={{
@@ -251,8 +232,8 @@ export default function GroceryDailyCheckFrontlinePage() {
                   marginBottom: 32
                 }}>
                   <div>
-                    <span style={{ fontSize: 22, fontWeight: 900, color: '#059669' }}>22 / 22</span>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#065F46', marginLeft: 8 }}>Checks Passed</span>
+                    <span style={{ fontSize: 22, fontWeight: 900, color: '#059669' }}>{totalChecks} / {totalChecks}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#065F46', marginLeft: 8 }}>Critical Checks Passed</span>
                   </div>
                 </div>
 
@@ -482,13 +463,13 @@ export default function GroceryDailyCheckFrontlinePage() {
                     marginBottom: 8
                   }}>
                     <Clock size={12} />
-                    <span>TODAY'S FOOD SAFETY CHECK · 22 CHECKS</span>
+                    <span>TODAY'S CRITICAL STORE CHECK · {totalChecks} CHECKS</span>
                   </div>
                   <h1 style={{ fontSize: 'clamp(22px, 3.2vw, 28px)', fontWeight: 900, margin: '0 0 4px', letterSpacing: '-0.01em' }}>
-                    Today's Food Safety Check
+                    Today's Critical Store Safety Check
                   </h1>
                   <p style={{ margin: 0, fontSize: 13.5, color: '#a7f3d0' }}>
-                    Walk your store and check each item. Tap YES if all is well, or NO if attention is needed.
+                    Streamlined to {totalChecks} critical retail controls. Tap YES if all is well, or NO if attention is needed.
                   </p>
                 </div>
 
@@ -542,49 +523,14 @@ export default function GroceryDailyCheckFrontlinePage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14, marginBottom: 12 }}>
                 <div style={{ flex: 1, minWidth: 260 }}>
                   <span style={{ fontSize: 11, fontWeight: 800, color: '#047857', background: '#d1fae5', padding: '2px 8px', borderRadius: 999 }}>
-                    STORE CHECKLIST RATIONALIZATION &amp; AI AGENT PROVISION
+                    STREAMLINED {totalChecks} CRITICAL RETAIL STORE CHECKS
                   </span>
                   <h2 style={{ fontSize: 16.5, fontWeight: 800, color: '#0f172a', margin: '6px 0 3px' }}>
-                    Critical Retail CCPs (Receiving, Cold Chain, FIFO/Expiry, Pest, Medical) + General Store Hygiene
+                    Receiving, Cold Chain, FIFO/Expiry, Segregation, Pest &amp; General Store Hygiene
                   </h2>
                   <p style={{ fontSize: 12.5, color: '#475569', margin: 0, lineHeight: 1.45 }}>
-                    Prioritizes critical retail food-safety risks (receiving fresh rations, chiller &lt;5°C / freezer &lt;-18°C, FIFO &amp; expired rations removal, pest control, and staff Form 1A medical fitness) while grouping general aisle/floor cleanliness.
+                    Covers only the {totalChecks} critical retail food-safety controls (receiving fresh rations, chiller &lt;5°C / freezer &lt;-18°C, FIFO &amp; expired rations removal, segregation, pest control, and consolidated store cleanliness &amp; staff medical fitness).
                   </p>
-                </div>
-
-                <div style={{ display: 'flex', gap: 6, background: '#f1f5f9', padding: 4, borderRadius: 10 }}>
-                  <button
-                    type="button"
-                    onClick={() => setGroceryViewMode('critical_consolidated')}
-                    style={{
-                      border: 'none',
-                      borderRadius: 8,
-                      padding: '7px 13px',
-                      fontSize: 12,
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                      background: groceryViewMode === 'critical_consolidated' ? '#059669' : 'transparent',
-                      color: groceryViewMode === 'critical_consolidated' ? '#ffffff' : '#334155'
-                    }}
-                  >
-                    ⚡ Critical CCPs + General Hygiene
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setGroceryViewMode('full_22')}
-                    style={{
-                      border: 'none',
-                      borderRadius: 8,
-                      padding: '7px 13px',
-                      fontSize: 12,
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                      background: groceryViewMode === 'full_22' ? '#059669' : 'transparent',
-                      color: groceryViewMode === 'full_22' ? '#ffffff' : '#334155'
-                    }}
-                  >
-                    📑 All 22 Store Checks
-                  </button>
                 </div>
               </div>
 

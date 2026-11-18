@@ -195,7 +195,7 @@ export default function AiCopilotPage() {
               <span className="eyebrow" style={{ fontSize: 10 }}>QUICK SHORTCUTS</span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
                 <Link href="/checks" className="nav-link" style={{ fontSize: 12.5, padding: '4px 8px' }}>
-                  → Daily 29 Safeguards Checklist
+                  → 12 Critical Daily Kitchen Checks
                 </Link>
                 <Link href="/manager/trends" className="nav-link" style={{ fontSize: 12.5, padding: '4px 8px' }}>
                   → AI Trend Analysis &amp; Predictions

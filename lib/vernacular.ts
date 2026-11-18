@@ -34,7 +34,7 @@ export const DICTIONARY: Record<string, Record<Language, string>> = {
   'action.viewBadge': { en: 'View FoodSafetyGreen Badge', hi: 'FoodSafetyGreen बैज देखें', mr: 'FoodSafetyGreen बॅज पहा' },
   'action.shareWhatsApp': { en: 'Share on WhatsApp', hi: 'व्हाट्सएप पर शेयर करें', mr: 'व्हॉट्सॲपवर शेअर करा' },
   'action.printStandee': { en: 'Print Table Standee / Decal', hi: 'टेबल स्टैंडी / स्टिकर प्रिंट करें', mr: 'टेबल स्टॅन्डी / स्टिकर प्रिंट करा' },
-  'action.filterAll': { en: 'All 29 Checks', hi: 'सभी 29 जांच', mr: 'सर्व 29 तपासण्या' },
+  'action.filterAll': { en: '12 Critical Checks', hi: '12 महत्वपूर्ण जांच', mr: '12 महत्त्वपूर्ण तपासण्या' },
   'action.filterKitchen': { en: 'Core Kitchen (23)', hi: 'मुख्य रसोई (23)', mr: 'मुख्य स्वयंपाकघर (23)' },
   'action.filterBar': { en: 'Bar & Brewery (2)', hi: 'बार और ब्रूअरी (2)', mr: 'बार आणि ब्रुअरी (2)' },
   'action.filterCloud': { en: 'Cloud Kitchen (2)', hi: 'क्लाउड किचन (2)', mr: 'क्लाउड किचन (2)' },
@@ -91,9 +91,9 @@ export const DICTIONARY: Record<string, Record<Language, string>> = {
     mr: 'FoodSafe365 द्वारे प्रमाणित सुरक्षित भोजन'
   },
   'badge.inspectionStatus': {
-    en: 'All 29 Critical Safeguards Inspected Today',
-    hi: 'आज सभी 29 महत्वपूर्ण सुरक्षा जांच पूरी हुईं',
-    mr: 'आज सर्व 29 महत्त्वपूर्ण सुरक्षा तपासण्या पूर्ण झाल्या'
+    en: 'All 12 Critical Daily Checks Inspected Today',
+    hi: 'आज सभी 12 महत्वपूर्ण दैनिक सुरक्षा जांच पूरी हुईं',
+    mr: 'आज सर्व 12 महत्त्वपूर्ण दैनिक सुरक्षा तपासण्या पूर्ण झाल्या'
   },
   'badge.scanPrompt': {
     en: 'Scan to view live inspection proof & food safety dossier',
