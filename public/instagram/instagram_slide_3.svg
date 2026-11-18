@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#063729" />
+      <stop offset="100%" stop-color="#05694F" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#bgGrad)" />
+
+  <!-- Subtle decorative circles -->
+  <circle cx="980" cy="100" r="220" fill="#34D399" opacity="0.08" />
+  <circle cx="100" cy="980" r="260" fill="#34D399" opacity="0.06" />
+
+  <!-- Top Brand Header -->
+  <rect x="64" y="54" width="240" height="48" rx="24" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" />
+  <text x="184" y="85" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="900" fill="#FFFFFF" letter-spacing="1">FOODSAFE365</text>
+
+  <rect x="640" y="54" width="376" height="48" rx="24" fill="#D1FAE5" />
+  <text x="828" y="84" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" fill="#0F172A" letter-spacing="0.8">SLIDE 3 / 5 · FSSAI READINESS</text>
+
+  <!-- Main Headlines -->
+  <text x="64" y="178" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="54" font-weight="900" fill="#FFFFFF">Only 12 Critical Daily</text>
+  <text x="64" y="244" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="54" font-weight="900" fill="#34D399">Kitchen Checks — Zero</text>
+  <text x="64" y="310" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="54" font-weight="900" fill="#FFFFFF">29-Check Bloat</text>
+
+  <!-- Subline -->
+  <text x="64" y="366" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="24" font-weight="600" fill="#CBD5E1">Complete in 3 minutes manually or via AI Agent Sensors/OCR</text>
+
+  <!-- Role Badge Pill -->
+  <rect x="64" y="396" width="520" height="44" rx="10" fill="rgba(16, 185, 129, 0.22)" stroke="#34D399" stroke-width="1.5" />
+  <text x="86" y="425" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="19" font-weight="800" fill="#D1FAE5" letter-spacing="1">FOR RESTAURANTS, CLUBS &amp; GROCERY STORES</text>
+
+  <!-- 3 Feature Cards -->
+  
+      <rect x="64" y="465" width="952" height="156" rx="22" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.24)" stroke-width="2" />
+      <circle cx="86" cy="503" r="8" fill="#34D399" />
+      <text x="108" y="510" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="25" font-weight="800" fill="#FFFFFF">The 12 Critical Daily Controls That Prevent Illness</text>
+      <text x="108" y="547" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="500" fill="#E2E8F0"><tspan x="108" dy="0">Receiving temp, Cold storage (&lt;5°C), Freezer (&lt;−18°C) &amp; Thawing,</tspan><tspan x="108" dy="25">Cooking (≥75°C), Hot hold (≥65°C) &amp; Blast chill, FIFO/Expiry, Oil</tspan><tspan x="108" dy="25">TPC (≤25%), Segregation, Water, Pest, Medical Form 1A &amp; General</tspan><tspan x="108" dy="25">Hygiene.</tspan></text>
+    
+      <rect x="64" y="641" width="952" height="138" rx="22" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.24)" stroke-width="2" />
+      <circle cx="86" cy="679" r="8" fill="#34D399" />
+      <text x="108" y="686" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="25" font-weight="800" fill="#FFFFFF">AI Agent-Assisted + 100% Manual Supervisor Mode</text>
+      <text x="108" y="723" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="500" fill="#E2E8F0"><tspan x="108" dy="0">Auto-draft via BLE probes, TPC oil meters &amp; invoice OCR, or log</tspan><tspan x="108" dy="25">manually — with manager review.</tspan></text>
+    
+      <rect x="64" y="799" width="952" height="138" rx="22" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.24)" stroke-width="2" />
+      <circle cx="86" cy="837" r="8" fill="#34D399" />
+      <text x="108" y="844" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="25" font-weight="800" fill="#FFFFFF">Public Operational Status &amp; Founding 50 Programme</text>
+      <text x="108" y="881" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="500" fill="#E2E8F0"><tspan x="108" dy="0">Showcase completed checks, manager reviews &amp; resolved actions with</tspan><tspan x="108" dy="25">full transparency.</tspan></text>
+    
+
+  <!-- Footer Bar -->
+  <rect x="0" y="990" width="1080" height="90" fill="rgba(0,0,0,0.32)" />
+  <text x="64" y="1044" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="800" fill="#FFFFFF">www.foodsafe365.in  ·  foodsafe365@gmail.com</text>
+  <text x="1016" y="1044" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#34D399">Independent Food-Safety Platform</text>
+</svg>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#062C21" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#bgGrad)" />
+
+  <!-- Subtle decorative circles -->
+  <circle cx="980" cy="100" r="220" fill="#FBBF24" opacity="0.08" />
+  <circle cx="100" cy="980" r="260" fill="#FBBF24" opacity="0.06" />
+
+  <!-- Top Brand Header -->
+  <rect x="64" y="54" width="240" height="48" rx="24" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" />
+  <text x="184" y="85" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="900" fill="#FFFFFF" letter-spacing="1">FOODSAFE365</text>
+
+  <rect x="640" y="54" width="376" height="48" rx="24" fill="#FEF3C7" />
+  <text x="828" y="84" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" fill="#0F172A" letter-spacing="0.8">SLIDE 5 / 5 · JOIN FOODSAFE365 TODAY</text>
+
+  <!-- Main Headlines -->
+  <text x="64" y="178" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="54" font-weight="900" fill="#FFFFFF">One Platform for</text>
+  <text x="64" y="244" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="54" font-weight="900" fill="#FBBF24">Diners, Restaurants &amp;</text>
+  <text x="64" y="310" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="54" font-weight="900" fill="#FFFFFF">Service Partners</text>
+
+  <!-- Subline -->
+  <text x="64" y="366" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="24" font-weight="600" fill="#CBD5E1">Available on Web (www.foodsafe365.in) &amp; Google Play Store</text>
+
+  <!-- Role Badge Pill -->
+  <rect x="64" y="396" width="520" height="44" rx="10" fill="rgba(16, 185, 129, 0.22)" stroke="#FBBF24" stroke-width="1.5" />
+  <text x="86" y="425" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="19" font-weight="800" fill="#FEF3C7" letter-spacing="1">GET STARTED IN 30 SECONDS</text>
+
+  <!-- 3 Feature Cards -->
+  
+      <rect x="64" y="465" width="952" height="138" rx="22" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.24)" stroke-width="2" />
+      <circle cx="86" cy="503" r="8" fill="#FBBF24" />
+      <text x="108" y="510" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="25" font-weight="800" fill="#FFFFFF">Customers &amp; Club Members</text>
+      <text x="108" y="547" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="500" fill="#E2E8F0"><tspan x="108" dy="0">Search any restaurant or club to rate today’s meal or a previous</tspan><tspan x="108" dy="25">visit (with Date of Visit).</tspan></text>
+    
+      <rect x="64" y="623" width="952" height="138" rx="22" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.24)" stroke-width="2" />
+      <circle cx="86" cy="661" r="8" fill="#FBBF24" />
+      <text x="108" y="668" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="25" font-weight="800" fill="#FFFFFF">Restaurants, Clubs &amp; Grocery Stores</text>
+      <text x="108" y="705" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="500" fill="#E2E8F0"><tspan x="108" dy="0">Join the First 50 Founding Restaurants Programme — set up your 12</tspan><tspan x="108" dy="25">Critical Daily Checks in 60s.</tspan></text>
+    
+      <rect x="64" y="781" width="952" height="138" rx="22" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.24)" stroke-width="2" />
+      <circle cx="86" cy="819" r="8" fill="#FBBF24" />
+      <text x="108" y="826" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="25" font-weight="800" fill="#FFFFFF">Verified Service Providers</text>
+      <text x="108" y="863" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="500" fill="#E2E8F0"><tspan x="108" dy="0">List your refrigeration, pest control, NABL lab, cleaning, or</tspan><tspan x="108" dy="25">medical camp services at foodsafe365.in.</tspan></text>
+    
+
+  <!-- Footer Bar -->
+  <rect x="0" y="990" width="1080" height="90" fill="rgba(0,0,0,0.32)" />
+  <text x="64" y="1044" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="800" fill="#FFFFFF">www.foodsafe365.in  ·  foodsafe365@gmail.com</text>
+  <text x="1016" y="1044" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#FBBF24">Independent Food-Safety Platform</text>
+</svg>

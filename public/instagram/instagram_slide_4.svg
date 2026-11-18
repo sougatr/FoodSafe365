@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2E1065" />
+      <stop offset="100%" stop-color="#4C1D95" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#bgGrad)" />
+
+  <!-- Subtle decorative circles -->
+  <circle cx="980" cy="100" r="220" fill="#C084FC" opacity="0.08" />
+  <circle cx="100" cy="980" r="260" fill="#C084FC" opacity="0.06" />
+
+  <!-- Top Brand Header -->
+  <rect x="64" y="54" width="240" height="48" rx="24" fill="rgba(255,255,255,0.14)" stroke="rgba(255,255,255,0.28)" stroke-width="1.5" />
+  <text x="184" y="85" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="900" fill="#FFFFFF" letter-spacing="1">FOODSAFE365</text>
+
+  <rect x="640" y="54" width="376" height="48" rx="24" fill="#F3E8FF" />
+  <text x="828" y="84" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="800" fill="#0F172A" letter-spacing="0.8">SLIDE 4 / 5 · PARTNER NETWORK</text>
+
+  <!-- Main Headlines -->
+  <text x="64" y="178" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="54" font-weight="900" fill="#FFFFFF">Help Restaurants Fix</text>
+  <text x="64" y="244" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="54" font-weight="900" fill="#C084FC">Deficiencies &amp; Stay</text>
+  <text x="64" y="310" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="54" font-weight="900" fill="#FFFFFF">Inspection-Ready</text>
+
+  <!-- Subline -->
+  <text x="64" y="366" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="24" font-weight="600" fill="#CBD5E1">Turn kitchen alerts &amp; corrective actions into direct service bookings</text>
+
+  <!-- Role Badge Pill -->
+  <rect x="64" y="396" width="520" height="44" rx="10" fill="rgba(16, 185, 129, 0.22)" stroke="#C084FC" stroke-width="1.5" />
+  <text x="86" y="425" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="19" font-weight="800" fill="#F3E8FF" letter-spacing="1">FOR FOOD-SAFETY SERVICE PROVIDERS</text>
+
+  <!-- 3 Feature Cards -->
+  
+      <rect x="64" y="465" width="952" height="138" rx="22" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.24)" stroke-width="2" />
+      <circle cx="86" cy="503" r="8" fill="#C084FC" />
+      <text x="108" y="510" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="25" font-weight="800" fill="#FFFFFF">1-Click Booking When a Kitchen Check Fails</text>
+      <text x="108" y="547" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="500" fill="#E2E8F0"><tspan x="108" dy="0">When a chiller runs warm or a pest check fails, managers book a</tspan><tspan x="108" dy="25">verified partner directly from the alert.</tspan></text>
+    
+      <rect x="64" y="623" width="952" height="156" rx="22" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.24)" stroke-width="2" />
+      <circle cx="86" cy="661" r="8" fill="#C084FC" />
+      <text x="108" y="668" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="25" font-weight="800" fill="#FFFFFF">8 High-Demand Food-Safety Service Categories</text>
+      <text x="108" y="705" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="500" fill="#E2E8F0"><tspan x="108" dy="0">Refrigeration repair, Pest control, NABL water/food labs, RUCO used</tspan><tspan x="108" dy="25">oil pickup, Deep cleaning, Calibration, Form 1A medical camps &amp;</tspan><tspan x="108" dy="25">FoSTaC training.</tspan></text>
+    
+      <rect x="64" y="799" width="952" height="138" rx="22" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.24)" stroke-width="2" />
+      <circle cx="86" cy="837" r="8" fill="#C084FC" />
+      <text x="108" y="844" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="25" font-weight="800" fill="#FFFFFF">Direct B2B Leads Across Mumbai &amp; Pan-India</text>
+      <text x="108" y="881" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="500" fill="#E2E8F0"><tspan x="108" dy="0">Connect directly with restaurants, clubs, cloud kitchens, and</tspan><tspan x="108" dy="25">supermarkets without middlemen.</tspan></text>
+    
+
+  <!-- Footer Bar -->
+  <rect x="0" y="990" width="1080" height="90" fill="rgba(0,0,0,0.32)" />
+  <text x="64" y="1044" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="800" fill="#FFFFFF">www.foodsafe365.in  ·  foodsafe365@gmail.com</text>
+  <text x="1016" y="1044" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="#C084FC">Independent Food-Safety Platform</text>
+</svg>

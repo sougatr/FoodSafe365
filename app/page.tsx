@@ -1103,6 +1103,67 @@ export default function Landing() {
                   </Link>
                 </div>
               )}
+
+              {/* Downloadable Instagram Post Slides (1080x1080 PNG) */}
+              <div
+                style={{
+                  marginTop: 16,
+                  paddingTop: 12,
+                  borderTop: '1px dashed #cbd5e1',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: 8
+                }}
+              >
+                <a
+                  href={`/instagram/instagram_slide_${introSlideIndex + 1}.png`}
+                  download={`FoodSafe365_Instagram_Slide_${introSlideIndex + 1}.png`}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    fontSize: 12,
+                    fontWeight: 800,
+                    color: '#047857',
+                    background: '#ecfdf5',
+                    border: '1px solid #a7f3d0',
+                    padding: '6px 12px',
+                    borderRadius: 8,
+                    textDecoration: 'none'
+                  }}
+                >
+                  <span>📸 Download Slide {introSlideIndex + 1} for Instagram (1080×1080 PNG)</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    [1, 2, 3, 4, 5].forEach((n, idx) => {
+                      setTimeout(() => {
+                        const a = document.createElement('a');
+                        a.href = `/instagram/instagram_slide_${n}.png`;
+                        a.download = `FoodSafe365_Instagram_Slide_${n}.png`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                      }, idx * 250);
+                    });
+                  }}
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: '#334155',
+                    background: '#f1f5f9',
+                    border: '1px solid #cbd5e1',
+                    padding: '6px 12px',
+                    borderRadius: 8,
+                    cursor: 'pointer'
+                  }}
+                >
+                  ⬇️ Download All 5 Instagram PNGs
+                </button>
+              </div>
             </div>
 
             {/* Bottom Navigation Bar: Dots + Back / Next / Start */}
